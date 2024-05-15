@@ -1,13 +1,15 @@
 @page "/LoginRegister"
 @using ShopApplication.Infrastructure.Identity
 @using ShopApplication.Types
-<h3>LoginRegister</h3>
+@using ShopApplication.Infrastructure.Http
+@using ShopApplication.Types.Optionals
+@inherits PageBase
 
 <div style="max-width: 360px" class="mt-5 mx-auto text-center">
     <img class="mb-4" src="/Images/Logo.svg" alt="blazor" width="72" height="57">
 
     <EditForm Model="_login" OnValidSubmit="@(async () => await Login() )">
-        <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
+        <h1 class="h3 mb-3 fw-normal">Please Sign In</h1>
         <DataAnnotationsValidator/>
         <div class="form-floating">
             <InputText type="name" class="form-control" id="emailOrUsername" @bind-Value="@_login.EmailOrUsername">></InputText>
@@ -54,6 +56,7 @@
 @code {
     [Inject] NavigationManager Navigation { get; init; } = default!;
     [Inject] IIdentityManager IdentityManager { get; init; } = default!;
+    [Inject] IHttpService Http { get; init; } = default!;
     //[Inject] CartManager CartManager { get; init; } = default!;
 
     readonly Login _login = new();
@@ -61,26 +64,32 @@
 
     async Task Login()
     {
-        /*ApiReply<User?> reply = await IdentityManager.Login( _login );
+        OptVal<LoginResponse> loginResult = await Http.TryGetValRequest<LoginResponse>( "" );
 
-        if (reply.Data is null) {
-            Alert( AlertType.Danger, reply.Details() );
+        if (!loginResult.IsSuccess()) {
+            PushAlert( AlertType.Danger, loginResult.PrintDetails() );
             return;
         }
 
-        await CartManager.GetCart( reply.Data.Token );
-
-        Navigation.NavigateTo( "/" );*/
+        OptVal<bool> updateResult = await IdentityManager.UpdateAuthenticationState( loginResult.Value.JwtToken );
+        //await CartManager.GetCart( reply.Data.Token );
+        
+        if (!updateResult.IsSuccess()) {
+            PushAlert( AlertType.Danger, updateResult.PrintDetails() );
+            return;
+        }
+        
+        Navigation.NavigateTo( "/" );
     }
     async Task Register()
     {
-        /*ApiReply<bool> reply = await IdentityManager.Register( _register );
+        OptVal<RegisterResponse> reply = await Http.TryGetValRequest<RegisterResponse>( "" );
 
-        if (!reply.Data) {
-            Alert( AlertType.Danger, reply.Details() );
+        if (!reply.IsSuccess()) {
+            PushAlert( AlertType.Danger, reply.PrintDetails() );
             return;
         }
-
-        Navigation.NavigateTo( "/registered" );*/
+        
+        Navigation.NavigateTo( "/registered" );
     }
 }

@@ -4,7 +4,7 @@ using ShopWeb.Layout;
 
 namespace ShopWeb.Pages;
 
-internal abstract class PageBase : ComponentBase
+public abstract class PageBase : ComponentBase
 {
     [Inject] MainLayout Layout { get; init; } = default!;
 
