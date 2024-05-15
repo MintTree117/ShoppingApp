@@ -14,4 +14,10 @@
         <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.5.2" />
     </ItemGroup>
 
+    <ItemGroup>
+      <AdditionalFiles Include="Components\Pages\Home.razor" />
+      <AdditionalFiles Include="Components\Pages\Identity\AccessDenied.razor" />
+      <AdditionalFiles Include="Components\Pages\Identity\ConfirmEmail.razor" />
+    </ItemGroup>
+
 </Project>
