@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopPresentation", "ShopPresentation\ShopPresentation.csproj", "{5FD9A02A-E151-48DB-A1E0-0405771D8BA0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopWeb", "ShopWeb\ShopWeb.csproj", "{5FD9A02A-E151-48DB-A1E0-0405771D8BA0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShopApplication", "ShopApplication\ShopApplication.csproj", "{1B9DF4BE-6E3C-4BBA-BB5F-DE666FFE3546}"
 EndProject

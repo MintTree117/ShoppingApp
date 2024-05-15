@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Components;
 using ShopApplication.Types;
-using ShopPresentation.Layout;
+using ShopWeb.Layout;
 
-namespace ShopPresentation.Pages;
+namespace ShopWeb.Pages;
 
 internal abstract class PageBase : ComponentBase
 {
