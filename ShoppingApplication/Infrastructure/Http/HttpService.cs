@@ -5,18 +5,24 @@ using System.Web;
 using ShoppingApplication.Types;
 using ShoppingApplication.Types.Optionals;
 
-namespace ShoppingApplication.Infrastructure;
+namespace ShoppingApplication.Infrastructure.Http;
 
-internal sealed class HttpService( IConfiguration config )
+internal sealed class HttpService( IHttpClientFactory httpFactory )
 {
-    readonly HttpClient _http = new();
+    readonly IHttpClientFactory _httpFactory = httpFactory;
 
+    HttpClient CreateClient( string? authentication )
+    {
+        HttpClient http = _httpFactory.CreateClient();
+        http.SetAuthenticationHeader( authentication );
+        return http;
+    }
+    
     public async Task<OptObj<T>> TryGetObjRequest<T>( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null ) where T : class, new()
     {
         try {
-            _http.SetAuthenticationHeader( authToken );
-            string path = GetQueryParameters( apiPath, parameters );
-            HttpResponseMessage httpResponse = await _http.GetAsync( path );
+            string path = ConstructQuery( apiPath, parameters );
+            HttpResponseMessage httpResponse = await CreateClient( authToken ).GetAsync( path );
             return await HandleHttpObjResponse<T>( httpResponse );
         }
         catch ( Exception e ) {
@@ -26,8 +32,7 @@ internal sealed class HttpService( IConfiguration config )
     public async Task<OptObj<T>> TryPostObjRequest<T>( string apiPath, object? body = null, string? authToken = null ) where T : class, new()
     {
         try {
-            _http.SetAuthenticationHeader( authToken );
-            HttpResponseMessage httpResponse = await _http.PostAsJsonAsync( apiPath, body );
+            HttpResponseMessage httpResponse = await CreateClient( authToken ).PostAsJsonAsync( apiPath, body );
             return await HandleHttpObjResponse<T>( httpResponse );
         }
         catch ( Exception e ) {
@@ -37,8 +42,7 @@ internal sealed class HttpService( IConfiguration config )
     public async Task<OptObj<T>> TryPutObjRequest<T>( string apiPath, object? body = null, string? authToken = null ) where T : class, new()
     {
         try {
-            _http.SetAuthenticationHeader( authToken );
-            HttpResponseMessage httpResponse = await _http.PutAsJsonAsync( apiPath, body );
+            HttpResponseMessage httpResponse = await CreateClient( authToken ).PutAsJsonAsync( apiPath, body );
             return await HandleHttpObjResponse<T>( httpResponse );
         }
         catch ( Exception e ) {
@@ -48,9 +52,8 @@ internal sealed class HttpService( IConfiguration config )
     public async Task<OptObj<T>> TryDeleteObjRequest<T>( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null ) where T : class, new()
     {
         try {
-            _http.SetAuthenticationHeader( authToken );
-            string path = GetQueryParameters( apiPath, parameters );
-            HttpResponseMessage httpResponse = await _http.DeleteAsync( path );
+            string path = ConstructQuery( apiPath, parameters );
+            HttpResponseMessage httpResponse = await CreateClient( authToken ).DeleteAsync( path );
             return await HandleHttpObjResponse<T>( httpResponse );
         }
         catch ( Exception e ) {
@@ -61,9 +64,8 @@ internal sealed class HttpService( IConfiguration config )
     public async Task<OptVal<T>> TryGetValRequest<T>( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null ) where T : struct
     {
         try {
-            _http.SetAuthenticationHeader( authToken );
-            string path = GetQueryParameters( apiPath, parameters );
-            HttpResponseMessage httpResponse = await _http.GetAsync( path );
+            string path = ConstructQuery( apiPath, parameters );
+            HttpResponseMessage httpResponse = await CreateClient( authToken ).GetAsync( path );
             return await HandleHttpValResponse<T>( httpResponse );
         }
         catch ( Exception e ) {
@@ -73,8 +75,7 @@ internal sealed class HttpService( IConfiguration config )
     public async Task<OptVal<T>> TryPostValRequest<T>( string apiPath, object? body = null, string? authToken = null ) where T : struct
     {
         try {
-            _http.SetAuthenticationHeader( authToken );
-            HttpResponseMessage httpResponse = await _http.PostAsJsonAsync( apiPath, body );
+            HttpResponseMessage httpResponse = await CreateClient( authToken ).PostAsJsonAsync( apiPath, body );
             return await HandleHttpValResponse<T>( httpResponse );
         }
         catch ( Exception e ) {
@@ -84,8 +85,7 @@ internal sealed class HttpService( IConfiguration config )
     public async Task<OptVal<T>> TryPutValRequest<T>( string apiPath, object? body = null, string? authToken = null ) where T : struct
     {
         try {
-            _http.SetAuthenticationHeader( authToken );
-            HttpResponseMessage httpResponse = await _http.PutAsJsonAsync( apiPath, body );
+            HttpResponseMessage httpResponse = await CreateClient( authToken ).PutAsJsonAsync( apiPath, body );
             return await HandleHttpValResponse<T>( httpResponse );
         }
         catch ( Exception e ) {
@@ -95,17 +95,16 @@ internal sealed class HttpService( IConfiguration config )
     public async Task<OptVal<T>> TryDeleteValRequest<T>( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null ) where T : struct
     {
         try {
-            _http.SetAuthenticationHeader( authToken );
-            string path = GetQueryParameters( apiPath, parameters );
-            HttpResponseMessage httpResponse = await _http.DeleteAsync( path );
+            string path = ConstructQuery( apiPath, parameters );
+            HttpResponseMessage httpResponse = await CreateClient( authToken ).DeleteAsync( path );
             return await HandleHttpValResponse<T>( httpResponse );
         }
         catch ( Exception e ) {
             return HandleHttpValException<T>( e, "Delete", apiPath );
         }
     }
-
-    static string GetQueryParameters( string apiPath, Dictionary<string, object>? parameters )
+    
+    static string ConstructQuery( string apiPath, Dictionary<string, object>? parameters )
     {
         if (parameters is null)
             return apiPath;

@@ -10,5 +10,6 @@ public enum Problem
     Internal,
     Network,
     NotFound,
-    Conflict
+    Conflict,
+    IO
 }
