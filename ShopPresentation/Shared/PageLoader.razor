@@ -1,0 +1,31 @@
+@using ShopApplication.Types
+
+@switch ( _state ) {
+    case LoadingState.Loading:
+        <div class="loading-container">
+            <div class="loading-circle"></div>
+            <p>Loading...</p>
+        </div>
+        break;
+    case LoadingState.Redirecting:
+        <div class="loading-container">
+            <div class="loading-circle"></div>
+            <p>Redirecting...</p>
+        </div>
+        break;
+    case LoadingState.Ready:
+        break;
+    default:
+        throw new ArgumentOutOfRangeException();
+}
+
+@code
+{
+    internal void SetLoadingState( LoadingState newState )
+    {
+        _state = newState;
+        StateHasChanged();
+    }
+    
+    LoadingState _state = LoadingState.Loading;
+}

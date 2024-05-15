@@ -1,0 +1,51 @@
+@using ShopApplication.Types
+
+<div class="fixed-top" style="z-index: 1050; display: @(Alerts.Any() ? "block" : "none")">
+    <div class="container" style="max-height: calc(100vh / 3); overflow-y: auto;" @ref="messageContainer">
+        @foreach ( Alert alert in Alerts ?? [])
+        {
+            <div class="alert alert-info alert-dismissible fade show mt-2" role="alert">
+                @alert.Message
+                <button type="button" class="btn-close" aria-label="Close" @onclick="async () => await RemoveAlert(alert)"></button>
+            </div>
+        }
+    </div>
+</div>
+
+@code 
+
+{
+    [Inject] protected IJSRuntime JSRuntime { get; set; } = default!;
+    
+    List<Alert> Alerts { get; set; } = [];
+    ElementReference messageContainer;
+
+    internal void PushAlert( AlertType type, string message )
+    {
+        Alerts.Add( Alert.With( type, message ) );
+        StateHasChanged();
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await ScrollToBottom();
+    }
+
+    async Task ScrollToBottom()
+    {
+        await JSRuntime.InvokeVoidAsync("BlazorSampleApp.ScrollToBottom", messageContainer);
+    }
+    async Task RemoveAlert(Alert alert)
+    {
+        Alerts.Remove(alert);
+        await ScrollToBottom();
+    }
+
+    readonly record struct Alert(
+        AlertType Type,
+        string Message )
+    {
+        public static Alert With( AlertType type, string message ) =>
+            new( type, message );
+    }
+}
