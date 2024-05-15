@@ -1,16 +1,29 @@
 ﻿@inherits LayoutComponentBase
+@using ShoppingApplication.Components.Shared
+@using ShoppingApplication.Types
+
 <div class="page">
-    <div class="sidebar">
-        <NavMenu/>
-    </div>
-
     <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
-
+        <PageLoader @ref="@_loader"/>
+        <AlertPanel @ref="@_alert"/>
         <article class="content px-4">
             @Body
         </article>
     </main>
 </div>
+
+
+@code 
+{
+    internal void SetLoadingState( LoadingState state )
+    {
+        _loader.SetLoadingState( state );
+    }
+    internal void PushAlert( AlertType type, string message )
+    {
+        _alert.PushAlert( type, message );
+    }
+    
+    PageLoader _loader = default!;
+    AlertPanel _alert = default!;
+}

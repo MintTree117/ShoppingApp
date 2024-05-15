@@ -11,7 +11,9 @@
     </div>
 </div>
 
-@code {
+@code 
+
+{
     [Inject] protected IJSRuntime JSRuntime { get; set; } = default!;
     
     List<Alert> Alerts { get; set; } = [];
