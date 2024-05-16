@@ -1,4 +1,4 @@
-namespace ShopPresentation.Infrastructure.Http;
+namespace ShopApplication.Infrastructure.Http;
 
 internal static class HttpExtentions
 {

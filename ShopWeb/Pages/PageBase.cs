@@ -18,15 +18,15 @@ public abstract class PageBase : ComponentBase
     readonly int redirectTime;
     int countdown = 0;
     System.Timers.Timer? pageRedirectTimer;
-
+    
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        Start();
+        StartLoading( GetInitialLoadingMessage() );
     }
-    protected virtual void Start()
+    protected virtual string GetInitialLoadingMessage()
     {
-        StopLoading();
+        return "Loading Page...";
     }
     
     protected void StartRedirect( string? message )

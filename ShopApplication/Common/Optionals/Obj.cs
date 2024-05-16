@@ -1,6 +1,6 @@
 namespace ShopApplication.Common.Optionals;
 
-public readonly record struct Obj<T> : IOptional where T : class, new()
+public readonly record struct Obj<T> : IOptional where T : class
 {
     readonly string? _message = null;
     readonly T? _obj = null;
@@ -23,7 +23,7 @@ public readonly record struct Obj<T> : IOptional where T : class, new()
         _message = $"{message} : Exception : {e} : {e.Message}";
     }
 
-    public T Object => _obj ?? new T();
+    public T Object => _obj ?? throw new Exception( "FATAL: Tried to access null optional." );
 
     public Problem Problem { get; init; } = Problem.None;
     public string Message => _message ?? string.Empty;

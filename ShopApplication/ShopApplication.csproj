@@ -19,4 +19,10 @@
       <Folder Include="Features\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Reference Include="Microsoft.AspNetCore.WebUtilities">
+        <HintPath>..\..\..\..\.nuget\packages\microsoft.aspnetcore.webutilities\8.0.5\lib\net8.0\Microsoft.AspNetCore.WebUtilities.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
 </Project>
