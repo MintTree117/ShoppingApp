@@ -28,21 +28,24 @@ else if (emailConfirmed) {
     bool emailConfirmed = false;
     bool confirmFailed = false;
     
-    string LoginLink => GetConfigSection( "Confirm" );
-    string ResendLink => GetConfigSection( "Resend" );
+    string LoginLink => IdentityUtils.GetApiUrl( "Confirm", Configuration );
+    string ResendLink => IdentityUtils.GetApiUrl( "Resend", Configuration );
     
     protected override async Task OnInitializedAsync()
     {
+        StartLoading( "Confirming email..." );
+        
         if (!ValidateLink( out string userId, out string code ))
             return;
 
-        if (!GetApiUrl( out string url ))
-            return;
+        string url = IdentityUtils.GetApiUrl( "Confirm", Configuration );
         
         replyVal = await TryConfirmEmail( url, userId, code );
         emailConfirmed = replyVal.IsSuccess();
         confirmFailed = !emailConfirmed;
+        
         StateHasChanged();
+        StopLoading();
     }
     
     bool ValidateLink( out string userId, out string code )
@@ -60,23 +63,18 @@ else if (emailConfirmed) {
         
         return !(invalidUser || invalidCode);
     }
-    bool GetApiUrl( out string url )
-    {
-        string? u = Configuration["IdentityApis"];
-        url = u ?? string.Empty;
-
-        if (!string.IsNullOrEmpty( u )) 
-            return true;
-        
-        PushAlert( AlertType.Danger, "Failed to get confirm identity url from IConfiguration." );
-        return false;
-    }
     async Task<Val<ConfirmEmailReply>> TryConfirmEmail( string url, string userId, string code )
     {
         Val<ConfirmEmailReply> reply = await Http.TryPutValRequest<ConfirmEmailReply>( 
             url, ConfirmEmailRequest.With( userId, code ) );
         return reply;
     }
-    string GetConfigSection( string s ) => 
-        Configuration[$"{IdentityConsts.IdentityConfigSection}:{s}"] ?? $"Failed to get config section {s}.";
+    
+    readonly record struct ConfirmEmailRequest(
+        string UserId,
+        string Token )
+    {
+        public static ConfirmEmailRequest With( string userId, string token ) =>
+            new( userId, token );
+    }
 }

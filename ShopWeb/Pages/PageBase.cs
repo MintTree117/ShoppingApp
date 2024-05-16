@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using ShopApplication.Common;
 using ShopApplication.Infrastructure.Http;
-using ShopApplication.Types;
 using ShopWeb.Layout;
 
 namespace ShopWeb.Pages;
@@ -27,7 +26,7 @@ public abstract class PageBase : ComponentBase
     }
     protected virtual void Start()
     {
-        ShowPage();
+        StopLoading();
     }
     
     protected void StartRedirect( string? message )
@@ -43,7 +42,11 @@ public abstract class PageBase : ComponentBase
     {
         layout.PushAlert( type, message );
     }
-    protected void ShowPage()
+    protected void StartLoading( string? message )
+    {
+        layout.StartLoading( message );
+    }
+    protected void StopLoading()
     {
         layout.HideLoader();
     }
