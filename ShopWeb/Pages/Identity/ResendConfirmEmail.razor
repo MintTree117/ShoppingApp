@@ -1,0 +1,56 @@
+@page "/identity/resend-email-confirmation"
+@using ShopApplication.Features.Identity
+@using ShopApplication.Common.Optionals
+@using ShopApplication.Common
+@inherits PageBase
+
+<PageTitle>Resend Email Confirmation</PageTitle>
+
+<h1>Resend email confirmation</h1>
+<h2>Enter your email.</h2>
+<hr/>
+<div class="row">
+    <div class="col-md-4">
+        <EditForm Model="Request" FormName="resend-email-confirmation" OnValidSubmit="OnValidSubmitAsync" method="post">
+            <DataAnnotationsValidator/>
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="@Request.Email" id="email" class="form-control" aria-required="true" placeholder="name@example.com"/>
+                <label for="email" class="form-label">Email</label>
+                <ValidationMessage For="@(() => Request.Email)" class="text-danger"/>
+            </div>
+            <button type="submit" class="w-100 btn btn-lg btn-primary">Resend</button>
+        </EditForm>
+    </div>
+</div>
+
+@code 
+{
+    [SupplyParameterFromForm]
+    private ConfirmEmailRequest Request { get; } = new();
+
+    private async Task OnValidSubmitAsync()
+    {
+        StartLoading( "Sending reset link..." );
+
+        string url = IdentityUtils.GetApiUrl( "Forgot", Configuration );
+        Val<bool> result = await Http.TryPostValRequest<bool>( url, Request );
+
+        if (result.IsSuccess())
+            PushAlert( AlertType.Success, "Confirmation email link has been sent. Check your email." );
+        else
+            PushAlert( AlertType.Danger, $"Failed to send reset link: {result.PrintDetails()}" );
+        
+        StopLoading();
+    }
+        
+    sealed class ConfirmEmailRequest
+    {
+        public string Email { get; set; } = string.Empty;
+
+        public static ConfirmEmailRequest With( string email ) =>
+            new() {
+                Email = email
+            };
+    }
+}
