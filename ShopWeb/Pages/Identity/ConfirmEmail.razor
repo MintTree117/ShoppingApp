@@ -1,23 +1,86 @@
-@page "/Identity/ConfirmEmail"
+@page "/identity/confirm"
+@using ShopApplication.Types
+@using ShopApplication.Types.Optionals
+@using ShopApplication.Infrastructure.Http
+@using ShopApplication.Types.Identity
+@inherits PageBase
 
-<PageTitle>Confirm email</PageTitle>
+<PageTitle>Confirm Email</PageTitle>
 
-<h1>Confirm email</h1>
-<StatusMessage Message="@statusMessage"/>
+@if (confirmFailed) {
+    <h1>Email Confirmation Failed!</h1>
+    <h2>Error Details: @replyVal.PrintDetails()</h2>
+    <p>Please click <a href="@ResendLink">here</a> to try sending another confirmation link, or contact support.</p>
+}
+else if (emailConfirmed) {
+    <h1>Email Confirmed: @replyVal.Value.ConfirmedEmail!</h1>
+    <h2>Account Name: @( replyVal.Value.ConfirmedUsername ) </h2>
+    <h2>Account Id: @(UserId ?? "No User Id Found!") </h2>
+    <p>Your account has been verified and you can now <a href="@LoginLink">login</a> normally.</p>
+}
 
-@code {
-    string? statusMessage = null;
+@code 
+{
+    [Inject] IConfiguration Configuration { get; init; } = default!;
+    [Inject] IHttpService Http { get; init; } = default!;
+    [SupplyParameterFromQuery] private string? UserId { get; set; }
+    [SupplyParameterFromQuery] private string? Code { get; set; }
 
-    //[CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
-
-    [SupplyParameterFromQuery]
-    private string? UserId { get; set; }
-
-    [SupplyParameterFromQuery]
-    private string? Code { get; set; }
-
+    const string ConfigSection = "IdentityApis";
+    
+    Val<ConfirmEmailReply> replyVal = Val<ConfirmEmailReply>.Has( ConfirmEmailReply.Empty() );
+    bool emailConfirmed = false;
+    bool confirmFailed = false;
+    
+    string LoginLink => GetConfigSection( "Confirm" );
+    string ResendLink => GetConfigSection( "Resend" );
+    
     protected override async Task OnInitializedAsync()
     {
+        if (!ValidateLink( out string userId, out string code ))
+            return;
+
+        if (!GetApiUrl( out string url ))
+            return;
         
+        replyVal = await TryConfirmEmail( url, userId, code );
+        emailConfirmed = replyVal.IsSuccess();
+        confirmFailed = !emailConfirmed;
+        StateHasChanged();
     }
+    
+    bool ValidateLink( out string userId, out string code )
+    {
+        bool invalidUser = string.IsNullOrEmpty( UserId );
+        if (invalidUser)
+            PushAlert( AlertType.Danger, $"Failed to confirm email address. {nameof( UserId )} is invalid." );
+
+        bool invalidCode = string.IsNullOrEmpty( Code );
+        if (invalidCode)
+            PushAlert( AlertType.Danger, $"Failed to confirm email address. {nameof( Code )} is invalid." );
+
+        userId = UserId ?? string.Empty;
+        code = Code ?? string.Empty;
+        
+        return !(invalidUser || invalidCode);
+    }
+    bool GetApiUrl( out string url )
+    {
+        string? u = Configuration["IdentityApis"];
+        url = u ?? string.Empty;
+
+        if (!string.IsNullOrEmpty( u )) 
+            return true;
+        
+        PushAlert( AlertType.Danger, "Failed to get confirm identity url from IConfiguration." );
+        return false;
+    }
+    async Task<Val<ConfirmEmailReply>> TryConfirmEmail( string url, string userId, string code )
+    {
+        Val<ConfirmEmailReply> reply = await Http.TryPutValRequest<ConfirmEmailReply>( 
+            url, ConfirmEmailRequest.With( userId, code ) );
+        return reply;
+    }
+    string GetConfigSection( string s ) => 
+        Configuration[$"{ConfigSection}:{s}"] ?? $"Failed to get config section {s}.";
 }

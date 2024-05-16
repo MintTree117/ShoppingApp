@@ -19,7 +19,7 @@ internal sealed class HttpService( IHttpClientFactory httpFactory ) : IHttpServi
         return http;
     }
     
-    public async Task<OptObj<T>> TryGetObjRequest<T>( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null ) where T : class, new()
+    public async Task<Obj<T>> TryGetObjRequest<T>( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null ) where T : class, new()
     {
         try {
             string path = ConstructQuery( apiPath, parameters );
@@ -30,7 +30,7 @@ internal sealed class HttpService( IHttpClientFactory httpFactory ) : IHttpServi
             return HandleHttpObjException<T>( e, "Get", apiPath );
         }
     }
-    public async Task<OptObj<T>> TryPostObjRequest<T>( string apiPath, object? body = null, string? authToken = null ) where T : class, new()
+    public async Task<Obj<T>> TryPostObjRequest<T>( string apiPath, object? body = null, string? authToken = null ) where T : class, new()
     {
         try {
             HttpResponseMessage httpResponse = await CreateClient( authToken ).PostAsJsonAsync( apiPath, body );
@@ -40,7 +40,7 @@ internal sealed class HttpService( IHttpClientFactory httpFactory ) : IHttpServi
             return HandleHttpObjException<T>( e, "Post", apiPath );
         }
     }
-    public async Task<OptObj<T>> TryPutObjRequest<T>( string apiPath, object? body = null, string? authToken = null ) where T : class, new()
+    public async Task<Obj<T>> TryPutObjRequest<T>( string apiPath, object? body = null, string? authToken = null ) where T : class, new()
     {
         try {
             HttpResponseMessage httpResponse = await CreateClient( authToken ).PutAsJsonAsync( apiPath, body );
@@ -50,7 +50,7 @@ internal sealed class HttpService( IHttpClientFactory httpFactory ) : IHttpServi
             return HandleHttpObjException<T>( e, "Put", apiPath );
         }
     }
-    public async Task<OptObj<T>> TryDeleteObjRequest<T>( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null ) where T : class, new()
+    public async Task<Obj<T>> TryDeleteObjRequest<T>( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null ) where T : class, new()
     {
         try {
             string path = ConstructQuery( apiPath, parameters );
@@ -62,7 +62,7 @@ internal sealed class HttpService( IHttpClientFactory httpFactory ) : IHttpServi
         }
     }
 
-    public async Task<OptVal<T>> TryGetValRequest<T>( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null ) where T : struct
+    public async Task<Val<T>> TryGetValRequest<T>( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null ) where T : struct
     {
         try {
             string path = ConstructQuery( apiPath, parameters );
@@ -73,7 +73,7 @@ internal sealed class HttpService( IHttpClientFactory httpFactory ) : IHttpServi
             return HandleHttpValException<T>( e, "Get", apiPath );
         }
     }
-    public async Task<OptVal<T>> TryPostValRequest<T>( string apiPath, object? body = null, string? authToken = null ) where T : struct
+    public async Task<Val<T>> TryPostValRequest<T>( string apiPath, object? body = null, string? authToken = null ) where T : struct
     {
         try {
             HttpResponseMessage httpResponse = await CreateClient( authToken ).PostAsJsonAsync( apiPath, body );
@@ -83,7 +83,7 @@ internal sealed class HttpService( IHttpClientFactory httpFactory ) : IHttpServi
             return HandleHttpValException<T>( e, "Post", apiPath );
         }
     }
-    public async Task<OptVal<T>> TryPutValRequest<T>( string apiPath, object? body = null, string? authToken = null ) where T : struct
+    public async Task<Val<T>> TryPutValRequest<T>( string apiPath, object? body = null, string? authToken = null ) where T : struct
     {
         try {
             HttpResponseMessage httpResponse = await CreateClient( authToken ).PutAsJsonAsync( apiPath, body );
@@ -93,7 +93,7 @@ internal sealed class HttpService( IHttpClientFactory httpFactory ) : IHttpServi
             return HandleHttpValException<T>( e, "Put", apiPath );
         }
     }
-    public async Task<OptVal<T>> TryDeleteValRequest<T>( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null ) where T : struct
+    public async Task<Val<T>> TryDeleteValRequest<T>( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null ) where T : struct
     {
         try {
             string path = ConstructQuery( apiPath, parameters );
@@ -116,13 +116,13 @@ internal sealed class HttpService( IHttpClientFactory httpFactory ) : IHttpServi
 
         return $"{apiPath}?{query}";
     }
-    static async Task<OptObj<T>> HandleHttpObjResponse<T>( HttpResponseMessage httpResponse ) where T : class, new()
+    static async Task<Obj<T>> HandleHttpObjResponse<T>( HttpResponseMessage httpResponse ) where T : class, new()
     {
         if (httpResponse.IsSuccessStatusCode) {
             var httpContent = await httpResponse.Content.ReadFromJsonAsync<T>();
             return httpContent is not null
-                ? OptObj<T>.Success( httpContent )
-                : OptObj<T>.Failure( Problem.Network, "No data returned from http request." );
+                ? Obj<T>.Success( httpContent )
+                : Obj<T>.Failure( Problem.Network, "No data returned from http request." );
         }
 
         string errorContent = await httpResponse.Content.ReadAsStringAsync();
@@ -135,10 +135,10 @@ internal sealed class HttpService( IHttpClientFactory httpFactory ) : IHttpServi
             _ => LogObjErrorAndReturn<T>( Problem.Internal, errorContent )
         };
     }
-    static async Task<OptVal<T>> HandleHttpValResponse<T>( HttpResponseMessage httpResponse ) where T : struct
+    static async Task<Val<T>> HandleHttpValResponse<T>( HttpResponseMessage httpResponse ) where T : struct
     {
         if (httpResponse.IsSuccessStatusCode)
-            return OptVal<T>.Success( await httpResponse.Content.ReadFromJsonAsync<T>() );
+            return Val<T>.Has( await httpResponse.Content.ReadFromJsonAsync<T>() );
 
         string errorContent = await httpResponse.Content.ReadAsStringAsync();
         return httpResponse.StatusCode switch {
@@ -150,24 +150,24 @@ internal sealed class HttpService( IHttpClientFactory httpFactory ) : IHttpServi
             _ => LogValErrorAndReturn<T>( Problem.Internal, errorContent )
         };
     }
-    static OptObj<T> LogObjErrorAndReturn<T>( Problem error, string message ) where T : class, new()
+    static Obj<T> LogObjErrorAndReturn<T>( Problem error, string message ) where T : class, new()
     {
         Console.WriteLine( $"{error} : An exception was thrown during an http request : {message}" );
-        return OptObj<T>.Failure( error, $"An exception was thrown during an http request : {message}" );
+        return Obj<T>.Failure( error, $"An exception was thrown during an http request : {message}" );
     }
-    static OptVal<T> LogValErrorAndReturn<T>( Problem error, string message ) where T : struct
+    static Val<T> LogValErrorAndReturn<T>( Problem error, string message ) where T : struct
     {
         Console.WriteLine( $"{error} : An exception was thrown during an http request : {message}" );
-        return OptVal<T>.Failure( error, $"An exception was thrown during an http request : {message}" );
+        return Val<T>.Failure( error, $"An exception was thrown during an http request : {message}" );
     }
-    static OptObj<T> HandleHttpObjException<T>( Exception e, string requestType, string requestUrl ) where T : class, new()
+    static Obj<T> HandleHttpObjException<T>( Exception e, string requestType, string requestUrl ) where T : class, new()
     {
         Console.WriteLine( e );
-        return OptObj<T>.Exception( e, Problem.Internal, $"{requestType}: An exception occured while executing http: {requestUrl}" );
+        return Obj<T>.Exception( e, Problem.Internal, $"{requestType}: An exception occured while executing http: {requestUrl}" );
     }
-    static OptVal<T> HandleHttpValException<T>( Exception e, string requestType, string requestUrl ) where T : struct
+    static Val<T> HandleHttpValException<T>( Exception e, string requestType, string requestUrl ) where T : struct
     {
         Console.WriteLine( e );
-        return OptVal<T>.Exception( e, Problem.Internal, $"{requestType}: An exception occured while executing http: {requestUrl}" );
+        return Val<T>.Exception( e, Problem.Internal, $"{requestType}: An exception occured while executing http: {requestUrl}" );
     }
 }

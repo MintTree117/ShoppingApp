@@ -4,26 +4,37 @@
 
 <div class="page">
     <main>
-        <PageLoader @ref="@_loader"/>
-        <AlertPanel @ref="@_alert"/>
+        <PageLoader @ref="@loader"/>
+        <AlertPanel @ref="@alert"/>
         <article class="content px-4">
             @Body
         </article>
     </main>
 </div>
 
-
 @code 
 {
-    internal void SetLoadingState( LoadingState state )
+    internal void StartRedirecting( int seconds, string? message = null )
     {
-        _loader.SetLoadingState( state );
+        loader.StartRedirecting( seconds, message );
+    }
+    internal void TickRedirect()
+    {
+        loader.TickRedirect();
+    }
+    internal void StartLoading( string? message = null )
+    {
+        loader.StartLoading( message );
+    }
+    internal void HideLoader()
+    {
+        loader.Hide();
     }
     internal void PushAlert( AlertType type, string message )
     {
-        _alert.PushAlert( type, message );
+        alert.PushAlert( type, message );
     }
     
-    PageLoader _loader = default!;
-    AlertPanel _alert = default!;
+    PageLoader loader = default!;
+    AlertPanel alert = default!;
 }

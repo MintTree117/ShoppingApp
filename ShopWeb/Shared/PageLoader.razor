@@ -1,16 +1,20 @@
 @using ShopApplication.Types
 
-@switch ( _state ) {
+@switch ( state ) {
     case LoadingState.Loading:
         <div class="loading-container">
             <div class="loading-circle"></div>
             <p>Loading...</p>
+            @if (!string.IsNullOrEmpty( loadingMessage ))
+                <p>@loadingMessage</p>
         </div>
         break;
     case LoadingState.Redirecting:
         <div class="loading-container">
             <div class="loading-circle"></div>
             <p>Redirecting...</p>
+            @if (!string.IsNullOrEmpty( redirectMessage ))
+                <p>@redirectMessage</p>
         </div>
         break;
     case LoadingState.Ready:
@@ -21,11 +25,31 @@
 
 @code
 {
-    internal void SetLoadingState( LoadingState newState )
+    internal void StartRedirecting( int seconds, string? message = null )
     {
-        _state = newState;
+        redirectSeconds = seconds;
+        redirectMessage = message ?? string.Empty;
+    }
+    internal void TickRedirect()
+    {
+        state = LoadingState.Redirecting;
+        redirectSeconds--;
+        StateHasChanged();
+    }
+    internal void StartLoading( string? message = null )
+    {
+        loadingMessage = message ?? string.Empty;
+        state = LoadingState.Loading;
+        StateHasChanged();
+    }
+    internal void Hide()
+    {
+        state = LoadingState.Ready;
         StateHasChanged();
     }
     
-    LoadingState _state = LoadingState.Loading;
+    LoadingState state = LoadingState.Loading;
+    string loadingMessage = string.Empty;
+    string redirectMessage = string.Empty;
+    int redirectSeconds = 0;
 }

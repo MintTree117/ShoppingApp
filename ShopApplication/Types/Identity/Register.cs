@@ -1,4 +1,4 @@
-namespace ShopApplication.Types;
+namespace ShopApplication.Types.Identity;
 
 public sealed class Register
 {

@@ -8,7 +8,7 @@ public interface IOptional
     public bool IsSuccess();
     public string PrintDetails();
 
-    public static OptVal<bool> Success() => OptVal<bool>.Success( true );
-    public static OptVal<bool> Failure( IOptional other ) => OptVal<bool>.Failure( other );
-    public static OptVal<bool> Failure( Problem error, string message ) => OptVal<bool>.Failure( error, message );
+    public static Val<bool> Success() => Val<bool>.Has( true );
+    public static Val<bool> Failure( IOptional other ) => Val<bool>.Failure( other );
+    public static Val<bool> Failure( Problem error, string message ) => Val<bool>.Failure( error, message );
 }

@@ -1,4 +1,4 @@
-namespace ShopApplication.Types;
+namespace ShopApplication.Types.Identity;
 
 internal readonly record struct UserSession(
     string Id,

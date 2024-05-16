@@ -2,6 +2,7 @@
 @using ShopApplication.Infrastructure.Identity
 @using ShopApplication.Types
 @using ShopApplication.Infrastructure.Http
+@using ShopApplication.Types.Identity
 @using ShopApplication.Types.Optionals
 @inherits PageBase
 
@@ -64,14 +65,14 @@
 
     async Task Login()
     {
-        OptVal<LoginResponse> loginResult = await Http.TryGetValRequest<LoginResponse>( "" );
+        Val<LoginResponse> loginResult = await Http.TryGetValRequest<LoginResponse>( "" );
 
         if (!loginResult.IsSuccess()) {
             PushAlert( AlertType.Danger, loginResult.PrintDetails() );
             return;
         }
 
-        OptVal<bool> updateResult = await IdentityManager.UpdateAuthenticationState( loginResult.Value.JwtToken );
+        Val<bool> updateResult = await IdentityManager.UpdateAuthenticationState( loginResult.Value.JwtToken );
         //await CartManager.GetCart( reply.Data.Token );
         
         if (!updateResult.IsSuccess()) {
@@ -83,7 +84,7 @@
     }
     async Task Register()
     {
-        OptVal<RegisterResponse> reply = await Http.TryGetValRequest<RegisterResponse>( "" );
+        Val<RegisterResponse> reply = await Http.TryGetValRequest<RegisterResponse>( "" );
 
         if (!reply.IsSuccess()) {
             PushAlert( AlertType.Danger, reply.PrintDetails() );

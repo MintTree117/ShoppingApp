@@ -1,23 +1,23 @@
 namespace ShopApplication.Types.Optionals;
 
-public readonly record struct OptObj<T> : IOptional where T : class, new()
+public readonly record struct Obj<T> : IOptional where T : class, new()
 {
     readonly string? _message = null;
     readonly T? _obj = null;
 
-    OptObj( T? obj )
+    Obj( T? obj )
     {
         _obj = obj;
 
         if (obj is null)
             Problem = Problem.NotFound;
     }
-    OptObj( Problem problem, string? message = null )
+    Obj( Problem problem, string? message = null )
     {
         Problem = problem;
         _message = message;
     }
-    OptObj( Exception e, Problem problem, string? message = null )
+    Obj( Exception e, Problem problem, string? message = null )
     {
         Problem = problem;
         _message = $"{message} : Exception : {e} : {e.Message}";
@@ -40,28 +40,28 @@ public readonly record struct OptObj<T> : IOptional where T : class, new()
         self = this;
         return Problem is not Problem.None;
     }
-    public bool Succeeds( out OptObj<T> self )
+    public bool Succeeds( out Obj<T> self )
     {
         self = this;
         return Problem is Problem.None;
     }
-    public bool Fails( out OptObj<T> self )
+    public bool Fails( out Obj<T> self )
     {
         self = this;
         return Problem is not Problem.None;
     }
     public T Reduce( T orElse ) => _obj ?? orElse;
     public T Reduce( Func<T> orElse ) => _obj ?? orElse();
-    public OptObj<T> Where( Func<T, bool> predicate ) =>
+    public Obj<T> Where( Func<T, bool> predicate ) =>
         _obj is not null && predicate( _obj ) ? this : None();
-    public OptObj<T> WhereNot( Func<T, bool> predicate ) =>
+    public Obj<T> WhereNot( Func<T, bool> predicate ) =>
         _obj is not null && !predicate( _obj ) ? this : None();
-    public static OptObj<T> Success( T obj ) => new( obj );
-    public static OptObj<T> Maybe( T? obj ) => new( obj );
-    public static OptObj<T> None() => new( Problem.NotFound );
-    public static OptObj<T> Failure( Problem er ) => new( er );
-    public static OptObj<T> Failure( Problem er, string msg ) => new( er, msg );
-    public static OptObj<T> Failure( IOptional opt ) => new( opt.Problem, opt.Message );
-    public static OptObj<T> Exception( Exception ex, Problem er ) => new( ex, er );
-    public static OptObj<T> Exception( Exception ex, Problem er, string msg ) => new( ex, er, msg );
+    public static Obj<T> Success( T obj ) => new( obj );
+    public static Obj<T> Maybe( T? obj ) => new( obj );
+    public static Obj<T> None() => new( Problem.NotFound );
+    public static Obj<T> Failure( Problem er ) => new( er );
+    public static Obj<T> Failure( Problem er, string msg ) => new( er, msg );
+    public static Obj<T> Failure( IOptional opt ) => new( opt.Problem, opt.Message );
+    public static Obj<T> Exception( Exception ex, Problem er ) => new( ex, er );
+    public static Obj<T> Exception( Exception ex, Problem er, string msg ) => new( ex, er, msg );
 }

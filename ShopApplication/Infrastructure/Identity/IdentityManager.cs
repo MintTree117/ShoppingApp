@@ -3,6 +3,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Components.Authorization;
 using ShopApplication.Infrastructure.Storage;
 using ShopApplication.Types;
+using ShopApplication.Types.Identity;
 using ShopApplication.Types.Optionals;
 
 namespace ShopApplication.Infrastructure.Identity;
@@ -14,7 +15,7 @@ internal sealed class IdentityManager( StorageService storage ) : Authentication
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        OptVal<Authentication> tokenResult = await _storage.Get<Authentication>( Key );
+        Val<Authentication> tokenResult = await _storage.Get<Authentication>( Key );
 
         if (tokenResult.Fails( out tokenResult ))
             return new AuthenticationState( new ClaimsPrincipal() );
@@ -22,7 +23,7 @@ internal sealed class IdentityManager( StorageService storage ) : Authentication
         ClaimsPrincipal claims = GetIdentityClaimsPrincipal( tokenResult.Value.JwtToken );
         return new AuthenticationState( claims );
     }
-    public async Task<OptVal<bool>> UpdateAuthenticationState( string token )
+    public async Task<Val<bool>> UpdateAuthenticationState( string token )
     {
         if (string.IsNullOrWhiteSpace( token ))
             return IOptional.Failure( Problem.BadRequest, "Empty token." );
@@ -30,7 +31,7 @@ internal sealed class IdentityManager( StorageService storage ) : Authentication
         NotifyChange( token );
         return await _storage.Set( Key, Authentication.With( token ) );
     }
-    public async Task<OptVal<bool>> ClearAuthenticationState()
+    public async Task<Val<bool>> ClearAuthenticationState()
     {
         NotifyAuthenticationStateChanged( GetNotifyParams( null ) );
         return await _storage.Remove( Key );

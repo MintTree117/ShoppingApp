@@ -1,23 +1,23 @@
 namespace ShopApplication.Types.Optionals;
 
-public readonly record struct OptObjs<T> : IOptional where T : class, new()
+public readonly record struct Objs<T> : IOptional where T : class, new()
 {
     readonly IEnumerable<T>? _enumerable = null;
     readonly string? _message = string.Empty;
 
-    OptObjs( IEnumerable<T>? enumerable )
+    Objs( IEnumerable<T>? enumerable )
     {
         _enumerable = enumerable;
 
         if (_enumerable is null)
             Problem = Problem.NotFound;
     }
-    OptObjs( Problem problem, string? message = null )
+    Objs( Problem problem, string? message = null )
     {
         Problem = problem;
         _message = message;
     }
-    OptObjs( Exception e, Problem problem, string? message = null )
+    Objs( Exception e, Problem problem, string? message = null )
     {
         Problem = problem;
         _message = $"{message} : Exception : {e} : {e.Message}";
@@ -41,22 +41,22 @@ public readonly record struct OptObjs<T> : IOptional where T : class, new()
         self = this;
         return Problem is not Problem.None;
     }
-    public bool Succeeds( out OptObjs<T> self )
+    public bool Succeeds( out Objs<T> self )
     {
         self = this;
         return Problem is Problem.None;
     }
-    public bool Fails( out OptObjs<T> self )
+    public bool Fails( out Objs<T> self )
     {
         self = this;
         return Problem is not Problem.None;
     }
-    public static OptObjs<T> With( IEnumerable<T> objs ) => new( objs );
-    public static OptObjs<T> Maybe( IEnumerable<T>? objs ) => new( objs );
-    public static OptObjs<T> None() => new( Problem.NotFound );
-    public static OptObjs<T> Error( Problem er ) => new( er );
-    public static OptObjs<T> Error( Problem er, string msg ) => new( er, msg );
-    public static OptObjs<T> Error( IOptional opt ) => new( opt.Problem, opt.Message );
-    public static OptObjs<T> Exception( Exception ex, Problem er ) => new( ex, er );
-    public static OptObjs<T> Exception( Exception ex, Problem er, string msg ) => new( ex, er, msg );
+    public static Objs<T> With( IEnumerable<T> objs ) => new( objs );
+    public static Objs<T> Maybe( IEnumerable<T>? objs ) => new( objs );
+    public static Objs<T> None() => new( Problem.NotFound );
+    public static Objs<T> Error( Problem er ) => new( er );
+    public static Objs<T> Error( Problem er, string msg ) => new( er, msg );
+    public static Objs<T> Error( IOptional opt ) => new( opt.Problem, opt.Message );
+    public static Objs<T> Exception( Exception ex, Problem er ) => new( ex, er );
+    public static Objs<T> Exception( Exception ex, Problem er, string msg ) => new( ex, er, msg );
 }
