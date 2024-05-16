@@ -26,7 +26,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <AdditionalFiles Include="Pages\Identity\LoginRegister.razor" />
       <AdditionalFiles Include="Shared\AlertPanel.razor" />
       <AdditionalFiles Include="Shared\PageLoader.razor" />
     </ItemGroup>

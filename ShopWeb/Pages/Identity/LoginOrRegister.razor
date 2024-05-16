@@ -1,96 +1,147 @@
 @page "/identity/login-or-register"
-@using ShopApplication.Infrastructure.Http
 @using ShopApplication.Features.Identity
-@using ShopApplication.Features.Identity.Types
 @using ShopApplication.Common
 @using ShopApplication.Common.Optionals
+@using System.ComponentModel.DataAnnotations
+@using ShopWeb.Utilities
 @inherits PageBase
 
-<div style="max-width: 360px" class="mt-5 mx-auto text-center">
-    <img class="mb-4" src="/Images/Logo.svg" alt="blazor" width="72" height="57">
+@if (registered) {
+    <h1>Account Registered.</h1>
+    <h2>Email: @(registerReply?.Email ?? "No email returned.")</h2>
+    <h2>Username: @( registerReply?.Username ?? "No username returned." )</h2>
+    <p>A confirmation link has been emailed to @( registerReply?.Email ?? "your email" ). Please verify your email before logging in.</p>
+}
+else {
+    <div style="max-width: 360px" class="mt-5 mx-auto text-center">
+        <img class="mb-4" src="/Images/Logo.svg" alt="blazor" width="72" height="57">
 
-    <EditForm Model="_login" OnValidSubmit="@(async () => await Login() )">
-        <h1 class="h3 mb-3 fw-normal">Please Sign In</h1>
-        <DataAnnotationsValidator/>
-        <div class="form-floating">
-            <InputText type="name" class="form-control" id="emailOrUsername" @bind-Value="@_login.EmailOrUsername">></InputText>
-            <label for="emailOrUsername">Email or Username</label>
-        </div>
-        <div class="form-floating">
-            <InputText type="password" class="form-control" id="password" @bind-Value="@_login.Password"></InputText>
-            <label for="password">Password</label>
-        </div>
-        <button class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
-    </EditForm>
+        <EditForm Model="@login" OnValidSubmit="@(async () => await OnValidLoginSubmitAsync() )">
+            <h1 class="h3 mb-3 fw-normal">Please Sign In</h1>
+            <DataAnnotationsValidator/>
+            <div class="form-floating">
+                <InputText type="name" class="form-control" id="emailOrUsername" @bind-Value="@login.EmailOrUsername">></InputText>
+                <label for="emailOrUsername">Email or Username</label>
+            </div>
+            <div class="form-floating">
+                <InputText type="password" class="form-control" id="password" @bind-Value="@login.Password"></InputText>
+                <label for="password">Password</label>
+            </div>
+            <button class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
+        </EditForm>
 
-    <span class="my-5 d-block text-muted">- Or -</span>
+        <span class="my-5 d-block text-muted">- Or -</span>
 
-    <EditForm Model="_register" OnValidSubmit="@(async () => await Register() )">
-        <h1 class="h3 mb-3 fw-normal">Register</h1>
-        <DataAnnotationsValidator/>
-        <div class="form-floating">
-            <InputText type="name" class="form-control" id="username" @bind-Value="@_register.Username"></InputText>
-            <ValidationMessage For="@(() => _register.Username)"/>
-            <label for="emailOrUsername">Username</label>
-        </div>
-        <div class="form-floating">
-            <InputText type="email" class="form-control" id="email" @bind-Value="@_register.Email"></InputText>
-            <ValidationMessage For="@(() => _register.Email)"/>
-            <label for="email">Email</label>
-        </div>
-        <div class="form-floating">
-            <InputText type="password" class="form-control" id="registerPassword" @bind-Value="@_register.Password"></InputText>
-            <ValidationMessage For="@(() => _register.Password)"/>
-            <label for="registerPassword">Password</label>
-        </div>
-        <div class="form-floating">
-            <InputText type="password" class="form-control" id="confirmPassword" @bind-Value="@_register.PasswordConfirm"></InputText>
-            <ValidationMessage For="@(() => _register.PasswordConfirm)"/>
-            <label for="confirmPassword">Confirm Password</label>
-        </div>
-        <button class="w-100 btn btn-lg btn-primary" type="submit">Register</button>
-    </EditForm>
-
-    <AlertMessage Page="@this"></AlertMessage>
-</div>
-
-@code {
-    [Inject] NavigationManager Navigation { get; init; } = default!;
+        <EditForm Model="@register" OnValidSubmit="@(async () => await OnValidRegisterSubmitAsync() )">
+            <h1 class="h3 mb-3 fw-normal">Register</h1>
+            <DataAnnotationsValidator/>
+            <div class="form-floating">
+                <InputText type="name" class="form-control" id="username" @bind-Value="@register.Username"></InputText>
+                <ValidationMessage For="@(() => register.Username)"/>
+                <label for="emailOrUsername">Username</label>
+            </div>
+            <div class="form-floating">
+                <InputText type="email" class="form-control" id="email" @bind-Value="@register.Email"></InputText>
+                <ValidationMessage For="@(() => register.Email)"/>
+                <label for="email">Email</label>
+            </div>
+            <div class="form-floating">
+                <InputText type="password" class="form-control" id="registerPassword" @bind-Value="@register.Password"></InputText>
+                <ValidationMessage For="@(() => register.Password)"/>
+                <label for="registerPassword">Password</label>
+            </div>
+            <div class="form-floating">
+                <InputText type="password" class="form-control" id="confirmPassword" @bind-Value="@register.PasswordConfirm"></InputText>
+                <ValidationMessage For="@(() => register.PasswordConfirm)"/>
+                <label for="confirmPassword">Confirm Password</label>
+            </div>
+            <button class="w-100 btn btn-lg btn-primary" type="submit">Register</button>
+        </EditForm>
+    </div>
+}
+    
+@code 
+{
     [Inject] IIdentityManager IdentityManager { get; init; } = default!;
-    [Inject] IHttpService Http { get; init; } = default!;
     //[Inject] CartManager CartManager { get; init; } = default!;
 
-    readonly Login _login = new();
-    readonly Register _register = new();
+    readonly LoginRequest login = new();
+    readonly RegisterRequest register = new();
 
-    async Task Login()
+    bool registered = false;
+    RegisterReply? registerReply;
+
+    async Task OnValidLoginSubmitAsync()
     {
-        Val<LoginResponse> loginResult = await Http.TryGetValRequest<LoginResponse>( "" );
+        StartLoading( "Logging In..." );
+        Obj<LoginReply> loginResult = await Http.TryGetObjRequest<LoginReply>( "" );
 
         if (!loginResult.IsSuccess()) {
             PushAlert( AlertType.Danger, loginResult.PrintDetails() );
             return;
         }
 
-        Val<bool> updateResult = await IdentityManager.UpdateAuthenticationState( loginResult.Value.JwtToken );
-        //await CartManager.GetCart( reply.Data.Token );
+        if (loginResult.Object.IsPending2FA) {
+            StartLoading( "Logging In..." );
+            Navigation.NavigateTo( WebUtils.GetIdentityPage( WebConsts.LoginTwoFactorConfig, Configuration ) );
+            return;
+        }
+        
+        Val<bool> updateResult = await IdentityManager.UpdateAuthenticationState( loginResult.Object.JwtToken );
         
         if (!updateResult.IsSuccess()) {
             PushAlert( AlertType.Danger, updateResult.PrintDetails() );
             return;
         }
-        
-        Navigation.NavigateTo( "/" );
+
+        //await CartManager.GetCart( reply.Data.Token );
     }
-    async Task Register()
+    async Task OnValidRegisterSubmitAsync()
     {
-        Val<RegisterResponse> reply = await Http.TryGetValRequest<RegisterResponse>( "" );
+        Obj<RegisterReply> reply = await Http.TryGetObjRequest<RegisterReply>( "" );
 
         if (!reply.IsSuccess()) {
             PushAlert( AlertType.Danger, reply.PrintDetails() );
             return;
         }
-        
-        Navigation.NavigateTo( "/registered" );
+
+        registered = true;
+        registerReply = reply.Object;
+        StateHasChanged();
     }
+
+    sealed class LoginRequest
+    {
+        [Required( ErrorMessage = "Email or Username is required." )]
+        public string EmailOrUsername { get; set; } = string.Empty;
+
+        [Required( ErrorMessage = "Password is required." )]
+        public string Password { get; set; } = string.Empty;
+    }
+
+    sealed class RegisterRequest
+    {
+        [Required( ErrorMessage = "Email is required." ), EmailAddress( ErrorMessage = "Invalid email address." )] 
+        public string Email { get; set; } = string.Empty;
+
+        [Required( ErrorMessage = "Username is required." )]
+        public string Username { get; set; } = string.Empty;
+
+        [Phone( ErrorMessage = "Invalid phone number." )]
+        public string? Phone { get; set; } = string.Empty;
+
+        [Required( ErrorMessage = "Password is required." ), MinLength( 8, ErrorMessage = "Password must be at least 8 characters." )] 
+        public string Password { get; set; } = string.Empty;
+
+        [Compare( "Password", ErrorMessage = "Passwords do not match." )]
+        public string PasswordConfirm { get; set; } = string.Empty;
+    }
+    
+    sealed record LoginReply(
+        string? JwtToken,
+        bool IsPending2FA );
+
+    sealed record RegisterReply(
+        string Email,
+        string Username );
 }
