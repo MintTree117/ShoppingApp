@@ -11,8 +11,8 @@ public abstract class PageBase : ComponentBase
     
     protected IConfiguration Configuration { get; init; } = default!;
     protected IHttpService Http { get; init; } = default!;
+    protected NavigationManager Navigation { get; init; } = default!;
     [Inject] MainLayout layout { get; init; } = default!;
-    [Inject] NavigationManager navigation { get; init; } = default!;
 
     readonly string ReturnUrl = string.Empty;
     readonly int redirectTime;
@@ -63,7 +63,7 @@ public abstract class PageBase : ComponentBase
         pageRedirectTimer?.Dispose();
 
         string returnUrl = !string.IsNullOrWhiteSpace( ReturnUrl ) ? ReturnUrl : string.Empty;
-        navigation.NavigateTo( returnUrl );
+        Navigation.NavigateTo( returnUrl );
     }
     static int GetRedirectTime( IConfiguration configuration ) =>
         int.TryParse( configuration["PageRedirectTime"], out int time )
