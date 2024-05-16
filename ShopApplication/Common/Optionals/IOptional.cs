@@ -1,4 +1,4 @@
-namespace ShopApplication.Types.Optionals;
+namespace ShopApplication.Common.Optionals;
 
 public interface IOptional
 {

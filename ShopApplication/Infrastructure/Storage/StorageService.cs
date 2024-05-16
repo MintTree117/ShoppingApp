@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Microsoft.JSInterop;
-using ShopApplication.Types;
-using ShopApplication.Types.Optionals;
+using ShopApplication.Common;
+using ShopApplication.Common.Optionals;
 
 namespace ShopApplication.Infrastructure.Storage;
 

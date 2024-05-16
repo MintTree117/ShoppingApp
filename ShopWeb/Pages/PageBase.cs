@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Components;
+using ShopApplication.Common;
+using ShopApplication.Infrastructure.Http;
 using ShopApplication.Types;
 using ShopWeb.Layout;
 
@@ -6,18 +8,28 @@ namespace ShopWeb.Pages;
 
 public abstract class PageBase : ComponentBase
 {
-    [Inject] IConfiguration Configuration { get; init; } = default!;
+    protected PageBase() => redirectTime = GetRedirectTime( Configuration );
+    
+    protected IConfiguration Configuration { get; init; } = default!;
+    protected IHttpService Http { get; init; } = default!;
     [Inject] MainLayout layout { get; init; } = default!;
     [Inject] NavigationManager navigation { get; init; } = default!;
 
+    readonly string ReturnUrl = string.Empty;
     readonly int redirectTime;
     int countdown = 0;
     System.Timers.Timer? pageRedirectTimer;
 
-    protected PageBase() => redirectTime = GetRedirectTime( Configuration );
-
-    protected string ReturnUrl = string.Empty;
-
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Start();
+    }
+    protected virtual void Start()
+    {
+        ShowPage();
+    }
+    
     protected void StartRedirect( string? message )
     {
         layout.StartRedirecting( redirectTime, message );
@@ -31,7 +43,7 @@ public abstract class PageBase : ComponentBase
     {
         layout.PushAlert( type, message );
     }
-    protected void HideLoader()
+    protected void ShowPage()
     {
         layout.HideLoader();
     }

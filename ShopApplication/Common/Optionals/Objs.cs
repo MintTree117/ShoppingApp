@@ -1,4 +1,4 @@
-namespace ShopApplication.Types.Optionals;
+namespace ShopApplication.Common.Optionals;
 
 public readonly record struct Objs<T> : IOptional where T : class, new()
 {

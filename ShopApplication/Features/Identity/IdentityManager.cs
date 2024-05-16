@@ -1,12 +1,12 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Components.Authorization;
+using ShopApplication.Common;
+using ShopApplication.Common.Optionals;
+using ShopApplication.Features.Identity.Types;
 using ShopApplication.Infrastructure.Storage;
-using ShopApplication.Types;
-using ShopApplication.Types.Identity;
-using ShopApplication.Types.Optionals;
 
-namespace ShopApplication.Infrastructure.Identity;
+namespace ShopApplication.Features.Identity;
 
 internal sealed class IdentityManager( StorageService storage ) : AuthenticationStateProvider, IIdentityManager
 {

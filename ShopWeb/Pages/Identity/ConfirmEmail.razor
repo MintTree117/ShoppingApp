@@ -1,8 +1,8 @@
 @page "/identity/confirm"
-@using ShopApplication.Types
-@using ShopApplication.Types.Optionals
-@using ShopApplication.Infrastructure.Http
-@using ShopApplication.Types.Identity
+@using ShopApplication.Features.Identity
+@using ShopApplication.Features.Identity.Types
+@using ShopApplication.Common
+@using ShopApplication.Common.Optionals
 @inherits PageBase
 
 <PageTitle>Confirm Email</PageTitle>
@@ -21,12 +21,8 @@ else if (emailConfirmed) {
 
 @code 
 {
-    [Inject] IConfiguration Configuration { get; init; } = default!;
-    [Inject] IHttpService Http { get; init; } = default!;
     [SupplyParameterFromQuery] private string? UserId { get; set; }
     [SupplyParameterFromQuery] private string? Code { get; set; }
-
-    const string ConfigSection = "IdentityApis";
     
     Val<ConfirmEmailReply> replyVal = Val<ConfirmEmailReply>.Has( ConfirmEmailReply.Empty() );
     bool emailConfirmed = false;
@@ -82,5 +78,5 @@ else if (emailConfirmed) {
         return reply;
     }
     string GetConfigSection( string s ) => 
-        Configuration[$"{ConfigSection}:{s}"] ?? $"Failed to get config section {s}.";
+        Configuration[$"{IdentityConsts.IdentityConfigSection}:{s}"] ?? $"Failed to get config section {s}.";
 }

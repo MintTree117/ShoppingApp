@@ -2,8 +2,8 @@ using System.Collections.Specialized;
 using System.Net;
 using System.Net.Http.Json;
 using System.Web;
-using ShopApplication.Types;
-using ShopApplication.Types.Optionals;
+using ShopApplication.Common;
+using ShopApplication.Common.Optionals;
 using ShopPresentation.Infrastructure.Http;
 
 namespace ShopApplication.Infrastructure.Http;

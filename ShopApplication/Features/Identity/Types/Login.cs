@@ -1,4 +1,4 @@
-namespace ShopApplication.Types.Identity;
+namespace ShopApplication.Features.Identity.Types;
 
 public sealed class Login
 {

@@ -1,4 +1,4 @@
-namespace ShopApplication.Types.Optionals;
+namespace ShopApplication.Common.Optionals;
 
 public readonly record struct ObjsLine<T>(
     List<Obj<T>> Options ) where T : class, new()

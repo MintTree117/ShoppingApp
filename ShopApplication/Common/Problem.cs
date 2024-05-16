@@ -1,4 +1,4 @@
-namespace ShopApplication.Types;
+namespace ShopApplication.Common;
 
 public enum Problem
 {

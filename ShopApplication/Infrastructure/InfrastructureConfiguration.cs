@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using ShopApplication.Features.Identity;
 using ShopApplication.Infrastructure.Http;
-using ShopApplication.Infrastructure.Identity;
 using ShopApplication.Infrastructure.Storage;
 
 namespace ShopApplication.Infrastructure;
