@@ -3,7 +3,7 @@ using ShopApplication.Common.Optionals;
 
 namespace ShopApplication.Features.Identity;
 
-public interface IIdentityManager
+public interface IAuthenticationManager
 {
     public Task<AuthenticationState> GetAuthenticationStateAsync();
     public Task<Val<bool>> SetAuthenticationStateAsync( string? accessToken, string? refreshToken );

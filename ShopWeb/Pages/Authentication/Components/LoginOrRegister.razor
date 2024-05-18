@@ -1,10 +1,9 @@
-@page "/identity/login-or-register"
 @using ShopApplication.Features.Identity
 @using ShopApplication.Common
 @using ShopApplication.Common.Optionals
 @using System.ComponentModel.DataAnnotations
 @using ShopWeb.Utilities
-@inherits PageBase
+@inherits PageComponent
 
 @if (registered) {
     <h1>Account Registered.</h1>
@@ -35,7 +34,7 @@ else if (pendingTwoFactor) {
     </div>
     <p>
         Don't have access to your authenticator device? You can
-        <a href="@recoveryUrl">log in with a recovery code</a>.
+        <button class="btn btn-link" onclick="@(async () => await GoToRecovery())">log in with a recovery code</button>.
     </p>
 }
 else {
@@ -55,6 +54,9 @@ else {
             </div>
             <button class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
         </EditForm>
+        
+        <button class="btn btn-link" onclick="@(async () => await GoToResend())">Resend Confirmation Email</button>
+        <button class="btn btn-link" onclick="@(async () => await GoToForgot())">Forgot Password</button>
 
         <span class="my-5 d-block text-muted">- Or -</span>
 
@@ -88,15 +90,12 @@ else {
     
 @code 
 {
-    [Inject] IIdentityManager IdentityManager { get; init; } = default!;
+    [Inject] IAuthenticationManager AuthenticationManager { get; init; } = default!;
     //[Inject] CartManager CartManager { get; init; } = default!;
 
     readonly LoginRequest login = new();
     readonly RegisterRequest register = new();
     readonly TwoFactorRequest twoFactor = new();
-
-    string loginRecoveryLink => WebUtils.GetIdentityPage( WebConsts.LoginWithRecoveryConfig, Configuration );
-    string recoveryUrl => WebUtils.ConstructReturnUrl( loginRecoveryLink, "ReturnUrl" );
 
     bool registered = false;
     bool pendingTwoFactor = false;
@@ -104,78 +103,81 @@ else {
 
     async Task OnValidLoginSubmitAsync()
     {
-        StartLoading( "Logging In..." );
+        await CallStartLoading( "Logging In..." );
         Obj<LoginReply> loginResult = await Http.TryGetObjRequest<LoginReply>( "" );
 
         if (!loginResult.IsSuccess()) {
-            PushAlert( AlertType.Danger, loginResult.PrintDetails() );
+            await CallPushAlert( AlertType.Danger, loginResult.PrintDetails() );
             return;
         }
 
         if (loginResult.Object.IsPending2FA) {
             pendingTwoFactor = true;
-            StopLoading();
+            await CallStopLoading();
             StateHasChanged();
             return;
         }
         
-        Val<bool> updateResult = await IdentityManager.SetAuthenticationStateAsync( loginResult.Object.AccessToken, loginResult.Object.RefreshToken );
+        Val<bool> updateResult = await AuthenticationManager.SetAuthenticationStateAsync( loginResult.Object.AccessToken, loginResult.Object.RefreshToken );
         
         if (!updateResult.IsSuccess()) {
-            StopLoading();
-            PushAlert( AlertType.Danger, updateResult.PrintDetails() );
+            await CallStopLoading();
+            await CallPushAlert( AlertType.Danger, updateResult.PrintDetails() );
             return;
         }
 
         //await CartManager.GetCart( reply.Data.Token );
-        
-        StartLoading( "Login Success! Redirecting..." );
-        Navigation.NavigateToOrDefault( "ReturnUrl" );
+
+        await CallStartLoading( "Login Success! Redirecting..." );
+        await CallNavigateTo( "ReturnUrl", true );
     }
     async Task OnValidTwoFactorSubmitAsync()
     {
-        StartLoading( "Verifying Two Factor..." );
+        await CallStartLoading( "Verifying Two Factor..." );
         
         twoFactor.Email = login.EmailOrUsername;
         
-        string api = IdentityUtils.GetApiUrl( WebConsts.LoginTwoFactorConfig, Configuration );
-        Val<TwoFactorReply> result = await Http.TryPostValRequest<TwoFactorReply>( api, twoFactor );
+        Val<TwoFactorReply> result = await Http.TryPostValRequest<TwoFactorReply>( Urls.ApiTwoFactor, twoFactor );
 
         if (!result.IsSuccess()) {
-            PushAlert( AlertType.Danger, $"Two factor authorization failed!: {result.PrintDetails()}" );
-            StopLoading();
+            await CallPushAlert( AlertType.Danger, $"Two factor authorization failed!: {result.PrintDetails()}" );
+            await CallStopLoading();
             return;
         }
 
-        Val<bool> updateResult = await IdentityManager.SetAuthenticationStateAsync( result.Value.AccessToken, result.Value.RefreshToken );
+        Val<bool> updateResult = await AuthenticationManager.SetAuthenticationStateAsync( result.Value.AccessToken, result.Value.RefreshToken );
 
         if (!updateResult.IsSuccess()) {
-            PushAlert( AlertType.Danger, $"Two factor authorization succeeded on the server, but failed to save locally!: {result.PrintDetails()}" );
-            StopLoading();
+            await CallPushAlert( AlertType.Danger, $"Two factor authorization succeeded on the server, but failed to save locally!: {result.PrintDetails()}" );
+            await CallStopLoading();
             return;
         }
         
         //await CartManager.GetCart( reply.Data.Token );
 
-        StartLoading( "Login Success! Redirecting..." );
-        Navigation.NavigateToOrDefault( "ReturnUrl" );
+        await CallStartLoading( "Login Success! Redirecting..." );
+        await CallNavigateTo( "ReturnUrl", true );
     }
     async Task OnValidRegisterSubmitAsync()
     {
-        StartLoading( "Registering..." );
+        await CallStartLoading( "Registering..." );
         Obj<RegisterReply> reply = await Http.TryGetObjRequest<RegisterReply>( "" );
 
         if (!reply.IsSuccess()) {
-            StopLoading();
-            PushAlert( AlertType.Danger, reply.PrintDetails() );
+            await CallStopLoading();
+            await CallPushAlert( AlertType.Danger, reply.PrintDetails() );
             return;
         }
 
         registered = true;
         registerReply = reply.Object;
-        StopLoading();
+        await CallStopLoading();
         StateHasChanged();
     }
+
+    async Task GoToRecovery() => await CallNavigateTo( Urls.PageLoginWithRecovery, false );
+    async Task GoToResend() => await CallNavigateTo( Urls.PageResendConfirm, false );
+    async Task GoToForgot() => await CallNavigateTo( Urls.PageLoginWithRecovery, false );
 
     sealed class LoginRequest
     {

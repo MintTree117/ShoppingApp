@@ -8,7 +8,7 @@ using ShopApplication.Infrastructure.Storage;
 
 namespace ShopApplication.Features.Identity;
 
-internal sealed class IdentityManager( StorageService storage ) : AuthenticationStateProvider, IIdentityManager
+internal sealed class AuthenticationManager( StorageService storage ) : AuthenticationStateProvider, IAuthenticationManager
 {
     const string AccessKey = "accessToken";
     const string RefreshKey = "refreshToken";

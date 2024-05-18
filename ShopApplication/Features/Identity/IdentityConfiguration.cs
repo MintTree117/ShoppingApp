@@ -8,6 +8,6 @@ internal static class IdentityConfiguration
 {
     internal static void ConfigureIdentity( this WebAssemblyHostBuilder builder )
     {
-        builder.Services.AddScoped<AuthenticationStateProvider, IdentityManager>();
+        builder.Services.AddScoped<AuthenticationStateProvider, AuthenticationManager>();
     }
 }

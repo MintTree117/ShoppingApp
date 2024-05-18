@@ -9,15 +9,19 @@ public abstract class PageBase : ComponentBase
 {
     protected PageBase() => redirectTime = GetRedirectTime( Configuration );
     
-    protected IConfiguration Configuration { get; init; } = default!;
+    IConfiguration Configuration { get; init; } = default!;
     protected IHttpService Http { get; init; } = default!;
     protected NavigationManager Navigation { get; init; } = default!;
+    
     [Inject] MainLayout layout { get; init; } = default!;
 
     readonly string ReturnUrl = string.Empty;
     readonly int redirectTime;
     int countdown = 0;
     System.Timers.Timer? pageRedirectTimer;
+
+    protected string BaseUrl = "";
+    protected string CurrentView = string.Empty;
     
     protected override void OnInitialized()
     {
@@ -28,7 +32,14 @@ public abstract class PageBase : ComponentBase
     {
         return "Loading Page...";
     }
-    
+
+    protected void NavigateTo( PageComponent.NavigateToArgs args )
+    {
+        if (!args.ForceReload)
+            CurrentView = args.Url;
+        StateHasChanged();
+        Navigation.NavigateTo( args.Url, args.ForceReload );
+    }
     protected void StartRedirect( string? message )
     {
         layout.StartRedirecting( redirectTime, message );
@@ -41,6 +52,10 @@ public abstract class PageBase : ComponentBase
     protected void PushAlert( AlertType type, string message )
     {
         layout.PushAlert( type, message );
+    }
+    protected void PushAlert( PageComponent.PushAlertArgs args )
+    {
+        layout.PushAlert( args.Type, args.Message );
     }
     protected void StartLoading( string? message )
     {

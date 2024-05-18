@@ -1,0 +1,41 @@
+@page "/authenticate"
+@using ShopWeb.Pages.Authentication.Components
+@inherits PageBase
+
+@switch ( CurrentView ) {
+    case nameof( EmailConfirm ):
+        <EmailConfirm 
+            StartLoadingCallback="@StartLoading"
+            StopLoadingCallback="@StopLoading"
+            PushAlertCallback="@PushAlert"
+            NavigateToCallback="@NavigateTo"/>
+        break;
+    case nameof( EmailConfirmResend ):
+        <EmailConfirmResend
+            StartLoadingCallback="@StartLoading"
+            StopLoadingCallback="@StopLoading"
+            PushAlertCallback="@PushAlert"
+            NavigateToCallback="@NavigateTo"/>
+        break;
+    case nameof( LoginOrRegister ):
+        <LoginOrRegister
+            StartLoadingCallback="@StartLoading"
+            StopLoadingCallback="@StopLoading"
+            PushAlertCallback="@PushAlert"
+            NavigateToCallback="@NavigateTo"/>
+        break;
+    case nameof( PasswordForgot ):
+        <PasswordForgot
+            StartLoadingCallback="@StartLoading"
+            StopLoadingCallback="@StopLoading"
+            PushAlertCallback="@PushAlert"
+            NavigateToCallback="@NavigateTo"/>
+        break;
+    case nameof( PasswordReset ):
+        <PasswordReset
+            StartLoadingCallback="@StartLoading"
+            StopLoadingCallback="@StopLoading"
+            PushAlertCallback="@PushAlert"
+            NavigateToCallback="@NavigateTo"/>
+        break;
+}

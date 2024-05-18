@@ -30,4 +30,9 @@
       <AdditionalFiles Include="Shared\PageLoader.razor" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Pages\Catalog\" />
+      <Folder Include="Pages\Checkout\" />
+    </ItemGroup>
+
 </Project>
