@@ -8,9 +8,35 @@
 
 @if (registered) {
     <h1>Account Registered.</h1>
+    <h2>Id: @( registerReply?.Id ?? "No id returned." )</h2>
     <h2>Email: @(registerReply?.Email ?? "No email returned.")</h2>
     <h2>Username: @( registerReply?.Username ?? "No username returned." )</h2>
     <p>A confirmation link has been emailed to @( registerReply?.Email ?? "your email" ). Please verify your email before logging in.</p>
+}
+else if (pendingTwoFactor) {
+    <h1>Two-factor authentication</h1>
+    <hr/>
+    <p>Your login is protected by a two-step verification process. Enter your verification code below.</p>
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm Model="@twoFactor" FormName="login-with-2fa" OnValidSubmit="OnValidTwoFactorSubmitAsync" method="post">
+                <DataAnnotationsValidator/>
+                <ValidationSummary class="text-danger" role="alert"/>
+                <div class="form-floating mb-3">
+                    <InputText @bind-Value="@twoFactor.Code" id="two-factor-code" class="form-control" autocomplete="off"/>
+                    <label for="two-factor-code" class="form-label">Authenticator code</label>
+                    <ValidationMessage For="@(() => twoFactor.Code)" class="text-danger"/>
+                </div>
+                <div>
+                    <button type="submit" class="w-100 btn btn-lg btn-primary">Log In</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+    <p>
+        Don't have access to your authenticator device? You can
+        <a href="@recoveryUrl">log in with a recovery code</a>.
+    </p>
 }
 else {
     <div style="max-width: 360px" class="mt-5 mx-auto text-center">
@@ -67,8 +93,13 @@ else {
 
     readonly LoginRequest login = new();
     readonly RegisterRequest register = new();
+    readonly TwoFactorRequest twoFactor = new();
+
+    string loginRecoveryLink => WebUtils.GetIdentityPage( WebConsts.LoginWithRecoveryConfig, Configuration );
+    string recoveryUrl => WebUtils.ConstructReturnUrl( loginRecoveryLink, "ReturnUrl" );
 
     bool registered = false;
+    bool pendingTwoFactor = false;
     RegisterReply? registerReply;
 
     async Task OnValidLoginSubmitAsync()
@@ -82,31 +113,67 @@ else {
         }
 
         if (loginResult.Object.IsPending2FA) {
-            StartLoading( "Logging In..." );
-            Navigation.NavigateTo( WebUtils.GetIdentityPage( WebConsts.LoginTwoFactorConfig, Configuration ) );
+            pendingTwoFactor = true;
+            StopLoading();
+            StateHasChanged();
             return;
         }
         
-        Val<bool> updateResult = await IdentityManager.UpdateAuthenticationState( loginResult.Object.JwtToken );
+        Val<bool> updateResult = await IdentityManager.SetAuthenticationStateAsync( loginResult.Object.AccessToken, loginResult.Object.RefreshToken );
         
         if (!updateResult.IsSuccess()) {
+            StopLoading();
             PushAlert( AlertType.Danger, updateResult.PrintDetails() );
             return;
         }
 
         //await CartManager.GetCart( reply.Data.Token );
+        
+        StartLoading( "Login Success! Redirecting..." );
+        Navigation.NavigateToOrDefault( "ReturnUrl" );
+    }
+    async Task OnValidTwoFactorSubmitAsync()
+    {
+        StartLoading( "Verifying Two Factor..." );
+        
+        twoFactor.Email = login.EmailOrUsername;
+        
+        string api = IdentityUtils.GetApiUrl( WebConsts.LoginTwoFactorConfig, Configuration );
+        Val<TwoFactorReply> result = await Http.TryPostValRequest<TwoFactorReply>( api, twoFactor );
+
+        if (!result.IsSuccess()) {
+            PushAlert( AlertType.Danger, $"Two factor authorization failed!: {result.PrintDetails()}" );
+            StopLoading();
+            return;
+        }
+
+        Val<bool> updateResult = await IdentityManager.SetAuthenticationStateAsync( result.Value.AccessToken, result.Value.RefreshToken );
+
+        if (!updateResult.IsSuccess()) {
+            PushAlert( AlertType.Danger, $"Two factor authorization succeeded on the server, but failed to save locally!: {result.PrintDetails()}" );
+            StopLoading();
+            return;
+        }
+        
+        //await CartManager.GetCart( reply.Data.Token );
+
+        StartLoading( "Login Success! Redirecting..." );
+        Navigation.NavigateToOrDefault( "ReturnUrl" );
     }
     async Task OnValidRegisterSubmitAsync()
     {
+        StartLoading( "Registering..." );
         Obj<RegisterReply> reply = await Http.TryGetObjRequest<RegisterReply>( "" );
 
         if (!reply.IsSuccess()) {
+            StopLoading();
             PushAlert( AlertType.Danger, reply.PrintDetails() );
             return;
         }
 
         registered = true;
         registerReply = reply.Object;
+        StopLoading();
         StateHasChanged();
     }
 
@@ -117,6 +184,14 @@ else {
 
         [Required( ErrorMessage = "Password is required." )]
         public string Password { get; set; } = string.Empty;
+    }
+
+    sealed class TwoFactorRequest
+    {
+        [Required] public string Email { get; set; } = string.Empty;
+        
+        [Required, DataType( DataType.Text ), Display( Name = "Authenticator code" ), StringLength( 40, ErrorMessage = "The two factor code must be at least 6 and at max 40 characters long.", MinimumLength = 6 )]
+        public string Code { get; set; } = string.Empty;
     }
 
     sealed class RegisterRequest
@@ -138,10 +213,16 @@ else {
     }
     
     sealed record LoginReply(
-        string? JwtToken,
+        string? AccessToken,
+        string? RefreshToken,
         bool IsPending2FA );
 
+    readonly record struct TwoFactorReply(
+        string AccessToken,
+        string RefreshToken );
+
     sealed record RegisterReply(
+        string Id,
         string Email,
         string Username );
 }

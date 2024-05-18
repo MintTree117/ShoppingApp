@@ -10,12 +10,13 @@ namespace ShopApplication.Features.Identity;
 
 internal sealed class IdentityManager( StorageService storage ) : AuthenticationStateProvider, IIdentityManager
 {
-    const string Key = "token";
+    const string AccessKey = "accessToken";
+    const string RefreshKey = "refreshToken";
     readonly StorageService _storage = storage;
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        Val<Authentication> tokenResult = await _storage.Get<Authentication>( Key );
+        Val<AccessKey> tokenResult = await _storage.GetVal<AccessKey>( AccessKey );
 
         if (tokenResult.Fails( out tokenResult ))
             return new AuthenticationState( new ClaimsPrincipal() );
@@ -23,18 +24,36 @@ internal sealed class IdentityManager( StorageService storage ) : Authentication
         ClaimsPrincipal claims = GetIdentityClaimsPrincipal( tokenResult.Value.JwtToken );
         return new AuthenticationState( claims );
     }
-    public async Task<Val<bool>> UpdateAuthenticationState( string token )
+    public async Task<Val<bool>> RefreshAuthenticationStateAsync( string? accessToken )
     {
-        if (string.IsNullOrWhiteSpace( token ))
-            return IOptional.Failure( Problem.BadRequest, "Empty token." );
-
-        NotifyChange( token );
-        return await _storage.Set( Key, Authentication.With( token ) );
+        if (string.IsNullOrWhiteSpace( accessToken ))
+            return IOptional.Failure( Problem.BadRequest, "Empty access token." );
+        
+        NotifyChange( accessToken );
+        
+        return await _storage.Set( AccessKey, accessToken );
     }
-    public async Task<Val<bool>> ClearAuthenticationState()
+    public async Task<Val<bool>> SetAuthenticationStateAsync( string? accessToken, string? refreshToken )
+    {
+        if (string.IsNullOrWhiteSpace( accessToken ))
+            return IOptional.Failure( Problem.BadRequest, "Empty access token." );
+
+        if (string.IsNullOrWhiteSpace( refreshToken ))
+            return IOptional.Failure( Problem.BadRequest, "Empty refresh token." );
+
+        NotifyChange( accessToken );
+        
+        Val<bool> access = await _storage.Set( AccessKey, accessToken );
+        Val<bool> refresh = await _storage.Set( RefreshKey, refreshToken );
+
+        return access.IsSuccess() && refresh.IsSuccess()
+            ? IOptional.Success()
+            : IOptional.Failure( Problem.IO, $"{access.PrintDetails()} : {refresh.PrintDetails()}" );
+    }
+    public async Task<Val<bool>> ClearAuthenticationStateAsync()
     {
         NotifyAuthenticationStateChanged( GetNotifyParams( null ) );
-        return await _storage.Remove( Key );
+        return await _storage.Remove( AccessKey );
     }
 
     void NotifyChange( string token )

@@ -27,15 +27,15 @@
 @code 
 {
     [SupplyParameterFromForm]
-    private ConfirmEmailRequest Request { get; } = new();
+    private ResendConfirmationRequest Request { get; } = new();
 
     private async Task OnValidSubmitAsync()
     {
         StartLoading( "Sending reset link..." );
 
-        string url = IdentityUtils.GetApiUrl( "Forgot", Configuration );
+        string url = IdentityUtils.GetApiUrl( "Resend", Configuration );
         Val<bool> result = await Http.TryPostValRequest<bool>( url, Request );
-
+        
         if (result.IsSuccess())
             PushAlert( AlertType.Success, "Confirmation email link has been sent. Check your email." );
         else
@@ -44,11 +44,11 @@
         StopLoading();
     }
         
-    sealed class ConfirmEmailRequest
+    sealed class ResendConfirmationRequest
     {
         public string Email { get; set; } = string.Empty;
 
-        public static ConfirmEmailRequest With( string email ) =>
+        public static ResendConfirmationRequest With( string email ) =>
             new() {
                 Email = email
             };
