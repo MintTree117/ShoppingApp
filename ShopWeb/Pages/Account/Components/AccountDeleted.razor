@@ -3,3 +3,11 @@
 
 <h1>Account Deleted</h1>
 <p>Your account and all associated data has been deleted.</p>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await CallStopLoading();
+    }
+}

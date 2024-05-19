@@ -1,7 +1,7 @@
 using System.Collections.Specialized;
 using System.Net.Http.Json;
 using System.Web;
-using RetailDomain.Optionals;
+using ShopApplication.Common.Optionals;
 
 namespace ShopApplication.Infrastructure.Http;
 

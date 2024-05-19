@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Components.Authorization;
-using RetailDomain.Optionals;
+using ShopApplication.Common.Optionals;
 
 namespace ShopApplication.Features.Identity;
 

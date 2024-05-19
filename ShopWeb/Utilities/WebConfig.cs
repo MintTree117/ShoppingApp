@@ -3,7 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace ShopWeb.Utilities;
 
-internal sealed class WebConfigConsts( IConfiguration config )
+internal sealed class WebConfig( IConfiguration config )
 {
     internal readonly PasswordCriteria PasswordRules = GetPasswordRules( config );
     internal readonly Jwt JwtRules = GetJwtRules( config );

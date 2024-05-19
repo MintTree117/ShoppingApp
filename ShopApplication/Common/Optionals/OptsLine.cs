@@ -1,4 +1,4 @@
-namespace RetailDomain.Optionals;
+namespace ShopApplication.Common.Optionals;
 
 public readonly record struct OptsLine<T>(
     List<Opt<T>> Options ) where T : class, new()

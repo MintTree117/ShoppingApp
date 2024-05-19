@@ -1,16 +1,16 @@
-namespace RetailDomain.Optionals;
+namespace ShopApplication.Common.Optionals;
 
 public readonly record struct Opt<T> : IOpt
 {
     readonly T? _obj = default;
-    readonly bool _sucess = false;
+    readonly bool _success = false;
     readonly string? _message = null;
     
     // Intentionally Unsafe: Up to programmer to keep track
-    public T Data => _obj ?? throw new Exception( "Fatal: Tried to access a null Optional!" );
+    public T Data => _obj ?? Activator.CreateInstance<T>(); // throw new Exception( "Fatal: Tried to access a null Optional!" );
     
     public string Message() => _message ?? string.Empty;
-    public bool IsOkay() => _obj is not null && _sucess;
+    public bool IsOkay() => _obj is not null && _success;
 
     public bool Okay( out IOpt self )
     {

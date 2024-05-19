@@ -1,7 +1,7 @@
 @page "/account/delete"
 @using System.ComponentModel.DataAnnotations
-@using RetailDomain.Optionals
 @using ShopApplication.Common
+@using ShopApplication.Common.Optionals
 @using ShopApplication.Features.Identity
 @using ShopWeb.Utilities
 @inherits PageComponent
@@ -39,6 +39,12 @@ else {
     DeleteAccountRequest Request { get; set; } = new();
     bool IsWarning = false;
 
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await CallStopLoading();
+    }
+    
     async Task OnValidSubmitAsync()
     {
         await Task.Delay( 1000 );

@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Microsoft.JSInterop;
-using RetailDomain.Optionals;
+using ShopApplication.Common.Optionals;
 
 namespace ShopApplication.Infrastructure.Storage;
 

@@ -1,4 +1,4 @@
-namespace RetailDomain.Optionals;
+namespace ShopApplication.Common.Optionals;
 
 public interface IOpt
 {

@@ -1,7 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Components.Authorization;
-using RetailDomain.Optionals;
+using ShopApplication.Common.Optionals;
 using ShopApplication.Features.Identity.Types;
 using ShopApplication.Infrastructure.Storage;
 
