@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Components.Authorization;
-using ShopApplication.Common.Optionals;
+using Shop.Infrastructure.Common.Optionals;
 
 namespace Shop.Features.Identity;
 

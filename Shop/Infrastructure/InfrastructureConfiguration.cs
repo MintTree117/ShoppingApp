@@ -5,9 +5,9 @@ using Shop.Infrastructure.Storage;
 
 namespace Shop.Infrastructure;
 
-public static class InfrastructureConfiguration
+internal static class InfrastructureConfiguration
 {
-    public static void ConfigureInfrastructure( this WebAssemblyHostBuilder builder )
+    internal static void ConfigureInfrastructure( this WebAssemblyHostBuilder builder )
     {
         builder.ConfigureHttp();
         builder.ConfigureIdentity();

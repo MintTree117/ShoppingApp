@@ -1,4 +1,4 @@
-namespace ShopApplication.Common.ValueTypes;
+namespace Shop.Infrastructure.Common.ValueTypes;
 
 public readonly record struct Contact( 
     int Id, 

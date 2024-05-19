@@ -1,4 +1,4 @@
-namespace ShopApplication.Common;
+namespace Shop.Infrastructure.Common.ValueTypes;
 
 public enum Problem
 {
@@ -10,6 +10,5 @@ public enum Problem
     Internal,
     Network,
     NotFound,
-    Conflict,
-    IO
+    Conflict
 }

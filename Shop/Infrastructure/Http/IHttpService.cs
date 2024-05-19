@@ -1,4 +1,4 @@
-using ShopApplication.Common.Optionals;
+using Shop.Infrastructure.Common.Optionals;
 
 namespace Shop.Infrastructure.Http;
 

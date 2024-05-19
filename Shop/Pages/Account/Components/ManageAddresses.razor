@@ -1,0 +1,217 @@
+@using Shop.Infrastructure.Common.Optionals
+@using Shop.Utilities
+@using Shop.Infrastructure.Common
+@using Shop.Shared
+@inherits Shop.Shared.PageComponent
+
+@if (isEditing) {
+    <div class="row">
+        <div class="col-md-6">
+            <EditForm Model="@editModel" FormName="edit-address" OnValidSubmit="OnClickSave" method="post">
+                <DataAnnotationsValidator/>
+                <ValidationSummary class="text-danger" role="alert"/>
+                <div class="form-floating mb-3">
+                    <InputText type="text" bind-Value="@editModel.Country" id="country" class="form-control" autocomplete="country" aria-required="true" placeholder="Country"/>
+                    <label for="country" class="form-label">Country</label>
+                    <ValidationMessage For="@(() => editModel.Country)" class="text-danger"/>
+                </div>
+                <div class="form-floating mb-3">
+                    <InputText type="text" bind-Value="@editModel.City" id="city" class="form-control" autocomplete="city" aria-required="true" placeholder="City"/>
+                    <label for="city" class="form-label">City</label>
+                    <ValidationMessage For="@(() => editModel.Country)" class="text-danger"/>
+                </div>
+                <div class="form-floating mb-3">
+                    <InputNumber type="number" bind-Value="@editModel.GridX" id="gridX" class="form-control" autocomplete="gridX" aria-required="true" placeholder="GridX"/>
+                    <label for="gridX" class="form-label">GridX</label>
+                    <ValidationMessage For="@(() => editModel.GridX)" class="text-danger"/>
+                </div>
+                <div class="form-floating mb-3">
+                    <InputNumber type="number" bind-Value="@editModel.GridY" id="gridY" class="form-control" autocomplete="gridY" aria-required="true" placeholder="GridY"/>
+                    <label for="gridY" class="form-label">GridY</label>
+                    <ValidationMessage For="@(() => editModel.GridX)" class="text-danger"/>
+                </div>
+                <button type="submit" class="w-100 btn btn-lg btn-primary">Save Changes</button>
+            </EditForm>
+        </div>
+    </div>
+}
+else {
+    <div class="d-flex flex-row justify-content-between">
+        <h3>View Addresses</h3>
+        <div class="d-flex flex-row justify-content-between">
+            <button class="btn btn-primary" @onclick="@OnClickNew">Add New Address</button>
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="RowsPerPage" data-bs-toggle="dropdown" aria-expanded="false">
+                    Display: @rowsPerPage
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="RowsPerPage">
+                    @for ( int i = 0; i < rowCounts.Length; i++ ) {
+                        int localIndex = i; // Create a local copy of the loop variable
+                        <li><button class="dropdown-item" type="button" @onclick="async () => await UpdateRowsPerPage( localIndex )">@rowCounts[localIndex]</button></li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    if (pagedAddresses.Count < 1) {
+        <p>No Addresses Found.</p>
+    }
+    else {
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Country</th>
+                <th>City</th>
+                <th>GridX</th>
+                <th>GridY</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach ( AddressModel address in pagedAddresses ) {
+                <tr>
+                    <td>@address.Country</td>
+                    <td>@address.City</td>
+                    <td>@address.GridX</td>
+                    <td>@address.GridY</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" @onclick="() => OnClickEdit( address )">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm" @onclick="@(async () => await OnClickDelete( address ))">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+        
+        <Pagination @ref="pagination" OnPageChange="@OnPaginationChange"/>
+    }
+}
+
+
+@code {
+    bool isViewing;
+    bool isEditing;
+    bool isNew;
+
+    AddressModel editModel = new();
+    List<AddressModel> pagedAddresses = [];
+    int[] rowCounts = [5, 10, 20];
+    int totalCount = 0;
+    int rowsPerPage = 0;
+
+    Pagination pagination = default!;
+    
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        await GetPagedAddresses( 0 );
+    }
+    async Task GetPagedAddresses( int page )
+    {
+        StartLoading( "Fetching account details..." );
+
+        Opt<AddressSearchResponse> result = await Http.TryGetRequest<AddressSearchResponse>( Urls.ApiGetAccountDetails );
+
+        if (!result.IsOkay()) {
+            StopLoading();
+            await CallPushAlert( AlertType.Danger, $"Failed to get account details. {result.Message()}" );
+            return;
+        }
+
+        pagedAddresses = result.Data.Addresses;
+        totalCount = result.Data.TotalCount;
+        pagination.Set( page, rowsPerPage, result.Data.TotalCount );
+        
+        isEditing = false;
+        isNew = false;
+        isViewing = true;
+        StopLoading();
+        StateHasChanged();
+    }
+    
+    void OnClickNew()
+    {
+        editModel = new AddressModel();
+        isEditing = true;
+        isNew = true;
+        StateHasChanged();
+    }
+    void OnClickEdit( AddressModel address )
+    {
+        editModel = address;
+        isEditing = true;
+        isNew = false;
+        StateHasChanged();
+    }
+    void ExitEditing()
+    {
+        isEditing = false;
+        isNew = false;
+        isViewing = true;
+        StateHasChanged();
+    }
+    async Task UpdateRowsPerPage( int count )
+    {
+        totalCount = count;
+        await GetPagedAddresses( 0 );
+    }
+    async Task OnPaginationChange( int page )
+    {
+        await GetPagedAddresses( page );
+    }
+    async Task OnClickSave()
+    {
+        StartLoading( "Saving Address..." );
+        Opt<bool> saveResult = await Http.TryPostRequest<bool>( Urls.ApiUpdateAddress, editModel );
+
+        if (!saveResult.IsOkay()) {
+            await CallPushAlert( AlertType.Danger, $"Failed to save address. {saveResult.Message()}" );
+            StopLoading();
+            return;
+        }
+
+        await CallPushAlert( AlertType.Success, "Address Saved." );
+
+        if (isNew)
+            await GetPagedAddresses( 0 );
+        else
+            StopLoading();
+    }
+    async Task OnClickDelete( AddressModel address )
+    {
+        StartLoading( "Deleting Address..." );
+        Opt<bool> deleteResult = await Http.TryPostRequest<bool>( Urls.ApiDeleteAddress, new AddressDeleteRequest( address.Id ) );
+
+        if (!deleteResult.IsOkay()) {
+            await CallPushAlert( AlertType.Danger, $"Failed to delete address. {deleteResult.Message()}" );
+            StopLoading();
+            return;
+        }
+
+        await CallPushAlert( AlertType.Success, "Address Deleted." );
+        await GetPagedAddresses( 0 );
+    }
+    
+    readonly record struct AddressSearchResponse(
+        List<AddressModel> Addresses,
+        int TotalCount );
+    readonly record struct AddressSearchRequest(
+        int Page,
+        int Count );
+    readonly record struct AddressDeleteRequest(
+        Guid AddressId );
+
+    sealed class AddressModel
+    {
+        public Guid Id { get; set; }
+        public string Country { get; set; } = string.Empty;
+        public string City { get; set; } = string.Empty;
+        public int GridX { get; set; }
+        public int GridY { get; set; }
+    }
+}

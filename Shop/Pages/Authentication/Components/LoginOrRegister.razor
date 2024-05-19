@@ -1,9 +1,9 @@
-@using ShopApplication.Common
 @using System.ComponentModel.DataAnnotations
 @using Shop.Features.Identity
-@using ShopApplication.Common.Optionals
-@using ShopWeb.Utilities
-@inherits ShopWeb.Shared.PageComponentOld
+@using Shop.Infrastructure.Common
+@using Shop.Infrastructure.Common.Optionals
+@using Shop.Utilities
+@inherits Shop.Shared.PageComponent
 
 @if (registered) {
     <h1>Account Registered.</h1>

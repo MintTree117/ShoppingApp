@@ -1,4 +1,4 @@
-namespace ShopWeb.Utilities;
+namespace Shop.Utilities;
 
 internal static class Urls
 {
@@ -9,6 +9,9 @@ internal static class Urls
     internal const string ApiGetAccountDetails = "";
     internal const string ApiUpdateAccountDetails = "";
     internal const string ApiUpdatePassword = "";
+    internal const string ApiDeleteAccount = "";
+    internal const string ApiUpdateAddress = "";
+    internal const string ApiDeleteAddress = "";
     
     internal const string ParamReturnUrl = "ReturnUrl";
 

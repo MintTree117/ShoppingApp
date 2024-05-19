@@ -1,11 +1,10 @@
 using Microsoft.AspNetCore.Components;
+using Shop.Infrastructure.Common;
 using Shop.Infrastructure.Http;
-using Shop.Shared;
-using ShopApplication.Common;
 
-namespace ShopWeb.Shared;
+namespace Shop.Shared;
 
-public abstract class PageComponentOld : ComponentBase
+public abstract class PageComponent : ComponentBase
 {
     [Inject] protected IHttpService Http { get; init; } = default!;
     [Parameter] public Action<bool, string?> ToggleLoadingAction { get; set; } = default!;

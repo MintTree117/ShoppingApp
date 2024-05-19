@@ -2,8 +2,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Components.Authorization;
 using Shop.Features.Identity.Types;
+using Shop.Infrastructure.Common.Optionals;
 using Shop.Infrastructure.Storage;
-using ShopApplication.Common.Optionals;
 
 namespace Shop.Features.Identity;
 

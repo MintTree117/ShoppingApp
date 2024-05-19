@@ -1,4 +1,4 @@
-namespace ShopApplication.Common.Optionals;
+namespace Shop.Infrastructure.Common.Optionals;
 
 public readonly record struct Opt<T> : IOpt
 {

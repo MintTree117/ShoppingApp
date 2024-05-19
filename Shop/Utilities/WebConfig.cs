@@ -1,7 +1,7 @@
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 
-namespace ShopWeb.Utilities;
+namespace Shop.Utilities;
 
 internal sealed class WebConfig( IConfiguration config )
 {

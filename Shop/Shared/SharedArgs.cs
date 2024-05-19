@@ -1,3 +1,4 @@
+using Shop.Infrastructure.Common;
 using ShopApplication.Common;
 
 namespace Shop.Shared;

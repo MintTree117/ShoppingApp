@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Components;
+using Shop.Infrastructure.Common;
 using Shop.Infrastructure.Http;
-using Shop.Layout;
 using ShopApplication.Common;
-using ShopWeb.Shared;
 
 namespace Shop.Shared;
 

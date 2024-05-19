@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components;
 
-namespace ShopWeb.Utilities;
+namespace Shop.Utilities;
 
 internal static class WebExtentions
 {

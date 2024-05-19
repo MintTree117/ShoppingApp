@@ -1,4 +1,4 @@
-namespace ShopWeb.Utilities;
+namespace Shop.Utilities;
 
 internal static class WebUtils
 {

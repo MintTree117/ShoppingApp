@@ -1,5 +1,4 @@
 @page "/account"
-@using Shop.Features.Account
 @using Shop.Pages.Account.Components
 @inherits Shop.Shared.PageBase
 
@@ -30,12 +29,11 @@
                     break;
                 case nameof( ManageAccount ):
                     <ManageAccount
-                        Manager="@Manager"
                         PushAlertCallback="@PushAlert"
                         NavigateToCallback="@NavigateTo"/>
                     break;
-                case nameof( ViewAddresses ):
-                    <ViewAddresses
+                case nameof( ManageAddresses ):
+                    <ManageAddresses
                         PushAlertCallback="@PushAlert"
                         NavigateToCallback="@NavigateTo"/>
                     break;
@@ -45,8 +43,6 @@
 </div>
 
 @code {
-    [Inject] public AccountManager Manager { get; set; } = default!;
-
     bool isComponentLoading = false;
     string componentLoadingMessage = string.Empty;
     

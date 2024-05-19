@@ -25,15 +25,10 @@
     int EndPage = 0;
     
     [Parameter] public EventCallback<int> OnPageChange { get; set; } = default!;
-    
-    public void UpdateTotalPages( int rowsPerPage, int totalResults )
+
+    internal void Set( int page, int rowsPerPage, int totalResults )
     {
         TotalPages = ( totalResults + rowsPerPage - 1 ) / rowsPerPage; // Round up to ensure correct page count
-        UpdateStartAndEndPages();
-        StateHasChanged();
-    }
-    public void SetCurrentPage( int page )
-    {
         CurrentPage = page;
         UpdateStartAndEndPages();
         StateHasChanged();
