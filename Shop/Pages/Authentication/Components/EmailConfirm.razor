@@ -30,13 +30,13 @@ else if (emailConfirmed) {
 
         if (!TryValidateLink( out string userId, out string code, out string errorMessage )) {
             PushError( errorMessage );
+            StopLoading();
             return;
         }
         
         apiReply = await TryConfirmEmail( Urls.ApiConfirmEmail, userId, code );
         emailConfirmed = apiReply.IsOkay();
         confirmFailed = !emailConfirmed;
-        
         StateHasChanged();
         StopLoading();
     }
@@ -67,8 +67,10 @@ else if (emailConfirmed) {
         static string InvalidLinkMessage( string parameter ) =>
             $"Failed to confirm email address. {parameter} is invalid.";
     }
-    void GoToResend() => Navigate( Urls.PageResendConfirm );
-    void GoToLogin() => Navigate( Urls.PageLoginOrRegister );
+    void GoToResend() => 
+        Navigate( Urls.PageResendConfirm );
+    void GoToLogin() => 
+        Navigate( Urls.PageLoginOrRegister );
     
     readonly record struct ConfirmEmailRequest(
         string Email,

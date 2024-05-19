@@ -18,13 +18,13 @@ else if (pendingTwoFactor) {
     <p>Your login is protected by a two-step verification process. Enter your verification code below.</p>
     <div class="row">
         <div class="col-md-4">
-            <EditForm Model="@twoFactor" FormName="login-with-2fa" OnValidSubmit="OnValidTwoFactorSubmitAsync" method="post">
+            <EditForm Model="@twoFactorRequest" FormName="login-with-2fa" OnValidSubmit="OnValidTwoFactorSubmitAsync" method="post">
                 <DataAnnotationsValidator/>
                 <ValidationSummary class="text-danger" role="alert"/>
                 <div class="form-floating mb-3">
-                    <InputText @bind-Value="@twoFactor.Code" id="two-factor-code" class="form-control" autocomplete="off"/>
+                    <InputText @bind-Value="@twoFactorRequest.Code" id="two-factor-code" class="form-control" autocomplete="off"/>
                     <label for="two-factor-code" class="form-label">Authenticator code</label>
-                    <ValidationMessage For="@(() => twoFactor.Code)" class="text-danger"/>
+                    <ValidationMessage For="@(() => twoFactorRequest.Code)" class="text-danger"/>
                 </div>
                 <div>
                     <button type="submit" class="w-100 btn btn-lg btn-primary">Log In</button>
@@ -41,15 +41,15 @@ else {
     <div style="max-width: 360px" class="mt-5 mx-auto text-center">
         <img class="mb-4" src="/Images/Logo.svg" alt="blazor" width="72" height="57">
 
-        <EditForm Model="@login" OnValidSubmit="@(async () => await OnValidLoginSubmitAsync() )">
+        <EditForm Model="@loginRequest" OnValidSubmit="@(async () => await OnValidLoginSubmitAsync() )">
             <h1 class="h3 mb-3 fw-normal">Please Sign In</h1>
             <DataAnnotationsValidator/>
             <div class="form-floating">
-                <InputText type="name" class="form-control" id="emailOrUsername" @bind-Value="@login.EmailOrUsername">></InputText>
+                <InputText type="name" class="form-control" id="emailOrUsername" @bind-Value="@loginRequest.EmailOrUsername">></InputText>
                 <label for="emailOrUsername">Email or Username</label>
             </div>
             <div class="form-floating">
-                <InputText type="password" class="form-control" id="password" @bind-Value="@login.Password"></InputText>
+                <InputText type="password" class="form-control" id="password" @bind-Value="@loginRequest.Password"></InputText>
                 <label for="password">Password</label>
             </div>
             <button class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
@@ -60,27 +60,27 @@ else {
 
         <span class="my-5 d-block text-muted">- Or -</span>
 
-        <EditForm Model="@register" OnValidSubmit="@(async () => await OnValidRegisterSubmitAsync() )">
+        <EditForm Model="@registerRequest" OnValidSubmit="@(async () => await OnValidRegisterSubmitAsync() )">
             <h1 class="h3 mb-3 fw-normal">Register</h1>
             <DataAnnotationsValidator/>
             <div class="form-floating">
-                <InputText type="name" class="form-control" id="username" @bind-Value="@register.Username"></InputText>
-                <ValidationMessage For="@(() => register.Username)"/>
+                <InputText type="name" class="form-control" id="username" @bind-Value="@registerRequest.Username"></InputText>
+                <ValidationMessage For="@(() => registerRequest.Username)"/>
                 <label for="emailOrUsername">Username</label>
             </div>
             <div class="form-floating">
-                <InputText type="email" class="form-control" id="email" @bind-Value="@register.Email"></InputText>
-                <ValidationMessage For="@(() => register.Email)"/>
+                <InputText type="email" class="form-control" id="email" @bind-Value="@registerRequest.Email"></InputText>
+                <ValidationMessage For="@(() => registerRequest.Email)"/>
                 <label for="email">Email</label>
             </div>
             <div class="form-floating">
-                <InputText type="password" class="form-control" id="registerPassword" @bind-Value="@register.Password"></InputText>
-                <ValidationMessage For="@(() => register.Password)"/>
+                <InputText type="password" class="form-control" id="registerPassword" @bind-Value="@registerRequest.Password"></InputText>
+                <ValidationMessage For="@(() => registerRequest.Password)"/>
                 <label for="registerPassword">Password</label>
             </div>
             <div class="form-floating">
-                <InputText type="password" class="form-control" id="confirmPassword" @bind-Value="@register.PasswordConfirm"></InputText>
-                <ValidationMessage For="@(() => register.PasswordConfirm)"/>
+                <InputText type="password" class="form-control" id="confirmPassword" @bind-Value="@registerRequest.PasswordConfirm"></InputText>
+                <ValidationMessage For="@(() => registerRequest.PasswordConfirm)"/>
                 <label for="confirmPassword">Confirm Password</label>
             </div>
             <button class="w-100 btn btn-lg btn-primary" type="submit">Register</button>
@@ -93,9 +93,9 @@ else {
     [Inject] IAuthenticationManager AuthenticationManager { get; init; } = default!;
     //[Inject] CartManager CartManager { get; init; } = default!;
 
-    readonly LoginRequest login = new();
-    readonly RegisterRequest register = new();
-    readonly TwoFactorRequest twoFactor = new();
+    readonly LoginRequest loginRequest = new();
+    readonly RegisterRequest registerRequest = new();
+    readonly TwoFactorRequest twoFactorRequest = new();
 
     bool registered = false;
     bool pendingTwoFactor = false;
@@ -104,38 +104,40 @@ else {
     async Task OnValidLoginSubmitAsync()
     {
         StartLoading( "Logging In..." );
+        
         Opt<LoginReply> loginResult = await TryLogin();
 
         if (!loginResult.IsOkay()) {
             PushError( loginResult, "Failed to login." );
+            StopLoading();
             return;
         }
 
         if (loginResult.Data.IsPending2FA) {
             pendingTwoFactor = true;
-            StopLoading();
             StateHasChanged();
+            StopLoading();
             return;
         }
 
         Opt<bool> updateResult = await TryUpdateLocalState( loginResult );
         
         if (!updateResult.IsOkay()) {
-            StopLoading();
             PushError( updateResult, "Failed to save login." );
+            StopLoading();
             return;
         }
 
         //await CartManager.GetCart( reply.Data.Token );
 
         StartLoading( "Login Success! Redirecting..." );
-        Navigate( "ReturnUrl" );
+        GoHome();
     }
     async Task OnValidTwoFactorSubmitAsync()
     {
         StartLoading( "Verifying Two Factor..." );
         
-        twoFactor.Email = login.EmailOrUsername;
+        twoFactorRequest.Email = loginRequest.EmailOrUsername;
 
         Opt<TwoFactorReply> result = await TryTwoFactorLogin();
 
@@ -155,35 +157,44 @@ else {
         
         //await CartManager.GetCart( reply.Data.Token );
 
-        StartLoading( "Login Success! Redirecting..." );
-        Navigate( "ReturnUrl" );
+        StartLoading( "Two Factor Success! Redirecting..." );
+        GoHome();
     }
     async Task OnValidRegisterSubmitAsync()
     {
         StartLoading( "Registering..." );
+        
         Opt<RegisterReply> reply = await TryRegister();
 
         if (!reply.IsOkay()) {
+            PushError( reply, "Failed to register account." );
             StopLoading();
-            PushError( reply.Message() );
             return;
         }
 
         registered = true;
         registerReply = reply.Data;
-        StopLoading();
         StateHasChanged();
+        StopLoading();
     }
     
-    async Task<Opt<LoginReply>> TryLogin() => await Http.TryGetRequest<LoginReply>( Urls.ApiLogin );
-    async Task<Opt<bool>> TryUpdateLocalState( Opt<LoginReply> loginResult ) => await AuthenticationManager.SetAuthenticationStateAsync( loginResult.Data.AccessToken, loginResult.Data.RefreshToken );
-    async Task<Opt<TwoFactorReply>> TryTwoFactorLogin() => await Http.TryPostRequest<TwoFactorReply>( Urls.ApiTwoFactor, twoFactor );
-    async Task<Opt<bool>> TryUpdateLocalState( Opt<TwoFactorReply> loginResult ) => await AuthenticationManager.SetAuthenticationStateAsync( loginResult.Data.AccessToken, loginResult.Data.RefreshToken );
-    async Task<Opt<RegisterReply>> TryRegister() => await Http.TryPostRequest<RegisterReply>( Urls.ApiRegister, register );
+    async Task<Opt<LoginReply>> TryLogin() => 
+        await Http.TryGetRequest<LoginReply>( Urls.ApiLogin );
+    async Task<Opt<bool>> TryUpdateLocalState( Opt<LoginReply> loginResult ) => 
+        await AuthenticationManager.SetAuthenticationStateAsync( loginResult.Data.AccessToken, loginResult.Data.RefreshToken );
+    async Task<Opt<TwoFactorReply>> TryTwoFactorLogin() => 
+        await Http.TryPostRequest<TwoFactorReply>( Urls.ApiTwoFactor, twoFactorRequest );
+    async Task<Opt<bool>> TryUpdateLocalState( Opt<TwoFactorReply> loginResult ) => 
+        await AuthenticationManager.SetAuthenticationStateAsync( loginResult.Data.AccessToken, loginResult.Data.RefreshToken );
+    async Task<Opt<RegisterReply>> TryRegister() => 
+        await Http.TryPostRequest<RegisterReply>( Urls.ApiRegister, registerRequest );
     
-    void GoToRecovery() => Navigate( Urls.PageLoginWithRecovery );
-    void GoToResend() => Navigate( Urls.PageResendConfirm );
-    void GoToForgot() => Navigate( Urls.PageLoginWithRecovery );
+    void GoToRecovery() => 
+        Navigate( Urls.PageLoginWithRecovery );
+    void GoToResend() => 
+        Navigate( Urls.PageResendConfirm );
+    void GoToForgot() => 
+        Navigate( Urls.PageForgotPassword );
 
     sealed class LoginRequest
     {

@@ -18,6 +18,7 @@ internal static class Urls
     
     internal const string ParamReturnUrl = "ReturnUrl";
 
+    internal const string PageHome = "";
     internal const string PageConfirmEmail = "";
     internal const string PageResendConfirm = "";
     internal const string PageLoginOrRegister = "";

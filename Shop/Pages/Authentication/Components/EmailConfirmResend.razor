@@ -3,8 +3,6 @@
 @using Shop.Utilities
 @inherits Shop.Shared.PageComponent
 
-<PageTitle>Resend Email Confirmation</PageTitle>
-
 @if (isSuccess) {
     <h1>Email confirm link sent!</h1>
     <h2>Please check your email.</h2>
@@ -32,6 +30,7 @@ else {
 @code {
     [SupplyParameterFromForm]
     ResendConfirmationRequest Request { get; } = new();
+    
     bool isSuccess = false;
 
     async Task SendConfirmationEmail()
@@ -45,13 +44,13 @@ else {
             StopLoading();
             return;
         }
-        
-        StateHasChanged();
+
         PushSuccess( "Confirmation email link has been sent. Check your email." );
+        StateHasChanged();
         StopLoading();
     }
     async Task<Opt<bool>> TrySendEmail() => 
-        await Http.TryPostRequest<bool>( Urls.ApiConfirmEmail, Request );
+        await Http.TryPostRequest<bool>( Urls.ApiResendConfirm, Request );
         
     sealed class ResendConfirmationRequest
     {

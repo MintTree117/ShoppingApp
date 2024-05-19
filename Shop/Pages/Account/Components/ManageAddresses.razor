@@ -109,31 +109,77 @@ else {
     protected override async Task OnParametersSetAsync()
     {
         await base.OnParametersSetAsync();
-        await GetPagedAddresses( 0 );
+        await LoadFreshAddresses();
     }
+    
     async Task GetPagedAddresses( int page )
     {
-        StartLoading( "Fetching account details..." );
+        StartLoading( "Loading Addresses..." );
 
-        Opt<AddressSearchResponse> result = await Http.TryGetRequest<AddressSearchResponse>( Urls.ApiGetAccountDetails );
+        Opt<AddressSearchResponse> result = await TryGetPagedAddresses();
 
         if (!result.IsOkay()) {
+            PushError( result, "Failed to get account details." );
             StopLoading();
-            PushError( $"Failed to get account details. {result.Message()}" );
+            return;
+        }
+        
+        UpdateLocalState( result, page );
+        StopLoading();
+    }
+    async Task OnClickSave()
+    {
+        StartLoading( "Saving Address..." );
+
+        Opt<bool> reply = await TrySaveAddress();
+
+        if (!reply.IsOkay()) {
+            PushError( reply, "Failed to save address." );
+            StopLoading();
             return;
         }
 
+        PushSuccess( "Address Saved." );
+        
+        if (isNew)
+            await LoadFreshAddresses();
+        else
+            StopLoading();
+    }
+    async Task OnClickDelete( AddressModel address )
+    {
+        StartLoading( "Deleting Address..." );
+        
+        Opt<bool> reply = await TryDeleteAddress( address );
+
+        if (!reply.IsOkay()) {
+            PushError( reply, "Failed to delete address." );
+            StopLoading();
+            return;
+        }
+
+        PushSuccess( "Address Deleted." );
+        await LoadFreshAddresses();
+    }
+    
+    async Task<Opt<AddressSearchResponse>> TryGetPagedAddresses() =>
+        await Http.TryGetRequest<AddressSearchResponse>( Urls.ApiGetAccountDetails );
+    async Task<Opt<bool>> TrySaveAddress() =>
+        await Http.TryPostRequest<bool>( Urls.ApiUpdateAddress, editModel );
+    async Task<Opt<bool>> TryDeleteAddress( AddressModel address ) =>
+        await Http.TryPostRequest<bool>( Urls.ApiDeleteAddress, new AddressDeleteRequest( address.Id ) );
+    
+    void UpdateLocalState( Opt<AddressSearchResponse> result, int page )
+    {
         pagedAddresses = result.Data.Addresses;
         totalCount = result.Data.TotalCount;
         pagination.Set( page, rowsPerPage, result.Data.TotalCount );
-        
+
         isEditing = false;
         isNew = false;
         isViewing = true;
-        StopLoading();
         StateHasChanged();
     }
-    
     void OnClickNew()
     {
         editModel = new AddressModel();
@@ -155,6 +201,9 @@ else {
         isViewing = true;
         StateHasChanged();
     }
+
+    async Task LoadFreshAddresses() =>
+        await GetPagedAddresses( 0 );
     async Task UpdateRowsPerPage( int count )
     {
         totalCount = count;
@@ -163,38 +212,6 @@ else {
     async Task OnPaginationChange( int page )
     {
         await GetPagedAddresses( page );
-    }
-    async Task OnClickSave()
-    {
-        StartLoading( "Saving Address..." );
-        Opt<bool> saveResult = await Http.TryPostRequest<bool>( Urls.ApiUpdateAddress, editModel );
-
-        if (!saveResult.IsOkay()) {
-            PushError( $"Failed to save address. {saveResult.Message()}" );
-            StopLoading();
-            return;
-        }
-
-        PushSuccess( "Address Saved." );
-
-        if (isNew)
-            await GetPagedAddresses( 0 );
-        else
-            StopLoading();
-    }
-    async Task OnClickDelete( AddressModel address )
-    {
-        StartLoading( "Deleting Address..." );
-        Opt<bool> deleteResult = await Http.TryPostRequest<bool>( Urls.ApiDeleteAddress, new AddressDeleteRequest( address.Id ) );
-
-        if (!deleteResult.IsOkay()) {
-            PushError( $"Failed to delete address. {deleteResult.Message()}" );
-            StopLoading();
-            return;
-        }
-
-        PushSuccess( "Address Deleted." );
-        await GetPagedAddresses( 0 );
     }
     
     readonly record struct AddressSearchResponse(

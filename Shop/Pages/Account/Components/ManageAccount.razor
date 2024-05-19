@@ -43,33 +43,43 @@
     {
         StartLoading( "Fetching account details..." );
 
-        Opt<AccountModel> result = await Http.TryGetRequest<AccountModel>( Urls.ApiGetAccountDetails );
+        Opt<AccountModel> reply = await TryGetAccount();
 
-        if (!result.IsOkay()) {
+        if (!reply.IsOkay()) {
+            PushError( reply, "Failed to get account details from the server." );
             StopLoading();
-            PushError( $"Failed to get account details. {result.Message()}" );
             return;
         }
 
+        UpdateLocalState( reply );
         StopLoading();
-        StateHasChanged();
     }
     async Task UpdateAccount()
     {
         StartLoading( "Updating Account..." );
 
-        Opt<bool> result = await Http.TryPostRequest<bool>( Urls.ApiGetAccountDetails, accountModel );
+        Opt<bool> reply = await TryUpdateAccount();
         
-        if (!result.IsOkay()) {
+        if (!reply.IsOkay()) {
+            PushError( reply, "Failed to update account details." );
             StopLoading();
-            PushError( $"Failed to update account details. {result.Message()}" );
             return;
         }
 
         PushSuccess( "Account details successfully updated." );
         StopLoading();
     }
-
+    
+    async Task<Opt<AccountModel>> TryGetAccount() =>
+        await Http.TryGetRequest<AccountModel>( Urls.ApiGetAccountDetails );
+    async Task<Opt<bool>> TryUpdateAccount() =>
+        await Http.TryPostRequest<bool>( Urls.ApiUpdateAccountDetails, accountModel );
+    void UpdateLocalState( Opt<AccountModel> reply )
+    {
+        accountModel = reply.Data;
+        StateHasChanged();
+    }
+    
     sealed class AccountModel
     {
         [Required( ErrorMessage = "Email is required." ), EmailAddress( ErrorMessage = "Invalid email address." )]

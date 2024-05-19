@@ -7,24 +7,26 @@
 
 <h3>Delete Personal Data</h3>
 
-@if (IsWarning) {
+<hr/>
+
+@if (isWarning) {
     <div class="alert alert-warning" role="alert">
         <p>
             <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
-            <button class="w-100 btn btn-lg btn-danger" @onclick="@(async () => await TryDeleteAccount())">Delete data and close my account</button>
+            <button class="w-100 btn btn-lg btn-danger" @onclick="@(async () => await OnConfirmSubmit())">Delete data and close my account</button>
             <button class="w-100 btn btn-lg btn-primary" @onclick="Cancel">Cancel</button>
         </p>
     </div>
 }
 else {
     <div>
-        <EditForm Model="@Request" FormName="delete-user" OnValidSubmit="OnValidSubmitAsync" method="post">
+        <EditForm Model="@request" FormName="delete-user" OnValidSubmit="OnValidSubmitAsync" method="post">
             <DataAnnotationsValidator/>
             <ValidationSummary class="text-danger" role="alert"/>
             <div class="form-floating mb-3">
-                <InputText type="password" bind-Value="@Request.Password" id="password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Please enter your password."/>
+                <InputText type="password" bind-Value="@request.Password" id="password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Please enter your password."/>
                 <label for="password" class="form-label">Password</label>
-                <ValidationMessage For="@(() => Request.Password)" class="text-danger"/>
+                <ValidationMessage For="@(() => request.Password)" class="text-danger"/>
             </div>
             <button class="w-100 btn btn-lg btn-danger" type="submit">Delete Data</button>
         </EditForm>
@@ -33,41 +35,43 @@ else {
 
 @code {
     [Inject] IAuthenticationManager Authenticator { get; set; } = default!;
-    DeleteAccountRequest Request { get; set; } = new();
-    bool IsWarning = false;
+    DeleteAccountRequest request = new();
+    bool isWarning = false;
     
     async Task OnValidSubmitAsync()
     {
-        await Task.Delay( 1000 );
-        IsWarning = true;
+        await Task.Delay( 1000 ); // protect user from double click second confirm
+        isWarning = true;
         StateHasChanged();
     }
 
-    async Task TryDeleteAccount()
+    async Task OnConfirmSubmit()
     {
         StartLoading( "Deleting Account..." );
-        Opt<bool> reply = await Http.TryPutRequest<bool>( "", Request );
+        
+        Opt<bool> reply = await TryDeleteAccount();
 
         if (!reply.IsOkay()) {
-            PushError( $"Failed to delete your account. {reply.Message()}" );
-            IsWarning = false;
+            PushError( reply, "Failed to delete your account." );
+            Cancel();
             StopLoading();
-            StateHasChanged();
+            return;
         }
 
         await Authenticator.ClearAuthenticationStateAsync();
         Navigate( Urls.PageAccountDeleted );
     }
-    
+    async Task<Opt<bool>> TryDeleteAccount() =>
+        await Http.TryPostRequest<bool>( Urls.ApiDeleteAccount, request );
     void Cancel()
     {
-        IsWarning = false;
+        isWarning = false;
         StateHasChanged();
     }
 
     sealed class DeleteAccountRequest
     {
-        [Required, DataType( DataType.Password )]
+        [Required, StringLength( 100, ErrorMessage = "The password must be at least 8 and at max 40 characters long.", MinimumLength = 8 ), DataType( DataType.Password ), Display( Name = "New password" )]
         public string Password { get; set; } = string.Empty;
     }
 }

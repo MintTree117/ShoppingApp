@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components;
 using Shop.Infrastructure.Common;
 using Shop.Infrastructure.Common.Optionals;
 using Shop.Infrastructure.Http;
+using Shop.Utilities;
 
 namespace Shop.Shared;
 
@@ -9,7 +10,9 @@ public abstract class PageComponent : ComponentBase
 {
     [Inject] protected IHttpService Http { get; init; } = default!;
     [Parameter] public PageBase Page { get; set; } = default!;
-    
+
+    protected void GoHome() => 
+        Redirect( Urls.PageHome );
     protected void StartLoading( string? loadingMessage = null )
     {
         Page.ToggleLoading( true, loadingMessage );
