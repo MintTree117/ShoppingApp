@@ -1,10 +1,10 @@
 @page "/account/delete"
 @using System.ComponentModel.DataAnnotations
+@using RetailDomain.Optionals
 @using ShopApplication.Common
-@using ShopApplication.Common.Optionals
 @using ShopApplication.Features.Identity
 @using ShopWeb.Utilities
-@inherits PageBase
+@inherits PageComponent
 
 <PageTitle>Delete Personal Data</PageTitle>
 
@@ -35,7 +35,7 @@ else {
 }
 
 @code {
-    [Inject] IAuthenticationManager Auth { get; set; } = default!;
+    [Inject] IAuthenticationManager Authenticator { get; set; } = default!;
     DeleteAccountRequest Request { get; set; } = new();
     bool IsWarning = false;
 
@@ -48,23 +48,24 @@ else {
 
     async Task TryDeleteAccount()
     {
-        StartLoading( "Deleting Account..." );
-        Val<bool> reply = await Http.TryPutValRequest<bool>( "", Request );
+        await CallStartLoading( "Deleting Account..." );
+        Opt<bool> reply = await Http.TryPutRequest<bool>( "", Request );
 
-        if (!reply.IsSuccess()) {
-            PushAlert( AlertType.Danger, $"Failed to delete your account. {reply.PrintDetails()}" );
+        if (!reply.IsOkay()) {
+            await CallPushAlert( AlertType.Danger, $"Failed to delete your account. {reply.Message()}" );
             IsWarning = false;
-            StopLoading();
+            await CallStopLoading();
             StateHasChanged();
         }
 
-        await Auth.ClearAuthenticationStateAsync();
-        Navigation.NavigateTo( Urls.PageAccountDeleted );
+        await Authenticator.ClearAuthenticationStateAsync();
+        await CallNavigateTo( Urls.PageAccountDeleted, false );
     }
     
     void Cancel()
     {
         IsWarning = false;
+        StateHasChanged();
     }
 
     sealed class DeleteAccountRequest

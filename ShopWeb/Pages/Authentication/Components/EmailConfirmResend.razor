@@ -1,6 +1,6 @@
-@using ShopApplication.Common.Optionals
 @using ShopApplication.Common
 @using ShopWeb.Utilities
+@using RetailDomain.Optionals
 @inherits PageComponent
 
 <PageTitle>Resend Email Confirmation</PageTitle>
@@ -38,13 +38,13 @@ else {
     async Task OnValidSubmitAsync()
     {
         await CallStartLoading( "Sending reset link..." );
-        
-        Val<bool> result = await Http.TryPostValRequest<bool>( Urls.ApiConfirmEmail, Request );
 
-        isSuccess = result.IsSuccess();
+        Opt<bool> result = await Http.TryPostRequest<bool>( Urls.ApiConfirmEmail, Request );
+
+        isSuccess = result.IsOkay();
 
         if (!isSuccess) {
-            await CallPushAlert( AlertType.Danger, $"Failed to send reset link: {result.PrintDetails()}" );
+            await CallPushAlert( AlertType.Danger, $"Failed to send reset link: {result.Message()}" );
             await CallStopLoading();
             return;
         }

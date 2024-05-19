@@ -1,11 +1,10 @@
-using ShopApplication.Common.Optionals;
+using RetailDomain.Optionals;
 
 namespace ShopApplication.Infrastructure.Storage;
 
 public interface IStorageService
 {
-    public Task<Obj<T>> GetObj<T>( string key ) where T : class;
-    public Task<Val<T>> GetVal<T>( string key ) where T : struct;
-    public Task<Val<bool>> Set<T>( string key, T value );
-    public Task<Val<bool>> Remove( string key );
+    public Task<Opt<T>> Get<T>( string key );
+    public Task<Opt<bool>> Set<T>( string key, T value );
+    public Task<Opt<bool>> Remove( string key );
 }

@@ -8,29 +8,23 @@ namespace ShopWeb.Pages;
 public abstract class PageBase : ComponentBase
 {
     protected PageBase() => redirectTime = GetRedirectTime( Configuration );
-    
-    IConfiguration Configuration { get; init; } = default!;
-    protected IHttpService Http { get; init; } = default!;
-    protected NavigationManager Navigation { get; init; } = default!;
-    
+
+    [Inject] protected IConfiguration Configuration { get; init; } = default!;
+    [Inject] protected IHttpService Http { get; init; } = default!;
+    [Inject] protected NavigationManager Navigation { get; init; } = default!;
     [Inject] MainLayout layout { get; init; } = default!;
 
     readonly string ReturnUrl = string.Empty;
     readonly int redirectTime;
-    int countdown = 0;
+    int redirectCountdown = 0;
     System.Timers.Timer? pageRedirectTimer;
-
-    protected string BaseUrl = "";
+    
     protected string CurrentView = string.Empty;
     
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        StartLoading( GetInitialLoadingMessage() );
-    }
-    protected virtual string GetInitialLoadingMessage()
-    {
-        return "Loading Page...";
+        StartLoading( "Loading Page..." );
     }
 
     protected void NavigateTo( PageComponent.NavigateToArgs args )
@@ -43,7 +37,7 @@ public abstract class PageBase : ComponentBase
     protected void StartRedirect( string? message )
     {
         layout.StartRedirecting( redirectTime, message );
-        countdown = redirectTime;
+        redirectCountdown = redirectTime;
         pageRedirectTimer = new System.Timers.Timer( redirectTime );
         pageRedirectTimer.Elapsed += CountdownTimerElapsed;
         pageRedirectTimer.AutoReset = true;
@@ -68,8 +62,8 @@ public abstract class PageBase : ComponentBase
     
     void CountdownTimerElapsed( object? sender, System.Timers.ElapsedEventArgs e )
     {
-        if (countdown > 0) {
-            countdown--;
+        if (redirectCountdown > 0) {
+            redirectCountdown--;
             layout.TickRedirect();
             return;
         }

@@ -10,6 +10,7 @@
       <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.5" />
       <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.5" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.1" />
       <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
       <PackageReference Include="Microsoft.JSInterop" Version="8.0.5" />
       <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.5.2" />
@@ -23,6 +24,7 @@
       <Reference Include="Microsoft.AspNetCore.WebUtilities">
         <HintPath>..\..\..\..\.nuget\packages\microsoft.aspnetcore.webutilities\8.0.5\lib\net8.0\Microsoft.AspNetCore.WebUtilities.dll</HintPath>
       </Reference>
+      <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     </ItemGroup>
 
 </Project>

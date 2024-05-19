@@ -1,13 +1,13 @@
 @using ShopApplication.Common
-@using ShopApplication.Common.Optionals
 @using ShopWeb.Utilities
+@using RetailDomain.Optionals
 @inherits PageComponent
 
 <PageTitle>Confirm Email</PageTitle>
 
 @if (confirmFailed) {
     <h1>Email Confirmation Failed!</h1>
-    <h2>Error Details: @apiReply.PrintDetails()</h2>
+    <h2>Error Details: @apiReply.Message()</h2>
     <p>Please click <button class="btn btn-link" onclick="@(async () => await GoToResend())">here</button> to try sending another confirmation link, or contact support.</p>
 }
 else if (emailConfirmed) {
@@ -22,7 +22,7 @@ else if (emailConfirmed) {
     
     bool emailConfirmed = false;
     bool confirmFailed = false;
-    Val<bool> apiReply;
+    Opt<bool> apiReply;
     
     protected override async Task OnInitializedAsync()
     {
@@ -34,7 +34,7 @@ else if (emailConfirmed) {
         }
         
         apiReply = await TryConfirmEmail( Urls.ApiConfirmEmail, userId, code );
-        emailConfirmed = apiReply.IsSuccess();
+        emailConfirmed = apiReply.IsOkay();
         confirmFailed = !emailConfirmed;
         
         StateHasChanged();
@@ -43,7 +43,7 @@ else if (emailConfirmed) {
 
     async Task GoToResend() => await CallNavigateTo( Urls.PageResendConfirm, false );
     async Task GoToLogin() => await CallNavigateTo( Urls.PageLoginOrRegister, false );
-    async Task<Val<bool>> TryConfirmEmail( string url, string userId, string code ) => await Http.TryPutValRequest<bool>( url, new ConfirmEmailRequest( userId, code ) );
+    async Task<Opt<bool>> TryConfirmEmail( string url, string userId, string code ) => await Http.TryPutRequest<bool>( url, new ConfirmEmailRequest( userId, code ) );
     
     bool ValidateLink( out string userId, out string code, out string errorMessage )
     {

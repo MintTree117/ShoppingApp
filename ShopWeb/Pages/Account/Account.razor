@@ -1,0 +1,69 @@
+@page "/account"
+@using ShopWeb.Pages.Account.Components
+@using ShopWeb.Utilities
+@using ShopApplication.Common
+@using System.ComponentModel.DataAnnotations
+@using RetailDomain.Optionals
+@inherits PageBase
+
+@switch ( CurrentView ) {
+    case nameof( AccountDeleted ):
+        <AccountDeleted
+            StartLoadingCallback="@StartLoading"
+            StopLoadingCallback="@StopLoading"
+            PushAlertCallback="@PushAlert"
+            NavigateToCallback="@NavigateTo"/>
+        break;
+    case nameof( DeleteAccount ):
+        <DeleteAccount
+            StartLoadingCallback="@StartLoading"
+            StopLoadingCallback="@StopLoading"
+            PushAlertCallback="@PushAlert"
+            NavigateToCallback="@NavigateTo"/>
+        break;
+    case nameof( ManageAccount ):
+        <ManageAccount
+            StartLoadingCallback="@StartLoading"
+            StopLoadingCallback="@StopLoading"
+            PushAlertCallback="@PushAlert"
+            NavigateToCallback="@NavigateTo"/>
+        break;
+    case nameof( ManageAddresses ):
+        <ManageAddresses
+            StartLoadingCallback="@StartLoading"
+            StopLoadingCallback="@StopLoading"
+            PushAlertCallback="@PushAlert"
+            NavigateToCallback="@NavigateTo"/>
+        break;
+}
+
+@code {
+    async Task FetchAccountDetails()
+    {
+        StartLoading( "Fetching account details..." );
+
+        Opt<Request> result = await Http.TryGetRequest<Request>( Urls.ApiGetAccountDetails );
+
+        if (!result.IsOkay()) {
+            StopLoading();
+            PushAlert( AlertType.Danger, $"Failed to get account details. {result.Message()}" );
+            CurrentView = nameof( AccountDeleted );
+            return;
+        }
+
+        StopLoading();
+        StateHasChanged();
+    }
+
+    public sealed class Request
+    {
+        [Required( ErrorMessage = "Email is required." ), EmailAddress( ErrorMessage = "Invalid email address." )]
+        public string Email { get; set; } = string.Empty;
+
+        [Required( ErrorMessage = "Username is required." )]
+        public string Username { get; set; } = string.Empty;
+
+        [Phone( ErrorMessage = "Invalid phone number." )]
+        public string? Phone { get; set; } = string.Empty;
+    }
+}

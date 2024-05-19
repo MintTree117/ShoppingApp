@@ -1,7 +1,7 @@
 @using ShopApplication.Features.Identity
 @using ShopApplication.Common
-@using ShopApplication.Common.Optionals
 @using System.ComponentModel.DataAnnotations
+@using RetailDomain.Optionals
 @using ShopWeb.Utilities
 @inherits PageComponent
 
@@ -104,25 +104,25 @@ else {
     async Task OnValidLoginSubmitAsync()
     {
         await CallStartLoading( "Logging In..." );
-        Obj<LoginReply> loginResult = await Http.TryGetObjRequest<LoginReply>( "" );
+        Opt<LoginReply> loginResult = await Http.TryGetRequest<LoginReply>( "" );
 
-        if (!loginResult.IsSuccess()) {
-            await CallPushAlert( AlertType.Danger, loginResult.PrintDetails() );
+        if (!loginResult.IsOkay()) {
+            await CallPushAlert( AlertType.Danger, loginResult.Message() );
             return;
         }
 
-        if (loginResult.Object.IsPending2FA) {
+        if (loginResult.Data.IsPending2FA) {
             pendingTwoFactor = true;
             await CallStopLoading();
             StateHasChanged();
             return;
         }
+
+        Opt<bool> updateResult = await AuthenticationManager.SetAuthenticationStateAsync( loginResult.Data.AccessToken, loginResult.Data.RefreshToken );
         
-        Val<bool> updateResult = await AuthenticationManager.SetAuthenticationStateAsync( loginResult.Object.AccessToken, loginResult.Object.RefreshToken );
-        
-        if (!updateResult.IsSuccess()) {
+        if (!updateResult.IsOkay()) {
             await CallStopLoading();
-            await CallPushAlert( AlertType.Danger, updateResult.PrintDetails() );
+            await CallPushAlert( AlertType.Danger, updateResult.Message() );
             return;
         }
 
@@ -136,19 +136,19 @@ else {
         await CallStartLoading( "Verifying Two Factor..." );
         
         twoFactor.Email = login.EmailOrUsername;
-        
-        Val<TwoFactorReply> result = await Http.TryPostValRequest<TwoFactorReply>( Urls.ApiTwoFactor, twoFactor );
 
-        if (!result.IsSuccess()) {
-            await CallPushAlert( AlertType.Danger, $"Two factor authorization failed!: {result.PrintDetails()}" );
+        Opt<TwoFactorReply> result = await Http.TryPostRequest<TwoFactorReply>( Urls.ApiTwoFactor, twoFactor );
+
+        if (!result.IsOkay()) {
+            await CallPushAlert( AlertType.Danger, $"Two factor authorization failed!: {result.Message()}" );
             await CallStopLoading();
             return;
         }
 
-        Val<bool> updateResult = await AuthenticationManager.SetAuthenticationStateAsync( result.Value.AccessToken, result.Value.RefreshToken );
+        Opt<bool> updateResult = await AuthenticationManager.SetAuthenticationStateAsync( result.Data.AccessToken, result.Data.RefreshToken );
 
-        if (!updateResult.IsSuccess()) {
-            await CallPushAlert( AlertType.Danger, $"Two factor authorization succeeded on the server, but failed to save locally!: {result.PrintDetails()}" );
+        if (!updateResult.IsOkay()) {
+            await CallPushAlert( AlertType.Danger, $"Two factor authorization succeeded on the server, but failed to save locally!: {result.Message()}" );
             await CallStopLoading();
             return;
         }
@@ -161,16 +161,16 @@ else {
     async Task OnValidRegisterSubmitAsync()
     {
         await CallStartLoading( "Registering..." );
-        Obj<RegisterReply> reply = await Http.TryGetObjRequest<RegisterReply>( "" );
+        Opt<RegisterReply> reply = await Http.TryGetRequest<RegisterReply>( "" );
 
-        if (!reply.IsSuccess()) {
+        if (!reply.IsOkay()) {
             await CallStopLoading();
-            await CallPushAlert( AlertType.Danger, reply.PrintDetails() );
+            await CallPushAlert( AlertType.Danger, reply.Message() );
             return;
         }
 
         registered = true;
-        registerReply = reply.Object;
+        registerReply = reply.Data;
         await CallStopLoading();
         StateHasChanged();
     }
@@ -187,7 +187,6 @@ else {
         [Required( ErrorMessage = "Password is required." )]
         public string Password { get; set; } = string.Empty;
     }
-
     sealed class TwoFactorRequest
     {
         [Required] public string Email { get; set; } = string.Empty;
@@ -195,7 +194,6 @@ else {
         [Required, DataType( DataType.Text ), Display( Name = "Authenticator code" ), StringLength( 40, ErrorMessage = "The two factor code must be at least 6 and at max 40 characters long.", MinimumLength = 6 )]
         public string Code { get; set; } = string.Empty;
     }
-
     sealed class RegisterRequest
     {
         [Required( ErrorMessage = "Email is required." ), EmailAddress( ErrorMessage = "Invalid email address." )] 
@@ -218,11 +216,9 @@ else {
         string? AccessToken,
         string? RefreshToken,
         bool IsPending2FA );
-
     readonly record struct TwoFactorReply(
         string AccessToken,
         string RefreshToken );
-
     sealed record RegisterReply(
         string Id,
         string Email,

@@ -6,6 +6,9 @@ internal static class Urls
     internal const string ApiResendConfirm = "";
     internal const string ApiTwoFactor = "";
     internal const string ApiResetPassword = "";
+    internal const string ApiGetAccountDetails = "";
+    internal const string ApiUpdateAccountDetails = "";
+    internal const string ApiUpdatePassword = "";
     
     internal const string ParamReturnUrl = "ReturnUrl";
 
