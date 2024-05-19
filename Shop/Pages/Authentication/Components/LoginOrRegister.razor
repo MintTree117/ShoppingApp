@@ -34,7 +34,7 @@ else if (pendingTwoFactor) {
     </div>
     <p>
         Don't have access to your authenticator device? You can
-        <button class="btn btn-link" onclick="@(async () => await GoToRecovery())">log in with a recovery code</button>.
+        <button class="btn btn-link" @onclick="GoToRecovery">log in with a recovery code</button>.
     </p>
 }
 else {
@@ -55,8 +55,8 @@ else {
             <button class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
         </EditForm>
         
-        <button class="btn btn-link" onclick="@(async () => await GoToResend())">Resend Confirmation Email</button>
-        <button class="btn btn-link" onclick="@(async () => await GoToForgot())">Forgot Password</button>
+        <button class="btn btn-link" @onclick="GoToResend">Resend Confirmation Email</button>
+        <button class="btn btn-link" @onclick="GoToForgot">Forgot Password</button>
 
         <span class="my-5 d-block text-muted">- Or -</span>
 
@@ -104,10 +104,10 @@ else {
     async Task OnValidLoginSubmitAsync()
     {
         StartLoading( "Logging In..." );
-        Opt<LoginReply> loginResult = await Http.TryGetRequest<LoginReply>( "" );
+        Opt<LoginReply> loginResult = await TryLogin();
 
         if (!loginResult.IsOkay()) {
-            await CallPushAlert( AlertType.Danger, loginResult.Message() );
+            PushError( loginResult, "Failed to login." );
             return;
         }
 
@@ -118,18 +118,18 @@ else {
             return;
         }
 
-        Opt<bool> updateResult = await AuthenticationManager.SetAuthenticationStateAsync( loginResult.Data.AccessToken, loginResult.Data.RefreshToken );
+        Opt<bool> updateResult = await TryUpdateLocalState( loginResult );
         
         if (!updateResult.IsOkay()) {
             StopLoading();
-            await CallPushAlert( AlertType.Danger, updateResult.Message() );
+            PushError( updateResult, "Failed to save login." );
             return;
         }
 
         //await CartManager.GetCart( reply.Data.Token );
 
         StartLoading( "Login Success! Redirecting..." );
-        await CallNavigateTo( "ReturnUrl", true );
+        Navigate( "ReturnUrl" );
     }
     async Task OnValidTwoFactorSubmitAsync()
     {
@@ -137,18 +137,18 @@ else {
         
         twoFactor.Email = login.EmailOrUsername;
 
-        Opt<TwoFactorReply> result = await Http.TryPostRequest<TwoFactorReply>( Urls.ApiTwoFactor, twoFactor );
+        Opt<TwoFactorReply> result = await TryTwoFactorLogin();
 
         if (!result.IsOkay()) {
-            await CallPushAlert( AlertType.Danger, $"Two factor authorization failed!: {result.Message()}" );
+            PushError( result, "Two factor authorization failed!" );
             StopLoading();
             return;
         }
 
-        Opt<bool> updateResult = await AuthenticationManager.SetAuthenticationStateAsync( result.Data.AccessToken, result.Data.RefreshToken );
+        Opt<bool> updateResult = await TryUpdateLocalState( result );
 
         if (!updateResult.IsOkay()) {
-            await CallPushAlert( AlertType.Danger, $"Two factor authorization succeeded on the server, but failed to save locally!: {result.Message()}" );
+            PushError( result, "Two factor authorization succeeded on the server, but failed to save locally!" );
             StopLoading();
             return;
         }
@@ -156,16 +156,16 @@ else {
         //await CartManager.GetCart( reply.Data.Token );
 
         StartLoading( "Login Success! Redirecting..." );
-        await CallNavigateTo( "ReturnUrl", true );
+        Navigate( "ReturnUrl" );
     }
     async Task OnValidRegisterSubmitAsync()
     {
         StartLoading( "Registering..." );
-        Opt<RegisterReply> reply = await Http.TryGetRequest<RegisterReply>( "" );
+        Opt<RegisterReply> reply = await TryRegister();
 
         if (!reply.IsOkay()) {
             StopLoading();
-            await CallPushAlert( AlertType.Danger, reply.Message() );
+            PushError( reply.Message() );
             return;
         }
 
@@ -174,10 +174,16 @@ else {
         StopLoading();
         StateHasChanged();
     }
-
-    async Task GoToRecovery() => await CallNavigateTo( Urls.PageLoginWithRecovery, false );
-    async Task GoToResend() => await CallNavigateTo( Urls.PageResendConfirm, false );
-    async Task GoToForgot() => await CallNavigateTo( Urls.PageLoginWithRecovery, false );
+    
+    async Task<Opt<LoginReply>> TryLogin() => await Http.TryGetRequest<LoginReply>( Urls.ApiLogin );
+    async Task<Opt<bool>> TryUpdateLocalState( Opt<LoginReply> loginResult ) => await AuthenticationManager.SetAuthenticationStateAsync( loginResult.Data.AccessToken, loginResult.Data.RefreshToken );
+    async Task<Opt<TwoFactorReply>> TryTwoFactorLogin() => await Http.TryPostRequest<TwoFactorReply>( Urls.ApiTwoFactor, twoFactor );
+    async Task<Opt<bool>> TryUpdateLocalState( Opt<TwoFactorReply> loginResult ) => await AuthenticationManager.SetAuthenticationStateAsync( loginResult.Data.AccessToken, loginResult.Data.RefreshToken );
+    async Task<Opt<RegisterReply>> TryRegister() => await Http.TryPostRequest<RegisterReply>( Urls.ApiRegister, register );
+    
+    void GoToRecovery() => Navigate( Urls.PageLoginWithRecovery );
+    void GoToResend() => Navigate( Urls.PageResendConfirm );
+    void GoToForgot() => Navigate( Urls.PageLoginWithRecovery );
 
     sealed class LoginRequest
     {

@@ -2,9 +2,12 @@ namespace Shop.Utilities;
 
 internal static class Urls
 {
+    internal const string ApiLogin = "";
+    internal const string ApiTwoFactor = "";
+    internal const string ApiRegister = "";
     internal const string ApiConfirmEmail = "";
     internal const string ApiResendConfirm = "";
-    internal const string ApiTwoFactor = "";
+    internal const string ApiForgotPassword = "";
     internal const string ApiResetPassword = "";
     internal const string ApiGetAccountDetails = "";
     internal const string ApiUpdateAccountDetails = "";

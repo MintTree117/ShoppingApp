@@ -8,11 +8,11 @@
 @if (confirmFailed) {
     <h1>Email Confirmation Failed!</h1>
     <h2>Error Details: @apiReply.Message()</h2>
-    <p>Please click <button class="btn btn-link" onclick="@(async () => await GoToResend())">here</button> to try sending another confirmation link, or contact support.</p>
+    <p>Please click <button class="btn btn-link" @onclick="GoToResend">here</button> to try sending another confirmation link, or contact support.</p>
 }
 else if (emailConfirmed) {
     <h1>Email Confirmed!</h1>
-    <p>Your account has been verified and you can now <button class="btn btn-link" onclick="@(async () => await GoToLogin())">login normally.</button></p>
+    <p>Your account has been verified and you can now <button class="btn btn-link" @onclick="GoToLogin">login normally.</button></p>
 }
 
 @code 
@@ -24,12 +24,12 @@ else if (emailConfirmed) {
     bool confirmFailed = false;
     Opt<bool> apiReply;
     
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
         StartLoading( "Confirming email..." );
 
-        if (!ValidateLink( out string userId, out string code, out string errorMessage )) {
-            await CallPushAlert( AlertType.Danger, errorMessage );
+        if (!TryValidateLink( out string userId, out string code, out string errorMessage )) {
+            PushError( errorMessage );
             return;
         }
         
@@ -40,24 +40,22 @@ else if (emailConfirmed) {
         StateHasChanged();
         StopLoading();
     }
-
-    async Task GoToResend() => await CallNavigateTo( Urls.PageResendConfirm, false );
-    async Task GoToLogin() => await CallNavigateTo( Urls.PageLoginOrRegister, false );
-    async Task<Opt<bool>> TryConfirmEmail( string url, string userId, string code ) => await Http.TryPutRequest<bool>( url, new ConfirmEmailRequest( userId, code ) );
     
-    bool ValidateLink( out string userId, out string code, out string errorMessage )
+    async Task<Opt<bool>> TryConfirmEmail( string url, string userId, string code ) =>
+        await Http.TryPutRequest<bool>( url, new ConfirmEmailRequest( userId, code ) );
+    bool TryValidateLink( out string userId, out string code, out string errorMessage )
     {
         userId = string.Empty;
         code = string.Empty;
         errorMessage = string.Empty;
-        
+
         if (string.IsNullOrEmpty( Email )) {
-            errorMessage = $"Failed to confirm email address. {nameof( Email )} is invalid.";
+            errorMessage = InvalidLinkMessage( nameof( Email ) );
             return false;
         }
 
         if (string.IsNullOrEmpty( Code )) {
-            errorMessage = $"Failed to confirm email address. {nameof( Code )} is invalid.";
+            errorMessage = InvalidLinkMessage( nameof( code ) );
             return false;
         }
 
@@ -65,7 +63,12 @@ else if (emailConfirmed) {
         code = Code;
 
         return true;
+
+        static string InvalidLinkMessage( string parameter ) =>
+            $"Failed to confirm email address. {parameter} is invalid.";
     }
+    void GoToResend() => Navigate( Urls.PageResendConfirm );
+    void GoToLogin() => Navigate( Urls.PageLoginOrRegister );
     
     readonly record struct ConfirmEmailRequest(
         string Email,

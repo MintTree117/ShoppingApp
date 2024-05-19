@@ -26,9 +26,7 @@
       <AdditionalFiles Include="Pages\Account\Components\AccountDeleted.razor" />
       <AdditionalFiles Include="Pages\Account\Components\ChangePassword.razor" />
       <AdditionalFiles Include="Pages\Account\Components\DeleteAccount.razor" />
-      <AdditionalFiles Include="Pages\Account\Components\EditAddress.razor" />
       <AdditionalFiles Include="Pages\Account\Components\ManageAccount.razor" />
-      <AdditionalFiles Include="Pages\Account\Components\ViewAddresses.razor" />
       <AdditionalFiles Include="Shared\AlertPanel.razor" />
       <AdditionalFiles Include="Shared\PageLoader.razor" />
     </ItemGroup>

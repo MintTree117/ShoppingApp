@@ -49,14 +49,14 @@ else {
         Opt<bool> reply = await Http.TryPutRequest<bool>( "", Request );
 
         if (!reply.IsOkay()) {
-            await CallPushAlert( AlertType.Danger, $"Failed to delete your account. {reply.Message()}" );
+            PushError( $"Failed to delete your account. {reply.Message()}" );
             IsWarning = false;
             StopLoading();
             StateHasChanged();
         }
 
         await Authenticator.ClearAuthenticationStateAsync();
-        await CallNavigateTo( Urls.PageAccountDeleted, false );
+        Navigate( Urls.PageAccountDeleted );
     }
     
     void Cancel()

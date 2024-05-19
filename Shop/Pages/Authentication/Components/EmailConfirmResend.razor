@@ -15,7 +15,7 @@ else {
     <hr/>
     <div class="row">
         <div class="col-md-4">
-            <EditForm Model="Request" FormName="resend-email-confirmation" OnValidSubmit="OnValidSubmitAsync" method="post">
+            <EditForm Model="Request" FormName="resend-email-confirmation" OnValidSubmit="SendConfirmationEmail" method="post">
                 <DataAnnotationsValidator/>
                 <ValidationSummary class="text-danger" role="alert"/>
                 <div class="form-floating mb-3">
@@ -32,32 +32,31 @@ else {
 @code {
     [SupplyParameterFromForm]
     ResendConfirmationRequest Request { get; } = new();
-    
     bool isSuccess = false;
 
-    async Task OnValidSubmitAsync()
+    async Task SendConfirmationEmail()
     {
         StartLoading( "Sending reset link..." );
 
-        Opt<bool> result = await Http.TryPostRequest<bool>( Urls.ApiConfirmEmail, Request );
+        Opt<bool> result = await TrySendEmail();
 
-        isSuccess = result.IsOkay();
-
-        if (!isSuccess) {
-            await CallPushAlert( AlertType.Danger, $"Failed to send reset link: {result.Message()}" );
+        if (!result.IsOkay()) {
+            PushError( result, "Failed to send reset link." );
             StopLoading();
             return;
         }
         
         StateHasChanged();
-        await CallPushAlert( AlertType.Success, "Confirmation email link has been sent. Check your email." );
+        PushSuccess( "Confirmation email link has been sent. Check your email." );
         StopLoading();
     }
+    async Task<Opt<bool>> TrySendEmail() => 
+        await Http.TryPostRequest<bool>( Urls.ApiConfirmEmail, Request );
         
     sealed class ResendConfirmationRequest
     {
         public string Email { get; set; } = string.Empty;
-
+        
         public static ResendConfirmationRequest With( string email ) =>
             new() {
                 Email = email

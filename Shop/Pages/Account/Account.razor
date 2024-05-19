@@ -18,37 +18,18 @@
         else {
             switch ( CurrentView ) {
                 case nameof( AccountDeleted ):
-                    <AccountDeleted
-                        PushAlertCallback="@PushAlert"
-                        NavigateToCallback="@NavigateTo"/>
+                    <AccountDeleted Page="@this"/>
                     break;
                 case nameof( DeleteAccount ):
-                    <DeleteAccount
-                        PushAlertCallback="@PushAlert"
-                        NavigateToCallback="@NavigateTo"/>
+                    <DeleteAccount Page="@this"/>
                     break;
                 case nameof( ManageAccount ):
-                    <ManageAccount
-                        PushAlertCallback="@PushAlert"
-                        NavigateToCallback="@NavigateTo"/>
+                    <ManageAccount Page="@this"/>
                     break;
                 case nameof( ManageAddresses ):
-                    <ManageAddresses
-                        PushAlertCallback="@PushAlert"
-                        NavigateToCallback="@NavigateTo"/>
+                    <ManageAddresses Page="@this"/>
                     break;
             }
         }
     </div>
 </div>
-
-@code {
-    bool isComponentLoading = false;
-    string componentLoadingMessage = string.Empty;
-    
-    internal void ToggleLoading( bool isLoading, string? loadingMessage = null )
-    {
-        isComponentLoading = isLoading;
-        componentLoadingMessage = loadingMessage ?? string.Empty;
-    }
-}

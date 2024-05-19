@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Shop.Infrastructure.Common;
+using Shop.Infrastructure.Common.Optionals;
 using Shop.Infrastructure.Http;
 
 namespace Shop.Shared;
@@ -7,24 +8,32 @@ namespace Shop.Shared;
 public abstract class PageComponent : ComponentBase
 {
     [Inject] protected IHttpService Http { get; init; } = default!;
-    [Parameter] public Action<bool, string?> ToggleLoadingAction { get; set; } = default!;
-    [Parameter] public EventCallback<PushAlertArgs> PushAlertCallback { get; init; } = default!;
-    [Parameter] public EventCallback<NavigateToArgs> NavigateToCallback { get; init; } = default!;
+    [Parameter] public PageBase Page { get; set; } = default!;
     
     protected void StartLoading( string? loadingMessage = null )
     {
-        ToggleLoadingAction.Invoke( true, loadingMessage );
+        Page.ToggleLoading( true, loadingMessage );
     }
     protected void StopLoading()
     {
-        ToggleLoadingAction.Invoke( false, null );
+        Page.ToggleLoading( false );
     }
-    protected async Task CallPushAlert( AlertType type, string message )
+    protected void PushSuccess( string message ) => PushAlert( AlertType.Success, message );
+    protected void PushWarning( string message ) => PushAlert( AlertType.Warning, message );
+    protected void PushError( string message ) => PushAlert( AlertType.Danger, message );
+    protected void PushError( IOpt opt, string message ) => PushAlert( AlertType.Danger, $"{message} : {opt.Message()}" );
+    protected void PushError( IOpt opt ) => PushAlert( AlertType.Danger, opt.Message() );
+    protected void Navigate( string viewName, bool forceReload = false )
     {
-        await PushAlertCallback.InvokeAsync( PushAlertArgs.With( type, message ) );
+        Page.Navigate( NavigationArgs.With( viewName, forceReload ) );
     }
-    protected async Task CallNavigateTo( string url, bool forceReload )
+    protected void Redirect( string url )
     {
-        await NavigateToCallback.InvokeAsync( NavigateToArgs.With( url, forceReload ) );
+        Page.Redirect( url );
+    }
+
+    void PushAlert( AlertType type, string message )
+    {
+        Page.PushAlert( PushAlertArgs.With( type, message ) );
     }
 }

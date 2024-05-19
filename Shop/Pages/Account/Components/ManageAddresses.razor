@@ -119,7 +119,7 @@ else {
 
         if (!result.IsOkay()) {
             StopLoading();
-            await CallPushAlert( AlertType.Danger, $"Failed to get account details. {result.Message()}" );
+            PushError( $"Failed to get account details. {result.Message()}" );
             return;
         }
 
@@ -170,12 +170,12 @@ else {
         Opt<bool> saveResult = await Http.TryPostRequest<bool>( Urls.ApiUpdateAddress, editModel );
 
         if (!saveResult.IsOkay()) {
-            await CallPushAlert( AlertType.Danger, $"Failed to save address. {saveResult.Message()}" );
+            PushError( $"Failed to save address. {saveResult.Message()}" );
             StopLoading();
             return;
         }
 
-        await CallPushAlert( AlertType.Success, "Address Saved." );
+        PushSuccess( "Address Saved." );
 
         if (isNew)
             await GetPagedAddresses( 0 );
@@ -188,12 +188,12 @@ else {
         Opt<bool> deleteResult = await Http.TryPostRequest<bool>( Urls.ApiDeleteAddress, new AddressDeleteRequest( address.Id ) );
 
         if (!deleteResult.IsOkay()) {
-            await CallPushAlert( AlertType.Danger, $"Failed to delete address. {deleteResult.Message()}" );
+            PushError( $"Failed to delete address. {deleteResult.Message()}" );
             StopLoading();
             return;
         }
 
-        await CallPushAlert( AlertType.Success, "Address Deleted." );
+        PushSuccess( "Address Deleted." );
         await GetPagedAddresses( 0 );
     }
     

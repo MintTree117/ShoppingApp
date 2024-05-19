@@ -1,5 +1,4 @@
 using Shop.Infrastructure.Common;
-using ShopApplication.Common;
 
 namespace Shop.Shared;
 
@@ -10,10 +9,10 @@ public readonly record struct PushAlertArgs(
     internal static PushAlertArgs With( AlertType type, string message ) =>
         new( type, message );
 }
-public readonly record struct NavigateToArgs(
+public readonly record struct NavigationArgs(
     string Url,
-    bool ForceReload )
+    bool ForceReload = false )
 {
-    internal static NavigateToArgs With( string url, bool isReal ) =>
+    internal static NavigationArgs With( string url, bool isReal ) =>
         new( url, isReal );
 }

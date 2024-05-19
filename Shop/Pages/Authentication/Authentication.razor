@@ -4,30 +4,28 @@
 @inherits Shop.Shared.PageBase
 @layout MainLayout
 
-@switch ( CurrentView ) {
-    case nameof( EmailConfirm ):
-        <EmailConfirm
-            PushAlertCallback="@PushAlert"
-            NavigateToCallback="@NavigateTo"/>
-        break;
-    case nameof( EmailConfirmResend ):
-        <EmailConfirmResend
-            PushAlertCallback="@PushAlert"
-            NavigateToCallback="@NavigateTo"/>
-        break;
-    case nameof( LoginOrRegister ):
-        <LoginOrRegister
-            PushAlertCallback="@PushAlert"
-            NavigateToCallback="@NavigateTo"/>
-        break;
-    case nameof( PasswordForgot ):
-        <PasswordForgot
-            PushAlertCallback="@PushAlert"
-            NavigateToCallback="@NavigateTo"/>
-        break;
-    case nameof( PasswordReset ):
-        <PasswordReset
-            PushAlertCallback="@PushAlert"
-            NavigateToCallback="@NavigateTo"/>
-        break;
+@if (isComponentLoading) {
+    <div class="loading-container">
+        <div class="loading-circle"></div>
+        <p>@componentLoadingMessage</p>
+    </div>
+}
+else {
+    switch ( CurrentView ) {
+        case nameof( EmailConfirm ):
+            <EmailConfirm Page="@this"/>
+            break;
+        case nameof( EmailConfirmResend ):
+            <EmailConfirmResend Page="@this"/>
+            break;
+        case nameof( LoginOrRegister ):
+            <LoginOrRegister Page="@this"/>
+            break;
+        case nameof( PasswordForgot ):
+            <PasswordForgot Page="@this"/>
+            break;
+        case nameof( PasswordReset ):
+            <PasswordReset Page="@this"/>
+            break;
+    }
 }

@@ -47,7 +47,7 @@
 
         if (!result.IsOkay()) {
             StopLoading();
-            await CallPushAlert( AlertType.Danger, $"Failed to get account details. {result.Message()}" );
+            PushError( $"Failed to get account details. {result.Message()}" );
             return;
         }
 
@@ -62,15 +62,15 @@
         
         if (!result.IsOkay()) {
             StopLoading();
-            await CallPushAlert( AlertType.Danger, $"Failed to update account details. {result.Message()}" );
+            PushError( $"Failed to update account details. {result.Message()}" );
             return;
         }
-        
-        await CallPushAlert( AlertType.Danger, $"Account details successfully updated. {result.Message()}" );
+
+        PushSuccess( "Account details successfully updated." );
         StopLoading();
     }
 
-    public class AccountModel
+    sealed class AccountModel
     {
         [Required( ErrorMessage = "Email is required." ), EmailAddress( ErrorMessage = "Invalid email address." )]
         public string Email { get; set; } = string.Empty;

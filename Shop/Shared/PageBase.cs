@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Shop.Infrastructure.Common;
 using Shop.Infrastructure.Http;
-using ShopApplication.Common;
 
 namespace Shop.Shared;
 
@@ -18,6 +17,15 @@ public abstract class PageBase : ComponentBase
     readonly int redirectTime;
     int redirectCountdown = 0;
     System.Timers.Timer? pageRedirectTimer;
+
+    protected bool isComponentLoading = false;
+    protected string componentLoadingMessage = string.Empty;
+
+    internal void ToggleLoading( bool isLoading, string? loadingMessage = null )
+    {
+        isComponentLoading = isLoading;
+        componentLoadingMessage = loadingMessage ?? string.Empty;
+    }
     
     protected string CurrentView = string.Empty;
     
@@ -27,12 +35,16 @@ public abstract class PageBase : ComponentBase
         StartLoading( "Loading Page..." );
     }
 
-    protected void NavigateTo( NavigateToArgs args )
+    internal void Navigate( NavigationArgs args )
     {
-        if (!args.ForceReload)
-            CurrentView = args.Url;
+        CurrentView = args.Url;
+        if (args.ForceReload)
+            Navigation.Refresh( true );
         StateHasChanged();
-        Navigation.NavigateTo( args.Url, args.ForceReload );
+    }
+    internal void Redirect( string url )
+    {
+        Navigation.NavigateTo( url, true );
     }
     protected void StartRedirect( string? message )
     {
@@ -43,11 +55,11 @@ public abstract class PageBase : ComponentBase
         pageRedirectTimer.AutoReset = true;
         pageRedirectTimer.Enabled = true;
     }
-    protected void PushAlert( AlertType type, string message )
+    internal void PushAlert( AlertType type, string message )
     {
         layout.PushAlert( type, message );
     }
-    protected void PushAlert( PushAlertArgs args )
+    internal void PushAlert( PushAlertArgs args )
     {
         layout.PushAlert( args.Type, args.Message );
     }
