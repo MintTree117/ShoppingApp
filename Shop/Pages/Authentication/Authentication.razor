@@ -1,0 +1,33 @@
+@page "/authenticate"
+@using Shop.Pages.Authentication.Components
+@using Shop.Layout
+@inherits Shop.Shared.PageBase
+@layout MainLayout
+
+@switch ( CurrentView ) {
+    case nameof( EmailConfirm ):
+        <EmailConfirm
+            PushAlertCallback="@PushAlert"
+            NavigateToCallback="@NavigateTo"/>
+        break;
+    case nameof( EmailConfirmResend ):
+        <EmailConfirmResend
+            PushAlertCallback="@PushAlert"
+            NavigateToCallback="@NavigateTo"/>
+        break;
+    case nameof( LoginOrRegister ):
+        <LoginOrRegister
+            PushAlertCallback="@PushAlert"
+            NavigateToCallback="@NavigateTo"/>
+        break;
+    case nameof( PasswordForgot ):
+        <PasswordForgot
+            PushAlertCallback="@PushAlert"
+            NavigateToCallback="@NavigateTo"/>
+        break;
+    case nameof( PasswordReset ):
+        <PasswordReset
+            PushAlertCallback="@PushAlert"
+            NavigateToCallback="@NavigateTo"/>
+        break;
+}

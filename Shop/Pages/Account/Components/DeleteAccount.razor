@@ -1,0 +1,73 @@
+@using System.ComponentModel.DataAnnotations
+@using Shop.Features.Identity
+@using ShopApplication.Common
+@using ShopApplication.Common.Optionals
+@using ShopWeb.Utilities
+@inherits ShopWeb.Shared.PageComponentOld
+
+<h3>Delete Personal Data</h3>
+
+@if (IsWarning) {
+    <div class="alert alert-warning" role="alert">
+        <p>
+            <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
+            <button class="w-100 btn btn-lg btn-danger" @onclick="@(async () => await TryDeleteAccount())">Delete data and close my account</button>
+            <button class="w-100 btn btn-lg btn-primary" @onclick="Cancel">Cancel</button>
+        </p>
+    </div>
+}
+else {
+    <div>
+        <EditForm Model="@Request" FormName="delete-user" OnValidSubmit="OnValidSubmitAsync" method="post">
+            <DataAnnotationsValidator/>
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="form-floating mb-3">
+                <InputText type="password" bind-Value="@Request.Password" id="password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Please enter your password."/>
+                <label for="password" class="form-label">Password</label>
+                <ValidationMessage For="@(() => Request.Password)" class="text-danger"/>
+            </div>
+            <button class="w-100 btn btn-lg btn-danger" type="submit">Delete Data</button>
+        </EditForm>
+    </div>
+}
+
+@code {
+    [Inject] IAuthenticationManager Authenticator { get; set; } = default!;
+    DeleteAccountRequest Request { get; set; } = new();
+    bool IsWarning = false;
+    
+    async Task OnValidSubmitAsync()
+    {
+        await Task.Delay( 1000 );
+        IsWarning = true;
+        StateHasChanged();
+    }
+
+    async Task TryDeleteAccount()
+    {
+        StartLoading( "Deleting Account..." );
+        Opt<bool> reply = await Http.TryPutRequest<bool>( "", Request );
+
+        if (!reply.IsOkay()) {
+            await CallPushAlert( AlertType.Danger, $"Failed to delete your account. {reply.Message()}" );
+            IsWarning = false;
+            StopLoading();
+            StateHasChanged();
+        }
+
+        await Authenticator.ClearAuthenticationStateAsync();
+        await CallNavigateTo( Urls.PageAccountDeleted, false );
+    }
+    
+    void Cancel()
+    {
+        IsWarning = false;
+        StateHasChanged();
+    }
+
+    sealed class DeleteAccountRequest
+    {
+        [Required, DataType( DataType.Password )]
+        public string Password { get; set; } = string.Empty;
+    }
+}

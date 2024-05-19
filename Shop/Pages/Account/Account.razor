@@ -1,0 +1,58 @@
+@page "/account"
+@using Shop.Features.Account
+@using Shop.Pages.Account.Components
+@inherits Shop.Shared.PageBase
+
+<PageTitle>Manage Account</PageTitle>
+
+<div class="row">
+    <div class="col-4">
+        <!-- Navigation -->
+    </div>
+    <div class="col-8">
+        @if (isComponentLoading) {
+            <div class="loading-container">
+                <div class="loading-circle"></div>
+                <p>@componentLoadingMessage</p>
+            </div>
+        }
+        else {
+            switch ( CurrentView ) {
+                case nameof( AccountDeleted ):
+                    <AccountDeleted
+                        PushAlertCallback="@PushAlert"
+                        NavigateToCallback="@NavigateTo"/>
+                    break;
+                case nameof( DeleteAccount ):
+                    <DeleteAccount
+                        PushAlertCallback="@PushAlert"
+                        NavigateToCallback="@NavigateTo"/>
+                    break;
+                case nameof( ManageAccount ):
+                    <ManageAccount
+                        Manager="@Manager"
+                        PushAlertCallback="@PushAlert"
+                        NavigateToCallback="@NavigateTo"/>
+                    break;
+                case nameof( ViewAddresses ):
+                    <ViewAddresses
+                        PushAlertCallback="@PushAlert"
+                        NavigateToCallback="@NavigateTo"/>
+                    break;
+            }
+        }
+    </div>
+</div>
+
+@code {
+    [Inject] public AccountManager Manager { get; set; } = default!;
+
+    bool isComponentLoading = false;
+    string componentLoadingMessage = string.Empty;
+    
+    internal void ToggleLoading( bool isLoading, string? loadingMessage = null )
+    {
+        isComponentLoading = isLoading;
+        componentLoadingMessage = loadingMessage ?? string.Empty;
+    }
+}

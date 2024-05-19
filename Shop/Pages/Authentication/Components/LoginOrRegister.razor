@@ -1,0 +1,226 @@
+@using ShopApplication.Common
+@using System.ComponentModel.DataAnnotations
+@using Shop.Features.Identity
+@using ShopApplication.Common.Optionals
+@using ShopWeb.Utilities
+@inherits ShopWeb.Shared.PageComponentOld
+
+@if (registered) {
+    <h1>Account Registered.</h1>
+    <h2>Id: @( registerReply?.Id ?? "No id returned." )</h2>
+    <h2>Email: @(registerReply?.Email ?? "No email returned.")</h2>
+    <h2>Username: @( registerReply?.Username ?? "No username returned." )</h2>
+    <p>A confirmation link has been emailed to @( registerReply?.Email ?? "your email" ). Please verify your email before logging in.</p>
+}
+else if (pendingTwoFactor) {
+    <h1>Two-factor authentication</h1>
+    <hr/>
+    <p>Your login is protected by a two-step verification process. Enter your verification code below.</p>
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm Model="@twoFactor" FormName="login-with-2fa" OnValidSubmit="OnValidTwoFactorSubmitAsync" method="post">
+                <DataAnnotationsValidator/>
+                <ValidationSummary class="text-danger" role="alert"/>
+                <div class="form-floating mb-3">
+                    <InputText @bind-Value="@twoFactor.Code" id="two-factor-code" class="form-control" autocomplete="off"/>
+                    <label for="two-factor-code" class="form-label">Authenticator code</label>
+                    <ValidationMessage For="@(() => twoFactor.Code)" class="text-danger"/>
+                </div>
+                <div>
+                    <button type="submit" class="w-100 btn btn-lg btn-primary">Log In</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+    <p>
+        Don't have access to your authenticator device? You can
+        <button class="btn btn-link" onclick="@(async () => await GoToRecovery())">log in with a recovery code</button>.
+    </p>
+}
+else {
+    <div style="max-width: 360px" class="mt-5 mx-auto text-center">
+        <img class="mb-4" src="/Images/Logo.svg" alt="blazor" width="72" height="57">
+
+        <EditForm Model="@login" OnValidSubmit="@(async () => await OnValidLoginSubmitAsync() )">
+            <h1 class="h3 mb-3 fw-normal">Please Sign In</h1>
+            <DataAnnotationsValidator/>
+            <div class="form-floating">
+                <InputText type="name" class="form-control" id="emailOrUsername" @bind-Value="@login.EmailOrUsername">></InputText>
+                <label for="emailOrUsername">Email or Username</label>
+            </div>
+            <div class="form-floating">
+                <InputText type="password" class="form-control" id="password" @bind-Value="@login.Password"></InputText>
+                <label for="password">Password</label>
+            </div>
+            <button class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
+        </EditForm>
+        
+        <button class="btn btn-link" onclick="@(async () => await GoToResend())">Resend Confirmation Email</button>
+        <button class="btn btn-link" onclick="@(async () => await GoToForgot())">Forgot Password</button>
+
+        <span class="my-5 d-block text-muted">- Or -</span>
+
+        <EditForm Model="@register" OnValidSubmit="@(async () => await OnValidRegisterSubmitAsync() )">
+            <h1 class="h3 mb-3 fw-normal">Register</h1>
+            <DataAnnotationsValidator/>
+            <div class="form-floating">
+                <InputText type="name" class="form-control" id="username" @bind-Value="@register.Username"></InputText>
+                <ValidationMessage For="@(() => register.Username)"/>
+                <label for="emailOrUsername">Username</label>
+            </div>
+            <div class="form-floating">
+                <InputText type="email" class="form-control" id="email" @bind-Value="@register.Email"></InputText>
+                <ValidationMessage For="@(() => register.Email)"/>
+                <label for="email">Email</label>
+            </div>
+            <div class="form-floating">
+                <InputText type="password" class="form-control" id="registerPassword" @bind-Value="@register.Password"></InputText>
+                <ValidationMessage For="@(() => register.Password)"/>
+                <label for="registerPassword">Password</label>
+            </div>
+            <div class="form-floating">
+                <InputText type="password" class="form-control" id="confirmPassword" @bind-Value="@register.PasswordConfirm"></InputText>
+                <ValidationMessage For="@(() => register.PasswordConfirm)"/>
+                <label for="confirmPassword">Confirm Password</label>
+            </div>
+            <button class="w-100 btn btn-lg btn-primary" type="submit">Register</button>
+        </EditForm>
+    </div>
+}
+    
+@code 
+{
+    [Inject] IAuthenticationManager AuthenticationManager { get; init; } = default!;
+    //[Inject] CartManager CartManager { get; init; } = default!;
+
+    readonly LoginRequest login = new();
+    readonly RegisterRequest register = new();
+    readonly TwoFactorRequest twoFactor = new();
+
+    bool registered = false;
+    bool pendingTwoFactor = false;
+    RegisterReply? registerReply;
+
+    async Task OnValidLoginSubmitAsync()
+    {
+        StartLoading( "Logging In..." );
+        Opt<LoginReply> loginResult = await Http.TryGetRequest<LoginReply>( "" );
+
+        if (!loginResult.IsOkay()) {
+            await CallPushAlert( AlertType.Danger, loginResult.Message() );
+            return;
+        }
+
+        if (loginResult.Data.IsPending2FA) {
+            pendingTwoFactor = true;
+            StopLoading();
+            StateHasChanged();
+            return;
+        }
+
+        Opt<bool> updateResult = await AuthenticationManager.SetAuthenticationStateAsync( loginResult.Data.AccessToken, loginResult.Data.RefreshToken );
+        
+        if (!updateResult.IsOkay()) {
+            StopLoading();
+            await CallPushAlert( AlertType.Danger, updateResult.Message() );
+            return;
+        }
+
+        //await CartManager.GetCart( reply.Data.Token );
+
+        StartLoading( "Login Success! Redirecting..." );
+        await CallNavigateTo( "ReturnUrl", true );
+    }
+    async Task OnValidTwoFactorSubmitAsync()
+    {
+        StartLoading( "Verifying Two Factor..." );
+        
+        twoFactor.Email = login.EmailOrUsername;
+
+        Opt<TwoFactorReply> result = await Http.TryPostRequest<TwoFactorReply>( Urls.ApiTwoFactor, twoFactor );
+
+        if (!result.IsOkay()) {
+            await CallPushAlert( AlertType.Danger, $"Two factor authorization failed!: {result.Message()}" );
+            StopLoading();
+            return;
+        }
+
+        Opt<bool> updateResult = await AuthenticationManager.SetAuthenticationStateAsync( result.Data.AccessToken, result.Data.RefreshToken );
+
+        if (!updateResult.IsOkay()) {
+            await CallPushAlert( AlertType.Danger, $"Two factor authorization succeeded on the server, but failed to save locally!: {result.Message()}" );
+            StopLoading();
+            return;
+        }
+        
+        //await CartManager.GetCart( reply.Data.Token );
+
+        StartLoading( "Login Success! Redirecting..." );
+        await CallNavigateTo( "ReturnUrl", true );
+    }
+    async Task OnValidRegisterSubmitAsync()
+    {
+        StartLoading( "Registering..." );
+        Opt<RegisterReply> reply = await Http.TryGetRequest<RegisterReply>( "" );
+
+        if (!reply.IsOkay()) {
+            StopLoading();
+            await CallPushAlert( AlertType.Danger, reply.Message() );
+            return;
+        }
+
+        registered = true;
+        registerReply = reply.Data;
+        StopLoading();
+        StateHasChanged();
+    }
+
+    async Task GoToRecovery() => await CallNavigateTo( Urls.PageLoginWithRecovery, false );
+    async Task GoToResend() => await CallNavigateTo( Urls.PageResendConfirm, false );
+    async Task GoToForgot() => await CallNavigateTo( Urls.PageLoginWithRecovery, false );
+
+    sealed class LoginRequest
+    {
+        [Required( ErrorMessage = "Email or Username is required." )]
+        public string EmailOrUsername { get; set; } = string.Empty;
+
+        [Required( ErrorMessage = "Password is required." )]
+        public string Password { get; set; } = string.Empty;
+    }
+    sealed class TwoFactorRequest
+    {
+        [Required] public string Email { get; set; } = string.Empty;
+        
+        [Required, DataType( DataType.Text ), Display( Name = "Authenticator code" ), StringLength( 40, ErrorMessage = "The two factor code must be at least 6 and at max 40 characters long.", MinimumLength = 6 )]
+        public string Code { get; set; } = string.Empty;
+    }
+    sealed class RegisterRequest
+    {
+        [Required( ErrorMessage = "Email is required." ), EmailAddress( ErrorMessage = "Invalid email address." )] 
+        public string Email { get; set; } = string.Empty;
+
+        [Required( ErrorMessage = "Username is required." )]
+        public string Username { get; set; } = string.Empty;
+
+        [Phone( ErrorMessage = "Invalid phone number." )]
+        public string? Phone { get; set; } = string.Empty;
+
+        [Required( ErrorMessage = "Password is required." ), MinLength( 8, ErrorMessage = "Password must be at least 8 characters." )] 
+        public string Password { get; set; } = string.Empty;
+
+        [Compare( "Password", ErrorMessage = "Passwords do not match." )]
+        public string PasswordConfirm { get; set; } = string.Empty;
+    }
+    
+    sealed record LoginReply(
+        string? AccessToken,
+        string? RefreshToken,
+        bool IsPending2FA );
+    readonly record struct TwoFactorReply(
+        string AccessToken,
+        string RefreshToken );
+    sealed record RegisterReply(
+        string Id,
+        string Email,
+        string Username );
+}

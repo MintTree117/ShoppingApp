@@ -1,0 +1,75 @@
+@using System.ComponentModel.DataAnnotations
+@using Shop.Features.Account
+@using Shop.Features.Account.Types
+@using ShopApplication.Common
+@using ShopApplication.Common.Optionals
+@using ShopWeb.Utilities
+@inherits ShopWeb.Shared.PageComponentOld
+
+<h3>Edit Account</h3>
+
+<div class="row">
+    <div class="col-md-6">
+        <EditForm Model="@_model" FormName="edit-account" OnValidSubmit="UpdateAccount" method="post">
+            <DataAnnotationsValidator/>
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="form-floating mb-3">
+                <InputText type="email" bind-Value="@_model.Email" id="email" class="form-control" autocomplete="email" aria-required="true" placeholder="Email"/>
+                <label for="email" class="form-label">Email</label>
+                <ValidationMessage For="@(() => _model.Email)" class="text-danger"/>
+            </div>
+            <div class="form-floating mb-3">
+                <InputText type="email" bind-Value="@_model.Email" id="username" class="form-control" autocomplete="username" aria-required="true" placeholder="Username"/>
+                <label for="username" class="form-label">Username</label>
+                <ValidationMessage For="@(() => _model.Username)" class="text-danger"/>
+            </div>
+            <div class="form-floating mb-3">
+                <InputText type="email" bind-Value="@_model.Phone" id="phone" class="form-control" autocomplete="phone" aria-required="true" placeholder="Phone"/>
+                <label for="phone" class="form-label">Phone</label>
+                <ValidationMessage For="@(() => _model.Phone)" class="text-danger"/>
+            </div>
+            <button type="submit" class="w-100 btn btn-lg btn-primary">Edit Account</button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    [Parameter] public AccountManager Manager { get; set; } = default!;
+    AccountModelNew _model = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await FetchAccount();
+    }
+    async Task UpdateAccount()
+    {
+        StartLoading( "Updating Account..." );
+
+        Opt<bool> result = await Http.TryPostRequest<bool>( Urls.ApiUpdateAccountDetails, _model );
+        
+        if (!result.IsOkay()) {
+            StopLoading();
+            await CallPushAlert( AlertType.Danger, $"Failed to update account details. {result.Message()}" );
+            return;
+        }
+        
+        await CallPushAlert( AlertType.Danger, $"Account details successfully updated. {result.Message()}" );
+        StopLoading();
+    }
+    async Task FetchAccount()
+    {
+        StartLoading( "Fetching account details..." );
+
+        Opt<AccountModelNew> result = await Http.TryGetRequest<AccountModelNew>( Urls.ApiGetAccountDetails );
+
+        if (!result.IsOkay()) {
+            StopLoading();
+            await CallPushAlert( AlertType.Danger, $"Failed to get account details. {result.Message()}" );
+            return;
+        }
+
+        StopLoading();
+        StateHasChanged();
+    }
+}
