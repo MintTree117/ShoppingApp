@@ -6,7 +6,7 @@ internal static class HttpConfiguration
 {
     public static void ConfigureHttp( this WebAssemblyHostBuilder builder )
     {
-        builder.Services.AddScoped( sp => new HttpClient { BaseAddress = new Uri( GetBaseUrl( builder ) ) } );
+        builder.Services.AddHttpClient();
         builder.Services.AddScoped<HttpService>();
     }
 
