@@ -38,13 +38,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <AdditionalFiles Include="UI\Shared\Home.razor" />
       <AdditionalFiles Include="UI\Shared\MainLayout.razor" />
-      <AdditionalFiles Include="UI\Shared\Pagination.razor" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="UI\" />
     </ItemGroup>
 
 </Project>

@@ -1,0 +1,66 @@
+@using Shop.Infrastructure.Common
+
+<div class="@displayCss">
+    @switch ( state ) {
+        case LoadingState.Loading:
+            <div class="loading-container">
+                <div class="loading-circle"></div>
+                <p>Loading...</p>
+                @if (!string.IsNullOrEmpty( message )) {
+                    <p>@message</p>   
+                }
+            </div>
+            break;
+        case LoadingState.Redirecting:
+            <div class="loading-container">
+                <div class="loading-circle"></div>
+                <p>Redirecting...</p>
+                @if (!string.IsNullOrEmpty( message )) {
+                    <p>@message</p>   
+                }
+            </div>
+            break;
+        case LoadingState.Ready:
+            break;
+        default:
+            throw new ArgumentOutOfRangeException();
+    }
+</div>
+
+@code
+{
+    internal void StartRedirecting( int seconds, string? m = null )
+    {
+        redirectSeconds = seconds;
+        this.message = m ?? string.Empty;
+        displayCss = ShowCss;
+        StateHasChanged();
+    }
+    internal void TickRedirect()
+    {
+        state = LoadingState.Redirecting;
+        redirectSeconds--;
+        StateHasChanged();
+    }
+    internal void StartLoading( string? m = null )
+    {
+        this.message = m ?? string.Empty;
+        state = LoadingState.Loading;
+        displayCss = ShowCss;
+        StateHasChanged();
+    }
+    internal void StopLoading()
+    {
+        state = LoadingState.Ready;
+        displayCss = HideCss;
+        StateHasChanged();
+    }
+    
+    LoadingState state = LoadingState.Loading;
+    string message = string.Empty;
+    int redirectSeconds = 0;
+    string displayCss = HideCss;
+
+    const string HideCss = "d-none";
+    const string ShowCss = "d-flex";
+}

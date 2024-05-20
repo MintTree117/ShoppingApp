@@ -1,0 +1,16 @@
+@layout AuthenticationLayout
+@inherits Shop.UI.Shared.ShopPage
+
+@code {
+    [CascadingParameter] 
+    public AuthenticationLayout authenticationLayout { get; set; } = default!;
+
+    protected void StartLoading( string? message )
+    {
+        authenticationLayout.StartLoading( message );
+    }
+    protected void StopLoading()
+    {
+        authenticationLayout.StopLoading();
+    }
+}

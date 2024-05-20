@@ -1,52 +1,39 @@
 ﻿@inherits LayoutComponentBase
 @using Shop.Infrastructure.Common
+@using Shop.UI.Shared.Components
 
 <div class="page">
     <main>
-        <AlertPanel @ref="@alert"/>
-        
-        @if (isPageLoading) {
-            <PageLoader @ref="@loader"/>   
-        }
-        else {
-            <article class="content px-4">
-                <NavBar/>
-                @Body
-            </article>   
-        }
+        <NoficationsPanel @ref="@notifications"/>
+        <article class="content px-4">
+            <MainNavigationBar/>
+            <LoadingPanel @ref="@loader"/>
+            <div class="main-content">
+                <CascadingValue Value="@GetSelf()" name="layout">
+                    @Body
+                </CascadingValue>
+            </div>
+        </article>
     </main>
 </div>
 
 @code
 {
-    internal void StartRedirecting( int seconds, string? message = null )
+    NoficationsPanel notifications = default!;
+    LoadingPanel loader = default!;
+    MainLayout GetSelf() => this;
+
+    internal void StartTimedPageRedirect( int seconds, string? message )
     {
-        loader.StartRedirecting( seconds, message );
-        isPageLoading = true;
-        StateHasChanged();
+        loader.StartRedirecting( seconds, message ?? "Redirecting..." );
     }
     internal void TickRedirect()
     {
         loader.TickRedirect();
-    }
-    internal void StartLoading( string? message = null )
-    {
-        loader.StartLoading( message );
-        isPageLoading = true;
-        StateHasChanged();
-    }
-    internal void StopLoading()
-    {
-        loader.Hide();
-        isPageLoading = false;
         StateHasChanged();
     }
     internal void PushAlert( AlertType type, string message )
     {
-        alert.PushAlert( type, message );
+        notifications.PushAlert( type, message );
     }
-    
-    PageLoader loader = default!;
-    AlertPanel alert = default!;
-    bool isPageLoading = false;
 }

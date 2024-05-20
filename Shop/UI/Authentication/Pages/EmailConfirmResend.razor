@@ -1,7 +1,9 @@
 @page "/resend-confirmation-email"
 @using Shop.Infrastructure.Common.Optionals
+@using Shop.UI.Shared
 @using Shop.Utilities
-@inherits Shop.UI.Shared.PageBase
+@inherits Shop.UI.Account.AccountPageBase
+@layout MainLayout
 
 <PageTitle>Resend Confirmation Email</PageTitle>
 
@@ -31,7 +33,7 @@ else {
 
 @code {
     [SupplyParameterFromForm]
-    ResendConfirmationRequest Request { get; } = new();
+    ResendConfirmationRequest Request { get; set; } = new();
     
     bool isSuccess = false;
 
@@ -46,8 +48,9 @@ else {
             StopLoading();
             return;
         }
-
+        
         PushSuccess( "Confirmation email link has been sent. Check your email." );
+        isSuccess = true;
         StateHasChanged();
         StopLoading();
     }

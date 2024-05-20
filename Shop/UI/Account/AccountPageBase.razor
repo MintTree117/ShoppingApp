@@ -1,16 +1,16 @@
 @layout AccountLayout
-@inherits Shop.UI.Shared.PageBase
+@inherits Shop.UI.Shared.ShopPage
 
 @code {
     [CascadingParameter] 
-    public AccountLayout Layout { get; set; } = default!;
+    public AccountLayout accountLayout { get; set; } = default!;
     
-    protected override void StartLoading( string? message )
+    protected void StartLoading( string? message )
     {
-        Layout.StartLoadingComponent( message );
+        accountLayout.StartLoadingComponent( message );
     }
-    protected override void StopLoading()
+    protected void StopLoading()
     {
-        Layout.StopLoadingComponent();
+        accountLayout.StopLoadingComponent();
     }
 }

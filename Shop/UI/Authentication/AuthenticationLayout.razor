@@ -1,14 +1,10 @@
-@inherits LayoutComponentBase
-@layout MainLayout
 @using Shop.UI.Shared
 @using Shop.UI.Shared.Components
+@inherits LayoutComponentBase
+@layout MainLayout
 
 <div class="row">
-    <div class="col-4">
-        <nav>
-        </nav>
-    </div>
-    <div class="col-8">
+    <div class="col-12">
         <LoadingPanel @ref="@_loadingPanel"/>
         <div class="page-content">
             @Body
@@ -19,11 +15,11 @@
 @code {
     LoadingPanel _loadingPanel = default!;
 
-    internal void StartLoadingComponent( string? message )
+    internal void StartLoading( string? message )
     {
         _loadingPanel.StartLoading( message );
     }
-    internal void StopLoadingComponent()
+    internal void StopLoading()
     {
         _loadingPanel.StopLoading();
     }

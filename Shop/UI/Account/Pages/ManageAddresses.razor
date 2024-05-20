@@ -1,5 +1,6 @@
 @using Shop.Infrastructure.Common.Optionals
 @using Shop.UI.Shared
+@using Shop.UI.Shared.Components
 @using Shop.Utilities
 @inherits Shop.UI.Account.AccountPageBase
 @layout AccountLayout
@@ -90,7 +91,7 @@ else {
             </tbody>
         </table>
         
-        <Pagination @ref="pagination" OnPageChange="@OnPaginationChange"/>
+        <PaginationPanel @ref="_paginationPanel" OnPageChange="@OnPaginationChange"/>
     }
 }
 
@@ -106,7 +107,7 @@ else {
     int totalCount = 0;
     int rowsPerPage = 0;
 
-    Pagination pagination = default!;
+    PaginationPanel _paginationPanel = default!;
     
     protected override async Task OnParametersSetAsync()
     {
@@ -175,7 +176,7 @@ else {
     {
         pagedAddresses = result.Data.Addresses;
         totalCount = result.Data.TotalCount;
-        pagination.Set( page, rowsPerPage, result.Data.TotalCount );
+        _paginationPanel.Set( page, rowsPerPage, result.Data.TotalCount );
 
         isEditing = false;
         isNew = false;
