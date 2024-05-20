@@ -19,21 +19,32 @@
       <_ContentIncludedByDefault Remove="Components\Pages\Identity\AccessDenied.razor" />
       <_ContentIncludedByDefault Remove="Components\Pages\Identity\ConfirmEmail.razor" />
       <_ContentIncludedByDefault Remove="Components\Pages\Identity\LoginRegister.razor" />
+      <_ContentIncludedByDefault Remove="Pages\Account\AccountLayout.razor" />
+      <_ContentIncludedByDefault Remove="Pages\Account\ChangePassword.razor" />
+      <_ContentIncludedByDefault Remove="Pages\Account\DeleteAccount.razor" />
+      <_ContentIncludedByDefault Remove="Pages\Account\ManageAccount.razor" />
+      <_ContentIncludedByDefault Remove="Pages\Account\ManageAddresses.razor" />
+      <_ContentIncludedByDefault Remove="Pages\Authentication\Authentication.razor" />
+      <_ContentIncludedByDefault Remove="Pages\Authentication\Components\EmailConfirm.razor" />
+      <_ContentIncludedByDefault Remove="Pages\Authentication\Components\EmailConfirmResend.razor" />
+      <_ContentIncludedByDefault Remove="Pages\Authentication\Components\LoginOrRegister.razor" />
+      <_ContentIncludedByDefault Remove="Pages\Authentication\Components\PasswordForgot.razor" />
+      <_ContentIncludedByDefault Remove="Pages\Authentication\Components\PasswordReset.razor" />
+      <_ContentIncludedByDefault Remove="UI\Pages\Authentication\Components\EmailConfirm.razor" />
+      <_ContentIncludedByDefault Remove="UI\Pages\Authentication\Components\EmailConfirmResend.razor" />
+      <_ContentIncludedByDefault Remove="UI\Pages\Authentication\Components\LoginOrRegister.razor" />
+      <_ContentIncludedByDefault Remove="UI\Pages\Authentication\Components\PasswordForgot.razor" />
+      <_ContentIncludedByDefault Remove="UI\Pages\Authentication\Components\PasswordReset.razor" />
     </ItemGroup>
 
     <ItemGroup>
-      <AdditionalFiles Include="Pages\Account\Account.razor" />
-      <AdditionalFiles Include="Pages\Account\Components\AccountDeleted.razor" />
-      <AdditionalFiles Include="Pages\Account\Components\ChangePassword.razor" />
-      <AdditionalFiles Include="Pages\Account\Components\DeleteAccount.razor" />
-      <AdditionalFiles Include="Pages\Account\Components\ManageAccount.razor" />
-      <AdditionalFiles Include="Shared\AlertPanel.razor" />
-      <AdditionalFiles Include="Shared\PageLoader.razor" />
+      <AdditionalFiles Include="UI\Shared\Home.razor" />
+      <AdditionalFiles Include="UI\Shared\MainLayout.razor" />
+      <AdditionalFiles Include="UI\Shared\Pagination.razor" />
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Pages\Catalog\" />
-      <Folder Include="Pages\Checkout\" />
+      <Folder Include="UI\" />
     </ItemGroup>
 
 </Project>

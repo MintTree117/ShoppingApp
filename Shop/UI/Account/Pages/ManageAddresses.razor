@@ -1,8 +1,8 @@
 @using Shop.Infrastructure.Common.Optionals
+@using Shop.UI.Shared
 @using Shop.Utilities
-@using Shop.Infrastructure.Common
-@using Shop.Shared
-@inherits Shop.Shared.PageComponent
+@inherits Shop.UI.Account.AccountPageBase
+@layout  AccountLayout
 
 @if (isEditing) {
     <div class="row">
@@ -163,7 +163,7 @@ else {
     }
     
     async Task<Opt<AddressSearchResponse>> TryGetPagedAddresses() =>
-        await Http.TryGetRequest<AddressSearchResponse>( Urls.ApiGetAccountDetails );
+        await Http.TryGetRequest<AddressSearchResponse>( Urls.ApiGetAddresses );
     async Task<Opt<bool>> TrySaveAddress() =>
         await Http.TryPostRequest<bool>( Urls.ApiUpdateAddress, editModel );
     async Task<Opt<bool>> TryDeleteAddress( AddressModel address ) =>

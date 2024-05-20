@@ -2,19 +2,28 @@ namespace Shop.Utilities;
 
 internal static class Urls
 {
-    internal const string ApiLogin = "";
-    internal const string ApiTwoFactor = "";
-    internal const string ApiRegister = "";
-    internal const string ApiConfirmEmail = "";
-    internal const string ApiResendConfirm = "";
-    internal const string ApiForgotPassword = "";
-    internal const string ApiResetPassword = "";
-    internal const string ApiGetAccountDetails = "";
-    internal const string ApiUpdateAccountDetails = "";
-    internal const string ApiUpdatePassword = "";
-    internal const string ApiDeleteAccount = "";
-    internal const string ApiUpdateAddress = "";
-    internal const string ApiDeleteAddress = "";
+    internal const string ApiBase = "https://localhost:7212/api";
+    internal const string IdentityBase = ApiBase + "/identity";
+    
+    internal const string ApiGetAccountDetails = IdentityBase + "/account/view";
+    internal const string ApiUpdateAccountDetails = IdentityBase + "/account/update";
+    internal const string ApiDeleteAccount = IdentityBase + "/account/delete";
+
+    internal const string ApiGetAddresses = IdentityBase + "/address/view";
+    internal const string ApiUpdateAddress = IdentityBase + "/address/update";
+    internal const string ApiDeleteAddress = IdentityBase + "/address/delete";
+
+    internal const string ApiRegister = IdentityBase + "/register";
+    internal const string ApiConfirmEmail = IdentityBase + "/email/confirm";
+    internal const string ApiResendConfirm = IdentityBase + "/email/resend";
+
+    internal const string ApiLogin = IdentityBase + "/login";
+    internal const string ApiTwoFactor = IdentityBase + "/2fa";
+    internal const string ApiLoginRefresh = IdentityBase + "/refresh";
+
+    internal const string ApiUpdatePassword = IdentityBase + "/password/manage";
+    internal const string ApiForgotPassword = IdentityBase + "/password/forgot";
+    internal const string ApiResetPassword = IdentityBase + "/password/reset";
     
     internal const string ParamReturnUrl = "ReturnUrl";
 

@@ -3,11 +3,17 @@
 
 <div class="page">
     <main>
-        <PageLoader @ref="@loader"/>
         <AlertPanel @ref="@alert"/>
-        <article class="content px-4">
-            @Body
-        </article>
+        
+        @if (isPageLoading) {
+            <PageLoader @ref="@loader"/>   
+        }
+        else {
+            <article class="content px-4">
+                <NavBar/>
+                @Body
+            </article>   
+        }
     </main>
 </div>
 
@@ -16,6 +22,8 @@
     internal void StartRedirecting( int seconds, string? message = null )
     {
         loader.StartRedirecting( seconds, message );
+        isPageLoading = true;
+        StateHasChanged();
     }
     internal void TickRedirect()
     {
@@ -24,10 +32,14 @@
     internal void StartLoading( string? message = null )
     {
         loader.StartLoading( message );
+        isPageLoading = true;
+        StateHasChanged();
     }
-    internal void HideLoader()
+    internal void StopLoading()
     {
         loader.Hide();
+        isPageLoading = false;
+        StateHasChanged();
     }
     internal void PushAlert( AlertType type, string message )
     {
@@ -36,4 +48,5 @@
     
     PageLoader loader = default!;
     AlertPanel alert = default!;
+    bool isPageLoading = false;
 }

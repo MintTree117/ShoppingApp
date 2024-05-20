@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Components;
 using Shop.Infrastructure.Common;
+using Shop.Infrastructure.Common.Optionals;
 using Shop.Infrastructure.Http;
+using Shop.Utilities;
 
-namespace Shop.Shared;
+namespace Shop.UI.Shared;
 
 public abstract class PageBase : ComponentBase
 {
@@ -17,17 +19,6 @@ public abstract class PageBase : ComponentBase
     readonly int redirectTime;
     int redirectCountdown = 0;
     System.Timers.Timer? pageRedirectTimer;
-
-    protected bool isComponentLoading = false;
-    protected string componentLoadingMessage = string.Empty;
-
-    internal void ToggleLoading( bool isLoading, string? loadingMessage = null )
-    {
-        isComponentLoading = isLoading;
-        componentLoadingMessage = loadingMessage ?? string.Empty;
-    }
-    
-    protected string CurrentView = string.Empty;
     
     protected override void OnInitialized()
     {
@@ -35,16 +26,11 @@ public abstract class PageBase : ComponentBase
         StartLoading( "Loading Page..." );
     }
 
-    internal void Navigate( NavigationArgs args )
+    protected void GoHome() =>
+        Navigate( Urls.PageHome, true );
+    protected void Navigate( string page, bool forceReload = false )
     {
-        CurrentView = args.Url;
-        if (args.ForceReload)
-            Navigation.Refresh( true );
-        StateHasChanged();
-    }
-    internal void Redirect( string url )
-    {
-        Navigation.NavigateTo( url, true );
+        Navigation.NavigateTo( page, forceReload );
     }
     protected void StartRedirect( string? message )
     {
@@ -55,23 +41,24 @@ public abstract class PageBase : ComponentBase
         pageRedirectTimer.AutoReset = true;
         pageRedirectTimer.Enabled = true;
     }
-    internal void PushAlert( AlertType type, string message )
-    {
-        layout.PushAlert( type, message );
-    }
-    internal void PushAlert( PushAlertArgs args )
-    {
-        layout.PushAlert( args.Type, args.Message );
-    }
-    protected void StartLoading( string? message )
+    protected void PushSuccess( string message ) => PushAlert( AlertType.Success, message );
+    protected void PushWarning( string message ) => PushAlert( AlertType.Warning, message );
+    protected void PushError( string message ) => PushAlert( AlertType.Danger, message );
+    protected void PushError( IOpt opt, string message ) => PushAlert( AlertType.Danger, $"{message} : {opt.Message()}" );
+    protected void PushError( IOpt opt ) => PushAlert( AlertType.Danger, opt.Message() );
+    protected virtual void StartLoading( string? message )
     {
         layout.StartLoading( message );
     }
-    protected void StopLoading()
+    protected virtual void StopLoading()
     {
-        layout.HideLoader();
+        layout.StopLoading();
     }
-    
+
+    void PushAlert( AlertType type, string message )
+    {
+        layout.PushAlert( type, message );
+    }
     void CountdownTimerElapsed( object? sender, System.Timers.ElapsedEventArgs e )
     {
         if (redirectCountdown > 0) {

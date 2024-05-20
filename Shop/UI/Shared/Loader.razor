@@ -1,0 +1,27 @@
+@if (isLoading) {
+    <div class="loading-container">
+        <div class="loading-circle"></div>
+        <p>Loading...</p>
+        @if (!string.IsNullOrEmpty( loadingMessage )) {
+            <p>@loadingMessage</p>
+        }
+    </div>
+}
+
+@code {
+    bool isLoading = false;
+    string loadingMessage = string.Empty;
+
+    internal void StartLoading( string? message )
+    {
+        isLoading = true;
+        loadingMessage = message ?? "Loading...";
+        StateHasChanged();
+    }
+    internal void StopLoading()
+    {
+        loadingMessage = string.Empty;
+        isLoading = false;
+        StateHasChanged();
+    }
+}

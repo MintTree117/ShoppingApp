@@ -44,6 +44,11 @@
         state = LoadingState.Loading;
         StateHasChanged();
     }
+    internal void StopLoading()
+    {
+        state = LoadingState.Ready;
+        StateHasChanged();
+    }
     internal void Hide()
     {
         state = LoadingState.Ready;

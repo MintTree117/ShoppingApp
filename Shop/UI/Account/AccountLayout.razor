@@ -1,0 +1,26 @@
+@inherits LayoutComponentBase
+@layout MainLayout
+@using Shop.UI.Shared
+
+@if (isLoading) {
+    <Loader @ref="@loader"/>
+}
+else {
+    @Body
+}
+
+@code {
+    bool isLoading = false;
+    Loader loader = default!;
+
+    internal void StartLoadingComponent( string? message )
+    {
+        isLoading = true;
+        loader.StartLoading( message );
+    }
+    internal void StopLoadingComponent()
+    {
+        isLoading = false;
+        loader.StopLoading();
+    }
+}
