@@ -2,7 +2,7 @@
 @using Shop.Infrastructure.Common.Optionals
 @using Shop.UI.Shared
 @using Shop.Utilities
-@inherits Shop.UI.Account.AccountPageBase
+@inherits Shop.UI.Authentication.AuthenticationPageBase
 @layout MainLayout
 
 <PageTitle>Resend Confirmation Email</PageTitle>
@@ -43,7 +43,7 @@ else {
 
         Opt<bool> result = await TrySendEmail();
 
-        if (!result.IsOkay()) {
+        if (!result.IsOkay) {
             PushError( result, "Failed to send reset link." );
             StopLoading();
             return;

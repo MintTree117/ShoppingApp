@@ -7,7 +7,9 @@
     <div class="col-12">
         <LoadingPanel @ref="@_loadingPanel"/>
         <div class="page-content">
-            @Body
+            <CascadingValue Value="@this">
+                @Body
+            </CascadingValue>
         </div>
     </div>
 </div>

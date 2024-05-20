@@ -50,7 +50,7 @@ public sealed class AuthenticationManager : AuthenticationStateProvider
         Opt<bool> access = await storage.Set( AccessKey, accessToken );
         Opt<bool> refresh = await storage.Set( RefreshKey, refreshToken );
 
-        return access.IsOkay() && refresh.IsOkay()
+        return access.IsOkay && refresh.IsOkay
             ? IOpt.Okay()
             : IOpt.None( $"{access.Message()} : {refresh.Message()}" );
     }
@@ -66,25 +66,25 @@ public sealed class AuthenticationManager : AuthenticationStateProvider
         NotifyAuthenticationStateChanged( GetNotifyParams( claims ) );
     }
     
+    static ClaimsPrincipal GetIdentityClaimsPrincipal( string jwtToken )
+    {
+        ClaimsIdentity identity = GetIdentityClaims( jwtToken );
+        return new ClaimsPrincipal( identity );
+    }
     static ClaimsIdentity GetIdentityClaims( string jwtToken )
     {
         JwtSecurityTokenHandler handler = new();
         JwtSecurityToken? token = handler.ReadJwtToken( jwtToken );
-        
+
         Claim? nameIdentifierClaim = token.Claims.FirstOrDefault( c => c.Type == ClaimTypes.NameIdentifier );
         Claim? emailClaim = token.Claims.FirstOrDefault( c => c.Type == ClaimTypes.Email );
         Claim? nameClaim = token.Claims.FirstOrDefault( c => c.Type == ClaimTypes.Name );
-        
+
         return new ClaimsIdentity( new[] {
             nameIdentifierClaim ?? new Claim( ClaimTypes.NameIdentifier, "" ),
             emailClaim ?? new Claim( ClaimTypes.Email, "" ),
             nameClaim ?? new Claim( ClaimTypes.Name, "" )
         }, "token" );
-    }
-    static ClaimsPrincipal GetIdentityClaimsPrincipal( string jwtToken )
-    {
-        ClaimsIdentity identity = GetIdentityClaims( jwtToken );
-        return new ClaimsPrincipal( identity );
     }
     static Task<AuthenticationState> GetNotifyParams( ClaimsPrincipal? claims ) =>
         Task.FromResult( new AuthenticationState( claims ?? new ClaimsPrincipal() ) );

@@ -121,7 +121,7 @@ else {
 
         Opt<AddressSearchResponse> result = await TryGetPagedAddresses();
 
-        if (!result.IsOkay()) {
+        if (!result.IsOkay) {
             PushError( result, "Failed to get account details." );
             StopLoading();
             return;
@@ -136,7 +136,7 @@ else {
 
         Opt<bool> reply = await TrySaveAddress();
 
-        if (!reply.IsOkay()) {
+        if (!reply.IsOkay) {
             PushError( reply, "Failed to save address." );
             StopLoading();
             return;
@@ -155,7 +155,7 @@ else {
         
         Opt<bool> reply = await TryDeleteAddress( address );
 
-        if (!reply.IsOkay()) {
+        if (!reply.IsOkay) {
             PushError( reply, "Failed to delete address." );
             StopLoading();
             return;

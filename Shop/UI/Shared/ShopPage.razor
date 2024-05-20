@@ -38,14 +38,6 @@
     protected void PushError( string message ) => PushAlert( AlertType.Danger, message );
     protected void PushError( IOpt opt, string message ) => PushAlert( AlertType.Danger, $"{message} : {opt.Message()}" );
     protected void PushError( IOpt opt ) => PushAlert( AlertType.Danger, opt.Message() );
-    /*protected virtual void StartLoading( string? message )
-    {
-        Layout.StartLoading( message );
-    }
-    protected virtual void StopLoading()
-    {
-        Layout.StopLoading();
-    }*/
 
     void PushAlert( AlertType type, string message )
     {

@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
         <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.5" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.5" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.4" PrivateAssets="all"/>
@@ -39,6 +40,11 @@
 
     <ItemGroup>
       <AdditionalFiles Include="UI\Shared\MainLayout.razor" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="UI\Cart\" />
+      <Folder Include="UI\Checkout\" />
     </ItemGroup>
 
 </Project>

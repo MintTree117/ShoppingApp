@@ -47,7 +47,7 @@
 
         Opt<AccountModel> reply = await TryGetAccount();
 
-        if (!reply.IsOkay()) {
+        if (!reply.IsOkay) {
             PushError( reply, "Failed to get account details from the server." );
             StopLoading();
             return;
@@ -62,7 +62,7 @@
 
         Opt<bool> reply = await TryUpdateAccount();
         
-        if (!reply.IsOkay()) {
+        if (!reply.IsOkay) {
             PushError( reply, "Failed to update account details." );
             StopLoading();
             return;

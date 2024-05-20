@@ -1,18 +1,16 @@
-using System.Text.Json;
-using Microsoft.JSInterop;
+using Blazored.LocalStorage;
 using Shop.Infrastructure.Common.Optionals;
 
 namespace Shop.Infrastructure.Storage;
 
-public sealed class StorageService()
+public sealed class StorageService( ILocalStorageService storageService )
 {
-    readonly IJSRuntime _jsRuntime = default;
-
+    readonly ILocalStorageService storage = storageService;
+    
     public async Task<Opt<T>> Get<T>( string key )
     {
         try {
-            string jsonString = await _jsRuntime.InvokeAsync<string>( "localStorage.getItem", key );
-            var o = JsonSerializer.Deserialize<T>( jsonString );
+            var o = await storage.GetItemAsync<T>( key );
             return o is null
                 ? Opt<T>.None( $"{key} not found in local storage." )
                 : Opt<T>.With( o );
@@ -25,8 +23,7 @@ public sealed class StorageService()
     public async Task<Opt<bool>> Set<T>( string key, T value )
     {
         try {
-            string jsonString = JsonSerializer.Serialize( value );
-            await _jsRuntime.InvokeVoidAsync( "localStorage.setItem", key, jsonString );
+            await storage.SetItemAsync( key, value );
             return IOpt.Okay();
         }
         catch ( Exception e ) {
@@ -37,7 +34,7 @@ public sealed class StorageService()
     public async Task<Opt<bool>> Remove( string key )
     {
         try {
-            await _jsRuntime.InvokeVoidAsync( "localStorage.removeItem", key );
+            await storage.RemoveItemAsync( key );
             return IOpt.Okay();
         }
         catch ( Exception e ) {

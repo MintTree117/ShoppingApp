@@ -3,7 +3,7 @@ namespace Shop.Infrastructure.Common.Optionals;
 public interface IOpt
 {
     public string Message();
-    public bool IsOkay();
+    public bool IsOkay { get; init; }
 
     public static Opt<bool> Okay() => Opt<bool>.With( true );
     public static Opt<bool> None( string message ) => Opt<bool>.None( message );

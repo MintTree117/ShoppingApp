@@ -1,6 +1,6 @@
 namespace Shop.Infrastructure.Identity.Types;
 
-internal readonly record struct AccessKey(
+internal record AccessKey(
     string JwtToken )
 {
     internal static AccessKey With( string jwtToken ) =>

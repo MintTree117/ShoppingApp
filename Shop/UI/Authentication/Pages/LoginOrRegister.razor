@@ -4,8 +4,7 @@
 @using Shop.Infrastructure.Identity
 @using Shop.UI.Shared
 @using Shop.Utilities
-@inherits Shop.UI.Account.AccountPageBase
-@layout MainLayout
+@inherits Shop.UI.Authentication.AuthenticationPageBase
 
 <PageTitle>Login Or Register</PageTitle>
 
@@ -67,6 +66,7 @@ else {
         <EditForm Model="@registerRequest" OnValidSubmit="@(async () => await OnValidRegisterSubmitAsync() )">
             <h1 class="h3 mb-3 fw-normal">Register</h1>
             <DataAnnotationsValidator/>
+            <ValidationSummary/>
             <div class="form-floating">
                 <InputText type="name" class="form-control" id="username" @bind-Value="@registerRequest.Username"></InputText>
                 <ValidationMessage For="@(() => registerRequest.Username)"/>
@@ -111,7 +111,7 @@ else {
         
         Opt<LoginReply> loginResult = await TryLogin();
 
-        if (!loginResult.IsOkay()) {
+        if (!loginResult.IsOkay) {
             PushError( loginResult, "Failed to login." );
             StopLoading();
             return;
@@ -126,7 +126,7 @@ else {
 
         Opt<bool> updateResult = await TryUpdateLocalState( loginResult );
         
-        if (!updateResult.IsOkay()) {
+        if (!updateResult.IsOkay) {
             PushError( updateResult, "Failed to save login." );
             StopLoading();
             return;
@@ -145,7 +145,7 @@ else {
 
         Opt<TwoFactorReply> result = await TryTwoFactorLogin();
 
-        if (!result.IsOkay()) {
+        if (!result.IsOkay) {
             PushError( result, "Two factor authorization failed!" );
             StopLoading();
             return;
@@ -153,7 +153,7 @@ else {
 
         Opt<bool> updateResult = await TryUpdateLocalState( result );
 
-        if (!updateResult.IsOkay()) {
+        if (!updateResult.IsOkay) {
             PushError( result, "Two factor authorization succeeded on the server, but failed to save locally!" );
             StopLoading();
             return;
@@ -166,12 +166,17 @@ else {
     }
     async Task OnValidRegisterSubmitAsync()
     {
+        Console.WriteLine( "Hello" );
+        
         StartLoading( "Registering..." );
+
+        Console.WriteLine( "Hello" );
         
         Opt<RegisterReply> reply = await TryRegister();
 
-        if (!reply.IsOkay()) {
+        if (!reply.IsOkay) {
             PushError( reply, "Failed to register account." );
+            Console.WriteLine( reply.Message() );
             StopLoading();
             return;
         }
@@ -222,9 +227,6 @@ else {
 
         [Required( ErrorMessage = "Username is required." )]
         public string Username { get; set; } = string.Empty;
-
-        [Phone( ErrorMessage = "Invalid phone number." )]
-        public string? Phone { get; set; } = string.Empty;
 
         [Required( ErrorMessage = "Password is required." ), MinLength( 8, ErrorMessage = "Password must be at least 8 characters." )] 
         public string Password { get; set; } = string.Empty;
