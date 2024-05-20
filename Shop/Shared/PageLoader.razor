@@ -5,16 +5,18 @@
         <div class="loading-container">
             <div class="loading-circle"></div>
             <p>Loading...</p>
-            @if (!string.IsNullOrEmpty( loadingMessage ))
-                <p>@loadingMessage</p>
+            @if (!string.IsNullOrEmpty( loadingMessage )) {
+                <p>@loadingMessage</p>   
+            }
         </div>
         break;
     case LoadingState.Redirecting:
         <div class="loading-container">
             <div class="loading-circle"></div>
             <p>Redirecting...</p>
-            @if (!string.IsNullOrEmpty( redirectMessage ))
-                <p>@redirectMessage</p>
+            @if (!string.IsNullOrEmpty( redirectMessage )) {
+                <p>@redirectMessage</p>   
+            }
         </div>
         break;
     case LoadingState.Ready:

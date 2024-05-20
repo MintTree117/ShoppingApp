@@ -1,17 +1,17 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Components.Authorization;
-using Shop.Features.Identity.Types;
 using Shop.Infrastructure.Common.Optionals;
+using Shop.Infrastructure.Identity.Types;
 using Shop.Infrastructure.Storage;
 
-namespace Shop.Features.Identity;
+namespace Shop.Infrastructure.Identity;
 
-internal sealed class AuthenticationManager( StorageService storageService ) : AuthenticationStateProvider, IAuthenticationManager
+internal sealed class AuthenticationManager( IStorageService storageService ) : AuthenticationStateProvider, IAuthenticationManager
 {
     const string AccessKey = "accessToken";
     const string RefreshKey = "refreshToken";
-    readonly StorageService storage = storageService;
+    readonly IStorageService storage = storageService;
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {

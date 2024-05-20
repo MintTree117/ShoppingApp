@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
-namespace Shop.Features.Identity;
+namespace Shop.Infrastructure.Identity;
 
 internal static class IdentityConfiguration
 {

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Shop.Infrastructure.Common.Optionals;
 
-namespace Shop.Features.Identity;
+namespace Shop.Infrastructure.Identity;
 
 public interface IAuthenticationManager
 {

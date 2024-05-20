@@ -1,4 +1,4 @@
-namespace Shop.Features.Identity.Types;
+namespace Shop.Infrastructure.Identity.Types;
 
 internal readonly record struct AccessKey(
     string JwtToken )

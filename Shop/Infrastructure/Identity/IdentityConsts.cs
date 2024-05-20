@@ -1,4 +1,4 @@
-namespace Shop.Features.Identity;
+namespace Shop.Infrastructure.Identity;
 
 public static class IdentityConsts
 {
