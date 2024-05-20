@@ -1,7 +1,9 @@
-@using Shop.Infrastructure.Common
+@page "/resend-confirmation-email"
 @using Shop.Infrastructure.Common.Optionals
 @using Shop.Utilities
 @inherits Shop.UI.Shared.PageBase
+
+<PageTitle>Resend Confirmation Email</PageTitle>
 
 @if (isSuccess) {
     <h1>Email confirm link sent!</h1>

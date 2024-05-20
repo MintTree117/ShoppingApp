@@ -1,8 +1,11 @@
+@page "/login-or-register"
 @using System.ComponentModel.DataAnnotations
 @using Shop.Infrastructure.Common.Optionals
 @using Shop.Infrastructure.Identity
 @using Shop.Utilities
 @inherits Shop.UI.Shared.PageBase
+
+<PageTitle>Login Or Register</PageTitle>
 
 @if (registered) {
     <h1>Account Registered.</h1>
@@ -89,7 +92,7 @@ else {
     
 @code 
 {
-    [Inject] IAuthenticationManager AuthenticationManager { get; init; } = default!;
+    [Inject] public AuthenticationManager AuthenticationManager { get; init; } = default!;
     //[Inject] CartManager CartManager { get; init; } = default!;
 
     readonly LoginRequest loginRequest = new();

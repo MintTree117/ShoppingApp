@@ -6,6 +6,6 @@ internal static class StorageConfiguration
 {
     internal static void ConfigureStorage( this WebAssemblyHostBuilder builder )
     {
-        builder.Services.AddSingleton<IStorageService, StorageService>();
+        builder.Services.AddScoped<StorageService>();
     }
 }

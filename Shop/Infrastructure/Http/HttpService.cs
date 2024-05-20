@@ -5,7 +5,7 @@ using Shop.Infrastructure.Common.Optionals;
 
 namespace Shop.Infrastructure.Http;
 
-internal sealed class HttpService( IHttpClientFactory httpFactory ) : IHttpService
+public sealed class HttpService( IHttpClientFactory httpFactory )
 {
     readonly IHttpClientFactory _httpFactory = httpFactory;
 

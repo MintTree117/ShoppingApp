@@ -4,9 +4,9 @@ using Shop.Infrastructure.Common.Optionals;
 
 namespace Shop.Infrastructure.Storage;
 
-internal sealed class StorageService( IJSRuntime jsRuntime ) : IStorageService
+public sealed class StorageService()
 {
-    readonly IJSRuntime _jsRuntime = jsRuntime;
+    readonly IJSRuntime _jsRuntime = default;
 
     public async Task<Opt<T>> Get<T>( string key )
     {

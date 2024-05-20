@@ -5,6 +5,8 @@
 @inherits Shop.UI.Account.AccountPageBase
 @layout AccountLayout
 
+<PageTitle>Delete Account</PageTitle>
+
 <h3>Delete Personal Data</h3>
 
 <hr/>
@@ -40,7 +42,7 @@ else {
 }
 
 @code {
-    [Inject] IAuthenticationManager Authenticator { get; set; } = default!;
+    [Inject] AuthenticationManager Authenticator { get; set; } = default!;
     DeleteAccountRequest request = new();
     bool isWarning = false;
     bool isDeleted = false;

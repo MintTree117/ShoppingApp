@@ -7,11 +7,16 @@ using Shop.Infrastructure.Storage;
 
 namespace Shop.Infrastructure.Identity;
 
-internal sealed class AuthenticationManager( IStorageService storageService ) : AuthenticationStateProvider, IAuthenticationManager
+public sealed class AuthenticationManager : AuthenticationStateProvider
 {
     const string AccessKey = "accessToken";
     const string RefreshKey = "refreshToken";
-    readonly IStorageService storage = storageService;
+    readonly StorageService storage;
+
+    public AuthenticationManager( StorageService storageService )
+    {
+        storage = storageService;
+    }
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
