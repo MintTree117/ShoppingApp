@@ -2,18 +2,21 @@
 @using System.ComponentModel.DataAnnotations
 @using Shop.Infrastructure.Common.Optionals
 @using Shop.Infrastructure.Identity
-@using Shop.UI.Shared
 @using Shop.Utilities
 @inherits Shop.UI.Authentication.AuthenticationPageBase
 
 <PageTitle>Login Or Register</PageTitle>
 
 @if (registered) {
-    <h1>Account Registered.</h1>
-    <h2>Id: @( registerReply?.Id ?? "No id returned." )</h2>
-    <h2>Email: @(registerReply?.Email ?? "No email returned.")</h2>
-    <h2>Username: @( registerReply?.Username ?? "No username returned." )</h2>
-    <p>A confirmation link has been emailed to @( registerReply?.Email ?? "your email" ). Please verify your email before logging in.</p>
+    <div class="row">
+        <div class="col-md-4">
+            <h1>Account Registered.</h1>
+            <h2>Id: @( registerReply?.Id ?? "No id returned." )</h2>
+            <h2>Email: @(registerReply?.Email ?? "No email returned.")</h2>
+            <h2>Username: @( registerReply?.Username ?? "No username returned." )</h2>
+            <p>A confirmation link has been emailed to @( registerReply?.Email ?? "your email" ). Please verify your email before logging in.</p>
+        </div>
+    </div>
 }
 else if (pendingTwoFactor) {
     <h1>Two-factor authentication</h1>
@@ -91,7 +94,19 @@ else {
         </EditForm>
     </div>
 }
-    
+
+<div class="row">
+    <div class="col-md-4">
+        <hr/>
+        <h1>Development</h1>
+        <hr/>
+        <button class="btn-primary" onclick="@(async ()=> await TestRegister())">Test Register</button>
+        <button class="btn-primary" onclick="@(async ()=> await TestLogin())">Test Login</button>
+    </div>
+</div>
+
+
+
 @code 
 {
     [Inject] public AuthenticationManager AuthenticationManager { get; init; } = default!;
@@ -104,6 +119,24 @@ else {
     bool registered = false;
     bool pendingTwoFactor = false;
     RegisterReply? registerReply;
+
+    async Task TestRegister()
+    {
+        registerRequest.Email = "martygrof3708@gmail.com";
+        registerRequest.Username = "MintTree117";
+        registerRequest.Password = "Password1?";
+        registerRequest.PasswordConfirm = "Password1?";
+
+        await OnValidRegisterSubmitAsync();
+    }
+
+    async Task TestLogin()
+    {
+        loginRequest.EmailOrUsername = "martygrof3708@gmail.com";
+        loginRequest.Password = "Password1?";
+
+        await OnValidLoginSubmitAsync();
+    }
 
     async Task OnValidLoginSubmitAsync()
     {
@@ -188,7 +221,7 @@ else {
     }
     
     async Task<Opt<LoginReply>> TryLogin() => 
-        await Http.TryGetRequest<LoginReply>( Urls.ApiLogin );
+        await Http.TryPostRequest<LoginReply>( Urls.ApiLogin, loginRequest );
     async Task<Opt<bool>> TryUpdateLocalState( Opt<LoginReply> loginResult ) => 
         await AuthenticationManager.SetAuthenticationStateAsync( loginResult.Data.AccessToken, loginResult.Data.RefreshToken );
     async Task<Opt<TwoFactorReply>> TryTwoFactorLogin() => 
