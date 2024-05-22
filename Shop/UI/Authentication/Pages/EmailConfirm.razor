@@ -71,7 +71,7 @@ else if (emailConfirmed) {
     void GoToResend() => 
         Navigate( Urls.PageResendConfirm );
     void GoToLogin() => 
-        Navigate( Urls.PageLoginOrRegister );
+        Navigate( Urls.PageLoginOrRegister, true );
     
     readonly record struct ConfirmEmailRequest(
         string Email,

@@ -45,6 +45,8 @@
     <ItemGroup>
       <Folder Include="UI\Cart\" />
       <Folder Include="UI\Checkout\" />
+      <Folder Include="UI\ProductDetails\" />
+      <Folder Include="UI\ProductSearch\" />
     </ItemGroup>
 
 </Project>

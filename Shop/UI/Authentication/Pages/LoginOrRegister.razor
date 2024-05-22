@@ -105,10 +105,26 @@ else {
     </div>
 </div>
 
-
-
 @code 
 {
+    async Task TestRegister()
+    {
+        registerRequest.Email = "martygrof3708@gmail.com";
+        registerRequest.Username = "MintTree117";
+        registerRequest.Password = "Password1?";
+        registerRequest.PasswordConfirm = "Password1?";
+
+        await OnValidRegisterSubmitAsync();
+    }
+    async Task TestLogin()
+    {
+        loginRequest.EmailOrUsername = "martygrof3708@gmail.com";
+        loginRequest.Password = "Password1?";
+
+        await OnValidLoginSubmitAsync();
+    }
+    
+    
     [Inject] public AuthenticationManager AuthenticationManager { get; init; } = default!;
     //[Inject] CartManager CartManager { get; init; } = default!;
 
@@ -119,24 +135,6 @@ else {
     bool registered = false;
     bool pendingTwoFactor = false;
     RegisterReply? registerReply;
-
-    async Task TestRegister()
-    {
-        registerRequest.Email = "martygrof3708@gmail.com";
-        registerRequest.Username = "MintTree117";
-        registerRequest.Password = "Password1?";
-        registerRequest.PasswordConfirm = "Password1?";
-
-        await OnValidRegisterSubmitAsync();
-    }
-
-    async Task TestLogin()
-    {
-        loginRequest.EmailOrUsername = "martygrof3708@gmail.com";
-        loginRequest.Password = "Password1?";
-
-        await OnValidLoginSubmitAsync();
-    }
 
     async Task OnValidLoginSubmitAsync()
     {

@@ -1,0 +1,172 @@
+@using Microsoft.AspNetCore.Components.Authorization
+@using Shop.Infrastructure.Catalog
+@using Shop.Infrastructure.Common.Optionals
+@using Shop.Infrastructure.Identity
+@using System.Security.Claims
+@implements IDisposable
+@inject AuthenticationManager Auth
+
+@if ( show ) {
+    <div class="nav-sidebar bg-light">
+        <div class="p-3 bg-dark d-flex align-items-center justify-content-between">
+            <div>
+                <AuthorizeView>
+                    <Authorized>
+                        <a class="text-decoration-none link-light fs-5" href="">
+                            <i class="oi oi-person"></i>
+                            <span class="ms-2">Welcome, @userName</span>
+                        </a>
+                    </Authorized>
+                    <NotAuthorized>
+                        <a class="text-decoration-none link-light fs-5" href="">
+                            <i class="oi oi-person"></i>
+                            <span class="ms-2">Hello, Sign In</span>
+                        </a>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+            <button class="btn btn-close-white" @onclick="() => ToggleSidebar( false )">
+                <i class="oi oi-x"></i>
+            </button>
+        </div>
+        
+        <nav>
+            <h5 class="sidebar-header">Shop Products</h5>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" href="">All Products</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="">On Sale</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="">Featured</a>
+                </li>
+            </ul>
+            
+            <hr/>
+            
+            <div class="d-flex align-items-center justify-content-start">
+                @if ( currentParentId.HasValue )
+                {
+                    <button class="btn border-end" @onclick="PreviousCategory">
+                        <i class="oi oi-caret-left"></i> Back
+                    </button>
+                }
+                <h5 class="sidebar-header mb-0">Shop Categories</h5>
+            </div>
+            <ul class="nav flex-column">
+                @foreach ( Category c in GetCurrentCategories() )
+                {
+                    <li class="nav-item d-flex align-items-center">
+                        <a class="nav-link flex-grow-1" href="">@c.Name</a>
+                        @if ( c.Children.Any() )
+                        {
+                            <button class="btn" @onclick="() => NextCategory( c )">
+                                <i class="oi oi-caret-right"></i>
+                            </button>
+                        }
+                    </li>
+                }
+            </ul>
+            
+            <hr/>
+            
+            <h5 class="sidebar-header">Account</h5>
+            <ul class="nav flex-column">
+                <AuthorizeView>
+                    <Authorized>
+                        <li class="nav-item">
+                            <a class="nav-link" href="">Account</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="">Purchases</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="">Logout</a>
+                        </li>
+                    </Authorized>
+                    <NotAuthorized>
+                        <li class="nav-item">
+                            <a class="nav-link" href="">Sign In</a>
+                        </li>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </ul>
+        </nav>
+    </div>
+}
+
+@code {
+    [Inject] public CategoriesService CategoriesService { get; set; } = default!;
+    [Parameter] public MainNavigationTop TopMenu { get; set; } = default!;
+
+    string userName = "No user";
+    CategoryData categories = null!;
+    bool show = false;
+    Guid? currentParentId = null;
+    
+    public void Dispose()
+    {
+        //TopMenu.OnToggleSidebar -= ToggleSidebar;
+        //TopMenu.OnSessionLoaded -= SetAuthorization;
+        //TopMenu.OnCategoriesLoaded -= SetCategories;
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await TryGetCategories();
+
+        AuthenticationState authState = await Auth.GetAuthenticationStateAsync();
+        ClaimsPrincipal? user = authState.User;
+
+        userName = (user?.Identity is not null && user.Identity.IsAuthenticated
+                ? user.Identity.Name
+                : "Username not found")
+            ?? string.Empty;
+
+        //TopMenu.OnCategoriesLoaded += SetCategories;
+        //TopMenu.OnSessionLoaded += SetAuthorization;
+        //TopMenu.OnToggleSidebar += ToggleSidebar;
+    }
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        //TopMenu.OnCategoriesLoaded += SetCategories;
+        //TopMenu.OnSessionLoaded += SetAuthorization;
+        //TopMenu.OnToggleSidebar += ToggleSidebar;
+    }
+
+    async Task TryGetCategories()
+    {
+        Opt<CategoryData> cats = await CategoriesService.GetCategories();
+        if (cats.IsOkay)
+            categories = cats.Data;
+    }
+    void ToggleSidebar( bool s )
+    {
+        this.show = s;
+        StateHasChanged();
+    }
+    IEnumerable<Category> GetCurrentCategories()
+    {
+        return currentParentId is not null
+            ? categories.Categories[ currentParentId.Value ].Children
+            : categories.PrimaryCategories;
+    }
+    void NextCategory( Category c )
+    {
+        currentParentId = c.Id;
+        StateHasChanged();
+    }
+    void PreviousCategory()
+    {
+        if ( currentParentId is null )
+            return;
+        
+        Category parentCategoryFull = categories.Categories[ currentParentId.Value ];
+        currentParentId = parentCategoryFull.ParentId;
+
+        StateHasChanged();
+    }
+}
