@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Shop;
+using Shop.Infrastructure.Catalog;
 using Shop.Infrastructure.Http;
 using Shop.Infrastructure.Identity;
 using Shop.Infrastructure.Storage;
@@ -16,6 +17,8 @@ builder.Services.AddScoped<StorageService>();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationManager>();
 builder.Services.AddScoped<AuthenticationStateProvider>( provider => provider.GetRequiredService<AuthenticationManager>() );
+builder.Services.AddSingleton<CategoriesCache>();
+builder.Services.AddScoped<CategoriesService>();
 builder.ConfigureHttp();
 
 await builder.Build().RunAsync();

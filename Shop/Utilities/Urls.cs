@@ -34,4 +34,7 @@ internal static class Urls
     internal const string PageForgotPassword = "";
     internal const string PageLoginWithRecovery = "";
     internal const string PageAccountDeleted = "";
+    internal const string PageAccountManage = "";
+    
+    internal const string PageCart = "";
 }

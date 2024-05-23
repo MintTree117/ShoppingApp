@@ -1,0 +1,78 @@
+@using Shop.Infrastructure.Catalog
+@using Shop.Infrastructure.Common.Optionals
+
+<div class="d-flex align-items-center justify-content-start">
+    @if ( currentParentId.HasValue )
+    {
+        <button class="btn border-end" @onclick="PreviousCategory">
+            <i class="oi oi-caret-left"></i> Back
+        </button>
+    }
+    <h5 class="sidebar-header mb-0">Shop Categories</h5>
+</div>
+<ul class="mb-3 nav flex-column">
+    @foreach ( Category c in GetCurrentCategories() )
+    {
+        <li class="nav-item d-flex align-items-center">
+            <a class="nav-link flex-grow-1" href="">@c.Name</a>
+            @if ( c.Children.Any() )
+            {
+                <button class="btn" @onclick="() => NextCategory( c )">
+                    <i class="oi oi-caret-right"></i>
+                </button>
+            }
+        </li>
+    }
+    <li class="nav-item d-flex align-items-center">
+        <a class="nav-link flex-grow-1" href="">Test</a>
+    </li>
+    <li class="nav-item d-flex align-items-center">
+        <a class="nav-link flex-grow-1" href="">Test</a>
+    </li>
+    <li class="nav-item d-flex align-items-center">
+        <a class="nav-link flex-grow-1" href="">Test</a>
+    </li>
+    <li class="nav-item d-flex align-items-center">
+        <a class="nav-link flex-grow-1" href="">Test</a>
+    </li>
+    <li class="nav-item d-flex align-items-center">
+        <a class="nav-link flex-grow-1" href="">Test</a>
+    </li>
+</ul>
+
+@code {
+    [Inject] public CategoriesService Service { get; set; } = default!;
+
+    CategoryData categoryData = CategoryData.None();
+    Guid? currentParentId = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        Opt<CategoryData> getResult = await Service.GetCategories();
+        if (getResult.IsOkay)
+            categoryData = getResult.Data;
+    }
+
+    IReadOnlyList<Category> GetCurrentCategories()
+    {
+        return currentParentId is not null
+            ? categoryData.Categories[currentParentId.Value].Children
+            : categoryData.PrimaryCategories;
+    }
+    void NextCategory( Category c )
+    {
+        currentParentId = c.Id;
+        StateHasChanged();
+    }
+    void PreviousCategory()
+    {
+        if (currentParentId is null)
+            return;
+
+        Category parent = categoryData.Categories[currentParentId.Value];
+        currentParentId = parent.ParentId;
+
+        StateHasChanged();
+    }
+}

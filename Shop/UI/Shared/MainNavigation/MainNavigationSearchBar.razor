@@ -1,0 +1,53 @@
+<div class="input-group">
+    <input class="form-control" 
+           @bind-value="@searchText"
+           type="search"
+           list="products"
+           @onkeyup="HandleSearch"
+           placeholder="Search All Products..."
+           @ref="_searchInputElement"/>
+    <datalist id="products">
+        @foreach ( string s in _suggestions )
+        {
+            <option>@s</option>
+        }
+    </datalist>
+    <div class="input-group-append">
+        <button class="btn btn-primary px-3" @onclick="SearchProducts">
+            <span class="me-2">Search</span>
+            <span class="fa-solid fa-magnifying-glass"></span>
+        </button>
+    </div>
+</div>
+
+@code 
+{
+    [Inject] public NavigationManager Navigation { get; set; } = default!;
+    
+    ElementReference _searchInputElement;
+    string searchText = string.Empty;
+    List<string> _suggestions = new();
+    
+    void SearchProducts()
+    {
+        Navigation.NavigateTo( "" );
+    }
+    async Task HandleSearch( KeyboardEventArgs args )
+    {
+        if (args.Key is null or "Enter") {
+            SearchProducts();
+            return;
+        }
+
+
+        /*ServiceReply<List<string>?> reply = await ProductService.GetProductSearchSuggestions( _searchText );
+        
+        if ( reply.Data is null || !reply.Success )
+        {
+            _suggestions = new List<string>();
+            return;
+        }
+
+        _suggestions = reply.Data;*/
+    }
+}

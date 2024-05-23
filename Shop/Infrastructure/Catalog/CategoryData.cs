@@ -26,4 +26,6 @@ public sealed class CategoryData( Dictionary<Guid, Category> dict, List<Category
 
         return new CategoryData( dictionary, primaries );
     }
+    public static CategoryData None() => 
+        new( new Dictionary<Guid, Category>(), [] );
 }

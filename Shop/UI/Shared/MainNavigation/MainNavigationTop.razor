@@ -1,0 +1,144 @@
+@using Shop.Utilities
+@implements IDisposable
+@inject IJSRuntime JsRuntime
+
+@if (mobileView) {
+    <div class="container-fluid border-bottom py-3 top-nav background-light">
+        <div class="d-flex flex-nowrap align-items-center justify-content-between top-nav-inner">
+            <div class="d-flex align-items-center justify-content-between gap-3">
+                <a class="logo" href="home">
+                    <img src="/images/logo.svg" alt="Blazor">
+                </a>
+            </div>
+            <div class="d-flex align-items-center justify-content-between gap-3">
+                <div class="d-none d-lg-block">
+                    <button class="btn me-1" @onclick="OnClickAccountButton">
+                        <i class="fa fa-cart-shopping fa-2x"></i>
+                    </button>
+                </div>
+                <div class="d-flex flex-row me-3">
+                    <button class="btn me-1" @onclick="GoToCart">
+                        <i class="fa fa-cart fa-2x"></i>
+                    </button>
+                    <div class="d-flex flex-column align-items-start">
+                        <span class="d-block text-muted"><small>@cartCount Items</small></span>
+                        <span class="d-block fw-bold">$@cartPrice</span>
+                    </div>
+                </div>
+            </div>
+            <button class="btn" @onclick="@OpenSidebar">
+                <i class="oi oi-menu"></i>
+            </button>
+        </div>
+
+        <!-- Second row exclusively for search bar on small screens -->
+        <div class="container-fluid d-lg-none mt-3">
+            <MainNavigationSearchBar/>
+        </div>
+    </div>
+
+    <NavSidebar NavMenu="@this"></NavSidebar>
+}
+else {
+    <div class="top-nav-upper">
+        <div class="top-nav-content content-container">
+            <nav class="top-nav-upper-left">
+                <a href="">Help & Contact</a>
+                <a href="">Featured Items</a>
+                <a href="">Top Deals</a>
+            </nav>
+            <div class="top-nav-upper-right">
+                <button class="btn top-nav-button" @onclick="OnClickAccountButton">
+                    <div class="btn btn-icon">
+                        <i class="fa fa-user"></i>
+                    </div>
+                    <div class="top-nav-upper-right-label">
+                        <span class="d-block"><small>@GetAccountButtonText()</small></span>
+                    </div>
+                </button>
+                <button class="btn top-nav-button" @onclick="OnClickAccountButton">
+                    <div class="btn btn-icon" @onclick="GoToCart">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                    </div>
+                    <div class="d-flex flex-column align-items-start justify-content-end">
+                        <span class="d-block"><small>@cartCount</small></span>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="top-nav-lower">
+        <div class="top-nav-content content-container">
+            <a class="logo" href="home">
+                <img class="top-nav-item" src="/images/logo.svg" alt="Blazor">
+            </a>
+            <div class="btn position-relative mx-2 top-nav-categories-button" @onmouseenter="ShowDesktopCategories" @onmouseleave="HideDesktopCategories">
+                <strong>Shop By Category</strong> &#9662
+                @if (showDesktopCategories) {
+                    <div class="top-nav-categories-wrapper position-absolute">
+                        <MainNavigationCategories/>
+                    </div>
+                }
+            </div>
+            <div class="d-flex flex-grow-1 mx-0 top-nav-item top-nav-search">
+                <MainNavigationSearchBar/>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Inject] public NavigationManager navigation { get; set; } = default!;
+
+    DotNetObjectReference<MainNavigationTop> dotNetRef = default!;
+    int screenWidth;
+    int screenHeight;
+    bool mobileView = false;
+    bool showDesktopCategories = false;
+
+    decimal cartPrice = decimal.Zero;
+    int cartCount = 0;
+
+    public void Dispose()
+    {
+        dotNetRef?.Dispose();
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        dotNetRef = DotNetObjectReference.Create( this );
+        await JsRuntime.InvokeVoidAsync( "resizeObserverInterop.initialize", dotNetRef );
+    }
+    [JSInvokable] public void OnResize( int width, int height )
+    {
+        screenWidth = width;
+        screenHeight = height;
+
+        mobileView = screenWidth < 900;
+
+        StateHasChanged();
+    }
+    void ShowDesktopCategories()
+    {
+        showDesktopCategories = true;
+        StateHasChanged();
+    }
+    void HideDesktopCategories()
+    {
+        showDesktopCategories = false;
+        StateHasChanged();
+    }
+    void OnClickAccountButton()
+    {
+        navigation.NavigateTo( Urls.PageAccountManage, true );
+    }
+    void GoToCart()
+    {
+        navigation.NavigateTo( Urls.PageCart, true );
+    }
+    void OpenSidebar() { }
+
+    string GetAccountButtonText()
+    {
+        return "Sign In";
+    }
+}

@@ -3,22 +3,23 @@ using Shop.Infrastructure.Http;
 
 namespace Shop.Infrastructure.Catalog;
 
-public sealed class CategoriesService( HttpService httpService )
+public sealed class CategoriesService( HttpService httpService, CategoriesCache categoriesCache )
 {
     readonly HttpService http = httpService;
-    Opt<CategoryData> categories = Opt<CategoryData>.None();
+    readonly CategoriesCache cache = categoriesCache;
+    readonly Opt<CategoryData> data = categoriesCache.categories;
 
     public async Task<Opt<CategoryData>> GetCategories()
     {
-        if (categories.IsOkay)
-            return categories;
+        if (data.IsOkay)
+            return data;
 
         Opt<List<Category>> fetchResult = await http.TryGetRequest<List<Category>>( "Get Categories" );
 
         if (!fetchResult.IsOkay)
             return Opt<CategoryData>.None( fetchResult );
 
-        categories = Opt<CategoryData>.With( CategoryData.Create( fetchResult.Data ) );
-        return categories;
+        cache.categories = Opt<CategoryData>.With( CategoryData.Create( fetchResult.Data ) );
+        return cache.categories;
     }
 }
