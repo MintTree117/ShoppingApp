@@ -1,5 +1,5 @@
-<div class="input-group">
-    <input class="form-control" 
+<div class="input-group top-nav-search">
+    <input class="form-control top-nav-search-control" 
            @bind-value="@searchText"
            type="search"
            list="products"
@@ -13,9 +13,9 @@
         }
     </datalist>
     <div class="input-group-append">
-        <button class="btn btn-primary px-3" @onclick="SearchProducts">
-            <span class="me-2">Search</span>
-            <span class="fa-solid fa-magnifying-glass"></span>
+        <button class="btn btn-primary top-nav-search-button text-center" @onclick="SearchProducts">
+            <span class="top-nav-search-button-text">Search</span>
+            <i class="fa-solid fa-magnifying-glass"></i>
         </button>
     </div>
 </div>

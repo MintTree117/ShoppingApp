@@ -3,51 +3,48 @@
 @inject IJSRuntime JsRuntime
 
 @if (mobileView) {
-    <div class="container-fluid border-bottom py-3 top-nav background-light">
-        <div class="d-flex flex-nowrap align-items-center justify-content-between top-nav-inner">
-            <div class="d-flex align-items-center justify-content-between gap-3">
-                <a class="logo" href="home">
-                    <img src="/images/logo.svg" alt="Blazor">
-                </a>
+    <!-- MOBILE -->
+    <div class="top-nav-mobile">
+        <!-- TOP ROW -->
+        <div class="top-nav-content content-container top-nav-mobile-top">
+            <!-- LOGO -->
+            <a class="logo" href="home">
+                <img class="top-nav-item p-2" src="/images/logo.svg" alt="Blazor">
+            </a>
+            <div class="top-nav-mobile-right">
+                <button class="btn btn-icon" @onclick="@OnClickAccountButton">
+                    <i class="fa-solid fa-user fa-lg"></i>
+                </button>
+                <button class="btn btn-icon" @onclick="@GoToCart">
+                    <i class="fa-solid fa-cart-shopping fa-lg"></i>
+                </button>
+                <button class="btn btn-icon pe-0" @onclick="@OpenSide">
+                    <i class="fa-solid fa-bars fa-lg"></i>
+                </button>
             </div>
-            <div class="d-flex align-items-center justify-content-between gap-3">
-                <div class="d-none d-lg-block">
-                    <button class="btn me-1" @onclick="OnClickAccountButton">
-                        <i class="fa fa-cart-shopping fa-2x"></i>
-                    </button>
-                </div>
-                <div class="d-flex flex-row me-3">
-                    <button class="btn me-1" @onclick="GoToCart">
-                        <i class="fa fa-cart fa-2x"></i>
-                    </button>
-                    <div class="d-flex flex-column align-items-start">
-                        <span class="d-block text-muted"><small>@cartCount Items</small></span>
-                        <span class="d-block fw-bold">$@cartPrice</span>
-                    </div>
-                </div>
-            </div>
-            <button class="btn" @onclick="@OpenSidebar">
-                <i class="oi oi-menu"></i>
-            </button>
         </div>
 
-        <!-- Second row exclusively for search bar on small screens -->
-        <div class="container-fluid d-lg-none mt-3">
+        <!-- BOTTOM ROW -->
+        <div class="top-nav-content content-container pb-2">
             <MainNavigationSearchBar/>
         </div>
     </div>
 
-    <NavSidebar NavMenu="@this"></NavSidebar>
+    <MainNavigationSide @ref="sidebar" TopMenu="@this"/>
 }
 else {
+    <!-- UPPER -->
     <div class="top-nav-upper">
         <div class="top-nav-content content-container">
+            <!-- TOP LEFT -->
             <nav class="top-nav-upper-left">
-                <a href="">Help & Contact</a>
-                <a href="">Featured Items</a>
-                <a href="">Top Deals</a>
+                <a href=""><small>Help & Contact</small></a>
+                <a href=""><small>Featured Items</small></a>
+                <a href=""><small>Top Deals</small></a>
             </nav>
+            <!-- TOP RIGHT -->
             <div class="top-nav-upper-right">
+                <!-- ACCOUNT -->
                 <button class="btn top-nav-button" @onclick="OnClickAccountButton">
                     <div class="btn btn-icon">
                         <i class="fa fa-user"></i>
@@ -56,8 +53,9 @@ else {
                         <span class="d-block"><small>@GetAccountButtonText()</small></span>
                     </div>
                 </button>
-                <button class="btn top-nav-button" @onclick="OnClickAccountButton">
-                    <div class="btn btn-icon" @onclick="GoToCart">
+                <!-- CART -->
+                <button class="btn top-nav-button" @onclick="GoToCart">
+                    <div class="btn btn-icon">
                         <i class="fa-solid fa-cart-shopping"></i>
                     </div>
                     <div class="d-flex flex-column align-items-start justify-content-end">
@@ -67,11 +65,14 @@ else {
             </div>
         </div>
     </div>
+    <!-- LOWER -->
     <div class="top-nav-lower">
         <div class="top-nav-content content-container">
+            <!-- LOGO -->
             <a class="logo" href="home">
                 <img class="top-nav-item" src="/images/logo.svg" alt="Blazor">
             </a>
+            <!-- CATEGORIES -->
             <div class="btn position-relative mx-2 top-nav-categories-button" @onmouseenter="ShowDesktopCategories" @onmouseleave="HideDesktopCategories">
                 <strong>Shop By Category</strong> &#9662
                 @if (showDesktopCategories) {
@@ -80,7 +81,8 @@ else {
                     </div>
                 }
             </div>
-            <div class="d-flex flex-grow-1 mx-0 top-nav-item top-nav-search">
+            <!-- SEARCH BAR -->
+            <div class="d-flex flex-grow-1 mx-0 top-nav-item">
                 <MainNavigationSearchBar/>
             </div>
         </div>
@@ -89,6 +91,7 @@ else {
 
 @code {
     [Inject] public NavigationManager navigation { get; set; } = default!;
+    MainNavigationSide? sidebar;
 
     DotNetObjectReference<MainNavigationTop> dotNetRef = default!;
     int screenWidth;
@@ -135,8 +138,11 @@ else {
     {
         navigation.NavigateTo( Urls.PageCart, true );
     }
-    void OpenSidebar() { }
-
+    void OpenSide()
+    {
+        sidebar?.Open();
+    }
+    
     string GetAccountButtonText()
     {
         return "Sign In";

@@ -14,9 +14,10 @@ builder.RootComponents.Add<HeadOutlet>( "head::after" );
 
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<StorageService>();
+//builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthorizationCore();
-builder.Services.AddScoped<AuthenticationManager>();
-builder.Services.AddScoped<AuthenticationStateProvider>( provider => provider.GetRequiredService<AuthenticationManager>() );
+builder.Services.AddScoped<AuthenticationStateProvider, AuthenticationManager>();
+//builder.Services.AddScoped<AuthenticationStateProvider>( provider => provider.GetRequiredService<AuthenticationManager>() );
 builder.Services.AddSingleton<CategoriesCache>();
 builder.Services.AddScoped<CategoriesService>();
 builder.ConfigureHttp();
