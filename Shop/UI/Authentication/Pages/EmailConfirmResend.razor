@@ -7,29 +7,26 @@
 
 <PageTitle>Resend Confirmation Email</PageTitle>
 
-@if (isSuccess) {
-    <h1>Email confirm link sent!</h1>
-    <h2>Please check your email.</h2>
-}
-else {
-    <h1>Resend email confirmation</h1>
-    <h2>Enter your email.</h2>
-    <hr/>
-    <div class="row">
-        <div class="col-md-4">
-            <EditForm Model="Request" FormName="resend-email-confirmation" OnValidSubmit="SendConfirmationEmail" method="post">
-                <DataAnnotationsValidator/>
-                <ValidationSummary class="text-danger" role="alert"/>
-                <div class="form-floating mb-3">
-                    <InputText @bind-Value="@Request.Email" id="email" class="form-control" aria-required="true" placeholder="name@example.com"/>
-                    <label for="email" class="form-label">Email</label>
-                    <ValidationMessage For="@(() => Request.Email)" class="text-danger"/>
-                </div>
-                <button type="submit" class="w-100 btn btn-lg btn-primary">Resend</button>
-            </EditForm>
-        </div>
-    </div>
-}
+<div class="col-4 mx-auto">
+    @if (isSuccess) {
+        <h3 class="mb-3">Email confirm link sent!</h3>
+        <p>Please click the link sent to your email to activate your account.</p>
+    }
+    else {
+        <h3 class="mb-3">Resend email confirmation</h3>
+        <h6 class="mb-3">Enter your email.</h6>
+        <EditForm Model="Request" FormName="resend-email-confirmation" OnValidSubmit="SendConfirmationEmail" method="post">
+            <DataAnnotationsValidator/>
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="@Request.Email" id="email" class="form-control" aria-required="true" placeholder="name@example.com"/>
+                <label for="email" class="form-label">Email</label>
+                <ValidationMessage For="@(() => Request.Email)" class="text-danger"/>
+            </div>
+            <button type="submit" class="w-100 btn btn-lg btn-primary">Resend</button>
+        </EditForm>
+    }
+</div>
 
 @code {
     [SupplyParameterFromForm]

@@ -36,6 +36,11 @@
         display: inline-block;
         margin-right: 10px;
     }
+
+    .top-nav-category-header {
+        display: none;
+        background-color: white;
+    }
 }
 
 /* MOBILE */

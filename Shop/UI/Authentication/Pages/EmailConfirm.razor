@@ -6,15 +6,17 @@
 
 <PageTitle>Confirm Email</PageTitle>
 
-@if (confirmFailed) {
-    <h1>Email Confirmation Failed!</h1>
-    <h2>Error Details: @apiReply.Message()</h2>
-    <p>Please click <button class="btn btn-link" @onclick="GoToResend">here</button> to try sending another confirmation link, or contact support.</p>
-}
-else if (emailConfirmed) {
-    <h1>Email Confirmed!</h1>
-    <p>Your account has been verified and you can now <button class="btn btn-link" @onclick="GoToLogin">login normally.</button></p>
-}
+<div class="col-4 mx-auto">
+    @if (confirmFailed) {
+        <h3 class="mb-3">Email Confirmation Failed!</h3>
+        <p class="mb-3">Error Details: @apiReply.Message()</p>
+        <p>Please click <button class="btn btn-link" @onclick="GoToResend">here</button> to try sending another confirmation link, or contact support.</p>
+    }
+    else if (emailConfirmed) {
+        <h3 class="mb-3">Email Confirmed!</h3>
+        <p>Your account has been verified and you can now <button class="btn btn-link" @onclick="GoToLogin">login normally.</button></p>
+    }
+</div>
 
 @code 
 {

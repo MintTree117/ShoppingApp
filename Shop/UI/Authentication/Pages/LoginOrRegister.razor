@@ -46,10 +46,8 @@ else if (pendingTwoFactor) {
 }
 else {
     <div style="max-width: 360px" class="mt-5 mx-auto text-center">
-        <img class="mb-4" src="/Images/Logo.svg" alt="blazor" width="72" height="57">
-
         <EditForm Model="@loginRequest" OnValidSubmit="@(async () => await OnValidLoginSubmitAsync() )">
-            <h1 class="h3 mb-3 fw-normal">Please Sign In</h1>
+            <h1 class="h3 mb-3 fw-normal">Sign In</h1>
             <DataAnnotationsValidator/>
             <div class="form-floating">
                 <InputText type="name" class="form-control" id="emailOrUsername" @bind-Value="@loginRequest.EmailOrUsername">></InputText>
