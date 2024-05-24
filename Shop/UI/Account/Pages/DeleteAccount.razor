@@ -1,6 +1,7 @@
+@page "/delete-account"
 @using System.ComponentModel.DataAnnotations
+@using Shop.Infrastructure.Authentication
 @using Shop.Infrastructure.Common.Optionals
-@using Shop.Infrastructure.Identity
 @using Shop.Utilities
 @inherits Shop.UI.Account.AccountPageBase
 @layout AccountLayout
@@ -42,7 +43,7 @@ else {
 }
 
 @code {
-    [Inject] AuthenticationManager Authenticator { get; set; } = default!;
+    [Inject] CustomAuthenticationProvider Authenticator { get; set; } = default!;
     DeleteAccountRequest request = new();
     bool isWarning = false;
     bool isDeleted = false;

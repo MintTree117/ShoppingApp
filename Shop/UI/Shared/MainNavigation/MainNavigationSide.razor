@@ -1,10 +1,10 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using Shop.Infrastructure.Catalog
 @using Shop.Infrastructure.Common.Optionals
-@using Shop.Infrastructure.Identity
 @using System.Security.Claims
-@implements IDisposable
-@inject AuthenticationStateProvider Auth
+@using Shop.Infrastructure.Authentication
+@using Shop.Infrastructure.Http
+@using Shop.Utilities
 
 @if ( show ) {
     <!-- CONTAINER -->
@@ -54,13 +54,13 @@
                 <AuthorizeView>
                     <Authorized>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Account</a>
+                            <a class="nav-link" href="@Urls.PageAccountManage">Manage Account</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Purchases</a>
+                            <a class="nav-link" href="@Urls.PageOrdersManage">Manage Orders</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Logout</a>
+                            <a class="nav-link" href="@Urls.PageLogout">Logout</a>
                         </li>
                     </Authorized>
                     <NotAuthorized>
@@ -77,9 +77,14 @@
 @code {
     [Parameter] public MainNavigationTop TopMenu { get; set; } = default!;
 
-    string userName = "No user";
+    string userName = "Login";
     bool show = false;
 
+    public void OnLogin( string name )
+    {
+        userName = name;
+        StateHasChanged();
+    }
     public void Open()
     {
         show = true;   
@@ -89,34 +94,5 @@
     {
         show = false;
         StateHasChanged();
-    }
-    public void Dispose()
-    {
-        //TopMenu.OnToggleSidebar -= ToggleSidebar;
-        //TopMenu.OnSessionLoaded -= SetAuthorization;
-        //TopMenu.OnCategoriesLoaded -= SetCategories;
-    }
-    protected override async Task OnInitializedAsync()
-    {
-        await base.OnInitializedAsync();
-
-        /*AuthenticationState authState = await Auth.GetAuthenticationStateAsync();
-        ClaimsPrincipal? user = authState.User;
-
-        userName = (user?.Identity is not null && user.Identity.IsAuthenticated
-                ? user.Identity.Name
-                : "Username not found")
-            ?? string.Empty;*/
-
-        //TopMenu.OnCategoriesLoaded += SetCategories;
-        //TopMenu.OnSessionLoaded += SetAuthorization;
-        //TopMenu.OnToggleSidebar += ToggleSidebar;
-    }
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-        //TopMenu.OnCategoriesLoaded += SetCategories;
-        //TopMenu.OnSessionLoaded += SetAuthorization;
-        //TopMenu.OnToggleSidebar += ToggleSidebar;
     }
 }

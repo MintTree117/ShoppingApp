@@ -1,7 +1,7 @@
 @using Shop.Utilities
-@using Shop.Infrastructure.Identity
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Principal
+@using Shop.Infrastructure.Authentication
 @implements IDisposable
 @inject IJSRuntime JsRuntime
 
@@ -48,13 +48,24 @@ else {
             <!-- TOP RIGHT -->
             <div class="top-nav-upper-right">
                 <!-- ACCOUNT -->
-                <button class="btn top-nav-button" @onclick="OnClickAccountButton">
+                <button class="btn top-nav-button position-relative" @onmouseenter="ShowAccountDropdown" @onmouseleave="HideAccountDropdown" @onclick="OnClickAccountButton">
                     <div class="btn btn-icon">
                         <i class="fa fa-user"></i>
                     </div>
                     <div class="top-nav-upper-right-label">
                         <span class="d-block"><small>@GetAccountButtonText()</small></span>
                     </div>
+                    @if (showUserOptions) {
+                        <div class="top-nav-user-options position-absolute">
+                            <ul class="list-unstyled">
+                                <li><a href="#">Account</a></li>
+                                <li><a href="#">Addresses</a></li>
+                                <li><a href="#">Password</a></li>
+                                <li><a href="#">Orders</a></li>
+                                <li><a href="@Urls.PageLogout">Logout</a></li>
+                            </ul>
+                        </div>
+                    }
                 </button>
                 <!-- CART -->
                 <button class="btn top-nav-button" @onclick="GoToCart">
@@ -93,9 +104,8 @@ else {
 }
 
 @code {
-    [Inject] public AuthenticationStateProvider Auth { get; set; } = default!;
     [Inject] public NavigationManager navigation { get; set; } = default!;
-    AuthenticationManager authManager = null!;
+    [Inject] public CustomAuthenticationProvider AuthProvider { get; set; } = default!;
     MainNavigationSide? sidebar;
     DotNetObjectReference<MainNavigationTop> dotNetRef = default!;
 
@@ -105,26 +115,23 @@ else {
     int screenHeight;
     bool mobileView = false;
     bool showDesktopCategories = false;
+    bool showUserOptions = false;
     bool authenticated = false;
         
     decimal cartPrice = decimal.Zero;
     int cartCount = 0;
-
-    protected override void OnInitialized()
-    {
-        authManager = Auth as AuthenticationManager ?? throw new Exception( "Failed to get authentication manager." );
-    }
+    
     public void Dispose()
     {
         dotNetRef?.Dispose();
-        Auth.AuthenticationStateChanged -= OnAuthStateChanged;
+        AuthProvider.AuthenticationStateChanged -= OnAuthStateChanged;
     }
     protected override async Task OnInitializedAsync()
     {
         dotNetRef = DotNetObjectReference.Create( this );
-        Auth.AuthenticationStateChanged += OnAuthStateChanged;
+        AuthProvider.AuthenticationStateChanged += OnAuthStateChanged;
         await JsRuntime.InvokeVoidAsync( "resizeObserverInterop.initialize", dotNetRef );
-        AuthenticationState state = await authManager.GetAuthenticationStateAsync();
+        AuthenticationState state = await AuthProvider.GetAuthenticationStateAsync();
         HandleIdentity( state );
     }
     
@@ -147,7 +154,7 @@ else {
     {
         identity = state.User.Identity;
         authenticated = identity?.IsAuthenticated ?? false;
-        //accountButtonText = GetAccountButtonText();
+        sidebar?.OnLogin( identity?.Name ?? "No Username" );
         StateHasChanged();
     }
     
@@ -159,6 +166,16 @@ else {
     void HideDesktopCategories()
     {
         showDesktopCategories = false;
+        StateHasChanged();
+    }
+    void ShowAccountDropdown()
+    {
+        showUserOptions = authenticated;
+        StateHasChanged();
+    }
+    void HideAccountDropdown()
+    {
+        showUserOptions = false;
         StateHasChanged();
     }
     void OnClickAccountButton()

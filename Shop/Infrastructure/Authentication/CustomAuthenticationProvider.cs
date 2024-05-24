@@ -2,18 +2,17 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Components.Authorization;
 using Shop.Infrastructure.Common.Optionals;
-using Shop.Infrastructure.Identity.Types;
 using Shop.Infrastructure.Storage;
 
-namespace Shop.Infrastructure.Identity;
+namespace Shop.Infrastructure.Authentication;
 
-public sealed class AuthenticationManager : AuthenticationStateProvider
+public sealed class CustomAuthenticationProvider : AuthenticationStateProvider
 {
     const string AccessKey = "accessToken";
     const string RefreshKey = "refreshToken";
     readonly StorageService storage;
 
-    public AuthenticationManager( StorageService storageService )
+    public CustomAuthenticationProvider( StorageService storageService )
     {
         storage = storageService;
     }
@@ -56,8 +55,13 @@ public sealed class AuthenticationManager : AuthenticationStateProvider
     }
     public async Task<Opt<bool>> ClearAuthenticationStateAsync()
     {
+        Opt<bool> o1 = await storage.Remove( AccessKey );
+        Opt<bool> o2 = await storage.Remove( RefreshKey );
+        
         NotifyAuthenticationStateChanged( GetNotifyParams( null ) );
-        return await storage.Remove( AccessKey );
+        return o1.IsOkay && o2.IsOkay
+            ? IOpt.Okay()
+            : IOpt.None( $"{o1.Message()} : {o2.Message()}" );
     }
 
     void NotifyChange( string token )
