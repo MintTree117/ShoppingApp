@@ -1,4 +1,7 @@
 @using Shop.Utilities
+@using Shop.Infrastructure.Identity
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Principal
 @implements IDisposable
 @inject IJSRuntime JsRuntime
 
@@ -69,7 +72,7 @@ else {
     <div class="top-nav-lower">
         <div class="top-nav-content content-container">
             <!-- LOGO -->
-            <a class="logo" href="home">
+            <a class="logo" href="@Urls.PageHome">
                 <img class="top-nav-item" src="/images/logo.svg" alt="Blazor">
             </a>
             <!-- CATEGORIES -->
@@ -90,28 +93,43 @@ else {
 }
 
 @code {
+    [Inject] public AuthenticationStateProvider Auth { get; set; } = default!;
     [Inject] public NavigationManager navigation { get; set; } = default!;
+    AuthenticationManager authManager = null!;
     MainNavigationSide? sidebar;
-
     DotNetObjectReference<MainNavigationTop> dotNetRef = default!;
+
+    IIdentity? identity;
+    
     int screenWidth;
     int screenHeight;
     bool mobileView = false;
     bool showDesktopCategories = false;
-
+    bool authenticated = false;
+        
     decimal cartPrice = decimal.Zero;
     int cartCount = 0;
 
+    protected override void OnInitialized()
+    {
+        authManager = Auth as AuthenticationManager ?? throw new Exception( "Failed to get authentication manager." );
+    }
     public void Dispose()
     {
         dotNetRef?.Dispose();
+        Auth.AuthenticationStateChanged -= OnAuthStateChanged;
     }
     protected override async Task OnInitializedAsync()
     {
         dotNetRef = DotNetObjectReference.Create( this );
+        Auth.AuthenticationStateChanged += OnAuthStateChanged;
         await JsRuntime.InvokeVoidAsync( "resizeObserverInterop.initialize", dotNetRef );
+        AuthenticationState state = await authManager.GetAuthenticationStateAsync();
+        HandleIdentity( state );
     }
-    [JSInvokable] public void OnResize( int width, int height )
+    
+    [JSInvokable] 
+    public void OnResize( int width, int height )
     {
         screenWidth = width;
         screenHeight = height;
@@ -120,6 +138,19 @@ else {
 
         StateHasChanged();
     }
+    void OnAuthStateChanged( Task<AuthenticationState> task )
+    {
+        HandleIdentity( task.Result );
+    }
+
+    void HandleIdentity( AuthenticationState state )
+    {
+        identity = state.User.Identity;
+        authenticated = identity?.IsAuthenticated ?? false;
+        //accountButtonText = GetAccountButtonText();
+        StateHasChanged();
+    }
+    
     void ShowDesktopCategories()
     {
         showDesktopCategories = true;
@@ -132,7 +163,11 @@ else {
     }
     void OnClickAccountButton()
     {
-        navigation.NavigateTo( Urls.PageAccountManage, true );
+        string url = authenticated
+            ? Urls.PageAccountManage
+            : Urls.PageLoginOrRegister;
+        
+        navigation.NavigateTo( url, true );
     }
     void GoToCart()
     {
@@ -142,9 +177,11 @@ else {
     {
         sidebar?.Open();
     }
-    
     string GetAccountButtonText()
     {
-        return "Sign In";
+        string text = authenticated
+            ? identity?.Name ?? "User"
+            : "Login";
+        return text;
     }
 }

@@ -1,5 +1,6 @@
 @page "/login-or-register"
 @using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Authorization
 @using Shop.Infrastructure.Common.Optionals
 @using Shop.Infrastructure.Identity
 @using Shop.Utilities
@@ -125,8 +126,15 @@ else {
     }
     
     
-    [Inject] public AuthenticationManager AuthenticationManager { get; init; } = default!;
+    [Inject] public AuthenticationStateProvider Auth { get; init; } = default!;
+    AuthenticationManager manager = null!;
     //[Inject] CartManager CartManager { get; init; } = default!;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        manager = (Auth as AuthenticationManager)!;
+    }
 
     readonly LoginRequest loginRequest = new();
     readonly RegisterRequest registerRequest = new();
@@ -197,11 +205,7 @@ else {
     }
     async Task OnValidRegisterSubmitAsync()
     {
-        Console.WriteLine( "Hello" );
-        
         StartLoading( "Registering..." );
-
-        Console.WriteLine( "Hello" );
         
         Opt<RegisterReply> reply = await TryRegister();
 
@@ -221,11 +225,11 @@ else {
     async Task<Opt<LoginReply>> TryLogin() => 
         await Http.TryPostRequest<LoginReply>( Urls.ApiLogin, loginRequest );
     async Task<Opt<bool>> TryUpdateLocalState( Opt<LoginReply> loginResult ) => 
-        await AuthenticationManager.SetAuthenticationStateAsync( loginResult.Data.AccessToken, loginResult.Data.RefreshToken );
+        await manager.SetAuthenticationStateAsync( loginResult.Data.AccessToken, loginResult.Data.RefreshToken );
     async Task<Opt<TwoFactorReply>> TryTwoFactorLogin() => 
         await Http.TryPostRequest<TwoFactorReply>( Urls.ApiTwoFactor, twoFactorRequest );
     async Task<Opt<bool>> TryUpdateLocalState( Opt<TwoFactorReply> loginResult ) => 
-        await AuthenticationManager.SetAuthenticationStateAsync( loginResult.Data.AccessToken, loginResult.Data.RefreshToken );
+        await manager.SetAuthenticationStateAsync( loginResult.Data.AccessToken, loginResult.Data.RefreshToken );
     async Task<Opt<RegisterReply>> TryRegister() => 
         await Http.TryPostRequest<RegisterReply>( Urls.ApiRegister, registerRequest );
     

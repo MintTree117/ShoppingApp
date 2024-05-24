@@ -20,12 +20,12 @@ public sealed class AuthenticationManager : AuthenticationStateProvider
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        Opt<AccessKey> tokenResult = await storage.Get<AccessKey>( AccessKey );
+        Opt<string> tokenResult = await storage.Get<string>( AccessKey );
 
         if (tokenResult.Fail( out tokenResult ))
             return new AuthenticationState( new ClaimsPrincipal() );
 
-        ClaimsPrincipal claims = GetIdentityClaimsPrincipal( tokenResult.Data.JwtToken );
+        ClaimsPrincipal claims = GetIdentityClaimsPrincipal( tokenResult.Data );
         return new AuthenticationState( claims );
     }
     public async Task<Opt<bool>> RefreshAuthenticationStateAsync( string? accessToken )
@@ -86,6 +86,6 @@ public sealed class AuthenticationManager : AuthenticationStateProvider
             nameClaim ?? new Claim( ClaimTypes.Name, "" )
         }, "token" );
     }
-    static Task<AuthenticationState> GetNotifyParams( ClaimsPrincipal? claims ) =>
-        Task.FromResult( new AuthenticationState( claims ?? new ClaimsPrincipal() ) );
+    static async Task<AuthenticationState> GetNotifyParams( ClaimsPrincipal? claims ) =>
+        await Task.FromResult( new AuthenticationState( claims ?? new ClaimsPrincipal() ) );
 }

@@ -27,14 +27,14 @@ internal static class Urls
     
     internal const string ParamReturnUrl = "ReturnUrl";
 
-    internal const string PageHome = "";
-    internal const string PageConfirmEmail = "";
-    internal const string PageResendConfirm = "";
-    internal const string PageLoginOrRegister = "";
-    internal const string PageForgotPassword = "";
-    internal const string PageLoginWithRecovery = "";
-    internal const string PageAccountDeleted = "";
-    internal const string PageAccountManage = "";
+    internal const string PageHome = "/";
+    internal const string PageConfirmEmail = "/confirm-email";
+    internal const string PageResendConfirm = "/resend-confirmation-email";
+    internal const string PageLoginOrRegister = "/login-or-register";
+    internal const string PageForgotPassword = "/forgot-password";
+    internal const string PageLoginWithRecovery = "/recovery-login";
+    internal const string PageAccountDeleted = "/account-deleted";
+    internal const string PageAccountManage = "/manage-account";
     
-    internal const string PageCart = "";
+    internal const string PageCart = "/cart";
 }
