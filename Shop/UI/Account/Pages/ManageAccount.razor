@@ -1,5 +1,6 @@
 @page "/manage-account"
 @using System.ComponentModel.DataAnnotations
+@using Shop.Infrastructure.Account
 @using Shop.Infrastructure.Authentication
 @using Shop.Infrastructure.Common.Optionals
 @using Shop.Utilities
@@ -16,19 +17,24 @@
             <DataAnnotationsValidator/>
             <ValidationSummary class="text-danger" role="alert"/>
             <div class="form-floating mb-3">
-                <InputText @bind-Value="@accountModel.Email" id="email" class="form-control" autocomplete="email" aria-required="true" placeholder="Email"/>
+                <InputText type="email" @bind-Value="@accountModel.Email" id="email" class="form-control" autocomplete="email" aria-required="true" placeholder="Email"/>
                 <ValidationMessage For="@(() => accountModel.Email)" class="text-danger"/>
                 <label for="email" class="form-label">Email</label>
             </div>
             <div class="form-floating mb-3">
-                <InputText @bind-Value="@accountModel.Username" id="username" class="form-control" autocomplete="username" aria-required="true" placeholder="Username"/>
+                <InputText type="name" @bind-Value="@accountModel.Username" id="username" class="form-control" autocomplete="username" aria-required="true" placeholder="Username"/>
                 <ValidationMessage For="@(() => accountModel.Username)" class="text-danger"/>
                 <label for="username" class="form-label">Username</label>
             </div>
             <div class="form-floating mb-3">
-                <InputText @bind-Value="@accountModel.Phone" id="phone" class="form-control" autocomplete="phone" aria-required="true" placeholder="Phone"/>
+                <InputText type="phone" @bind-Value="@accountModel.Phone" id="phone" class="form-control" autocomplete="phone" aria-required="true" placeholder="Phone"/>
                 <ValidationMessage For="@(() => accountModel.Phone)" class="text-danger"/>
                 <label for="phone" class="form-label">Phone</label>
+            </div>
+            <div class="form-floating mb-3">
+                <InputCheckbox @bind-Value="@accountModel.HasTwoFactor" id="2fa" class="form-control" autocomplete="two-factor" aria-required="true" placeholder="TwoFactor"/>
+                <ValidationMessage For="@(() => accountModel.Phone)" class="text-danger"/>
+                <label for="2fa" class="form-label">Enable Two Factor Login?</label>
             </div>
             <button type="submit" class="w-100 btn btn-lg btn-primary">Edit Account</button>
         </EditForm>
@@ -37,6 +43,7 @@
 
 @code {
     [Inject] public CustomAuthenticationProvider Auth { get; set; } = default!;
+    [Inject] public AccountEventHandler AccountEventHandler { get; set; } = default!;
     AccountModel accountModel = new();
     string accessToken = string.Empty;
 
@@ -45,7 +52,6 @@
         await base.OnInitializedAsync();
         Opt<string> token = await Auth.GetAccessToken();
         accessToken = token.Data;
-        Console.WriteLine( accessToken );
         await FetchAccount();
     }
     async Task FetchAccount()
@@ -81,7 +87,7 @@
     async Task<Opt<AccountModel>> TryGetAccount() =>
         await Http.TryGetRequest<AccountModel>( Urls.ApiGetAccountDetails, null, accessToken );
     async Task<Opt<bool>> TryUpdateAccount() =>
-        await Http.TryPostRequest<bool>( Urls.ApiUpdateAccountDetails, accountModel );
+        await Http.TryPostRequest<bool>( Urls.ApiUpdateAccountDetails, accountModel, accessToken );
     void UpdateLocalState( Opt<AccountModel> reply )
     {
         accountModel = reply.IsOkay
@@ -100,5 +106,7 @@
 
         [Phone( ErrorMessage = "Invalid phone number." )]
         public string? Phone { get; set; } = string.Empty;
+
+        public bool HasTwoFactor { get; set; }
     }
 }

@@ -9,7 +9,6 @@ namespace Shop.Infrastructure.Authentication;
 public sealed class CustomAuthenticationProvider : AuthenticationStateProvider
 {
     const string AccessKey = "accessToken";
-    const string RefreshKey = "refreshToken";
     readonly StorageService storage;
 
     public CustomAuthenticationProvider( StorageService storageService )
@@ -27,46 +26,28 @@ public sealed class CustomAuthenticationProvider : AuthenticationStateProvider
         ClaimsPrincipal claims = GetIdentityClaimsPrincipal( tokenResult.Data );
         return new AuthenticationState( claims );
     }
-    public async Task<Opt<bool>> RefreshAuthenticationStateAsync( string? accessToken )
-    {
-        if (string.IsNullOrWhiteSpace( accessToken ))
-            return IOpt.None( "Empty access token." );
-        
-        NotifyChange( accessToken );
-        
-        return await storage.Set( AccessKey, accessToken );
-    }
-    public async Task<Opt<bool>> SetAuthenticationStateAsync( string? accessToken, string? refreshToken )
+    public async Task<Opt<bool>> SetAuthenticationStateAsync( string? accessToken )
     {
         if (string.IsNullOrWhiteSpace( accessToken ))
             return IOpt.None( "Empty access token." );
 
-        if (string.IsNullOrWhiteSpace( refreshToken ))
-            return IOpt.None( "Empty refresh token." );
-
         NotifyChange( accessToken );
 
-        Opt<bool> access = await storage.Set( AccessKey, accessToken );
-        Opt<bool> refresh = await storage.Set( RefreshKey, refreshToken );
-
-        return access.IsOkay && refresh.IsOkay
+        Opt<bool> result = await storage.Set( AccessKey, accessToken );
+        return result.IsOkay
             ? IOpt.Okay()
-            : IOpt.None( $"{access.Message()} : {refresh.Message()}" );
+            : IOpt.None( result );
     }
     public async Task<Opt<bool>> ClearAuthenticationStateAsync()
     {
-        Opt<bool> o1 = await storage.Remove( AccessKey );
-        Opt<bool> o2 = await storage.Remove( RefreshKey );
-        
+        Opt<bool> result = await storage.Remove( AccessKey );
         NotifyAuthenticationStateChanged( GetNotifyParams( null ) );
-        return o1.IsOkay && o2.IsOkay
+        return result.IsOkay
             ? IOpt.Okay()
-            : IOpt.None( $"{o1.Message()} : {o2.Message()}" );
+            : IOpt.None( result );
     }
     public async Task<Opt<string>> GetAccessToken() => 
         await storage.Get<string>( AccessKey );
-    public async Task<Opt<string>> GetRefreshToken() =>
-        await storage.Get<string>( RefreshKey );
     
     void NotifyChange( string token )
     {
