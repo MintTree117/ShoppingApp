@@ -8,7 +8,6 @@
         <NoficationsPanel @ref="@notifications"/>
         <MainNavigationTop/>
         <article class="content content-container">
-            <LoadingPanel @ref="@loader"/>
             <div class="main-content">
                 <CascadingValue Value="@GetSelf()" name="layout">
                     @Body
@@ -21,18 +20,8 @@
 @code
 {
     NoficationsPanel notifications = default!;
-    LoadingPanel loader = default!;
     MainLayout GetSelf() => this;
-
-    internal void StartTimedPageRedirect( int seconds, string? message )
-    {
-        loader.StartRedirecting( seconds, message ?? "Redirecting..." );
-    }
-    internal void TickRedirect()
-    {
-        loader.TickRedirect();
-        StateHasChanged();
-    }
+    
     internal void PushAlert( AlertType type, string message )
     {
         notifications.PushAlert( type, message );

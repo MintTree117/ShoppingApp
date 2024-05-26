@@ -19,7 +19,7 @@
             <DataAnnotationsValidator/>
             <ValidationSummary class="text-danger" role="alert"/>
             <div class="form-floating mb-3">
-                <InputText @bind-Value="@Request.Email" id="email" class="form-control" aria-required="true" placeholder="name@example.com"/>
+                <InputText type="email" @bind-Value="@Request.Email" id="email" class="form-control" aria-required="true" placeholder="name@example.com"/>
                 <label for="email" class="form-label">Email</label>
                 <ValidationMessage For="@(() => Request.Email)" class="text-danger"/>
             </div>

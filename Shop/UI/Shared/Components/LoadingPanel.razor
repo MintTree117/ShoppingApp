@@ -1,4 +1,6 @@
 @using Shop.Infrastructure.Common
+@using Shop.Utilities
+@implements IDisposable
 
 <div class="@displayCss">
     @switch ( state ) {
@@ -29,27 +31,49 @@
 
 @code
 {
-    internal void StartRedirecting( int seconds, string? m = null )
+    [Inject] public LoadingService LoadingService { get; set; } = default!;
+
+    public void Dispose()
+    {
+        LoadingService.OnChange -= OnLoadingStateChanged;
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        LoadingService.OnChange += OnLoadingStateChanged;
+    }
+
+    void OnLoadingStateChanged()
+    {
+        if (!LoadingService.IsLoading) {
+            StopLoading();
+            return;
+        }
+        
+        StartLoading( LoadingService.Message );
+    }
+
+    void StartRedirecting( int seconds, string? m = null )
     {
         redirectSeconds = seconds;
         this.message = m ?? string.Empty;
         displayCss = ShowCss;
         StateHasChanged();
-    }
-    internal void TickRedirect()
+    } 
+    void TickRedirect()
     {
         state = LoadingState.Redirecting;
         redirectSeconds--;
         StateHasChanged();
     }
-    internal void StartLoading( string? m = null )
+    void StartLoading( string? m = null )
     {
         this.message = m ?? string.Empty;
         state = LoadingState.Loading;
         displayCss = ShowCss;
         StateHasChanged();
     }
-    internal void StopLoading()
+    void StopLoading()
     {
         state = LoadingState.Ready;
         displayCss = HideCss;

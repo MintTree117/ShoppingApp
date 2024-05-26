@@ -68,14 +68,14 @@ else {
         <EditForm Model="@registerRequest" OnValidSubmit="@(async () => await OnValidRegisterSubmitAsync() )">
             <h1 class="h3 mb-3 fw-normal">Register</h1>
             <DataAnnotationsValidator/>
-            <ValidationSummary/>
+            <ValidationSummary class="text-danger" role="alert"/>
             <div class="form-floating">
                 <InputText type="name" class="form-control" id="username" @bind-Value="@registerRequest.Username"></InputText>
                 <ValidationMessage For="@(() => registerRequest.Username)"/>
                 <label for="emailOrUsername">Username</label>
             </div>
             <div class="form-floating">
-                <InputText type="email" class="form-control" id="email" @bind-Value="@registerRequest.Email"></InputText>
+                <InputText type="name" class="form-control" id="email" @bind-Value="@registerRequest.Email"></InputText>
                 <ValidationMessage For="@(() => registerRequest.Email)"/>
                 <label for="email">Email</label>
             </div>

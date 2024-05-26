@@ -26,7 +26,7 @@
     }
     protected void StartRedirect( string? message )
     {
-        Layout.StartTimedPageRedirect( redirectTime, message );
+        //Layout.StartTimedPageRedirect( redirectTime, message );
         redirectCountdown = redirectTime;
         pageRedirectTimer = new System.Timers.Timer( redirectTime );
         pageRedirectTimer.Elapsed += CountdownTimerElapsed;
@@ -47,7 +47,7 @@
     {
         if (redirectCountdown > 0) {
             redirectCountdown--;
-            Layout.TickRedirect();
+            //Layout.TickRedirect();
             return;
         }
 

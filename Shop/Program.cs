@@ -7,6 +7,7 @@ using Shop.Infrastructure.Authentication;
 using Shop.Infrastructure.Catalog;
 using Shop.Infrastructure.Http;
 using Shop.Infrastructure.Storage;
+using Shop.Utilities;
 
 var builder = WebAssemblyHostBuilder.CreateDefault( args );
 builder.RootComponents.Add<App>( "#app" );
@@ -19,6 +20,7 @@ builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<CustomAuthenticationProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationProvider>();
 //builder.Services.AddScoped<AuthenticationStateProvider>( provider => provider.GetRequiredService<AuthenticationManager>() );
+builder.Services.AddScoped<LoadingService>();
 builder.Services.AddSingleton<CategoriesCache>();
 builder.Services.AddScoped<CategoriesService>();
 builder.ConfigureHttp();

@@ -63,7 +63,11 @@ public sealed class CustomAuthenticationProvider : AuthenticationStateProvider
             ? IOpt.Okay()
             : IOpt.None( $"{o1.Message()} : {o2.Message()}" );
     }
-
+    public async Task<Opt<string>> GetAccessToken() => 
+        await storage.Get<string>( AccessKey );
+    public async Task<Opt<string>> GetRefreshToken() =>
+        await storage.Get<string>( RefreshKey );
+    
     void NotifyChange( string token )
     {
         ClaimsPrincipal claims = GetIdentityClaimsPrincipal( token );

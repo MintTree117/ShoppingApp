@@ -5,24 +5,9 @@
 
 <div class="row">
     <div class="col-12">
-        <LoadingPanel @ref="@_loadingPanel"/>
+        <LoadingPanel/>
         <div class="page-content">
-            <CascadingValue Value="@this">
-                @Body
-            </CascadingValue>
+            @Body
         </div>
     </div>
 </div>
-
-@code {
-    LoadingPanel _loadingPanel = default!;
-
-    internal void StartLoading( string? message )
-    {
-        _loadingPanel.StartLoading( message );
-    }
-    internal void StopLoading()
-    {
-        _loadingPanel.StopLoading();
-    }
-}

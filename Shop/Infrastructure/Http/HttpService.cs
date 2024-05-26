@@ -73,19 +73,19 @@ public sealed class HttpService( IHttpClientFactory httpFactory )
     static async Task<Opt<T>> HandleHttpResponse<T>( HttpResponseMessage httpResponse )
     {
         if (httpResponse.IsSuccessStatusCode) {
-            var httpContent = await httpResponse.Content.ReadFromJsonAsync<T>();
+            T? httpContent = await httpResponse.Content.ReadFromJsonAsync<T>();
             return httpContent is not null
                 ? Opt<T>.With( httpContent )
                 : Opt<T>.None( "No data returned from http request." );
         }
 
         string errorContent = await httpResponse.Content.ReadAsStringAsync();
-        return LogErrorAndReturn<T>( errorContent );
+        return LogErrorAndReturn<T>( httpResponse.StatusCode + errorContent );
     }
     static Opt<T> LogErrorAndReturn<T>( string message )
     {
-        Console.WriteLine( $"An exception was thrown during an http request : {message}" );
-        return Opt<T>.None( $"An exception was thrown during an http request : {message}" );
+        Console.WriteLine( $"An error occured during an http request : {message}" );
+        return Opt<T>.None( $"An error occured during an http request : {message}" );
     }
     static Opt<T> HandleHttpException<T>( Exception e, string requestType, string requestUrl )
     {
