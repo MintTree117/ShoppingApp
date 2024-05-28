@@ -8,17 +8,18 @@ namespace Shop.Infrastructure.Authentication;
 
 public sealed class CustomAuthenticationProvider : AuthenticationStateProvider
 {
-    const string AccessKey = "accessToken";
-    readonly StorageService storage;
-
+    const string AccessKey = "AccessToken";
+    const string RefreshKey = "RefreshToken";
+    readonly StorageService _storage;
+    
     public CustomAuthenticationProvider( StorageService storageService )
     {
-        storage = storageService;
+        _storage = storageService;
     }
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        Opt<string> tokenResult = await storage.Get<string>( AccessKey );
+        Opt<string> tokenResult = await _storage.Get<string>( AccessKey );
 
         if (tokenResult.Fail( out tokenResult ))
             return new AuthenticationState( new ClaimsPrincipal() );
@@ -26,34 +27,37 @@ public sealed class CustomAuthenticationProvider : AuthenticationStateProvider
         ClaimsPrincipal claims = GetIdentityClaimsPrincipal( tokenResult.Data );
         return new AuthenticationState( claims );
     }
-    public async Task<Opt<bool>> SetAuthenticationStateAsync( string? accessToken )
+    public async Task<Opt<bool>> SetAuthenticationStateAsync( string? accessToken, string? refreshToken )
     {
         if (string.IsNullOrWhiteSpace( accessToken ))
-            return IOpt.None( "Empty access token." );
+            return IOpt.None( "Invalid access token" );
 
-        NotifyChange( accessToken );
+        if (string.IsNullOrWhiteSpace( refreshToken ))
+            return IOpt.None( "Invalid refresh token" );
+        
+        Opt<bool> accessResult = await _storage.Set( AccessKey, accessToken );
+        Opt<bool> refreshResult = await _storage.Set( RefreshKey, refreshToken );
 
-        Opt<bool> result = await storage.Set( AccessKey, accessToken );
-        return result.IsOkay
+        ClaimsPrincipal claims = GetIdentityClaimsPrincipal( accessToken );
+        NotifyAuthenticationStateChanged( GetNotifyParams( claims ) );
+        
+        return accessResult.IsOkay && refreshResult.IsOkay
             ? IOpt.Okay()
-            : IOpt.None( result );
+            : IOpt.None( accessResult.Message() + refreshResult.Message() );
     }
     public async Task<Opt<bool>> ClearAuthenticationStateAsync()
     {
-        Opt<bool> result = await storage.Remove( AccessKey );
+        Opt<bool> result1 = await _storage.Remove( AccessKey );
+        Opt<bool> result2 = await _storage.Remove( RefreshKey );
         NotifyAuthenticationStateChanged( GetNotifyParams( null ) );
-        return result.IsOkay
+        return result1.IsOkay && result2.IsOkay
             ? IOpt.Okay()
-            : IOpt.None( result );
+            : IOpt.None( result1.Message() + result2.Message() );
     }
     public async Task<Opt<string>> GetAccessToken() => 
-        await storage.Get<string>( AccessKey );
-    
-    void NotifyChange( string token )
-    {
-        ClaimsPrincipal claims = GetIdentityClaimsPrincipal( token );
-        NotifyAuthenticationStateChanged( GetNotifyParams( claims ) );
-    }
+        await _storage.Get<string>( AccessKey );
+    public async Task<Opt<string>> GetRefreshToken() =>
+        await _storage.Get<string>( RefreshKey );
     
     static ClaimsPrincipal GetIdentityClaimsPrincipal( string jwtToken )
     {

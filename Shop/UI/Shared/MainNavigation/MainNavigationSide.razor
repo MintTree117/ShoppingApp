@@ -77,12 +77,14 @@
 @code {
     [Parameter] public MainNavigationTop TopMenu { get; set; } = default!;
 
+    bool authenticated = false;
     string userName = "Login";
     bool show = false;
 
-    public void OnLogin( string name )
+    public void OnAccountChange( string? name )
     {
-        userName = name;
+        userName = name ?? "Login";
+        authenticated = name is not null;
         StateHasChanged();
     }
     public void Open()

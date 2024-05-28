@@ -169,6 +169,8 @@
 .top-nav-user-options {
     position: absolute;
     top: 1.5em;
+    width: 100%;
+    min-width: 100%;
     height: auto;
     z-index: 100;
     padding: 0;
@@ -208,6 +210,9 @@
 
 .top-nav-categories-wrapper {
     position: absolute;
+    z-index: 1000;
+    width: 100%;
+    min-width: 100%;
     background: white;
     border: 1px solid lightgray;
 }

@@ -1,6 +1,5 @@
 @page "/manage-account"
 @using System.ComponentModel.DataAnnotations
-@using Shop.Infrastructure.Account
 @using Shop.Infrastructure.Authentication
 @using Shop.Infrastructure.Common.Optionals
 @using Shop.Utilities
@@ -43,7 +42,6 @@
 
 @code {
     [Inject] public CustomAuthenticationProvider Auth { get; set; } = default!;
-    [Inject] public AccountEventHandler AccountEventHandler { get; set; } = default!;
     AccountModel accountModel = new();
     string accessToken = string.Empty;
 

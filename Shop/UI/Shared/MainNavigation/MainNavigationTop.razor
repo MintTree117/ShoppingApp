@@ -48,25 +48,27 @@ else {
             <!-- TOP RIGHT -->
             <div class="top-nav-upper-right">
                 <!-- ACCOUNT -->
-                <button class="btn top-nav-button position-relative" @onmouseenter="ShowAccountDropdown" @onmouseleave="HideAccountDropdown" @onclick="OnClickAccountButton">
-                    <div class="btn btn-icon">
-                        <i class="fa fa-user"></i>
-                    </div>
-                    <div class="top-nav-upper-right-label">
-                        <span class="d-block"><small>@GetAccountButtonText()</small></span>
-                    </div>
+                <div class="position-relative" @onmouseenter="@ShowAccountDropdown" @onmouseleave="@HideAccountDropdown">
+                    <button class="btn top-nav-button" @onclick="OnClickAccountButton">
+                        <div class="btn btn-icon">
+                            <i class="fa fa-user"></i>
+                        </div>
+                        <div class="top-nav-upper-right-label">
+                            <span class="d-block"><small>@username</small></span>
+                        </div>
+                    </button>
                     @if (showUserOptions) {
-                        <div class="top-nav-user-options position-absolute">
+                        <div class="top-nav-user-options position-absolute shadow">
                             <ul class="list-unstyled">
-                                <li><a href="#">Account</a></li>
-                                <li><a href="#">Addresses</a></li>
-                                <li><a href="#">Password</a></li>
-                                <li><a href="#">Orders</a></li>
+                                <li><a href="@Urls.PageAccountManage">Account</a></li>
+                                <li><a href="@Urls.PageHome">Addresses</a></li>
+                                <li><a href="@Urls.PageHome">Password</a></li>
+                                <li><a href="@Urls.PageHome">Orders</a></li>
                                 <li><a href="@Urls.PageLogout">Logout</a></li>
                             </ul>
                         </div>
                     }
-                </button>
+                </div>
                 <!-- CART -->
                 <button class="btn top-nav-button" @onclick="GoToCart">
                     <div class="btn btn-icon">
@@ -90,7 +92,7 @@ else {
             <div class="btn position-relative mx-2 top-nav-categories-button" @onmouseenter="ShowDesktopCategories" @onmouseleave="HideDesktopCategories">
                 <strong>Shop By Category</strong> &#9662
                 @if (showDesktopCategories) {
-                    <div class="top-nav-categories-wrapper position-absolute">
+                    <div class="top-nav-categories-wrapper position-absolute shadow">
                         <MainNavigationCategories/>
                     </div>
                 }
@@ -109,18 +111,21 @@ else {
     MainNavigationSide? sidebar;
     DotNetObjectReference<MainNavigationTop> dotNetRef = default!;
 
-    IIdentity? identity;
-    
     int screenWidth;
     int screenHeight;
     bool mobileView = false;
     bool showDesktopCategories = false;
     bool showUserOptions = false;
     bool authenticated = false;
-        
+    string? username;
     decimal cartPrice = decimal.Zero;
     int cartCount = 0;
-    
+
+    void Log()
+    {
+        Console.WriteLine("Hit");
+    }
+
     public void Dispose()
     {
         dotNetRef?.Dispose();
@@ -131,12 +136,10 @@ else {
         dotNetRef = DotNetObjectReference.Create( this );
         AuthProvider.AuthenticationStateChanged += OnAuthStateChanged;
         await JsRuntime.InvokeVoidAsync( "resizeObserverInterop.initialize", dotNetRef );
-        AuthenticationState state = await AuthProvider.GetAuthenticationStateAsync();
-        HandleIdentity( state );
+        HandleIdentity( await AuthProvider.GetAuthenticationStateAsync() );
     }
-    
-    [JSInvokable] 
-    public void OnResize( int width, int height )
+
+    [JSInvokable] public void OnResize( int width, int height )
     {
         screenWidth = width;
         screenHeight = height;
@@ -152,12 +155,18 @@ else {
 
     void HandleIdentity( AuthenticationState state )
     {
-        identity = state.User.Identity;
-        authenticated = identity?.IsAuthenticated ?? false;
-        sidebar?.OnLogin( identity?.Name ?? "No Username" );
+        authenticated = state.User.Identity?.IsAuthenticated ?? false;
+
+        if (authenticated) {
+            username = state.User.Identity!.Name;
+            sidebar?.OnAccountChange( username );
+            StateHasChanged();
+            return;
+        }
+
+        sidebar?.OnAccountChange( null );
         StateHasChanged();
     }
-    
     void ShowDesktopCategories()
     {
         showDesktopCategories = true;
@@ -183,7 +192,7 @@ else {
         string url = authenticated
             ? Urls.PageAccountManage
             : Urls.PageLoginOrRegister;
-        
+
         navigation.NavigateTo( url, true );
     }
     void GoToCart()
@@ -193,12 +202,5 @@ else {
     void OpenSide()
     {
         sidebar?.Open();
-    }
-    string GetAccountButtonText()
-    {
-        string text = authenticated
-            ? identity?.Name ?? "User"
-            : "Login";
-        return text;
     }
 }

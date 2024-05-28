@@ -212,12 +212,12 @@ else {
     
     async Task<Opt<LoginReply>> TryLogin() => 
         await Http.TryPostRequest<LoginReply>( Urls.ApiLogin, loginRequest );
-    async Task<Opt<bool>> TryUpdateLocalState( Opt<LoginReply> loginResult ) => 
-        await Auth.SetAuthenticationStateAsync( loginResult.Data.AccessToken );
+    async Task<Opt<bool>> TryUpdateLocalState( Opt<LoginReply> loginResult ) =>
+        await Auth.SetAuthenticationStateAsync( loginResult.Data.AccessToken, loginResult.Data.RefreshToken );
     async Task<Opt<TwoFactorReply>> TryTwoFactorLogin() => 
         await Http.TryPostRequest<TwoFactorReply>( Urls.ApiTwoFactor, twoFactorRequest );
-    async Task<Opt<bool>> TryUpdateLocalState( Opt<TwoFactorReply> loginResult ) => 
-        await Auth.SetAuthenticationStateAsync( loginResult.Data.AccessToken );
+    async Task<Opt<bool>> TryUpdateLocalState( Opt<TwoFactorReply> twoFactorResult ) =>
+        await Auth.SetAuthenticationStateAsync( twoFactorResult.Data.AccessToken, twoFactorResult.Data.RefreshToken );
     async Task<Opt<RegisterReply>> TryRegister() => 
         await Http.TryPostRequest<RegisterReply>( Urls.ApiRegister, registerRequest );
     
@@ -260,6 +260,7 @@ else {
     
     sealed record LoginReply(
         string? AccessToken,
+        string? RefreshToken,
         bool IsPending2FA );
     readonly record struct TwoFactorReply(
         string AccessToken,
