@@ -41,7 +41,7 @@
 </div>
 
 @code {
-    [Inject] public CustomAuthenticationProvider Auth { get; set; } = default!;
+    [Inject] public AuthProvider Auth { get; set; } = default!;
     AccountModel accountModel = new();
     string accessToken = string.Empty;
 

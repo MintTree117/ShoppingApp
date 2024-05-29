@@ -2,36 +2,23 @@
 @using Shop.Utilities
 @using Shop.Infrastructure.Common
 @using Shop.Infrastructure.Common.Optionals
+@using Shop.Infrastructure.Authentication
 @inherits ComponentBase
 
 @code {
-    protected ShopPage() => redirectTime = GetRedirectTime( Configuration );
-
+    [CascadingParameter( Name = "layout" )]
+    public MainLayout Layout { get; init; } = default!;
+    
+    [Inject] protected AuthProvider Auth { get; init; } = default!;
     [Inject] protected IConfiguration Configuration { get; init; } = default!;
     [Inject] protected HttpService Http { get; init; } = default!;
     [Inject] protected NavigationManager Navigation { get; init; } = default!;
-    [CascadingParameter( Name = "layout" )]
-    public MainLayout Layout { get; init; } = default!;
-
-    readonly string ReturnUrl = string.Empty;
-    readonly int redirectTime;
-    int redirectCountdown = 0;
-    System.Timers.Timer? pageRedirectTimer;
-
+    
     protected void GoHome() =>
         Navigate( Urls.PageHome, true );
     protected void Navigate( string page, bool forceReload = false )
     {
         Navigation.NavigateTo( page, forceReload );
-    }
-    protected void StartRedirect( string? message )
-    {
-        //Layout.StartTimedPageRedirect( redirectTime, message );
-        redirectCountdown = redirectTime;
-        pageRedirectTimer = new System.Timers.Timer( redirectTime );
-        pageRedirectTimer.Elapsed += CountdownTimerElapsed;
-        pageRedirectTimer.AutoReset = true;
-        pageRedirectTimer.Enabled = true;
     }
     protected void PushSuccess( string message ) => PushAlert( AlertType.Success, message );
     protected void PushWarning( string message ) => PushAlert( AlertType.Warning, message );
@@ -43,23 +30,4 @@
     {
         Layout.PushAlert( type, message );
     }
-    void CountdownTimerElapsed( object? sender, System.Timers.ElapsedEventArgs e )
-    {
-        if (redirectCountdown > 0) {
-            redirectCountdown--;
-            //Layout.TickRedirect();
-            return;
-        }
-
-        pageRedirectTimer?.Stop();
-        pageRedirectTimer?.Dispose();
-
-        string returnUrl = !string.IsNullOrWhiteSpace( ReturnUrl ) ? ReturnUrl : string.Empty;
-        Navigation.NavigateTo( returnUrl );
-    }
-    /*static int GetRedirectTime( IConfiguration configuration ) =>
-        int.TryParse( configuration["PageRedirectTime"], out int time )
-            ? time
-            : 3;*/
-    static int GetRedirectTime( IConfiguration configuration ) => 3;
 }

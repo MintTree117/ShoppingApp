@@ -6,7 +6,20 @@ namespace Shop.Infrastructure.Storage;
 public sealed class StorageService( ILocalStorageService storageService )
 {
     readonly ILocalStorageService storage = storageService;
-    
+
+    public async Task<Opt<string>> GetString( string key )
+    {
+        try {
+            string? o = await storage.GetItemAsync<string>( key );
+            return o is null
+                ? Opt<string>.None( $"{key} not found in local storage." )
+                : Opt<string>.With( o );
+        }
+        catch ( Exception e ) {
+            Console.WriteLine( e );
+            return Opt<string>.Exception( e, $"An exception occurred while trying to fetch key {key} from storage." );
+        }
+    }
     public async Task<Opt<T>> Get<T>( string key )
     {
         try {

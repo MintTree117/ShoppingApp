@@ -7,7 +7,7 @@ internal static class HttpConfiguration
     public static void ConfigureHttp( this WebAssemblyHostBuilder builder )
     {
         builder.Services.AddHttpClient();
-        builder.Services.AddScoped<HttpService>();
+        builder.Services.AddSingleton<HttpService>();
     }
 
     static string GetBaseUrl( WebAssemblyHostBuilder builder ) =>

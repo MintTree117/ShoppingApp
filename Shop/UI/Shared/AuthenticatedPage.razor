@@ -1,0 +1,25 @@
+@inherits ShopPage
+@using Microsoft.AspNetCore.Components.Authorization
+@using Shop.Utilities
+@implements IDisposable
+
+@code {
+    public void Dispose()
+    {
+        Auth.AuthenticationStateChanged -= OnAuthStateChange;
+    }
+
+    protected override void OnParametersSet()
+    {
+        Auth.AuthenticationStateChanged += OnAuthStateChange;
+    }
+
+    void OnAuthStateChange( Task<AuthenticationState> task )
+    {
+        AuthenticationState state = task.Result;
+        bool? authenticated = state.User.Identity?.IsAuthenticated;
+
+        if (authenticated is null or false)
+            Navigate( Urls.PageSessionExpired, true );
+    }
+}

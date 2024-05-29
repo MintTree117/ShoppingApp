@@ -33,6 +33,7 @@ internal static class Urls
     internal const string PageResendConfirm = "/resend-confirmation-email";
     internal const string PageLoginOrRegister = "/login-or-register";
     internal const string PageLogout = "/logout";
+    internal const string PageSessionExpired = "/session-expired";
     internal const string PageForgotPassword = "/forgot-password";
     internal const string PageLoginWithRecovery = "/recovery-login";
     internal const string PageAccountDeleted = "/account-deleted";

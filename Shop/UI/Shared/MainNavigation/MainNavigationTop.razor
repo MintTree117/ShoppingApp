@@ -107,7 +107,7 @@ else {
 
 @code {
     [Inject] public NavigationManager navigation { get; set; } = default!;
-    [Inject] public CustomAuthenticationProvider AuthProvider { get; set; } = default!;
+    [Inject] public AuthProvider AuthProvider { get; set; } = default!;
     MainNavigationSide? sidebar;
     DotNetObjectReference<MainNavigationTop> dotNetRef = default!;
 

@@ -1,0 +1,15 @@
+@page "/session-expired"
+@using Shop.Utilities
+@using Shop.UI.Shared
+@inherits Shop.UI.Shared.ShopPage
+@layout MainLayout
+
+<PageTitle>Session Expired</PageTitle>
+
+<div class="container">
+    <div class="row">
+        <div class="col-4">
+            <p>Your session has expired. <a href="@Urls.PageLoginOrRegister">Please login again.</a></p>
+        </div>
+    </div>
+</div>

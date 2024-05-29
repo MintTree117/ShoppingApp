@@ -43,7 +43,7 @@ else {
 }
 
 @code {
-    [Inject] CustomAuthenticationProvider Authenticator { get; set; } = default!;
+    [Inject] AuthProvider Authenticator { get; set; } = default!;
     DeleteAccountRequest request = new();
     bool isWarning = false;
     bool isDeleted = false;

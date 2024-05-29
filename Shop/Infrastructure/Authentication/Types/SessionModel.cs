@@ -1,4 +1,4 @@
-namespace Shop.Infrastructure.Authentication;
+namespace Shop.Infrastructure.Authentication.Types;
 
 public readonly record struct SessionModel(
     string? AccessToken,
