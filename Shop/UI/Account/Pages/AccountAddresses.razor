@@ -2,112 +2,142 @@
 @using Shop.Infrastructure.Common.Optionals
 @using Shop.UI.Shared.Components
 @using Shop.Utilities
+@using Shop.Infrastructure.Authentication.Types
 @inherits Shop.UI.Account.AccountPageBase
 @layout AccountLayout
 
 <PageTitle>Manage Addresses</PageTitle>
 
 <div class="content-container mt-3">
-    @if (isEditing) {
-        <h3 class="fw-bold">Edit Address</h3>
+    <!-- EDIT -->
+    @if (_isEditing) {
+        <div class="d-flex flex-row align-items-center justify-content-between">
+            <h3 class="mb-0">@GetEditTitle()</h3>
+            <button class="btn btn-secondary btn-icon" @onclick="@OnClickCancelEdit">Cancel<i class="fa fa-window-close ms-2"></i></button>
+        </div>
         <hr/>
-        <EditForm Model="@editModel" FormName="edit-address" OnValidSubmit="OnClickSave" method="post">
+        <!-- FORM -->
+        <EditForm Model="@_editModel" FormName="edit-address" OnValidSubmit="OnClickSave" method="post">
             <DataAnnotationsValidator/>
             <ValidationSummary class="text-danger" role="alert"/>
+            <!-- COUNTRY -->
             <div class="form-floating mb-3">
-                <InputText type="text" @bind-Value="@editModel.Country" id="country" class="form-control" autocomplete="country" aria-required="true" placeholder="Country"/>
+                <InputText type="text" @bind-Value="@_editModel.Country" id="country" class="form-control" autocomplete="country" aria-required="true" placeholder="Country"/>
                 <label for="country" class="form-label">Country</label>
-                <ValidationMessage For="@(() => editModel.Country)" class="text-danger"/>
+                <ValidationMessage For="@(() => _editModel.Country)" class="text-danger"/>
             </div>
+            <!-- CITY -->
             <div class="form-floating mb-3">
-                <InputText type="text" @bind-Value="@editModel.City" id="city" class="form-control" autocomplete="city" aria-required="true" placeholder="City"/>
+                <InputText type="text" @bind-Value="@_editModel.City" id="city" class="form-control" autocomplete="city" aria-required="true" placeholder="City"/>
                 <label for="city" class="form-label">City</label>
-                <ValidationMessage For="@(() => editModel.Country)" class="text-danger"/>
+                <ValidationMessage For="@(() => _editModel.Country)" class="text-danger"/>
             </div>
+            <!-- GRID X -->
             <div class="form-floating mb-3">
-                <InputNumber TValue="int" type="number" @bind-Value="@editModel.GridX" id="gridX" class="form-control" autocomplete="gridX" aria-required="true" placeholder="GridX"/>
+                <InputNumber TValue="int" type="number" @bind-Value="@_editModel.GridX" id="gridX" class="form-control" autocomplete="gridX" aria-required="true" placeholder="GridX"/>
                 <label for="gridX" class="form-label">GridX</label>
-                <ValidationMessage For="@(() => editModel.GridX)" class="text-danger"/>
+                <ValidationMessage For="@(() => _editModel.GridX)" class="text-danger"/>
             </div>
+            <!-- GRID Y -->
             <div class="form-floating mb-3">
-                <InputNumber TValue="int" type="number" @bind-Value="@editModel.GridY" id="gridY" class="form-control" autocomplete="gridY" aria-required="true" placeholder="GridY"/>
+                <InputNumber TValue="int" type="number" @bind-Value="@_editModel.GridY" id="gridY" class="form-control" autocomplete="gridY" aria-required="true" placeholder="GridY"/>
                 <label for="gridY" class="form-label">GridY</label>
-                <ValidationMessage For="@(() => editModel.GridX)" class="text-danger"/>
+                <ValidationMessage For="@(() => _editModel.GridX)" class="text-danger"/>
             </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Save Changes</button>
+            <!-- SUBMIT -->
+            <button class="btn btn-primary btn-icon">Save Changes<i class="fa fa-paper-plane ms-2"></i></button>
         </EditForm>
     }
     else {
-        <div class="d-flex flex-row justify-content-between">
-            <h3 class="fw-bold">Addresses</h3>
-            <hr/>
-            <div class="d-flex flex-row justify-content-between">
-                <button class="btn btn-primary" @onclick="@OnClickNew">Add New Address</button>
-                <div class="dropdown">
-                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="RowsPerPage" data-bs-toggle="dropdown" aria-expanded="false">
-                        Display: @rowsPerPageSelection
+        <!-- VIEW TOP-->
+        <div class="d-flex flex-row align-items-center justify-content-between">
+            <!-- TOP LEFT -->
+            <h3 class="mb-0">Addresses</h3>
+            <!-- TOP RIGHT -->
+            <div class="d-flex flex-row align-items-stretch justify-content-between">
+                <!-- ROWS DROPDOWN -->
+                <div class="dropdown me-3 h-100">
+                    <button class="btn btn-secondary dropdown-toggle h-100" type="button" id="RowsPerPage" data-bs-toggle="dropdown" aria-expanded="false">
+                        Display: @_rowsPerPageSelection
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="RowsPerPage">
-                        @for ( int i = 0; i < rowCounts.Length; i++ ) {
-                            int localIndex = i; // Create a local copy of the loop variable
-                            <li><button class="dropdown-item" type="button" @onclick="async () => await UpdateRowsPerPage( localIndex )">@rowCounts[localIndex]</button></li>
+                        @for ( int i = 0; i < _rowCounts.Length; i++ ) {
+                            int localIndex = i; // Create a local copy of the loop variable because of enumeration
+                            <li><button class="dropdown-item" type="button" @onclick="async () => await UpdateRowsPerPage( localIndex )">@_rowCounts[localIndex]</button></li>
                         }
                     </ul>
                 </div>
+                <!-- ADD ADDRESS -->
+                <button class="btn btn-primary btn-icon" @onclick="@OnClickNew">Add Address<i class="fa fa-plus ms-2"></i></button>
             </div>
         </div>
+        <hr/>
         
-        if (pagedAddresses.Count < 1) {
+        <!-- VIEW BOTTOM -->
+        if (_pagedAddresses.Count < 1) {
             <p>No Addresses Found.</p>
         }
         else {
+            <!-- VIEW HEADER -->
+            <p class="mb-3 text-muted">@GetViewHeader()</p>
+            <hr/>
+            <!-- VIEW TABLE -->
             <table class="table">
+                <!-- TABLE HEADER -->
                 <thead>
                 <tr>
                     <th>Country</th>
                     <th>City</th>
                     <th>GridX</th>
                     <th>GridY</th>
-                    <th>Actions</th>
+                    <th class="text-end">Actions</th>
                 </tr>
                 </thead>
+                <!-- TABLE BODY -->
                 <tbody>
-                @foreach ( AddressModel address in pagedAddresses ) {
+                @foreach ( AddressModel address in _pagedAddresses ) {
                     <tr>
                         <td>@address.Country</td>
                         <td>@address.City</td>
                         <td>@address.GridX</td>
                         <td>@address.GridY</td>
-                        <td>
-                            <button class="btn btn-primary btn-sm" @onclick="() => OnClickEdit( address )">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="btn btn-danger btn-sm" @onclick="@(async () => await OnClickDelete( address ))">
-                                <i class="bi bi-trash"></i>
-                            </button>
+                        <td class="text-end">
+                            <div class="d-flex flex-row align-items-stretch justify-content-end">
+                                <!-- Edit Address -->
+                                <button class="btn btn-primary btn-sm btn-icon me-3" @onclick="() => OnClickEdit( address )">Edit<i class="fa fa-edit ms-2"></i></button>
+                                <!-- Delete Address -->
+                                <button class="btn btn-primary btn-sm btn-icon" @onclick="@(async () => await OnClickDelete( address ))">Delete<i class="fa fa-trash ms-2"></i></button>
+                            </div>
                         </td>
                     </tr>
                 }
                 </tbody>
             </table>
-    }
-
-    <PaginationPanel @ref=" _paginationPanel" OnPageChange="@OnPaginationChange"/>
+        }
+        
+        <!-- PAGINATION -->
+        <PaginationPanel @ref="@_paginationPanel" OnPageChange="@OnPaginationChange"/>
     }
 </div>
 
 @code {
-    bool isEditing;
-    bool isNew;
-
-    AddressModel editModel = new();
-    List<AddressModel> pagedAddresses = [];
-    readonly int[] rowCounts = [5, 10, 20];
-    int totalCount = 0;
-    int rowsPerPageSelection = 5;
-    int currentPage = 1;
-
+    AddressModel _editModel = new();
+    List<AddressModel> _pagedAddresses = [];
+    readonly int[] _rowCounts = [5, 10, 20];
+    int _rowsPerPageSelection = 5;
+    int _currentPage = 1;
+    int _totalCount = 0;
+    bool _isEditing;
+    bool _isNew;
     PaginationPanel _paginationPanel = default!;
+    string _authToken = string.Empty;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        _authToken = await AwaitAccessToken();
+        await LoadFreshAddresses();
+    }
 
     async Task GetPagedAddresses( int page )
     {
@@ -138,7 +168,7 @@
 
         PushSuccess( "Address Saved." );
         
-        if (isNew)
+        if (_isNew)
             await LoadFreshAddresses();
         else
             StopLoading();
@@ -154,7 +184,7 @@
             StopLoading();
             return;
         }
-
+        
         PushSuccess( "Address Deleted." );
         await LoadFreshAddresses();
     }
@@ -162,78 +192,72 @@
     async Task<Opt<AddressSearchResponse>> TryGetPagedAddresses()
     {
         Dictionary<string, object> parameters = [];
-        parameters.Add( "Page", currentPage );
-        parameters.Add( "Rows", rowsPerPageSelection );
-        string token = await AwaitAccessToken();
-        Console.WriteLine( "TryGetPagedAddresses" + token );
-        return await Http.TryGetRequest<AddressSearchResponse>( Urls.ApiGetAddresses, parameters, token );
+        parameters.Add( "page", _currentPage );
+        parameters.Add( "rows", _rowsPerPageSelection );
+        return await Http.TryGetRequest<AddressSearchResponse>( Urls.ApiGetAddresses, parameters, _authToken );
     }
-    async Task<Opt<bool>> TrySaveAddress() =>
-        await Http.TryPostRequest<bool>( Urls.ApiUpdateAddress, editModel );
+    async Task<Opt<bool>> TrySaveAddress() => _isNew
+        ? await Http.TryPutRequest<bool>( Urls.ApiAddAddress, _editModel, _authToken )
+        : await Http.TryPostRequest<bool>( Urls.ApiUpdateAddress, _editModel, _authToken );
     async Task<Opt<bool>> TryDeleteAddress( AddressModel address ) =>
-        await Http.TryPostRequest<bool>( Urls.ApiDeleteAddress, new AddressDeleteRequest( address.Id ) );
+        await Http.TryPostRequest<bool>( Urls.ApiDeleteAddress, new AddressDeleteRequest( address.Id ), _authToken );
     
     void UpdateLocalState( Opt<AddressSearchResponse> result, int page )
     {
-        pagedAddresses = result.Data.Addresses;
-        totalCount = result.Data.TotalCount;
+        _pagedAddresses = result.Data.Addresses;
+        _totalCount = result.Data.TotalCount;
 
         int count = result.IsOkay ? result.Data.TotalCount : 0;
         
-        _paginationPanel.Set( page, rowsPerPageSelection, count );
+        _paginationPanel.Set( page, _rowsPerPageSelection, count );
 
-        isEditing = false;
-        isNew = false;
+        _isEditing = false;
+        _isNew = false;
         StateHasChanged();
     }
     void OnClickNew()
     {
-        editModel = new AddressModel();
-        isEditing = true;
-        isNew = true;
+        _editModel = new AddressModel();
+        _isEditing = true;
+        _isNew = true;
         StateHasChanged();
     }
     void OnClickEdit( AddressModel address )
     {
-        editModel = address;
-        isEditing = true;
-        isNew = false;
+        _editModel = address;
+        _isEditing = true;
+        _isNew = false;
         StateHasChanged();
     }
-    void ExitEditing()
+    void OnClickCancelEdit()
     {
-        isEditing = false;
-        isNew = false;
+        _isEditing = false;
+        _isNew = false;
         StateHasChanged();
     }
 
     async Task LoadFreshAddresses() =>
         await GetPagedAddresses( 0 );
-    async Task UpdateRowsPerPage( int count )
+    async Task UpdateRowsPerPage( int rows )
     {
-        totalCount = count;
+        _rowsPerPageSelection = rows;
         await GetPagedAddresses( 0 );
     }
     async Task OnPaginationChange( int page )
     {
+        _currentPage = page;
         await GetPagedAddresses( page );
     }
+
+    string GetEditTitle() =>
+        _isNew ? "New Address" : "Edit Address";
+    string GetViewHeader() =>
+        $"Viewing {Math.Min(_rowsPerPageSelection, _totalCount)} results of {_totalCount} total.";
     
     readonly record struct AddressSearchResponse(
-        List<AddressModel> Addresses,
-        int TotalCount );
-    readonly record struct AddressSearchRequest(
-        int Page,
-        int Count );
+        int TotalCount,
+        List<AddressModel> Addresses );
     readonly record struct AddressDeleteRequest(
         Guid AddressId );
-
-    sealed class AddressModel
-    {
-        public Guid Id { get; set; }
-        public string Country { get; set; } = string.Empty;
-        public string City { get; set; } = string.Empty;
-        public int GridX { get; set; }
-        public int GridY { get; set; }
-    }
+    
 }

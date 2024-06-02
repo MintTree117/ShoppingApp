@@ -10,6 +10,7 @@ internal static class Urls
     internal const string ApiDeleteAccount = IdentityBase + "/account/delete";
 
     internal const string ApiGetAddresses = IdentityBase + "/address/view";
+    internal const string ApiAddAddress = IdentityBase + "/address/add";
     internal const string ApiUpdateAddress = IdentityBase + "/address/update";
     internal const string ApiDeleteAddress = IdentityBase + "/address/delete";
 
