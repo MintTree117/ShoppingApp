@@ -5,9 +5,10 @@
 @using Shop.Infrastructure.Authentication
 @using Shop.Infrastructure.Http
 @using Shop.Utilities
+@using Shop.UI.Shared.Components
 @implements IDisposable
 
-@if ( show ) {
+@if ( _show ) {
     <!-- CONTAINER -->
     <div class="nav-sidebar">
         <!-- HEADER -->
@@ -16,13 +17,13 @@
                 <AuthorizeView>
                     <Authorized>
                         <a class="text-decoration-none link-light fs-5" href="@Urls.PageAccountProfile">
-                            <i class="oi oi-person"></i>
-                            <span class="ms-2">Welcome, @userName</span>
+                            <i class="fa fa-user"></i>
+                            <span class="ms-2">Welcome, @_userName</span>
                         </a>
                     </Authorized>
                     <NotAuthorized>
                         <a class="text-decoration-none link-light fs-5" href="@Urls.PageLoginOrRegister">
-                            <i class="oi oi-person"></i>
+                            <i class="fa fa-user"></i>
                             <span class="ms-2">Hello, Sign In</span>
                         </a>
                     </NotAuthorized>
@@ -32,63 +33,69 @@
                 <i class="fa-solid fa-x"></i>
             </button>
         </div>
+
         <!-- NAV -->
         <nav>
-            <!-- FEATURES -->
-            <h4 class="nav-sidebar-header">Shop Products</h4>
-            <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a class="nav-link" href="#">All Products</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">On Sale</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Featured</a>
-                </li>
-            </ul>
-            <!-- CATEGORIES -->
-            <MainNavigationCategories/>
-            <!-- ACCOUNT -->
-            <h4 class="nav-sidebar-header">Account</h4>
-            <ul class="nav flex-column">
-                <AuthorizeView>
-                    <Authorized>
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Urls.PageAccountProfile">Profile</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Urls.PageOrdersManage">Password</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Urls.PageOrdersManage">Addresses</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Urls.PageOrdersManage">Orders</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Urls.PageLogout">Logout</a>
-                        </li>
-                    </Authorized>
-                    <NotAuthorized>
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Urls.PageLoginOrRegister">Sign In</a>
-                        </li>
-                    </NotAuthorized>
-                </AuthorizeView>
-            </ul>
+            @if (_viewingCategories) {
+                <MainNavigationCategories OnExitCallback="ExitCategories" ShowExitButton="@(true)"/>
+            }
+            else {
+                <!-- SHOP -->
+                <h4 class="nav-sidebar-header">Shop Products</h4>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <button class="btn btn-link nav-link" @onclick="@OnClickCategories">
+                            <i class="fa-solid fa-list nav-icon"></i><strong>Categories</strong>
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fa-solid fa-gift nav-icon"></i><strong>Featured</strong>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fa-solid fa-dollar-sign nav-icon"></i><strong>On Sale</strong>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fa-solid fa-shop nav-icon"></i><strong>All Products</strong>
+                        </a>
+                    </li>
+                </ul>
+                <!-- ACCOUNT -->
+                <h4 class="nav-sidebar-header">Account</h4>
+                <ul class="nav flex-column">
+                    <AuthorizeView>
+                        <Authorized>
+                            <AccountMenuOptions/>
+                        </Authorized>
+                        <NotAuthorized>
+                            <li class="nav-item">
+                                <a class="nav-link" href="@Urls.PageLoginOrRegister">
+                                    <i class="fa fa-user nav-icon"></i><strong>Sign In</strong>
+                                </a>
+                            </li>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                </ul>
+            }
         </nav>
     </div>
 }
+
 
 @code {
     [Inject] public NavigationManager Navigation { get; set; } = default!;
     [Parameter] public MainNavigationTop TopMenu { get; set; } = default!;
 
-    bool authenticated = false;
     const string DefaultUsername = "Login";
-    string userName = DefaultUsername;
-    bool show = false;
+
+    bool _authenticated = false;
+    string _userName = DefaultUsername;
+    bool _show = false;
+    bool _viewingCategories = false;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -101,21 +108,33 @@
     }
     public void OnAccountChange( string? name )
     {
-        userName = name ?? DefaultUsername;
-        authenticated = name is not null;
+        _userName = name ?? DefaultUsername;
+        _authenticated = name is not null;
         StateHasChanged();
     }
     public void Open()
     {
-        show = true;   
+        _show = true;
         StateHasChanged();
     }
     public void Close()
     {
-        show = false;
+        _show = false;
         StateHasChanged();
     }
 
+    void OnClickCategories()
+    {
+        // show categories
+        _viewingCategories = true;
+        StateHasChanged();
+    }
+    void ExitCategories()
+    {
+        // hide categories
+        _viewingCategories = false;
+        StateHasChanged();
+    }
     void OnPageChanged( object? obj, LocationChangedEventArgs args )
     {
         Close();

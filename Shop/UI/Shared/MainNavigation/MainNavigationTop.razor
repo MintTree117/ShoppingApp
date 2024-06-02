@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Principal
 @using Shop.Infrastructure.Authentication
+@using Shop.UI.Shared.Components
 @implements IDisposable
 @inject IJSRuntime JsRuntime
 
@@ -26,13 +27,12 @@
                 </button>
             </div>
         </div>
-
         <!-- BOTTOM ROW -->
         <div class="top-nav-content content-container pb-2">
             <MainNavigationSearchBar/>
         </div>
     </div>
-
+    <!-- SIDEBAR -->
     <MainNavigationSide @ref="sidebar" TopMenu="@this"/>
 }
 else {
@@ -58,15 +58,11 @@ else {
                         </div>
                     </button>
                     @if (showUserOptions) {
-                        <div class="top-nav-user-options position-absolute shadow">
-                            <ul class="list-unstyled">
-                                <li><a href="@Urls.PageAccountProfile">Profile</a></li>
-                                <li><a href="@Urls.PageAccountPassword">Password</a></li>
-                                <li><a href="@Urls.PageAccountAddresses">Addresses</a></li>
-                                <li><a href="@Urls.PageHome">Orders</a></li>
-                                <li><a href="@Urls.PageLogout">Logout</a></li>
+                        <nav class="top-nav-user-options position-absolute shadow">
+                            <ul class="nav justify-content-center w-100">
+                                <AccountMenuOptions/>
                             </ul>
-                        </div>
+                        </nav>
                     }
                 </div>
                 <!-- CART -->
@@ -90,10 +86,10 @@ else {
             </a>
             <!-- CATEGORIES -->
             <div class="btn position-relative mx-2 top-nav-categories-button" @onmouseenter="ShowDesktopCategories" @onmouseleave="HideDesktopCategories">
-                <strong>Shop By Category</strong> &#9662
+                <strong>Shop By Category</strong> &nbsp; &#9662
                 @if (showDesktopCategories) {
                     <div class="top-nav-categories-wrapper position-absolute shadow">
-                        <MainNavigationCategories/>
+                        <MainNavigationCategories ShowExitButton="@(false)"/>
                     </div>
                 }
             </div>

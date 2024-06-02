@@ -4,11 +4,17 @@
 <div class="d-flex align-items-center justify-content-start">
     @if ( currentParentId.HasValue )
     {
-        <button class="btn border-end" @onclick="PreviousCategory">
-            <i class="oi oi-caret-left"></i> Back
+        <button class="btn btn-link nav-link me-2 border-end" @onclick="PreviousCategory">
+            <i class="fa fa-caret-left"></i> Back
         </button>
     }
-    <h4 class="top-nav-category-header mb-0 w-100">Shop Categories</h4>
+    else if (ShowExitButton) 
+    {
+        <button class="btn btn-link nav-link me-2 border-end" @onclick="Exit">
+            <i class="fa fa-caret-left"></i> Back
+        </button>
+    }
+    <h4 class="nav-link mb-0 w-100">Categories</h4>
 </div>
 <ul class="nav flex-column">
     @foreach ( Category c in GetCurrentCategories() )
@@ -41,11 +47,13 @@
 </ul>
 
 @code {
+    [Parameter] public Action OnExitCallback { get; set; } = default!;
+    [Parameter] public bool ShowExitButton { get; set; } = false;
     [Inject] public CategoriesService Service { get; set; } = default!;
-
+    
     CategoryData categoryData = CategoryData.None();
     Guid? currentParentId = null;
-
+    
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
@@ -74,5 +82,10 @@
         currentParentId = parent.ParentId;
 
         StateHasChanged();
+    }
+
+    void Exit()
+    {
+        OnExitCallback();
     }
 }
