@@ -22,6 +22,7 @@ public sealed class AuthService // Singleton
 
     readonly object _fetchLock = new();
     bool _isFetching = false; // Singleton
+    bool _isFirstFetch = true;
 
     public event Action<Task<AuthenticationState>>? OnStateChanged; 
     public AuthService( IConfiguration config, HttpService http, IServiceProvider serviceProvider )
@@ -40,16 +41,28 @@ public sealed class AuthService // Singleton
 
         lock ( _fetchLock )
             _isFetching = true;
-
+        
         StorageService storage = GetStorage();
         
         Opt<string> aTokenResult = await storage.Get<string>( AccessKey );
         if (!aTokenResult.Fail( out aTokenResult ) && !ShouldRefresh( aTokenResult.Data, _rules )) {
             lock ( _fetchLock )
                 _isFetching = false;
-            return new AuthenticationState( GetIdentityClaimsPrincipal( aTokenResult.Data ) );
+
+            if (!_isFirstFetch)
+                return new AuthenticationState( GetIdentityClaimsPrincipal( aTokenResult.Data ) );
+
+            _isFirstFetch = false;
+
+            Dictionary<string, object> parameter = [];
+            parameter.Add( "AccessToken", aTokenResult.Data );
+            Opt<bool> isValid = await _http.TryGetRequest<bool>( Urls.ApiLoginCheck, parameter );
+            if (!isValid.IsOkay)
+                await ClearAuthentication();
+            return new AuthenticationState( new ClaimsPrincipal() );
         }
 
+        _isFirstFetch = false;
 
         Opt<string> rTokenResult = await storage.Get<string>( RefreshKey );
         if (!rTokenResult.IsOkay) {

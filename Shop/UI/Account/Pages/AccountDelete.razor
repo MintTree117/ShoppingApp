@@ -1,6 +1,5 @@
 @page "/account/delete"
 @using System.ComponentModel.DataAnnotations
-@using Shop.Infrastructure.Authentication
 @using Shop.Infrastructure.Common.Optionals
 @using Shop.Utilities
 @inherits Shop.UI.Account.AccountPageBase
@@ -8,58 +7,54 @@
 
 <PageTitle>Delete Account</PageTitle>
 
-<h3>Delete Personal Data</h3>
-
-<hr/>
-
-@if (isDeleted) {
-    <h3>Account Deleted</h3>
-    <hr/>
-    <p>Your account and all associated data has been deleted.</p>
-    <p><button class="btn btn-link" @onclick="GoHome">Click Here</button> to return to the homepage.</p>
-}
-else if (isWarning) {
-    <div class="alert alert-warning" role="alert">
-        <p>
-            <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
+<div class="content-container mt-3">
+    @if (isWarning) {
+        <div class="alert alert-warning p-3" role="alert">
+            <p>
+                <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
+            </p>
             <button class="w-100 btn btn-lg btn-danger" @onclick="@(async () => await OnConfirmSubmit())">Delete data and close my account</button>
-            <button class="w-100 btn btn-lg btn-primary" @onclick="Cancel">Cancel</button>
-        </p>
-    </div>
-}
-else {
-    <div>
-        <EditForm Model="@request" FormName="delete-user" OnValidSubmit="OnValidSubmitAsync" method="post">
+            <hr/>
+            <button class="w-100 btn btn-lg btn-info" @onclick="Cancel">Cancel</button>
+        </div>
+    }
+    else {
+        <h3 class="fw-bold">Delete Personal Data</h3>
+        <hr/>
+        <EditForm Model="@request" FormName="delete-user" OnValidSubmit="@(async () => await OnValidSubmitAsync())" method="post">
             <DataAnnotationsValidator/>
             <ValidationSummary class="text-danger" role="alert"/>
             <div class="form-floating mb-3">
-                <InputText type="password" bind-Value="@request.Password" id="password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Please enter your password."/>
+                <InputText type="password" @bind-Value="@request.Password" id="password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Please enter your password."/>
                 <label for="password" class="form-label">Password</label>
                 <ValidationMessage For="@(() => request.Password)" class="text-danger"/>
             </div>
             <button class="w-100 btn btn-lg btn-danger" type="submit">Delete Data</button>
         </EditForm>
-    </div>
-}
+    }
+</div>
 
 @code {
-    [Inject] AuthService Authenticator { get; set; } = default!;
-    DeleteAccountRequest request = new();
+    readonly DeleteAccountRequest request = new();
     bool isWarning = false;
-    bool isDeleted = false;
-    
+
     async Task OnValidSubmitAsync()
     {
         await Task.Delay( 1000 ); // protect user from double click second confirm
         isWarning = true;
         StateHasChanged();
     }
-
     async Task OnConfirmSubmit()
     {
         StartLoading( "Deleting Account..." );
-        
-        Opt<bool> reply = await TryDeleteAccount();
+
+        Opt<string> token = await Auth.GetAccessToken();
+        if (!token.IsOkay) {
+            PushError( "Invalid Credentials" );
+            StopLoading();
+            return;
+        }
+        Opt<bool> reply = await Http.TryPostRequest<bool>( Urls.ApiDeleteAccount, request, token.Data );
 
         if (!reply.IsOkay) {
             PushError( reply, "Failed to delete your account." );
@@ -68,11 +63,10 @@ else {
             return;
         }
 
-        await Authenticator.ClearState();
+        await Auth.ClearState();
+        StopLoading();
         Navigate( Urls.PageAccountDelete );
     }
-    async Task<Opt<bool>> TryDeleteAccount() =>
-        await Http.TryPostRequest<bool>( Urls.ApiDeleteAccount, request );
     void Cancel()
     {
         isWarning = false;

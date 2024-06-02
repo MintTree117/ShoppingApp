@@ -16,7 +16,8 @@ internal static class Urls
     internal const string ApiRegister = IdentityBase + "/register";
     internal const string ApiConfirmEmail = IdentityBase + "/email/confirm";
     internal const string ApiResendConfirm = IdentityBase + "/email/resend";
-    
+
+    internal const string ApiLoginCheck = IdentityBase + "/check";
     internal const string ApiLogout = IdentityBase + "/logout";
     internal const string ApiLogin = IdentityBase + "/login";
     internal const string ApiTwoFactor = IdentityBase + "/2fa";
