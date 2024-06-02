@@ -8,8 +8,8 @@
 <PageTitle>Login Or Register</PageTitle>
 
 @if (registered) {
-    <div class="row">
-        <div class="col-md-4">
+    <div class="content-container">
+        <div class="col-6 mt-5 mx-auto text-start">
             <h1>Account Registered.</h1>
             <h2>Id: @( registerReply?.Id ?? "No id returned." )</h2>
             <h2>Email: @(registerReply?.Email ?? "No email returned.")</h2>
@@ -22,8 +22,8 @@ else if (pendingTwoFactor) {
     <h1>Two-factor authentication</h1>
     <hr/>
     <p>Your login is protected by a two-step verification process. Enter your verification code below.</p>
-    <div class="row">
-        <div class="col-md-4">
+    <div class="content-container">
+        <div class="col-6 mt-5 mx-auto text-start">
             <EditForm Model="@twoFactorRequest" FormName="login-with-2fa" OnValidSubmit="OnValidTwoFactorSubmitAsync" method="post">
                 <DataAnnotationsValidator/>
                 <ValidationSummary class="text-danger" role="alert"/>
@@ -36,12 +36,12 @@ else if (pendingTwoFactor) {
                     <button type="submit" class="w-100 btn btn-lg btn-primary">Log In</button>
                 </div>
             </EditForm>
+            <p>
+                Don't have access to your authenticator device? You can
+                <button class="btn btn-link" @onclick="GoToRecovery">log in with a recovery code</button>.
+            </p>
         </div>
     </div>
-    <p>
-        Don't have access to your authenticator device? You can
-        <button class="btn btn-link" @onclick="GoToRecovery">log in with a recovery code</button>.
-    </p>
 }
 else {
     <div style="max-width: 360px" class="mt-5 mx-auto text-center">
@@ -90,18 +90,18 @@ else {
             </div>
             <button class="w-100 btn btn-lg btn-primary" type="submit">Register</button>
         </EditForm>
+        
+        <div class="row">
+            <div class="col-md-4">
+                <hr/>
+                <h1>Development</h1>
+                <hr/>
+                <button class="btn-primary" onclick="@(async ()=> await TestRegister())">Test Register</button>
+                <button class="btn-primary" onclick="@(async ()=> await TestLogin())">Test Login</button>
+            </div>
+        </div>
     </div>
 }
-
-<div class="row">
-    <div class="col-md-4">
-        <hr/>
-        <h1>Development</h1>
-        <hr/>
-        <button class="btn-primary" onclick="@(async ()=> await TestRegister())">Test Register</button>
-        <button class="btn-primary" onclick="@(async ()=> await TestLogin())">Test Login</button>
-    </div>
-</div>
 
 @code 
 {
@@ -211,11 +211,11 @@ else {
     async Task<Opt<LoginReply>> TryLogin() => 
         await Http.TryPostRequest<LoginReply>( Urls.ApiLogin, loginRequest );
     async Task<Opt<bool>> TryUpdateLocalState( Opt<LoginReply> loginResult ) =>
-        await Auth.SetAuthenticationStateAsync( AuthRefreshEventArgs.With( loginResult.Data.AccessToken, loginResult.Data.RefreshToken ) );
+        await Auth.SetState( AuthRefreshEventArgs.With( loginResult.Data.AccessToken, loginResult.Data.RefreshToken ) );
     async Task<Opt<TwoFactorReply>> TryTwoFactorLogin() => 
         await Http.TryPostRequest<TwoFactorReply>( Urls.ApiTwoFactor, twoFactorRequest );
     async Task<Opt<bool>> TryUpdateLocalState( Opt<TwoFactorReply> twoFactorResult ) =>
-        await Auth.SetAuthenticationStateAsync( AuthRefreshEventArgs.With( twoFactorResult.Data.AccessToken, twoFactorResult.Data.RefreshToken ) );
+        await Auth.SetState( AuthRefreshEventArgs.With( twoFactorResult.Data.AccessToken, twoFactorResult.Data.RefreshToken ) );
     async Task<Opt<RegisterReply>> TryRegister() => 
         await Http.TryPostRequest<RegisterReply>( Urls.ApiRegister, registerRequest );
     

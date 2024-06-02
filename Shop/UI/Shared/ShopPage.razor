@@ -3,16 +3,68 @@
 @using Shop.Infrastructure.Common
 @using Shop.Infrastructure.Common.Optionals
 @using Shop.Infrastructure.Authentication
+@using Microsoft.AspNetCore.Components.Authorization
 @inherits ComponentBase
+@implements IDisposable
 
 @code {
     [CascadingParameter( Name = "layout" )]
     public MainLayout Layout { get; init; } = default!;
     
-    [Inject] protected AuthProvider Auth { get; init; } = default!;
     [Inject] protected IConfiguration Configuration { get; init; } = default!;
+    [Inject] protected AuthService Auth { get; init; } = default!;
     [Inject] protected HttpService Http { get; init; } = default!;
     [Inject] protected NavigationManager Navigation { get; init; } = default!;
+
+    AuthenticationState AuthState = null!;
+    string AccessToken = string.Empty;
+
+    bool _isInitialized = false; // Children have own lifecycle so we need state
+    
+    protected bool GetAccessToken( out string token )
+    {
+        if (_isInitialized) {
+            token = AccessToken;
+            return true;
+        }
+
+        token = string.Empty;
+        return false;
+    }
+    protected async Task<string> AwaitAccessToken()
+    {
+        while ( !_isInitialized )
+            await Task.Delay( 100 );
+        
+        return AccessToken;
+    }
+    protected async Task<AuthService> AwaitAuthProvider()
+    {
+        while ( Auth is null )
+            await Task.Delay( 100 );
+
+        return Auth;
+    }
+
+    public void Dispose()
+    {
+        Auth.OnStateChanged -= OnAuthStateChange;
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        Auth.OnStateChanged += OnAuthStateChange;
+        Console.WriteLine("OnParametersSet()");
+    }
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        AuthenticationState authState = await Auth.GetState();
+        await UpdateAuthState( authState );
+        _isInitialized = true;
+        Console.WriteLine( "OnParametersSetAsync()" );
+    }
     
     protected void GoHome() =>
         Navigate( Urls.PageHome, true );
@@ -26,6 +78,25 @@
     protected void PushError( IOpt opt, string message ) => PushAlert( AlertType.Danger, $"{message} : {opt.Message()}" );
     protected void PushError( IOpt opt ) => PushAlert( AlertType.Danger, opt.Message() );
 
+    async void OnAuthStateChange( Task<AuthenticationState> task )
+    {
+        AuthenticationState state = task.Result;
+        await UpdateAuthState( state );
+    }
+    async Task UpdateAuthState( AuthenticationState state )
+    {
+        bool? authenticated = state.User.Identity?.IsAuthenticated;
+
+        if (authenticated is null or false)
+            return;
+
+        Opt<string> accessToken = await Auth.GetAccessToken();
+        if (!accessToken.IsOkay)
+            return;
+
+        AuthState = state;
+        AccessToken = accessToken.Data;
+    }
     void PushAlert( AlertType type, string message )
     {
         Layout.PushAlert( type, message );

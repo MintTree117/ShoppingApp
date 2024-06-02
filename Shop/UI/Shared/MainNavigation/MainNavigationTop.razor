@@ -60,9 +60,9 @@ else {
                     @if (showUserOptions) {
                         <div class="top-nav-user-options position-absolute shadow">
                             <ul class="list-unstyled">
-                                <li><a href="@Urls.PageAccountManage">Account</a></li>
-                                <li><a href="@Urls.PageHome">Addresses</a></li>
-                                <li><a href="@Urls.PageHome">Password</a></li>
+                                <li><a href="@Urls.PageAccountProfile">Profile</a></li>
+                                <li><a href="@Urls.PageAccountPassword">Password</a></li>
+                                <li><a href="@Urls.PageAccountAddresses">Addresses</a></li>
                                 <li><a href="@Urls.PageHome">Orders</a></li>
                                 <li><a href="@Urls.PageLogout">Logout</a></li>
                             </ul>
@@ -106,11 +106,14 @@ else {
 }
 
 @code {
-    [Inject] public NavigationManager navigation { get; set; } = default!;
-    [Inject] public AuthProvider AuthProvider { get; set; } = default!;
+    [CascadingParameter( Name = "layout" )]
+    public MainLayout Layout { get; init; } = default!;
+    
+    [Inject] public NavigationManager Navigation { get; set; } = default!;
+    [Inject] public AuthService AuthService { get; set; } = default!;
     MainNavigationSide? sidebar;
     DotNetObjectReference<MainNavigationTop> dotNetRef = default!;
-
+    
     int screenWidth;
     int screenHeight;
     bool mobileView = false;
@@ -129,14 +132,14 @@ else {
     public void Dispose()
     {
         dotNetRef?.Dispose();
-        AuthProvider.AuthenticationStateChanged -= OnAuthStateChanged;
+        AuthService.OnStateChanged -= OnAuthStateChanged;
     }
     protected override async Task OnInitializedAsync()
     {
         dotNetRef = DotNetObjectReference.Create( this );
-        AuthProvider.AuthenticationStateChanged += OnAuthStateChanged;
+        AuthService.OnStateChanged += OnAuthStateChanged;
         await JsRuntime.InvokeVoidAsync( "resizeObserverInterop.initialize", dotNetRef );
-        HandleIdentity( await AuthProvider.GetAuthenticationStateAsync() );
+        HandleIdentity( await Layout.Auth.GetAuthenticationStateAsync() );
     }
 
     [JSInvokable] public void OnResize( int width, int height )
@@ -156,9 +159,12 @@ else {
     void HandleIdentity( AuthenticationState state )
     {
         authenticated = state.User.Identity?.IsAuthenticated ?? false;
-
+        
+        Console.WriteLine( "OnAuthStateChanged" );
+        Console.WriteLine( "IsAuthenticated:" + authenticated );
         if (authenticated) {
             username = state.User.Identity!.Name;
+            Console.WriteLine( "New Username" + state.User.Identity!.Name );
             sidebar?.OnAccountChange( username );
             StateHasChanged();
             return;
@@ -190,14 +196,14 @@ else {
     void OnClickAccountButton()
     {
         string url = authenticated
-            ? Urls.PageAccountManage
+            ? Urls.PageAccountProfile
             : Urls.PageLoginOrRegister;
 
-        navigation.NavigateTo( url, true );
+        Navigation.NavigateTo( url, true );
     }
     void GoToCart()
     {
-        navigation.NavigateTo( Urls.PageCart, true );
+        Navigation.NavigateTo( Urls.PageCart, true );
     }
     void OpenSide()
     {

@@ -5,14 +5,14 @@
 
 @code {
     [Inject] public HttpService Http { get; set; } = default!;
-    [Inject] public AuthProvider Auth { get; set; } = default!;
+    [Inject] public AuthService Auth { get; set; } = default!;
     [Inject] public NavigationManager Navigation { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
-        await Auth.ClearAuthenticationStateAsync();
+        await Auth.ClearState();
         await Http.TryPostRequest<bool>( Urls.ApiLogout );
         Navigation.NavigateTo( Urls.PageHome, true );
     }

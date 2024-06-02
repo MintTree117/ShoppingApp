@@ -2,11 +2,14 @@
 @using Shop.Infrastructure.Common
 @using Shop.UI.Shared.Components
 @using Shop.UI.Shared.MainNavigation
+@using Shop.Infrastructure.Authentication
 
 <div class="page">
     <main>
         <NoficationsPanel @ref="@notifications"/>
-        <MainNavigationTop/>
+        <CascadingValue Value="@GetSelf()" name="layout">
+            <MainNavigationTop/>
+        </CascadingValue>
         <article class="content content-container">
             <div class="main-content">
                 <CascadingValue Value="@GetSelf()" name="layout">
@@ -19,6 +22,8 @@
 
 @code
 {
+    [Inject] public AuthProvider Auth { get; set; } = null!;
+    
     NoficationsPanel notifications = default!;
     MainLayout GetSelf() => this;
     

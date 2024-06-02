@@ -1,4 +1,4 @@
-@page "/manage-account"
+@page "/account/profile"
 @using System.ComponentModel.DataAnnotations
 @using Shop.Infrastructure.Authentication
 @using Shop.Infrastructure.Common.Optionals
@@ -41,15 +41,15 @@
 </div>
 
 @code {
-    [Inject] public AuthProvider Auth { get; set; } = default!;
     AccountModel accountModel = new();
     string accessToken = string.Empty;
+    AuthService auth = null!;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        Opt<string> token = await Auth.GetAccessToken();
-        accessToken = token.Data;
+        auth = await AwaitAuthProvider();
+        await UpdateAuthToken();
         await FetchAccount();
     }
     async Task FetchAccount()
@@ -63,7 +63,7 @@
             return;
         }
 
-        UpdateLocalState( reply );
+        UpdateLocalProfile( reply );
         StopLoading();
     }
     async Task UpdateAccount()
@@ -79,6 +79,15 @@
         }
 
         PushSuccess( "Account details successfully updated." );
+
+        Opt<bool> refreshResult = await auth.RefreshStateFull();
+        if (!refreshResult.IsOkay) {
+            Console.WriteLine( refreshResult.Message() );
+            await auth.ClearState();
+            Navigate( Urls.PageSessionExpired, true );
+        }
+        
+        await UpdateAuthToken();
         StopLoading();
     }
     
@@ -86,7 +95,13 @@
         await Http.TryGetRequest<AccountModel>( Urls.ApiGetAccountDetails, null, accessToken );
     async Task<Opt<bool>> TryUpdateAccount() =>
         await Http.TryPostRequest<bool>( Urls.ApiUpdateAccountDetails, accountModel, accessToken );
-    void UpdateLocalState( Opt<AccountModel> reply )
+
+    async Task UpdateAuthToken()
+    {
+        Opt<string> token = await auth.GetAccessToken();
+        accessToken = token.Data;
+    }
+    void UpdateLocalProfile( Opt<AccountModel> reply )
     {
         accountModel = reply.IsOkay
             ? reply.Data

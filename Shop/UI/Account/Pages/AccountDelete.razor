@@ -1,4 +1,4 @@
-@page "/delete-account"
+@page "/account/delete"
 @using System.ComponentModel.DataAnnotations
 @using Shop.Infrastructure.Authentication
 @using Shop.Infrastructure.Common.Optionals
@@ -43,7 +43,7 @@ else {
 }
 
 @code {
-    [Inject] AuthProvider Authenticator { get; set; } = default!;
+    [Inject] AuthService Authenticator { get; set; } = default!;
     DeleteAccountRequest request = new();
     bool isWarning = false;
     bool isDeleted = false;
@@ -68,8 +68,8 @@ else {
             return;
         }
 
-        await Authenticator.ClearAuthenticationStateAsync();
-        Navigate( Urls.PageAccountDeleted );
+        await Authenticator.ClearState();
+        Navigate( Urls.PageAccountDelete );
     }
     async Task<Opt<bool>> TryDeleteAccount() =>
         await Http.TryPostRequest<bool>( Urls.ApiDeleteAccount, request );

@@ -1,4 +1,4 @@
-@page "/manage-addresses"
+@page "/account/addresses"
 @using Shop.Infrastructure.Common.Optionals
 @using Shop.UI.Shared.Components
 @using Shop.Utilities
@@ -45,7 +45,7 @@ else {
             <button class="btn btn-primary" @onclick="@OnClickNew">Add New Address</button>
             <div class="dropdown">
                 <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="RowsPerPage" data-bs-toggle="dropdown" aria-expanded="false">
-                    Display: @rowsPerPage
+                    Display: @rowsPerPageSelection
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="RowsPerPage">
                     @for ( int i = 0; i < rowCounts.Length; i++ ) {
@@ -90,31 +90,25 @@ else {
             }
             </tbody>
         </table>
-        
-        <PaginationPanel @ref="_paginationPanel" OnPageChange="@OnPaginationChange"/>
     }
+
+    <PaginationPanel @ref=" _paginationPanel" OnPageChange="@OnPaginationChange"/>
 }
 
 
 @code {
-    bool isViewing;
     bool isEditing;
     bool isNew;
 
     AddressModel editModel = new();
     List<AddressModel> pagedAddresses = [];
-    int[] rowCounts = [5, 10, 20];
+    readonly int[] rowCounts = [5, 10, 20];
     int totalCount = 0;
-    int rowsPerPage = 0;
+    int rowsPerPageSelection = 5;
+    int currentPage = 1;
 
     PaginationPanel _paginationPanel = default!;
-    
-    protected override async Task OnParametersSetAsync()
-    {
-        await base.OnParametersSetAsync();
-        await LoadFreshAddresses();
-    }
-    
+
     async Task GetPagedAddresses( int page )
     {
         StartLoading( "Loading Addresses..." );
@@ -164,9 +158,16 @@ else {
         PushSuccess( "Address Deleted." );
         await LoadFreshAddresses();
     }
-    
-    async Task<Opt<AddressSearchResponse>> TryGetPagedAddresses() =>
-        await Http.TryGetRequest<AddressSearchResponse>( Urls.ApiGetAddresses );
+
+    async Task<Opt<AddressSearchResponse>> TryGetPagedAddresses()
+    {
+        Dictionary<string, object> parameters = [];
+        parameters.Add( "Page", currentPage );
+        parameters.Add( "Rows", rowsPerPageSelection );
+        string token = await AwaitAccessToken();
+        Console.WriteLine( "TryGetPagedAddresses" + token );
+        return await Http.TryGetRequest<AddressSearchResponse>( Urls.ApiGetAddresses, parameters, token );
+    }
     async Task<Opt<bool>> TrySaveAddress() =>
         await Http.TryPostRequest<bool>( Urls.ApiUpdateAddress, editModel );
     async Task<Opt<bool>> TryDeleteAddress( AddressModel address ) =>
@@ -176,11 +177,13 @@ else {
     {
         pagedAddresses = result.Data.Addresses;
         totalCount = result.Data.TotalCount;
-        _paginationPanel.Set( page, rowsPerPage, result.Data.TotalCount );
+
+        int count = result.IsOkay ? result.Data.TotalCount : 0;
+        
+        _paginationPanel.Set( page, rowsPerPageSelection, count );
 
         isEditing = false;
         isNew = false;
-        isViewing = true;
         StateHasChanged();
     }
     void OnClickNew()
@@ -201,7 +204,6 @@ else {
     {
         isEditing = false;
         isNew = false;
-        isViewing = true;
         StateHasChanged();
     }
 
