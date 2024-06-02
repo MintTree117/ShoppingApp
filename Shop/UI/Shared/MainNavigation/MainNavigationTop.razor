@@ -11,7 +11,7 @@
         <!-- TOP ROW -->
         <div class="top-nav-content content-container top-nav-mobile-top">
             <!-- LOGO -->
-            <a class="logo" href="home">
+            <a class="logo" href="@Urls.PageHome">
                 <img class="top-nav-item p-2" src="/images/logo.svg" alt="Blazor">
             </a>
             <div class="top-nav-mobile-right">
@@ -120,7 +120,8 @@ else {
     bool showDesktopCategories = false;
     bool showUserOptions = false;
     bool authenticated = false;
-    string? username;
+    const string DefaultUserText = "Login";
+    string username = DefaultUserText;
     decimal cartPrice = decimal.Zero;
     int cartCount = 0;
 
@@ -160,16 +161,14 @@ else {
     {
         authenticated = state.User.Identity?.IsAuthenticated ?? false;
         
-        Console.WriteLine( "OnAuthStateChanged" );
-        Console.WriteLine( "IsAuthenticated:" + authenticated );
         if (authenticated) {
-            username = state.User.Identity!.Name;
-            Console.WriteLine( "New Username" + state.User.Identity!.Name );
+            username = state.User.Identity!.Name ?? "Account";
             sidebar?.OnAccountChange( username );
             StateHasChanged();
             return;
         }
 
+        username = DefaultUserText;
         sidebar?.OnAccountChange( null );
         StateHasChanged();
     }

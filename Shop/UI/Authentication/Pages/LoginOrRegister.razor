@@ -9,21 +9,28 @@
 
 @if (registered) {
     <div class="content-container">
-        <div class="col-6 mt-5 mx-auto text-start">
-            <h1>Account Registered.</h1>
-            <h2>Id: @( registerReply?.Id ?? "No id returned." )</h2>
-            <h2>Email: @(registerReply?.Email ?? "No email returned.")</h2>
-            <h2>Username: @( registerReply?.Username ?? "No username returned." )</h2>
-            <p>A confirmation link has been emailed to @( registerReply?.Email ?? "your email" ). Please verify your email before logging in.</p>
+        <div class="auth-container">
+            <i class="fa-solid fa-circle-check fa-4x text-success auth-icon"></i>
+            <h1>Registration Success!</h1>
+            <hr/>
+            <ul class="text-start">
+                <li><strong>Id:</strong> <small>@( registerReply?.Id ?? "No id returned." )</small></li>
+                <li><strong>Email:</strong> <small>@( registerReply?.Email ?? "No email returned." )</small></li>
+                <li><strong>Username:</strong> <small>@( registerReply?.Username ?? "No username returned." )</small></li>
+            </ul>
+            <hr/>
+            <p class="text-secondary text-start">Your account has been created and is awaiting confirmation. A link has been emailed to @( registerReply?.Email ?? "your email" ). Please verify your email before logging in.</p>
         </div>
     </div>
 }
 else if (pendingTwoFactor) {
-    <h1>Two-factor authentication</h1>
-    <hr/>
-    <p>Your login is protected by a two-step verification process. Enter your verification code below.</p>
-    <div class="content-container">
-        <div class="col-6 mt-5 mx-auto text-start">
+    <div class="content-container ">
+        <div class="auth-container">
+            <i class="fa-solid fa-circle-check fa-4x text-info auth-icon"></i>
+            <h1>Two-factor authentication</h1>
+            <hr/>
+            <p>Your login is protected by a two-step verification process. Enter your verification code below.</p>
+            <hr/>
             <EditForm Model="@twoFactorRequest" FormName="login-with-2fa" OnValidSubmit="OnValidTwoFactorSubmitAsync" method="post">
                 <DataAnnotationsValidator/>
                 <ValidationSummary class="text-danger" role="alert"/>
@@ -44,60 +51,62 @@ else if (pendingTwoFactor) {
     </div>
 }
 else {
-    <div style="max-width: 360px" class="mt-5 mx-auto text-center">
-        <EditForm Model="@loginRequest" OnValidSubmit="@(async () => await OnValidLoginSubmitAsync() )">
-            <h1 class="h3 mb-3 fw-normal">Sign In</h1>
-            <DataAnnotationsValidator/>
-            <div class="form-floating">
-                <InputText type="name" class="form-control" id="emailOrUsername" @bind-Value="@loginRequest.EmailOrUsername">></InputText>
-                <label for="emailOrUsername">Email or Username</label>
-            </div>
-            <div class="form-floating">
-                <InputText type="password" class="form-control" id="password" @bind-Value="@loginRequest.Password"></InputText>
-                <label for="password">Password</label>
-            </div>
-            <button class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
-        </EditForm>
+    <div class="content-container">
+        <div class="auth-container" style="max-width: 360px">
+            <EditForm Model="@loginRequest" OnValidSubmit="@(async () => await OnValidLoginSubmitAsync() )">
+                <h1 class="h3 mb-3 fw-normal">Sign In</h1>
+                <DataAnnotationsValidator/>
+                <div class="form-floating">
+                    <InputText type="name" class="form-control" id="emailOrUsername" @bind-Value="@loginRequest.EmailOrUsername">></InputText>
+                    <label for="emailOrUsername">Email or Username</label>
+                </div>
+                <div class="form-floating">
+                    <InputText type="password" class="form-control" id="password" @bind-Value="@loginRequest.Password"></InputText>
+                    <label for="password">Password</label>
+                </div>
+                <button class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
+            </EditForm>
+                
+            <button class="btn btn-link" @onclick="GoToResend">Resend Confirmation Email</button>
+            <button class="btn btn-link" @onclick="GoToForgot">Forgot Password</button>
         
-        <button class="btn btn-link" @onclick="GoToResend">Resend Confirmation Email</button>
-        <button class="btn btn-link" @onclick="GoToForgot">Forgot Password</button>
-
-        <span class="my-5 d-block text-muted">- Or -</span>
-
-        <EditForm Model="@registerRequest" OnValidSubmit="@(async () => await OnValidRegisterSubmitAsync() )">
-            <h1 class="h3 mb-3 fw-normal">Register</h1>
-            <DataAnnotationsValidator/>
-            <ValidationSummary class="text-danger" role="alert"/>
-            <div class="form-floating">
-                <InputText type="name" class="form-control" id="username" @bind-Value="@registerRequest.Username"></InputText>
-                <ValidationMessage For="@(() => registerRequest.Username)"/>
-                <label for="emailOrUsername">Username</label>
-            </div>
-            <div class="form-floating">
-                <InputText type="name" class="form-control" id="email" @bind-Value="@registerRequest.Email"></InputText>
-                <ValidationMessage For="@(() => registerRequest.Email)"/>
-                <label for="email">Email</label>
-            </div>
-            <div class="form-floating">
-                <InputText type="password" class="form-control" id="registerPassword" @bind-Value="@registerRequest.Password"></InputText>
-                <ValidationMessage For="@(() => registerRequest.Password)"/>
-                <label for="registerPassword">Password</label>
-            </div>
-            <div class="form-floating">
-                <InputText type="password" class="form-control" id="confirmPassword" @bind-Value="@registerRequest.PasswordConfirm"></InputText>
-                <ValidationMessage For="@(() => registerRequest.PasswordConfirm)"/>
-                <label for="confirmPassword">Confirm Password</label>
-            </div>
-            <button class="w-100 btn btn-lg btn-primary" type="submit">Register</button>
-        </EditForm>
+            <span class="my-5 d-block text-muted">- Or -</span>
         
-        <div class="row">
-            <div class="col-md-4">
-                <hr/>
-                <h1>Development</h1>
-                <hr/>
-                <button class="btn-primary" onclick="@(async ()=> await TestRegister())">Test Register</button>
-                <button class="btn-primary" onclick="@(async ()=> await TestLogin())">Test Login</button>
+            <EditForm Model="@registerRequest" OnValidSubmit="@(async () => await OnValidRegisterSubmitAsync() )">
+                <h1 class="h3 mb-3 fw-normal">Register</h1>
+                <DataAnnotationsValidator/>
+                <ValidationSummary class="text-danger" role="alert"/>
+                <div class="form-floating">
+                    <InputText type="name" class="form-control" id="username" @bind-Value="@registerRequest.Username"></InputText>
+                    <ValidationMessage For="@(() => registerRequest.Username)"/>
+                    <label for="emailOrUsername">Username</label>
+                </div>
+                <div class="form-floating">
+                    <InputText type="name" class="form-control" id="email" @bind-Value="@registerRequest.Email"></InputText>
+                    <ValidationMessage For="@(() => registerRequest.Email)"/>
+                    <label for="email">Email</label>
+                </div>
+                <div class="form-floating">
+                    <InputText type="password" class="form-control" id="registerPassword" @bind-Value="@registerRequest.Password"></InputText>
+                    <ValidationMessage For="@(() => registerRequest.Password)"/>
+                    <label for="registerPassword">Password</label>
+                </div>
+                <div class="form-floating">
+                    <InputText type="password" class="form-control" id="confirmPassword" @bind-Value="@registerRequest.PasswordConfirm"></InputText>
+                    <ValidationMessage For="@(() => registerRequest.PasswordConfirm)"/>
+                    <label for="confirmPassword">Confirm Password</label>
+                </div>
+                <button class="w-100 btn btn-lg btn-primary" type="submit">Register</button>
+            </EditForm>
+                
+            <div class="row">
+                <div class="col-md-4">
+                    <hr/>
+                    <h1>Development</h1>
+                    <hr/>
+                    <button class="btn-primary" onclick="@(async ()=> await TestRegister())">Test Register</button>
+                    <button class="btn-primary" onclick="@(async ()=> await TestLogin())">Test Login</button>
+                </div>
             </div>
         </div>
     </div>

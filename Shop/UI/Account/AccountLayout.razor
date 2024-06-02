@@ -9,22 +9,11 @@
         </nav>
     </div>
     <div class="col-8">
-        <LoadingPanel @ref="@_loadingPanel"/>
+        <div class="mx-auto d-flex align-items-center justify-content-center">
+            <LoadingPanel/>
+        </div>
         <div class="page-content">
             @Body
         </div>
     </div>
 </div>
-
-@code {
-    LoadingPanel _loadingPanel = default!;
-
-    internal void StartLoadingComponent( string? message )
-    {
-        //_loadingPanel.StartLoading( message );
-    }
-    internal void StopLoadingComponent()
-    {
-        //_loadingPanel.StopLoading();
-    }
-}

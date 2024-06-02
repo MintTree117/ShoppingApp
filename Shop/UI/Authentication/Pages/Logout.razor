@@ -1,17 +1,14 @@
 @page "/logout"
-@using Shop.Infrastructure.Http
-@using Shop.Infrastructure.Authentication
 @using Shop.Utilities
+@inherits AuthenticationPageBase
 
 @code {
-    [Inject] public HttpService Http { get; set; } = default!;
-    [Inject] public AuthService Auth { get; set; } = default!;
-    [Inject] public NavigationManager Navigation { get; set; } = default!;
-
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-
+        
+        StartLoading( "Logging Out..." );
+        
         await Auth.ClearState();
         await Http.TryPostRequest<bool>( Urls.ApiLogout );
         Navigation.NavigateTo( Urls.PageHome, true );

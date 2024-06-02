@@ -1,0 +1,15 @@
+.auth-container {
+    margin-top: 30px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    max-width: 425px;
+    text-align: center;
+}
+
+.auth-icon {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 15px;
+}

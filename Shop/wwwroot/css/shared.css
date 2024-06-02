@@ -6,6 +6,48 @@
     padding-right: 15px;
 }
 
+/* Container styling */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+    z-index: 9999; /* High z-index to overlay other content */
+}
+
+/* Spinner styling */
+.loading-circle {
+    border: 8px solid rgba(0, 0, 0, 0.1); /* Light grey border */
+    border-top: 8px solid #3498db; /* Blue border for the spinner */
+    border-radius: 50%; /* Circular shape */
+    width: 60px; /* Width of the spinner */
+    height: 60px; /* Height of the spinner */
+    animation: spin 1s linear infinite; /* Infinite spinning animation */
+}
+
+/* Keyframes for the spinning animation */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg); /* Initial state */
+    }
+    100% {
+        transform: rotate(360deg); /* Full rotation */
+    }
+}
+
+/* Message styling */
+.loading-container p {
+    margin-top: 20px; /* Space above the message */
+    font-size: 1.2em; /* Larger font size */
+    color: #333; /* Dark grey text color */
+}
+
 @media only screen and (min-width: 1400px) {
     .content-container {
         padding-left: 0;

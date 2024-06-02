@@ -2,32 +2,29 @@
 @using Shop.Utilities
 @implements IDisposable
 
-<div class="@displayCss">
-    @switch ( state ) {
-        case LoadingState.Loading:
-            <div class="loading-container">
-                <div class="loading-circle"></div>
-                <p>Loading...</p>
-                @if (!string.IsNullOrEmpty( message )) {
-                    <p>@message</p>   
-                }
-            </div>
-            break;
-        case LoadingState.Redirecting:
-            <div class="loading-container">
-                <div class="loading-circle"></div>
-                <p>Redirecting...</p>
-                @if (!string.IsNullOrEmpty( message )) {
-                    <p>@message</p>   
-                }
-            </div>
-            break;
-        case LoadingState.Ready:
-            break;
-        default:
-            throw new ArgumentOutOfRangeException();
-    }
-</div>
+@switch ( state ) {
+    case LoadingState.Loading:
+        <div class="loading-container @displayCss">
+            <div class="loading-circle"></div>
+            @if (!string.IsNullOrEmpty( message )) {
+                <p>@message</p>   
+            }
+        </div>
+        break;
+    case LoadingState.Redirecting:
+        <div class="loading-container @displayCss">
+            <div class="loading-circle"></div>
+            <p>Redirecting...</p>
+            @if (!string.IsNullOrEmpty( message )) {
+                <p>@message</p>   
+            }
+        </div>
+        break;
+    case LoadingState.Ready:
+        break;
+    default:
+        throw new ArgumentOutOfRangeException();
+}
 
 @code
 {

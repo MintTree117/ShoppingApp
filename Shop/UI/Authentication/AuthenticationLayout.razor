@@ -3,11 +3,9 @@
 @inherits LayoutComponentBase
 @layout MainLayout
 
-<div class="row">
-    <div class="col-12">
+<div class="content-container">
+    <div class="page-content position-relative">
         <LoadingPanel/>
-        <div class="page-content">
-            @Body
-        </div>
+        @Body
     </div>
 </div>
