@@ -140,7 +140,12 @@ else {
         dotNetRef = DotNetObjectReference.Create( this );
         AuthService.OnStateChanged += OnAuthStateChanged;
         await JsRuntime.InvokeVoidAsync( "resizeObserverInterop.initialize", dotNetRef );
-        HandleIdentity( await Layout.Auth.GetAuthenticationStateAsync() );
+    }
+    protected override async Task OnAfterRenderAsync( bool firstRender )
+    {
+        await base.OnAfterRenderAsync( firstRender );
+        if (firstRender)
+            HandleIdentity( await Layout.Auth.GetAuthenticationStateAsync() );
     }
 
     [JSInvokable] public void OnResize( int width, int height )

@@ -5,6 +5,7 @@
 @using Shop.Infrastructure.Authentication
 @using Shop.Infrastructure.Http
 @using Shop.Utilities
+@implements IDisposable
 
 @if ( show ) {
     <!-- CONTAINER -->
@@ -14,13 +15,13 @@
             <div>
                 <AuthorizeView>
                     <Authorized>
-                        <a class="text-decoration-none link-light fs-5" href="#">
+                        <a class="text-decoration-none link-light fs-5" href="@Urls.PageAccountProfile">
                             <i class="oi oi-person"></i>
                             <span class="ms-2">Welcome, @userName</span>
                         </a>
                     </Authorized>
                     <NotAuthorized>
-                        <a class="text-decoration-none link-light fs-5" href="#">
+                        <a class="text-decoration-none link-light fs-5" href="@Urls.PageLoginOrRegister">
                             <i class="oi oi-person"></i>
                             <span class="ms-2">Hello, Sign In</span>
                         </a>
@@ -54,10 +55,16 @@
                 <AuthorizeView>
                     <Authorized>
                         <li class="nav-item">
-                            <a class="nav-link" href="@Urls.PageAccountProfile">Manage Account</a>
+                            <a class="nav-link" href="@Urls.PageAccountProfile">Profile</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="@Urls.PageOrdersManage">Manage Orders</a>
+                            <a class="nav-link" href="@Urls.PageOrdersManage">Password</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Urls.PageOrdersManage">Addresses</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Urls.PageOrdersManage">Orders</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="@Urls.PageLogout">Logout</a>
@@ -65,7 +72,7 @@
                     </Authorized>
                     <NotAuthorized>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Sign In</a>
+                            <a class="nav-link" href="@Urls.PageLoginOrRegister">Sign In</a>
                         </li>
                     </NotAuthorized>
                 </AuthorizeView>
@@ -75,15 +82,26 @@
 }
 
 @code {
+    [Inject] public NavigationManager Navigation { get; set; } = default!;
     [Parameter] public MainNavigationTop TopMenu { get; set; } = default!;
 
     bool authenticated = false;
-    string userName = "Login";
+    const string DefaultUsername = "Login";
+    string userName = DefaultUsername;
     bool show = false;
 
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        Navigation.LocationChanged += OnPageChanged;
+    }
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= OnPageChanged;
+    }
     public void OnAccountChange( string? name )
     {
-        userName = name ?? "Login";
+        userName = name ?? DefaultUsername;
         authenticated = name is not null;
         StateHasChanged();
     }
@@ -96,5 +114,10 @@
     {
         show = false;
         StateHasChanged();
+    }
+
+    void OnPageChanged( object? obj, LocationChangedEventArgs args )
+    {
+        Close();
     }
 }
