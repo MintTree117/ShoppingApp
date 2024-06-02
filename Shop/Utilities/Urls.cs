@@ -41,8 +41,9 @@ internal static class Urls
     internal const string PageAccountProfile = "/account/profile";
     internal const string PageAccountPassword = "/account/password";
     internal const string PageAccountAddresses = "/account/addresses";
-    internal const string PageAccountDelete = "/account/delete";
     internal const string PageOrdersManage = "/manage-orders";
+    internal const string PageAccountDelete = "/account/delete";
+    internal const string PageAccountDeleted = "/account/deleted";
     
     internal const string PageCart = "/cart";
 }
