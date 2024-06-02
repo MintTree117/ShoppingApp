@@ -4,7 +4,7 @@
     <div class="container" style="max-height: calc(100vh / 3); overflow-y: auto;" @ref="messageContainer">
         @foreach ( Alert alert in Alerts ?? [])
         {
-            <div class="alert alert-info alert-dismissible fade show mt-2" role="alert">
+            <div class="alert @GetAlertCss( alert.Type ) alert-dismissible fade show mt-2" role="alert">
                 @alert.Message
                 <button type="button" class="btn-close" aria-label="Close" @onclick="async () => await RemoveAlert(alert)"></button>
             </div>
@@ -41,6 +41,15 @@
         await ScrollToBottom();
     }
 
+    string GetAlertCss( AlertType type ) =>
+        type switch {
+            AlertType.Info => "alert-info",
+            AlertType.Success => "alert-success",
+            AlertType.Warning => "alert-warning",
+            AlertType.Danger => "alert-danger",
+            _ => throw new ArgumentOutOfRangeException( nameof( type ), type, null )
+        };
+    
     readonly record struct Alert(
         AlertType Type,
         string Message )

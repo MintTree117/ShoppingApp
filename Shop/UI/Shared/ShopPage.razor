@@ -15,8 +15,7 @@
     [Inject] protected AuthService Auth { get; init; } = default!;
     [Inject] protected HttpService Http { get; init; } = default!;
     [Inject] protected NavigationManager Navigation { get; init; } = default!;
-
-    AuthenticationState AuthState = null!;
+    
     string AccessToken = string.Empty;
 
     bool _isInitialized = false; // Children have own lifecycle so we need state
@@ -93,8 +92,7 @@
         Opt<string> accessToken = await Auth.GetAccessToken();
         if (!accessToken.IsOkay)
             return;
-
-        AuthState = state;
+        
         AccessToken = accessToken.Data;
     }
     void PushAlert( AlertType type, string message )
