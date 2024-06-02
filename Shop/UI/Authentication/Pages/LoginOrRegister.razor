@@ -7,9 +7,9 @@
 
 <PageTitle>Login Or Register</PageTitle>
 
-@if (registered) {
-    <div class="content-container">
-        <div class="auth-container">
+<div class="content-container">
+    <div class="auth-container">
+        @if (registered) {
             <i class="fa-solid fa-circle-check fa-4x text-success auth-icon"></i>
             <h1>Registration Success!</h1>
             <hr/>
@@ -19,13 +19,10 @@
                 <li><strong>Username:</strong> <small>@( registerReply?.Username ?? "No username returned." )</small></li>
             </ul>
             <hr/>
-            <p class="text-secondary text-start">Your account has been created and is awaiting confirmation. A link has been emailed to @( registerReply?.Email ?? "your email" ). Please verify your email before logging in.</p>
-        </div>
-    </div>
-}
-else if (pendingTwoFactor) {
-    <div class="content-container ">
-        <div class="auth-container">
+            <p class="text-secondary text-center">Your account has been created and is awaiting confirmation. A link has been emailed to @( registerReply?.Email ?? "your email" ). Please verify your email before logging in.</p>
+            <button class="btn btn-primary text-center mx-auto" @onclick="GoToLogin">Login</button>
+        }
+        else if (pendingTwoFactor) {
             <i class="fa-solid fa-circle-check fa-4x text-info auth-icon"></i>
             <h1>Two-factor authentication</h1>
             <hr/>
@@ -47,12 +44,8 @@ else if (pendingTwoFactor) {
                 Don't have access to your authenticator device? You can
                 <button class="btn btn-link" @onclick="GoToRecovery">log in with a recovery code</button>.
             </p>
-        </div>
-    </div>
-}
-else {
-    <div class="content-container">
-        <div class="auth-container" style="max-width: 360px">
+        }
+        else {
             <EditForm Model="@loginRequest" OnValidSubmit="@(async () => await OnValidLoginSubmitAsync() )">
                 <h1 class="h3 mb-3 fw-normal">Sign In</h1>
                 <DataAnnotationsValidator/>
@@ -69,9 +62,9 @@ else {
                 
             <button class="btn btn-link" @onclick="GoToResend">Resend Confirmation Email</button>
             <button class="btn btn-link" @onclick="GoToForgot">Forgot Password</button>
-        
+
             <span class="my-5 d-block text-muted">- Or -</span>
-        
+
             <EditForm Model="@registerRequest" OnValidSubmit="@(async () => await OnValidRegisterSubmitAsync() )">
                 <h1 class="h3 mb-3 fw-normal">Register</h1>
                 <DataAnnotationsValidator/>
@@ -100,7 +93,7 @@ else {
             </EditForm>
                 
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-12 d-flex flex-column align-items-center">
                     <hr/>
                     <h1>Development</h1>
                     <hr/>
@@ -108,9 +101,9 @@ else {
                     <button class="btn-primary" onclick="@(async ()=> await TestLogin())">Test Login</button>
                 </div>
             </div>
-        </div>
+        }
     </div>
-}
+</div>
 
 @code 
 {
@@ -234,6 +227,8 @@ else {
         Navigate( Urls.PageResendConfirm );
     void GoToForgot() => 
         Navigate( Urls.PageForgotPassword );
+    void GoToLogin() =>
+        Navigate( Urls.PageLoginOrRegister, true );
 
     sealed class LoginRequest
     {

@@ -8,9 +8,9 @@
 
 <PageTitle>Manage Account</PageTitle>
 
-<div class="content-container mt-3">
+<div class="content-container">
     <div class="auth-container">
-        <h3 class="fw-bold">Profile</h3>
+        <h3>Profile</h3>
         <hr/>
         <EditForm Model="@accountModel" OnValidSubmit="@(async () => await UpdateAccount())" method="post">
             <DataAnnotationsValidator/>

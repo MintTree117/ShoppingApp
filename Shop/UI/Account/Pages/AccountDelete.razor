@@ -7,33 +7,33 @@
 
 <PageTitle>Delete Account</PageTitle>
 
-<div class="content-container mt-3">
+<div class="content-container">
     <div class="auth-container">
         @if (isWarning) {
-                <div class="alert alert-warning p-3" role="alert">
-                    <i class="fa-solid fa-triangle-exclamation fa-4x text-success auth-icon"></i>
-                    <p>
-                        <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
-                    </p>
-                    <button class="w-100 btn btn-lg btn-danger" @onclick="@(async () => await OnConfirmSubmit())">Delete data and close my account</button>
-                    <hr/>
-                    <button class="w-100 btn btn-lg btn-info" @onclick="Cancel">Cancel</button>
-                </div>
-            }
-            else {
-                <h3 class="fw-bold">Delete Personal Data</h3>
+            <div class="alert alert-warning p-3" role="alert">
+                <i class="fa-solid fa-triangle-exclamation fa-4x text-warning auth-icon"></i>
+                <p class="mb-3">
+                    <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
+                </p>
+                <button class="btn btn-warning btn-icon mx-auto px-3" @onclick="@(async () => await OnConfirmSubmit())"><i class="fa fa-trash me-2"></i>Delete</button>
                 <hr/>
-                <EditForm Model="@request" FormName="delete-user" OnValidSubmit="@(async () => await OnValidSubmitAsync())" method="post">
-                    <DataAnnotationsValidator/>
-                    <ValidationSummary class="text-danger" role="alert"/>
-                    <div class="form-floating mb-3">
-                        <InputText type="password" @bind-Value="@request.Password" id="password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Please enter your password."/>
-                        <label for="password" class="form-label">Password</label>
-                        <ValidationMessage For="@(() => request.Password)" class="text-danger"/>
-                    </div>
-                    <button class="w-100 btn btn-lg btn-danger" type="submit">Delete Data</button>
-                </EditForm>
-            }
+                <button class="btn btn-warning btn-icon mx-auto px-3" @onclick="Cancel"><i class="fa-solid fa-x me-2"></i>Cancel</button>
+            </div>
+        }
+        else {
+            <h3>Delete Personal Data</h3>
+            <hr/>
+            <EditForm Model="@request" FormName="delete-user" OnValidSubmit="@(async () => await OnValidSubmitAsync())" method="post">
+                <DataAnnotationsValidator/>
+                <ValidationSummary class="text-danger" role="alert"/>
+                <div class="form-floating mb-3">
+                    <InputText type="password" @bind-Value="@request.Password" id="password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Please enter your password."/>
+                    <label for="password" class="form-label">Password</label>
+                    <ValidationMessage For="@(() => request.Password)" class="text-danger"/>
+                </div>
+                 <button class="btn btn-warning btn-icon mx-auto px-3"><i class="fa fa-trash me-2"></i>Delete Data</button>
+            </EditForm>
+        }
     </div>
 </div>
 

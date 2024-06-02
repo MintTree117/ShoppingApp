@@ -6,16 +6,22 @@
 
 <PageTitle>Confirm Email</PageTitle>
 
-<div class="col-4 mx-auto">
-    @if (confirmFailed) {
-        <h3 class="mb-3">Email Confirmation Failed!</h3>
-        <p class="mb-3">Error Details: @apiReply.Message()</p>
-        <p>Please click <button class="btn btn-link" @onclick="GoToResend">here</button> to try sending another confirmation link, or contact support.</p>
-    }
-    else if (emailConfirmed) {
-        <h3 class="mb-3">Email Confirmed!</h3>
-        <p>Your account has been verified and you can now <button class="btn btn-link" @onclick="GoToLogin">login normally.</button></p>
-    }
+<div class="content-container">
+    <div class="auth-container">
+        @if (confirmFailed) {
+            <i class="fa-solid fa-circle-exclamation fa-4x text-danger auth-icon"></i>
+            <h3 class="mb-3">Email Confirmation Failed!</h3>
+            <p class="mb-3">Error Details: @apiReply.Message()</p>
+            <p class="mb-3 text-muted">Please try again or contact support.</p>
+            <button class="btn btn-info btn-icon" @onclick="GoToResend"><i class="fa fa-repeat me-2"></i>Retry</button>
+        }
+        else if (emailConfirmed) {
+            <i class="fa-solid fa-circle-check fa-4x text-success auth-icon"></i>
+            <h3 class="mb-3">Email Confirmed!</h3>
+            <p class="mb-3 text-muted">Your account has been verified and you can now login normally.</p>
+            <button class="btn btn-primary btn-icon mx-auto px-3" @onclick="GoToLogin"><i class="fa fa-user me-2"></i>Login</button>
+        }
+    </div>
 </div>
 
 @code 
