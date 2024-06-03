@@ -8,10 +8,12 @@
 
 <PageTitle>Manage Addresses</PageTitle>
 
+<!-- WRAPPERS -->
 <div class="content-container">
     <div class="auth-container" style="max-width: 900px;">
-        <!-- EDIT -->
         @if (_isEditing) {
+            <!-- EDIT -->
+            <!-- TITLE -->
             <div class="d-flex flex-row align-items-center justify-content-between">
                 <h3 class="mb-0">@GetEditTitle()</h3>
                 <button class="btn btn-secondary btn-icon" @onclick="@OnClickCancelEdit">Cancel<i class="fa fa-window-close ms-2"></i></button>
@@ -46,10 +48,11 @@
                     <ValidationMessage For="@(() => _editModel.GridX)" class="text-danger"/>
                 </div>
                 <!-- SUBMIT -->
-                <button class="btn btn-primary btn-icon">Save Changes<i class="fa fa-paper-plane ms-2"></i></button>
+                <button class="btn btn-submit btn-icon">Save Changes<i class="fa fa-paper-plane ms-2"></i></button>
             </EditForm>
         }
         else {
+            <!-- VIEW -->
             <!-- VIEW TOP-->
             <div class="d-flex flex-row align-items-center justify-content-between">
                 <!-- TOP LEFT -->
@@ -58,9 +61,11 @@
                 <div class="d-flex flex-row align-items-stretch justify-content-between">
                     <!-- ROWS DROPDOWN -->
                     <div class="dropdown me-3 h-100">
+                        <!-- DROPDOWN TOGGLE -->
                         <button class="btn btn-secondary dropdown-toggle h-100" type="button" id="RowsPerPage" data-bs-toggle="dropdown" aria-expanded="false">
                             Display: @_rowsPerPageSelection
                         </button>
+                        <!-- DROPDOWN LIST -->
                         <ul class="dropdown-menu" aria-labelledby="RowsPerPage">
                             @for ( int i = 0; i < _rowCounts.Length; i++ ) {
                                 int localIndex = i; // Create a local copy of the loop variable because of enumeration
@@ -136,12 +141,10 @@
     bool _isEditing;
     bool _isNew;
     PaginationPanel _paginationPanel = default!;
-    string _authToken = string.Empty;
 
     protected override async Task OnParametersSetAsync()
     {
         await base.OnParametersSetAsync();
-        _authToken = await AwaitAccessToken();
         await LoadFreshAddresses();
     }
 
@@ -200,13 +203,13 @@
         Dictionary<string, object> parameters = [];
         parameters.Add( "page", _currentPage );
         parameters.Add( "rows", _rowsPerPageSelection );
-        return await Http.TryGetRequest<AddressSearchResponse>( Urls.ApiGetAddresses, parameters, _authToken );
+        return await Http.TryGetRequest<AddressSearchResponse>( Urls.ApiGetAddresses, parameters, await GetAuthToken());
     }
     async Task<Opt<bool>> TrySaveAddress() => _isNew
-        ? await Http.TryPutRequest<bool>( Urls.ApiAddAddress, _editModel, _authToken )
-        : await Http.TryPostRequest<bool>( Urls.ApiUpdateAddress, _editModel, _authToken );
+        ? await Http.TryPutRequest<bool>( Urls.ApiAddAddress, _editModel, await GetAuthToken() )
+        : await Http.TryPostRequest<bool>( Urls.ApiUpdateAddress, _editModel, await GetAuthToken() );
     async Task<Opt<bool>> TryDeleteAddress( AddressModel address ) =>
-        await Http.TryPostRequest<bool>( Urls.ApiDeleteAddress, new AddressDeleteRequest( address.Id ), _authToken );
+        await Http.TryDeleteRequest<bool>( Urls.ApiDeleteAddress, new Dictionary<string, object>() { { "AddressId", address.Id } }, await GetAuthToken() );
     
     void UpdateLocalState( Opt<AddressSearchResponse> result, int page )
     {

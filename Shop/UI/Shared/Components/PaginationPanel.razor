@@ -26,12 +26,6 @@
     
     [Parameter] public EventCallback<int> OnPageChange { get; set; } = default!;
 
-    protected override void OnAfterRender( bool firstRender )
-    {
-        base.OnAfterRender( firstRender );
-        Console.WriteLine( "PaginationPanel Rendered." );
-    }
-
     internal void Set( int page, int rowsPerPage, int totalResults )
     {
         TotalPages = ( totalResults + rowsPerPage - 1 ) / rowsPerPage; // Round up to ensure correct page count

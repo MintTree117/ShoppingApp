@@ -7,12 +7,16 @@
 
 <PageTitle>Login Or Register</PageTitle>
 
+<!-- WRAPPERS -->
 <div class="content-container">
     <div class="auth-container">
         @if (registered) {
+            <!-- PENDING 2FA -->
+            <!-- MESSAGE -->
             <i class="fa-solid fa-circle-check fa-4x text-success auth-icon"></i>
             <h1>Registration Success!</h1>
             <hr/>
+            <!-- DETAILS -->
             <ul class="text-start">
                 <li><strong>Id:</strong> <small>@( registerReply?.Id ?? "No id returned." )</small></li>
                 <li><strong>Email:</strong> <small>@( registerReply?.Email ?? "No email returned." )</small></li>
@@ -20,85 +24,100 @@
             </ul>
             <hr/>
             <p class="text-secondary text-center">Your account has been created and is awaiting confirmation. A link has been emailed to @( registerReply?.Email ?? "your email" ). Please verify your email before logging in.</p>
-            <button class="btn btn-primary text-center mx-auto" @onclick="GoToLogin">Login</button>
+            <!-- LOGIN -->
+            <button class="btn btn-submit btn-icon" @onclick="GoToLogin"><i class="fa fa-user me-2"></i>Login</button>
         }
         else if (pendingTwoFactor) {
+            <!-- PENDING 2FA -->
+            <!-- MESSAGE -->
             <i class="fa-solid fa-circle-check fa-4x text-info auth-icon"></i>
             <h1>Two-factor authentication</h1>
             <hr/>
             <p>Your login is protected by a two-step verification process. Enter your verification code below.</p>
             <hr/>
+            <!-- FORM -->
             <EditForm Model="@twoFactorRequest" FormName="login-with-2fa" OnValidSubmit="OnValidTwoFactorSubmitAsync" method="post">
                 <DataAnnotationsValidator/>
                 <ValidationSummary class="text-danger" role="alert"/>
-                <div class="form-floating mb-3">
+                <div class="form-floating">
                     <InputText @bind-Value="@twoFactorRequest.Code" id="two-factor-code" class="form-control" autocomplete="off"/>
                     <label for="two-factor-code" class="form-label">Authenticator code</label>
                     <ValidationMessage For="@(() => twoFactorRequest.Code)" class="text-danger"/>
                 </div>
-                <div>
-                    <button type="submit" class="w-100 btn btn-lg btn-primary">Log In</button>
-                </div>
+                <!-- SUBMIT -->
+                <button class="btn btn-submit btn-icon" type="submit"><i class="fa fa-user me-2"></i>Log In</button>
             </EditForm>
-            <p>
-                Don't have access to your authenticator device? You can
-                <button class="btn btn-link" @onclick="GoToRecovery">log in with a recovery code</button>.
-            </p>
         }
         else {
-            <EditForm Model="@loginRequest" OnValidSubmit="@(async () => await OnValidLoginSubmitAsync() )">
-                <h1 class="h3 mb-3 fw-normal">Sign In</h1>
+            <!-- LOGIN TITLE -->
+            <h3>Sign In</h3>
+            <hr/>
+            <!-- LOGIN FORM -->
+            <EditForm Model="@loginRequest" OnValidSubmit="@(async () => await OnValidLoginSubmitAsync())">
                 <DataAnnotationsValidator/>
+                <!-- EMAIL OR USERNAME-->
                 <div class="form-floating">
                     <InputText type="name" class="form-control" id="emailOrUsername" @bind-Value="@loginRequest.EmailOrUsername">></InputText>
                     <label for="emailOrUsername">Email or Username</label>
                 </div>
+                <!-- PASSWORD -->
                 <div class="form-floating">
                     <InputText type="password" class="form-control" id="password" @bind-Value="@loginRequest.Password"></InputText>
                     <label for="password">Password</label>
                 </div>
-                <button class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
+                <!-- SUBMIT -->
+                <button class="btn btn-submit btn-icon" type="submit"><i class="fa fa-sign-in me-2"></i>Sign in</button>
             </EditForm>
-                
+
+            <!-- BETWEEN FORMS -->
             <button class="btn btn-link" @onclick="GoToResend">Resend Confirmation Email</button>
             <button class="btn btn-link" @onclick="GoToForgot">Forgot Password</button>
-
+            
             <span class="my-5 d-block text-muted">- Or -</span>
 
+            <!-- REGISTER TITLE -->
+            <h3>Register</h3>
+            <hr/>
+            <!-- REGISTER FORM -->
             <EditForm Model="@registerRequest" OnValidSubmit="@(async () => await OnValidRegisterSubmitAsync() )">
-                <h1 class="h3 mb-3 fw-normal">Register</h1>
                 <DataAnnotationsValidator/>
                 <ValidationSummary class="text-danger" role="alert"/>
-                <div class="form-floating">
-                    <InputText type="name" class="form-control" id="username" @bind-Value="@registerRequest.Username"></InputText>
-                    <ValidationMessage For="@(() => registerRequest.Username)"/>
-                    <label for="emailOrUsername">Username</label>
-                </div>
+                <!-- EMAIL -->
                 <div class="form-floating">
                     <InputText type="name" class="form-control" id="email" @bind-Value="@registerRequest.Email"></InputText>
                     <ValidationMessage For="@(() => registerRequest.Email)"/>
                     <label for="email">Email</label>
                 </div>
+                <!-- USERNAME -->
+                <div class="form-floating">
+                    <InputText type="name" class="form-control" id="username" @bind-Value="@registerRequest.Username"></InputText>
+                    <ValidationMessage For="@(() => registerRequest.Username)"/>
+                    <label for="emailOrUsername">Username</label>
+                </div>
+                <!-- PASSWORD -->
                 <div class="form-floating">
                     <InputText type="password" class="form-control" id="registerPassword" @bind-Value="@registerRequest.Password"></InputText>
                     <ValidationMessage For="@(() => registerRequest.Password)"/>
                     <label for="registerPassword">Password</label>
                 </div>
+                <!-- CONFIRM PASSWORD -->
                 <div class="form-floating">
                     <InputText type="password" class="form-control" id="confirmPassword" @bind-Value="@registerRequest.PasswordConfirm"></InputText>
                     <ValidationMessage For="@(() => registerRequest.PasswordConfirm)"/>
                     <label for="confirmPassword">Confirm Password</label>
                 </div>
-                <button class="w-100 btn btn-lg btn-primary" type="submit">Register</button>
+                <!-- SUBMIT -->
+                <button class="btn btn-submit btn-icon" type="submit"><i class="fa fa-user-plus me-2"></i>Register</button>
             </EditForm>
-                
-            <div class="row">
+
+            <!-- DEVELOPER -->
+            <div class="row mt-3">
                 <div class="col-12 d-flex flex-column align-items-center">
                     <hr/>
                     <h1>Development</h1>
                     <hr/>
-                    <button class="btn-primary" onclick="@(async ()=> await TestRegister())">Test Register</button>
-                    <button class="btn-primary" onclick="@(async ()=> await TestLogin())">Test Login</button>
+                    <button class="btn-submit" onclick="@(async ()=> await TestRegister())">Test Register</button>
+                    <button class="btn-submit" onclick="@(async ()=> await TestLogin())">Test Login</button>
                 </div>
             </div>
         }
@@ -146,6 +165,7 @@
 
         if (loginResult.Data.IsPending2FA) {
             pendingTwoFactor = true;
+            twoFactorRequest.EmailOrUsername = loginRequest.EmailOrUsername;
             StateHasChanged();
             StopLoading();
             return;
@@ -168,7 +188,7 @@
     {
         StartLoading( "Verifying Two Factor..." );
         
-        twoFactorRequest.Email = loginRequest.EmailOrUsername;
+        twoFactorRequest.EmailOrUsername = loginRequest.EmailOrUsername;
 
         Opt<TwoFactorReply> result = await TryTwoFactorLogin();
 
@@ -240,7 +260,7 @@
     }
     sealed class TwoFactorRequest
     {
-        [Required] public string Email { get; set; } = string.Empty;
+        [Required] public string EmailOrUsername { get; set; } = string.Empty;
         
         [Required, DataType( DataType.Text ), Display( Name = "Authenticator code" ), StringLength( 40, ErrorMessage = "The two factor code must be at least 6 and at max 40 characters long.", MinimumLength = 6 )]
         public string Code { get; set; } = string.Empty;

@@ -38,6 +38,7 @@ internal static class Urls
     internal const string PageLogout = "/logout";
     internal const string PageSessionExpired = "/session-expired";
     internal const string PageForgotPassword = "/forgot-password";
+    internal const string PageResetPassword = "/reset-password";
     internal const string PageLoginWithRecovery = "/recovery-login";
     internal const string PageAccountProfile = "/account/profile";
     internal const string PageAccountPassword = "/account/password";
