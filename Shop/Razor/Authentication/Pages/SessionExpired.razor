@@ -1,8 +1,7 @@
 @page "/session-expired"
 @using Shop.Utilities
-@using Shop.UI.Shared
-@inherits Shop.UI.Shared.ShopPage
-@layout MainLayout
+@inherits AuthenticationPageBase
+@layout  AuthenticationLayout
 
 <PageTitle>Session Expired</PageTitle>
 
@@ -12,7 +11,7 @@
         <!-- TITLE -->
         <h3 class="mb-3">Your session has expired. Please login again.</h3>
         <!-- LOGIN -->
-        <button class="btn btn-info btn-icon" @onclick="GoToLogin"><i class="fa fa-user me-2"></i>Login</button>
+        <button class="btn btn-submit btn-info btn-icon" @onclick="GoToLogin"><i class="fa fa-sign-in me-2"></i>Login</button>
     </div>
 </div>
 

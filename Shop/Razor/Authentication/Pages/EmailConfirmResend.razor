@@ -1,9 +1,8 @@
 @page "/resend-confirmation-email"
 @using Shop.Infrastructure.Common.Optionals
-@using Shop.UI.Shared
 @using Shop.Utilities
-@inherits Shop.UI.Authentication.AuthenticationPageBase
-@layout MainLayout
+@inherits AuthenticationPageBase
+@layout  AuthenticationLayout
 
 <PageTitle>Resend Confirmation Email</PageTitle>
 
@@ -16,7 +15,7 @@
             <h3 class="mb-3">Email confirm link sent!</h3>
             <p class="mb-3">Please click the link sent to your email to activate your account.</p>
             <!-- RESEND -->
-            <button class="btn btn-primary btn-icon" @onclick="GoToResend"><i class="fa fa-repeat me-2"></i>Retry</button>
+            <button class="btn btn-submit btn-info btn-icon" @onclick="GoToResend"><i class="fa fa-repeat me-2"></i>Retry</button>
         }
         else {
             <!-- TITLE -->

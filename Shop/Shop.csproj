@@ -39,14 +39,14 @@
     </ItemGroup>
 
     <ItemGroup>
-      <AdditionalFiles Include="UI\Shared\MainLayout.razor" />
+      <AdditionalFiles Include="Razor\Shared\MainLayout.razor" />
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="UI\Cart\" />
-      <Folder Include="UI\Checkout\" />
-      <Folder Include="UI\ProductDetails\" />
-      <Folder Include="UI\ProductSearch\" />
+      <Folder Include="Razor\Cart\" />
+      <Folder Include="Razor\Checkout\" />
+      <Folder Include="Razor\ProductDetails\" />
+      <Folder Include="Razor\ProductSearch\" />
     </ItemGroup>
 
     <ItemGroup>

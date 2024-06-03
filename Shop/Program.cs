@@ -5,11 +5,11 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Shop;
 using Shop.Infrastructure.Authentication;
 using Shop.Infrastructure.Catalog;
+using Shop.Infrastructure.Common;
 using Shop.Infrastructure.Http;
 using Shop.Infrastructure.Storage;
-using Shop.Utilities;
 
-var builder = WebAssemblyHostBuilder.CreateDefault( args );
+WebAssemblyHostBuilder builder = WebAssemblyHostBuilder.CreateDefault( args );
 builder.RootComponents.Add<App>( "#app" );
 builder.RootComponents.Add<HeadOutlet>( "head::after" );
 

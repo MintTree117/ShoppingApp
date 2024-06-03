@@ -1,0 +1,25 @@
+@using Shop.Razor.Shared
+@using Shop.Razor.Shared.Components
+@using Microsoft.AspNetCore.Components.Authorization
+@inherits LayoutComponentBase
+@layout MainLayout
+
+<AuthorizeView>
+    <Authorized>
+        <div class="row mx-auto" style="max-width: 900px">
+            <div class="page-content position-relative col-auto flex-grow-1">
+                <LoadingPanel/>
+                <nav class="account-nav-desktop mx-auto w-100">
+                    <ul class="nav justify-content-center w-100">
+                        <AccountMenuOptions/>
+                    </ul>
+                </nav>
+                <hr/>
+                @Body
+            </div>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <AccessDenied/>
+    </NotAuthorized>
+</AuthorizeView>

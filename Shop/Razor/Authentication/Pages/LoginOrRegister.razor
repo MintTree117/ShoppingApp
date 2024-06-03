@@ -3,7 +3,8 @@
 @using Shop.Infrastructure.Authentication.Types
 @using Shop.Infrastructure.Common.Optionals
 @using Shop.Utilities
-@inherits Shop.UI.Authentication.AuthenticationPageBase
+@inherits AuthenticationPageBase
+@layout AuthenticationLayout
 
 <PageTitle>Login Or Register</PageTitle>
 
@@ -56,17 +57,17 @@
             <EditForm Model="@loginRequest" OnValidSubmit="@(async () => await OnValidLoginSubmitAsync())">
                 <DataAnnotationsValidator/>
                 <!-- EMAIL OR USERNAME-->
-                <div class="form-floating">
+                <div class="form-floating mb-2">
                     <InputText type="name" class="form-control" id="emailOrUsername" @bind-Value="@loginRequest.EmailOrUsername">></InputText>
                     <label for="emailOrUsername">Email or Username</label>
                 </div>
                 <!-- PASSWORD -->
-                <div class="form-floating">
+                <div class="form-floating mb-2">
                     <InputText type="password" class="form-control" id="password" @bind-Value="@loginRequest.Password"></InputText>
                     <label for="password">Password</label>
                 </div>
                 <!-- SUBMIT -->
-                <button class="btn btn-submit btn-icon" type="submit"><i class="fa fa-sign-in me-2"></i>Sign in</button>
+                <button class="btn btn-submit btn-icon mb-2" type="submit"><i class="fa fa-sign-in me-2"></i>Sign in</button>
             </EditForm>
 
             <!-- BETWEEN FORMS -->
@@ -83,31 +84,31 @@
                 <DataAnnotationsValidator/>
                 <ValidationSummary class="text-danger" role="alert"/>
                 <!-- EMAIL -->
-                <div class="form-floating">
+                <div class="form-floating mb-2">
                     <InputText type="name" class="form-control" id="email" @bind-Value="@registerRequest.Email"></InputText>
                     <ValidationMessage For="@(() => registerRequest.Email)"/>
                     <label for="email">Email</label>
                 </div>
                 <!-- USERNAME -->
-                <div class="form-floating">
+                <div class="form-floating mb-2">
                     <InputText type="name" class="form-control" id="username" @bind-Value="@registerRequest.Username"></InputText>
                     <ValidationMessage For="@(() => registerRequest.Username)"/>
                     <label for="emailOrUsername">Username</label>
                 </div>
                 <!-- PASSWORD -->
-                <div class="form-floating">
+                <div class="form-floating mb-2">
                     <InputText type="password" class="form-control" id="registerPassword" @bind-Value="@registerRequest.Password"></InputText>
                     <ValidationMessage For="@(() => registerRequest.Password)"/>
                     <label for="registerPassword">Password</label>
                 </div>
                 <!-- CONFIRM PASSWORD -->
-                <div class="form-floating">
+                <div class="form-floating mb-2">
                     <InputText type="password" class="form-control" id="confirmPassword" @bind-Value="@registerRequest.PasswordConfirm"></InputText>
                     <ValidationMessage For="@(() => registerRequest.PasswordConfirm)"/>
                     <label for="confirmPassword">Confirm Password</label>
                 </div>
                 <!-- SUBMIT -->
-                <button class="btn btn-submit btn-icon" type="submit"><i class="fa fa-user-plus me-2"></i>Register</button>
+                <button class="btn btn-submit btn-icon mb-2" type="submit"><i class="fa fa-user-plus me-2"></i>Register</button>
             </EditForm>
 
             <!-- DEVELOPER -->

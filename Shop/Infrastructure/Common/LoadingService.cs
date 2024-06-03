@@ -1,4 +1,4 @@
-namespace Shop.Utilities;
+namespace Shop.Infrastructure.Common;
 
 public sealed class LoadingService
 {
@@ -6,7 +6,7 @@ public sealed class LoadingService
     bool _isLoading;
     string? _message;
 
-    public bool IsLoading
+    internal bool IsLoading
     {
         get => _isLoading;
         private set
@@ -17,8 +17,7 @@ public sealed class LoadingService
             }
         }
     }
-
-    public string? Message
+    internal string? Message
     {
         get => _message;
         private set
@@ -29,18 +28,16 @@ public sealed class LoadingService
             }
         }
     }
-
-    public void StartLoading( string? message = null )
+    internal void StartLoading( string? message = null )
     {
         Message = message;
         IsLoading = true;
     }
-
-    public void StopLoading()
+    internal void StopLoading()
     {
         IsLoading = false;
         Message = null;
     }
 
-    private void NotifyStateChanged() => OnChange?.Invoke();
+    void NotifyStateChanged() => OnChange?.Invoke();
 }

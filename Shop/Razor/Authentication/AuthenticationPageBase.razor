@@ -1,6 +1,7 @@
+@inherits Shop.Razor.Shared.ShopPage
 @layout AuthenticationLayout
 @using Shop.Utilities
-@inherits Shop.UI.Shared.ShopPage
+@using Shop.Infrastructure.Common
 
 @code {
     [Inject] public LoadingService LoadingService { get; set; } = default!;

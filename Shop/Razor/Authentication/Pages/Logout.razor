@@ -1,6 +1,8 @@
 @page "/logout"
 @using Shop.Utilities
+@using Shop.Razor.Shared
 @inherits AuthenticationPageBase
+@layout  AuthenticationLayout
 
 @code {
     protected override async Task OnInitializedAsync()

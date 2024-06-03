@@ -1,10 +1,9 @@
 @page "/account/delete"
 @using System.ComponentModel.DataAnnotations
-@using Shop.Infrastructure.Authentication
 @using Shop.Infrastructure.Common.Optionals
 @using Shop.Utilities
-@inherits Shop.UI.Account.AccountPageBase
-@layout AccountLayout
+@inherits AccountPageBase
+@layout  AccountLayout
 
 <PageTitle>Delete Account</PageTitle>
 
@@ -20,10 +19,10 @@
                     <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
                 </p>
                 <!-- YES -->
-                <button class="btn btn-warning btn-icon mx-auto px-3" @onclick="@(async () => await OnConfirmSubmit())"><i class="fa fa-trash me-2"></i>Delete</button>
+                <button class="btn btn-submit btn-warning btn-icon mx-auto px-3" @onclick="@(async () => await OnConfirmSubmit())"><i class="fa fa-trash me-2"></i>Delete</button>
                 <hr/>
                 <!-- NO -->
-                <button class="btn btn-warning btn-icon mx-auto px-3" @onclick="Cancel"><i class="fa-solid fa-x me-2"></i>Cancel</button>
+                <button class="btn btn-submit btn-warning btn-icon mx-auto px-3" @onclick="Cancel"><i class="fa-solid fa-x me-2"></i>Cancel</button>
             </div>
         }
         else {

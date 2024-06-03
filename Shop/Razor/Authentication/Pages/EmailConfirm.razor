@@ -1,7 +1,7 @@
 @page "/confirm-email"
 @using Shop.Infrastructure.Common.Optionals
 @using Shop.Utilities
-@inherits Shop.UI.Authentication.AuthenticationPageBase
+@inherits Shop.Razor.Authentication.AuthenticationPageBase
 @layout AuthenticationLayout
 
 <PageTitle>Confirm Email</PageTitle>
@@ -16,7 +16,7 @@
             <p class="mb-3">Error Details: @apiReply.Message()</p>
             <p class="mb-3 text-muted">Please try again or contact support.</p>
             <!-- RESEND -->
-            <button class="btn btn-info btn-icon" @onclick="GoToResend"><i class="fa fa-repeat me-2"></i>Retry</button>
+            <button class="btn btn-submit btn-info btn-icon" @onclick="GoToResend"><i class="fa fa-repeat me-2"></i>Retry</button>
         }
         else if (emailConfirmed) {
             <!-- MESSAGE -->
@@ -24,7 +24,7 @@
             <h3 class="mb-3">Email Confirmed!</h3>
             <p class="mb-3 text-muted">Your account has been verified and you can now login normally.</p>
             <!-- LOGIN -->
-            <button class="btn btn-primary btn-icon mx-auto px-3" @onclick="GoToLogin"><i class="fa fa-user me-2"></i>Login</button>
+            <button class="btn btn-submit btn-icon mx-auto px-3" @onclick="GoToLogin"><i class="fa fa-user me-2"></i>Login</button>
         }
     </div>
 </div>
