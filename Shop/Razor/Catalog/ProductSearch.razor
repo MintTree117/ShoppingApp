@@ -1,8 +1,48 @@
-@page "/ProductSearch"
+@page "/products/search"
+@using Shop.Infrastructure.Catalog
+@implements IDisposable
+
+<div class="content-container">
+    <ProductSearchHeader @ref="_header"/>
+    <ProductSearchFilters @ref="_filters"/>
+</div>
 
 @code {
     // On Load
     // load categories
     // load filters
     // load search
+
+    ProductSearchHeader _header = default!;
+    ProductSearchFilters _filters = default!;
+
+    public void Dispose()
+    {
+        _header.PageSizeChangedEvent -= OnPageSizeChanged;
+        _header.PageSortChangedEvent -= OnPageSortChanged;
+        _filters.OnChangeFilters -= OnSearchFiltersChanged;
+    }
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        _header.PageSizeChangedEvent += OnPageSizeChanged;
+        _header.PageSortChangedEvent += OnPageSortChanged;
+        _filters.OnChangeFilters += OnSearchFiltersChanged;
+    }
+
+    async Task OnPageSizeChanged( int newPageSize )
+    {
+        await Task.Delay( 1000 );
+        Console.WriteLine( $"Page Size Changed: {newPageSize}" );
+    }
+    async Task OnPageSortChanged( int newPageSortIndex )
+    {
+        await Task.Delay( 1000 );
+        Console.WriteLine( $"Page Sort Changed: {newPageSortIndex}" );
+    }
+    async Task OnSearchFiltersChanged( Filters newFilters )
+    {
+        await Task.Delay( 1000 );
+        Console.WriteLine( $"Search Filters Changed: {newFilters}" );
+    } 
 }

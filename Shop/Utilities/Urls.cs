@@ -46,6 +46,8 @@ internal static class Urls
     internal const string PageOrdersManage = "/manage-orders";
     internal const string PageAccountDelete = "/account/delete";
     internal const string PageAccountDeleted = "/account/deleted";
+
+    internal const string PageProductSearch = "/products/search";
     
     internal const string PageCart = "/cart";
 }

@@ -1,6 +1,6 @@
 namespace Shop.Infrastructure.Catalog.Categories;
 
-public sealed class Category
+public record Category
 {
     public Guid Id { get; init; }
     public Guid? ParentId { get; init; }
