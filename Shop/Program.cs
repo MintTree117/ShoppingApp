@@ -26,6 +26,6 @@ builder.Services.AddScoped<AuthenticationStateProvider, AuthProvider>();
 //builder.Services.AddScoped<AuthenticationStateProvider>( provider => provider.GetRequiredService<AuthenticationManager>() );
 builder.Services.AddScoped<LoadingService>();
 builder.Services.AddSingleton<CategoriesCache>();
-builder.Services.AddScoped<CategoriesService>();
+builder.Services.AddSingleton<CategoriesCache>();
 
 await builder.Build().RunAsync();

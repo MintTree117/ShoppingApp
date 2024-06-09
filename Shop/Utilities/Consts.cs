@@ -29,6 +29,9 @@ internal static class Consts
     internal const string ApiAddAddress = ApiAccountBase + "/address/add";
     internal const string ApiUpdateAddress = ApiAccountBase + "/address/update";
     internal const string ApiDeleteAddress = ApiAccountBase + "/address/delete";
+    // CATALOG
+    internal const string ApiGetCategories = ApiBase + "/categories";
+    internal const string ApiGetBrands = ApiBase + "/brands";
     // PARAMS
     // ----------------------------------------------------------------------------------------------------------------
     internal const string ParamReturnUrl = "ReturnUrl";

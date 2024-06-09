@@ -10,20 +10,19 @@ public abstract class MemoryCache<T> // singleton that handles both storage and 
     
     MemoryCacheEntry<T>? _cacheEntry;
 
-    public MemoryCache( string storageKey, StorageService storage, TimeSpan cacheLife )
+    protected MemoryCache( string storageKey, StorageService storage, TimeSpan cacheLife )
     {
         StorageKey = storageKey;
         Storage = storage;
         CacheLife = cacheLife;
     }
-
-    public async Task<Reply<bool>> Set( T newData )
+    protected async Task<Reply<bool>> SetCache( T newData )
     {
         _cacheEntry = MemoryCacheEntry<T>.New( newData );
         return await Storage.Set( StorageKey, _cacheEntry );
 
     }
-    public async Task<Reply<T>> Get()
+    protected async Task<Reply<T>> GetCache()
     {
         if (_cacheEntry is not null)
             if (_cacheEntry.Value.Expired( CacheLife )) _cacheEntry = null;

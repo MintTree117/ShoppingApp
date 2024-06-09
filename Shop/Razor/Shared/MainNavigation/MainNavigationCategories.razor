@@ -51,7 +51,7 @@
 @code {
     [Parameter] public Action OnExitCallback { get; set; } = default!;
     [Parameter] public bool ShowExitButton { get; set; } = false;
-    [Inject] public CategoriesService Service { get; set; } = default!;
+    [Inject] public CategoriesCache Service { get; set; } = default!;
     
     CategoriesCollection _categoriesCollection = CategoriesCollection.None();
     Guid? currentParentId = null;
