@@ -4,5 +4,5 @@ namespace Shop.Infrastructure.Catalog.Brands;
 
 public sealed class BrandsCache
 {
-    public Opt<BrandData> brandData = Opt<BrandData>.None();
+    public Opt<BrandData> BrandData = Opt<BrandData>.None();
 }

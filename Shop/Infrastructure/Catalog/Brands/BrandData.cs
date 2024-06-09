@@ -1,5 +1,5 @@
 namespace Shop.Infrastructure.Catalog.Brands;
 
-public readonly record struct BrandData(
+public record BrandData(
     IReadOnlyDictionary<Guid, Brand> BrandsById,
     IReadOnlyDictionary<Guid, IReadOnlyList<Brand>> BrandsByCategoryId );

@@ -7,12 +7,11 @@ public sealed class BrandsService( HttpService http, BrandsCache cache )
 {
     readonly HttpService _http = http;
     readonly BrandsCache _cache = cache;
-    Opt<BrandData> _data;
 
     public async Task<Opt<BrandData>> GetBrands()
     {
-        if (_data.IsOkay)
-            return _data;
+        if (_cache.BrandData.IsOkay)
+            return _cache.BrandData;
 
         Opt<BrandsDto> fetchResult = await _http.TryGetRequest<BrandsDto>( "Get Brands" );
 
@@ -30,7 +29,7 @@ public sealed class BrandsService( HttpService http, BrandsCache cache )
             brandsByCategory.TryAdd( kvp.Key, brandsForCategory );
         }
         BrandData data = new( brandsById, brandsByCategory );
-        _data = Opt<BrandData>.With( data );
-        return _data;
+        _cache.BrandData = Opt<BrandData>.With( data );
+        return _cache.BrandData;
     }
 }

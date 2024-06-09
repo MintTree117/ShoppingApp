@@ -68,10 +68,10 @@
     List<Brand> _brands = [];
 
     readonly Dictionary<string, bool> _collapsedSections = [];
-    readonly HashSet<Category> _selectedSubcategories = [];
-    readonly HashSet<Brand> _selectedBrands = [];
+    readonly HashSet<Guid> _selectedSubcategories = [];
+    readonly HashSet<Guid> _selectedBrands = [];
 
-    public Func<Filters, Task>? OnChangeFilters;
+    public Func<SearchFiltersDto, Task>? OnChangeFilters;
     public void Show()
     {
         _hidden = false;
@@ -116,18 +116,23 @@
     void OnClickSubcategory( Category category )
     {
         _altered = true;
-        _selectedSubcategories.Add( category );
+        _selectedSubcategories.Add( category.Id );
     }
     void OnClickBrand( Brand brand )
     {
         _altered = true;
-        _selectedBrands.Add( brand );
+        _selectedBrands.Add( brand.Id );
     }
     void InvokeChange()
     {
-        Filters f = new(
-            _selectedSubcategories.ToList(),
-            _selectedBrands.ToList() );
+        SearchFiltersDto f = new(
+            _selectedSubcategories,
+            _selectedBrands,
+            null,
+            null,
+            null,
+            null,
+            false );
 
         OnChangeFilters?.Invoke( f );
     }

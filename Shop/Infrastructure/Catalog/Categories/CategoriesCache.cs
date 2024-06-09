@@ -4,5 +4,5 @@ namespace Shop.Infrastructure.Catalog.Categories;
 
 public sealed class CategoriesCache
 {
-    public Opt<CategoryData> categories = Opt<CategoryData>.None();
+    public Opt<CategoryData> Categories = Opt<CategoryData>.None();
 }

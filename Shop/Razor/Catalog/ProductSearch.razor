@@ -40,9 +40,9 @@
         await Task.Delay( 1000 );
         Console.WriteLine( $"Page Sort Changed: {newPageSortIndex}" );
     }
-    async Task OnSearchFiltersChanged( Filters newFilters )
+    async Task OnSearchFiltersChanged( SearchFiltersDto newSearchFiltersDto )
     {
         await Task.Delay( 1000 );
-        Console.WriteLine( $"Search Filters Changed: {newFilters}" );
+        Console.WriteLine( $"Search Filters Changed: {newSearchFiltersDto}" );
     } 
 }
