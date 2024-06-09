@@ -10,7 +10,7 @@
         <!-- TOP ROW -->
         <div class="top-nav-content content-container top-nav-mobile-top">
             <!-- LOGO -->
-            <a class="logo" href="@Urls.PageHome">
+            <a class="logo" href="@Consts.PageHome">
                 <img class="top-nav-item p-2" src="/images/logo.svg" alt="Blazor">
             </a>
             <div class="top-nav-mobile-right">
@@ -79,7 +79,7 @@ else {
     <div class="top-nav-lower">
         <div class="top-nav-content content-container">
             <!-- LOGO -->
-            <a class="logo" href="@Urls.PageHome">
+            <a class="logo" href="@Consts.PageHome">
                 <img class="top-nav-item" src="/images/logo.svg" alt="Blazor">
             </a>
             <!-- CATEGORIES -->
@@ -194,14 +194,14 @@ else {
     void OnClickAccountButton()
     {
         string url = authenticated
-            ? Urls.PageAccountProfile
-            : Urls.PageLoginOrRegister;
+            ? Consts.PageAccountProfile
+            : Consts.PageLoginOrRegister;
 
         Navigation.NavigateTo( url, true );
     }
     void GoToCart()
     {
-        Navigation.NavigateTo( Urls.PageCart, true );
+        Navigation.NavigateTo( Consts.PageCart, true );
     }
     void OpenSide()
     {

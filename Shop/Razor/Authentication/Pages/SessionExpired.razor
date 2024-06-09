@@ -1,4 +1,4 @@
-@page "/session-expired"
+@page "/sessionExpired"
 @using Shop.Utilities
 @inherits AuthenticationPageBase
 @layout  AuthenticationLayout
@@ -17,5 +17,5 @@
 
 @code {
     void GoToLogin() =>
-        Navigate( Urls.PageLoginOrRegister );
+        Navigate( Consts.PageLoginOrRegister );
 }

@@ -1,6 +1,6 @@
 namespace Shop.Utilities;
 
-internal static class WebUtils
+internal static class Extentions
 {
     internal static string GetOrThrow( this IConfiguration configuration, string section ) =>
         configuration[section] ?? throw new Exception( $"Failed to get {section} from IConfiguration." );
@@ -13,5 +13,5 @@ internal static class WebUtils
         configuration[$"Identity:Pages:{page}"] ?? $"Failed to get identity page url {page} from configuration.";
 
     internal static string ConstructReturnUrl( string url, string? returnUrl ) =>
-        $"{url}?{Urls.ParamReturnUrl}={returnUrl ?? "/"}";
+        $"{url}?{Consts.ParamReturnUrl}={returnUrl ?? "/"}";
 }

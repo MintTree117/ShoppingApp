@@ -1,4 +1,4 @@
-@page "/resend-confirmation-email"
+@page "/emailResend"
 @using Shop.Infrastructure.Common.Optionals
 @using Shop.Utilities
 @inherits AuthenticationPageBase
@@ -63,7 +63,7 @@
         StopLoading();
     }
     async Task<Reply<bool>> TrySendEmail() => 
-        await Http.TryPostRequest<bool>( Urls.ApiResendConfirm, Request );
+        await Http.TryPostRequest<bool>( Consts.ApiResendConfirm, Request );
         
     sealed class ResendConfirmationRequest
     {
@@ -76,5 +76,5 @@
     }
 
     void GoToResend() =>
-        Navigate( Urls.PageResendConfirm, true );
+        Navigate( Consts.PageEmailConfirmResend, true );
 }

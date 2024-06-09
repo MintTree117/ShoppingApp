@@ -203,13 +203,13 @@
         Dictionary<string, object> parameters = [];
         parameters.Add( "page", _currentPage );
         parameters.Add( "rows", _rowsPerPageSelection );
-        return await Http.TryGetRequest<AddressSearchResponse>( Urls.ApiGetAddresses, parameters, await GetAuthToken());
+        return await Http.TryGetRequest<AddressSearchResponse>( Consts.ApiGetAddresses, parameters, await GetAuthToken());
     }
     async Task<Reply<bool>> TrySaveAddress() => _isNew
-        ? await Http.TryPutRequest<bool>( Urls.ApiAddAddress, _editModel, await GetAuthToken() )
-        : await Http.TryPostRequest<bool>( Urls.ApiUpdateAddress, _editModel, await GetAuthToken() );
+        ? await Http.TryPutRequest<bool>( Consts.ApiAddAddress, _editModel, await GetAuthToken() )
+        : await Http.TryPostRequest<bool>( Consts.ApiUpdateAddress, _editModel, await GetAuthToken() );
     async Task<Reply<bool>> TryDeleteAddress( AddressModel address ) =>
-        await Http.TryDeleteRequest<bool>( Urls.ApiDeleteAddress, new Dictionary<string, object>() { { "AddressId", address.Id } }, await GetAuthToken() );
+        await Http.TryDeleteRequest<bool>( Consts.ApiDeleteAddress, new Dictionary<string, object>() { { "AddressId", address.Id } }, await GetAuthToken() );
     
     void UpdateLocalState( Reply<AddressSearchResponse> result, int page )
     {

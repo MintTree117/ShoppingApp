@@ -15,13 +15,13 @@
             <div>
                 <AuthorizeView>
                     <Authorized>
-                        <a class="text-decoration-none link-light fs-5" href="@Urls.PageAccountProfile">
+                        <a class="text-decoration-none link-light fs-5" href="@Consts.PageAccountProfile">
                             <i class="fa fa-user"></i>
                             <span class="ms-2">Welcome, @_userName</span>
                         </a>
                     </Authorized>
                     <NotAuthorized>
-                        <a class="text-decoration-none link-light fs-5" href="@Urls.PageLoginOrRegister">
+                        <a class="text-decoration-none link-light fs-5" href="@Consts.PageLoginOrRegister">
                             <i class="fa fa-user"></i>
                             <span class="ms-2">Hello, Sign In</span>
                         </a>
@@ -72,7 +72,7 @@
                         </Authorized>
                         <NotAuthorized>
                             <li class="nav-item">
-                                <a class="nav-link" href="@Urls.PageLoginOrRegister">
+                                <a class="nav-link" href="@Consts.PageLoginOrRegister">
                                     <i class="fa fa-user nav-icon"></i><strong>Sign In</strong>
                                 </a>
                             </li>

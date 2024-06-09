@@ -12,7 +12,7 @@
         StartLoading( "Logging Out..." );
         
         await Auth.ClearState();
-        await Http.TryPostRequest<bool>( Urls.ApiLogout );
-        Navigation.NavigateTo( Urls.PageHome, true );
+        await Http.TryPostRequest<bool>( Consts.ApiLogout );
+        Navigation.NavigateTo( Consts.PageHome, true );
     }
 }

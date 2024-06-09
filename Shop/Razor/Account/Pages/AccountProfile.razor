@@ -89,7 +89,7 @@
         if (!refreshResult.IsOkay) {
             Console.WriteLine( refreshResult.Message() );
             await Auth.ClearState();
-            Navigate( Urls.PageSessionExpired, true );
+            Navigate( Consts.PageSessionExpired, true );
         }
         
         await UpdateAuthToken();
@@ -97,9 +97,9 @@
     }
     
     async Task<Reply<AccountModel>> TryGetAccount() =>
-        await Http.TryGetRequest<AccountModel>( Urls.ApiGetAccountDetails, null, accessToken );
+        await Http.TryGetRequest<AccountModel>( Consts.ApiGetAccountDetails, null, accessToken );
     async Task<Reply<bool>> TryUpdateAccount() =>
-        await Http.TryPostRequest<bool>( Urls.ApiUpdateAccountDetails, accountModel, accessToken );
+        await Http.TryPostRequest<bool>( Consts.ApiUpdateAccountDetails, accountModel, accessToken );
 
     async Task UpdateAuthToken()
     {

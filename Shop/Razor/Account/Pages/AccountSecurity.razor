@@ -1,17 +1,17 @@
-@page "/account/password"
+@page "/account/security"
 @using System.ComponentModel.DataAnnotations
 @using Shop.Infrastructure.Common.Optionals
 @using Shop.Utilities
 @inherits AccountPageBase
 @layout AccountLayout
 
-<PageTitle>Change Password</PageTitle>
+<PageTitle>Account Security</PageTitle>
 
 <!-- WRAPPERS -->
 <div class="content-container">
     <div class="auth-container">
         <!-- TITLE -->
-        <h3>Password</h3>
+        <h3>Security</h3>
         <hr/>
          <!-- FORM -->
         <EditForm Model="@Request" FormName="change-password" OnValidSubmit="OnValidSubmitPasswordAsync" method="post">
@@ -55,7 +55,7 @@
             return;   
         }
         
-        Reply<bool> result = await Http.TryPostRequest<bool>( Urls.ApiUpdatePassword, Request, token.Data );
+        Reply<bool> result = await Http.TryPostRequest<bool>( Consts.ApiUpdatePassword, Request, token.Data );
 
         if (!result.IsOkay) {
             PushError( result, "Failed to update password." );

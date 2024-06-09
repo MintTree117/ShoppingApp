@@ -66,7 +66,7 @@
             StopLoading();
             return;
         }
-        Reply<bool> reply = await Http.TryPostRequest<bool>( Urls.ApiDeleteAccount, request, token.Data );
+        Reply<bool> reply = await Http.TryPostRequest<bool>( Consts.ApiDeleteAccount, request, token.Data );
 
         if (!reply.IsOkay) {
             PushError( reply, "Failed to delete your account." );
@@ -77,7 +77,7 @@
 
         await Auth.ClearState();
         StopLoading();
-        Navigate( Urls.PageAccountDeleted );
+        Navigate( Consts.PageAccountDeleted );
     }
     void Cancel()
     {

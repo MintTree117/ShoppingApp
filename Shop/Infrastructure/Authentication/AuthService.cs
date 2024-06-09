@@ -56,7 +56,7 @@ public sealed class AuthService // Singleton
 
             Dictionary<string, object> parameter = [];
             parameter.Add( "AccessToken", aTokenResult.Data );
-            Reply<bool> isValid = await _http.TryGetRequest<bool>( Urls.ApiLoginCheck, parameter );
+            Reply<bool> isValid = await _http.TryGetRequest<bool>( Consts.ApiLoginCheck, parameter );
             if (!isValid.IsOkay)
                 await ClearAuthentication();
             return new AuthenticationState( new ClaimsPrincipal() );
@@ -72,7 +72,7 @@ public sealed class AuthService // Singleton
         }
 
         RefreshRequest request = new( aTokenResult.Data, rTokenResult.Data );
-        Reply<RefreshReply> refreshResult = await _http.TryPostRequest<RefreshReply>( Urls.ApiLoginRefresh, request );
+        Reply<RefreshReply> refreshResult = await _http.TryPostRequest<RefreshReply>( Consts.ApiLoginRefresh, request );
 
         if (!refreshResult.IsOkay) {
             lock ( _fetchLock )
@@ -102,7 +102,7 @@ public sealed class AuthService // Singleton
         Console.WriteLine( "Refreshing" );
 
         RefreshRequest request = new( aTokenResult.Data, rTokenResult.Data );
-        Reply<RefreshReply> refreshResult = await _http.TryPostRequest<RefreshReply>( Urls.ApiLoginRefresh, request );
+        Reply<RefreshReply> refreshResult = await _http.TryPostRequest<RefreshReply>( Consts.ApiLoginRefresh, request );
 
         if (!refreshResult.IsOkay)
             return IReply.None( refreshResult );
@@ -124,7 +124,7 @@ public sealed class AuthService // Singleton
         Console.WriteLine( "Refreshing" );
 
         RefreshRequest request = new( aTokenResult.Data, rTokenResult.Data );
-        Reply<RefreshReply> refreshResult = await _http.TryPostRequest<RefreshReply>( Urls.ApiLoginRefreshFull, request );
+        Reply<RefreshReply> refreshResult = await _http.TryPostRequest<RefreshReply>( Consts.ApiLoginRefreshFull, request );
 
         if (!refreshResult.IsOkay)
             return IReply.None( refreshResult );

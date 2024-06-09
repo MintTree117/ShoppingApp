@@ -1,4 +1,4 @@
-@page "/confirm-email"
+@page "/emailConfirm"
 @using Shop.Infrastructure.Common.Optionals
 @using Shop.Utilities
 @inherits Shop.Razor.Authentication.AuthenticationPageBase
@@ -48,7 +48,7 @@
             return;
         }
         
-        apiReply = await TryConfirmEmail( Urls.ApiConfirmEmail, userId, code );
+        apiReply = await TryConfirmEmail( Consts.ApiConfirmEmail, userId, code );
         emailConfirmed = apiReply.IsOkay;
         confirmFailed = !emailConfirmed;
         StateHasChanged();
@@ -82,9 +82,9 @@
             $"Failed to confirm email address. {parameter} is invalid.";
     }
     void GoToResend() => 
-        Navigate( Urls.PageResendConfirm );
+        Navigate( Consts.PageEmailConfirmResend );
     void GoToLogin() => 
-        Navigate( Urls.PageLoginOrRegister, true );
+        Navigate( Consts.PageLoginOrRegister, true );
     
     readonly record struct ConfirmEmailRequest(
         string Email,

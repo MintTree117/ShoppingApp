@@ -1,4 +1,4 @@
-@page "/login-or-register"
+@page "/loginOrRegister"
 @using System.ComponentModel.DataAnnotations
 @using Shop.Infrastructure.Authentication.Types
 @using Shop.Infrastructure.Common.Optionals
@@ -232,24 +232,25 @@
     }
     
     async Task<Reply<LoginReply>> TryLogin() => 
-        await Http.TryPostRequest<LoginReply>( Urls.ApiLogin, loginRequest );
+        await Http.TryPostRequest<LoginReply>( Consts.ApiLogin, loginRequest );
     async Task<Reply<bool>> TryUpdateLocalState( Reply<LoginReply> loginResult ) =>
         await Auth.SetState( AuthRefreshEventArgs.With( loginResult.Data.AccessToken, loginResult.Data.RefreshToken ) );
     async Task<Reply<TwoFactorReply>> TryTwoFactorLogin() => 
-        await Http.TryPostRequest<TwoFactorReply>( Urls.ApiTwoFactor, twoFactorRequest );
+        await Http.TryPostRequest<TwoFactorReply>( Consts.ApiTwoFactor, twoFactorRequest );
     async Task<Reply<bool>> TryUpdateLocalState( Reply<TwoFactorReply> twoFactorResult ) =>
         await Auth.SetState( AuthRefreshEventArgs.With( twoFactorResult.Data.AccessToken, twoFactorResult.Data.RefreshToken ) );
     async Task<Reply<RegisterReply>> TryRegister() => 
-        await Http.TryPostRequest<RegisterReply>( Urls.ApiRegister, registerRequest );
+        await Http.TryPostRequest<RegisterReply>( Consts.ApiRegister, registerRequest );
     
+    // TODO: IMPLEMENT RECOVERY CODES
     void GoToRecovery() => 
-        Navigate( Urls.PageLoginWithRecovery );
+        Navigate( "" );
     void GoToResend() => 
-        Navigate( Urls.PageResendConfirm );
+        Navigate( Consts.PageEmailConfirmResend );
     void GoToForgot() => 
-        Navigate( Urls.PageForgotPassword );
+        Navigate( Consts.PageForgotPassword );
     void GoToLogin() =>
-        Navigate( Urls.PageLoginOrRegister, true );
+        Navigate( Consts.PageLoginOrRegister, true );
 
     sealed class LoginRequest
     {
