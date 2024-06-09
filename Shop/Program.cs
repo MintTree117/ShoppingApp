@@ -17,7 +17,7 @@ builder.Configuration.AddJsonFile( "appsettings.json", optional: false, reloadOn
 
 builder.ConfigureHttp();
 builder.Services.AddBlazoredLocalStorage();
-builder.Services.AddScoped<StorageService>();
+builder.Services.AddSingleton<StorageService>();
 //builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddSingleton<AuthService>();

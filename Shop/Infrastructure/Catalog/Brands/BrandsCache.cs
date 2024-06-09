@@ -7,7 +7,7 @@ using Shop.Utilities;
 namespace Shop.Infrastructure.Catalog.Brands;
 
 public sealed class BrandsCache( HttpService http, StorageService storage ) :
-    MemoryCache<BrandsCollection>( "Brands", storage, TimeSpan.FromHours( 24 ) )
+    MemoryCache<BrandsCollection>( "Brands", storage, TimeSpan.FromHours( 24 ) ) // Singleton
 {
     readonly HttpService _http = http;
     bool _isFetching = false;
