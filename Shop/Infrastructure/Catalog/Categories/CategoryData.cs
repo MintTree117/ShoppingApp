@@ -1,4 +1,4 @@
-namespace Shop.Infrastructure.Catalog;
+namespace Shop.Infrastructure.Catalog.Categories;
 
 public sealed class CategoryData( Dictionary<Guid, Category> dict, List<Category> primes )
 {

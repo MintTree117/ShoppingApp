@@ -1,13 +1,13 @@
 using Shop.Infrastructure.Common.Optionals;
 using Shop.Infrastructure.Http;
 
-namespace Shop.Infrastructure.Catalog;
+namespace Shop.Infrastructure.Catalog.Categories;
 
 public sealed class CategoriesService( HttpService httpService, CategoriesCache categoriesCache )
 {
     readonly HttpService http = httpService;
     readonly CategoriesCache cache = categoriesCache;
-    readonly Opt<CategoryData> data = categoriesCache.categories;
+     Opt<CategoryData> data = categoriesCache.categories;
 
     public async Task<Opt<CategoryData>> GetCategories()
     {

@@ -43,10 +43,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Razor\Cart\" />
-      <Folder Include="Razor\Checkout\" />
-      <Folder Include="Razor\ProductDetails\" />
-      <Folder Include="Razor\ProductSearch\" />
+      <Folder Include="Razor\Ordering\" />
     </ItemGroup>
 
     <ItemGroup>
