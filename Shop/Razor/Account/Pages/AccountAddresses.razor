@@ -1,8 +1,8 @@
 @page "/account/addresses"
 @using Shop.Infrastructure.Common.Optionals
 @using Shop.Utilities
-@using Shop.Infrastructure.Authentication.Types
 @using Shop.Razor.Shared.Components
+@using Shop.Infrastructure.Authentication.Types
 @inherits AccountPageBase
 @layout AccountLayout
 
@@ -152,7 +152,7 @@
     {
         StartLoading( "Loading Addresses..." );
 
-        Opt<AddressSearchResponse> result = await TryGetPagedAddresses();
+        Reply<AddressSearchResponse> result = await TryGetPagedAddresses();
 
         if (!result.IsOkay) {
             PushError( result, "Failed to get account details." );
@@ -167,7 +167,7 @@
     {
         StartLoading( "Saving Address..." );
 
-        Opt<bool> reply = await TrySaveAddress();
+        Reply<bool> reply = await TrySaveAddress();
 
         if (!reply.IsOkay) {
             PushError( reply, "Failed to save address." );
@@ -186,7 +186,7 @@
     {
         StartLoading( "Deleting Address..." );
         
-        Opt<bool> reply = await TryDeleteAddress( address );
+        Reply<bool> reply = await TryDeleteAddress( address );
 
         if (!reply.IsOkay) {
             PushError( reply, "Failed to delete address." );
@@ -198,20 +198,20 @@
         await LoadFreshAddresses();
     }
 
-    async Task<Opt<AddressSearchResponse>> TryGetPagedAddresses()
+    async Task<Reply<AddressSearchResponse>> TryGetPagedAddresses()
     {
         Dictionary<string, object> parameters = [];
         parameters.Add( "page", _currentPage );
         parameters.Add( "rows", _rowsPerPageSelection );
         return await Http.TryGetRequest<AddressSearchResponse>( Urls.ApiGetAddresses, parameters, await GetAuthToken());
     }
-    async Task<Opt<bool>> TrySaveAddress() => _isNew
+    async Task<Reply<bool>> TrySaveAddress() => _isNew
         ? await Http.TryPutRequest<bool>( Urls.ApiAddAddress, _editModel, await GetAuthToken() )
         : await Http.TryPostRequest<bool>( Urls.ApiUpdateAddress, _editModel, await GetAuthToken() );
-    async Task<Opt<bool>> TryDeleteAddress( AddressModel address ) =>
+    async Task<Reply<bool>> TryDeleteAddress( AddressModel address ) =>
         await Http.TryDeleteRequest<bool>( Urls.ApiDeleteAddress, new Dictionary<string, object>() { { "AddressId", address.Id } }, await GetAuthToken() );
     
-    void UpdateLocalState( Opt<AddressSearchResponse> result, int page )
+    void UpdateLocalState( Reply<AddressSearchResponse> result, int page )
     {
         _pagedAddresses = result.Data.Addresses;
         _totalCount = result.Data.TotalCount;

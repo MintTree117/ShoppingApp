@@ -60,13 +60,13 @@
     {
         StartLoading( "Deleting Account..." );
         
-        Opt<string> token = await Auth.GetAccessToken();
+        Reply<string> token = await Auth.GetAccessToken();
         if (!token.IsOkay) {
             PushError( "Invalid Credentials" );
             StopLoading();
             return;
         }
-        Opt<bool> reply = await Http.TryPostRequest<bool>( Urls.ApiDeleteAccount, request, token.Data );
+        Reply<bool> reply = await Http.TryPostRequest<bool>( Urls.ApiDeleteAccount, request, token.Data );
 
         if (!reply.IsOkay) {
             PushError( reply, "Failed to delete your account." );

@@ -1,8 +1,7 @@
-using Shop.Infrastructure.Common.Optionals;
+using Shop.Infrastructure.Catalog.Categories.Types;
+using Shop.Infrastructure.Storage;
 
 namespace Shop.Infrastructure.Catalog.Categories;
 
-public sealed class CategoriesCache
-{
-    public Opt<CategoryData> Categories = Opt<CategoryData>.None();
-}
+public sealed class CategoriesCache( StorageService storage ) : 
+    MemoryCache<CategoriesCollection>( "Categories", storage, TimeSpan.FromHours( 24 ) );

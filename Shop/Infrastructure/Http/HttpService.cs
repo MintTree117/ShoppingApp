@@ -16,7 +16,7 @@ public sealed class HttpService( IHttpClientFactory httpFactory )
         return http;
     }
     
-    public async Task<Opt<T>> TryGetRequest<T>( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null )
+    public async Task<Reply<T>> TryGetRequest<T>( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null )
     {
         try {
             string path = ConstructHttpQuery( apiPath, parameters );
@@ -27,7 +27,7 @@ public sealed class HttpService( IHttpClientFactory httpFactory )
             return HandleHttpException<T>( e, "Get", apiPath );
         }
     }
-    public async Task<Opt<T>> TryPostRequest<T>( string apiPath, object? body = null, string? authToken = null )
+    public async Task<Reply<T>> TryPostRequest<T>( string apiPath, object? body = null, string? authToken = null )
     {
         try {
             HttpResponseMessage httpResponse = await CreateClient( authToken ).PostAsJsonAsync( apiPath, body );
@@ -37,7 +37,7 @@ public sealed class HttpService( IHttpClientFactory httpFactory )
             return HandleHttpException<T>( e, "Post", apiPath );
         }
     }
-    public async Task<Opt<T>> TryPutRequest<T>( string apiPath, object? body = null, string? authToken = null )
+    public async Task<Reply<T>> TryPutRequest<T>( string apiPath, object? body = null, string? authToken = null )
     {
         try {
             HttpResponseMessage httpResponse = await CreateClient( authToken ).PutAsJsonAsync( apiPath, body );
@@ -47,7 +47,7 @@ public sealed class HttpService( IHttpClientFactory httpFactory )
             return HandleHttpException<T>( e, "Put", apiPath );
         }
     }
-    public async Task<Opt<T>> TryDeleteRequest<T>( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null )
+    public async Task<Reply<T>> TryDeleteRequest<T>( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null )
     {
         try {
             string path = ConstructHttpQuery( apiPath, parameters );
@@ -70,26 +70,26 @@ public sealed class HttpService( IHttpClientFactory httpFactory )
 
         return $"{apiPath}?{query}";
     }
-    static async Task<Opt<T>> HandleHttpResponse<T>( HttpResponseMessage httpResponse )
+    static async Task<Reply<T>> HandleHttpResponse<T>( HttpResponseMessage httpResponse )
     {
         if (httpResponse.IsSuccessStatusCode) {
             T? httpContent = await httpResponse.Content.ReadFromJsonAsync<T>();
             return httpContent is not null
-                ? Opt<T>.With( httpContent )
-                : Opt<T>.None( "No data returned from http request." );
+                ? Reply<T>.With( httpContent )
+                : Reply<T>.None( "No data returned from http request." );
         }
 
         string errorContent = await httpResponse.Content.ReadAsStringAsync();
         return LogErrorAndReturn<T>( httpResponse.StatusCode + errorContent );
     }
-    static Opt<T> LogErrorAndReturn<T>( string message )
+    static Reply<T> LogErrorAndReturn<T>( string message )
     {
         Console.WriteLine( $"An error occured during an http request : {message}" );
-        return Opt<T>.None( $"An error occured during an http request : {message}" );
+        return Reply<T>.None( $"An error occured during an http request : {message}" );
     }
-    static Opt<T> HandleHttpException<T>( Exception e, string requestType, string requestUrl )
+    static Reply<T> HandleHttpException<T>( Exception e, string requestType, string requestUrl )
     {
         Console.WriteLine( e );
-        return Opt<T>.Exception( e, $"{requestType}: An exception occured while executing http: {requestUrl}" );
+        return Reply<T>.Exception( e, $"{requestType}: An exception occured while executing http: {requestUrl}" );
     }
 }

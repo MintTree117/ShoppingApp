@@ -1,9 +1,9 @@
 @using Shop.Infrastructure.Http
 @using Shop.Utilities
-@using Shop.Infrastructure.Common
 @using Shop.Infrastructure.Common.Optionals
 @using Shop.Infrastructure.Authentication
 @using Microsoft.AspNetCore.Components.Authorization
+@using Shop.Infrastructure.Loading
 @inherits ComponentBase
 @implements IDisposable
 
@@ -39,7 +39,7 @@
 
     protected async Task<string> GetAuthToken()
     {
-        Opt<string> token = await Auth.GetAccessToken();
+        Reply<string> token = await Auth.GetAccessToken();
         return token.IsOkay
             ? token.Data
             : string.Empty;
@@ -55,8 +55,8 @@
     protected void PushSuccess( string message ) => PushAlert( AlertType.Success, message );
     protected void PushWarning( string message ) => PushAlert( AlertType.Warning, message );
     protected void PushError( string message ) => PushAlert( AlertType.Danger, message );
-    protected void PushError( IOpt opt, string message ) => PushAlert( AlertType.Danger, $"{message} : {opt.Message()}" );
-    protected void PushError( IOpt opt ) => PushAlert( AlertType.Danger, opt.Message() );
+    protected void PushError( IReply reply, string message ) => PushAlert( AlertType.Danger, $"{message} : {reply.Message()}" );
+    protected void PushError( IReply reply ) => PushAlert( AlertType.Danger, reply.Message() );
 
     protected virtual async void OnAuthStateChange( Task<AuthenticationState> task )
     {

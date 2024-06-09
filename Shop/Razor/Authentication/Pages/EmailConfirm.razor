@@ -36,7 +36,7 @@
     
     bool emailConfirmed = false;
     bool confirmFailed = false;
-    Opt<bool> apiReply;
+    Reply<bool> apiReply;
     
     protected override async Task OnParametersSetAsync()
     {
@@ -55,7 +55,7 @@
         StopLoading();
     }
     
-    async Task<Opt<bool>> TryConfirmEmail( string url, string userId, string code ) =>
+    async Task<Reply<bool>> TryConfirmEmail( string url, string userId, string code ) =>
         await Http.TryPutRequest<bool>( url, new ConfirmEmailRequest( userId, code ) );
     bool TryValidateLink( out string userId, out string code, out string errorMessage )
     {

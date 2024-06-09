@@ -49,7 +49,7 @@
     {
         StartLoading( "Sending reset link..." );
 
-        Opt<bool> result = await TrySendEmail();
+        Reply<bool> result = await TrySendEmail();
 
         if (!result.IsOkay) {
             PushError( result, "Failed to send reset link." );
@@ -62,7 +62,7 @@
         StateHasChanged();
         StopLoading();
     }
-    async Task<Opt<bool>> TrySendEmail() => 
+    async Task<Reply<bool>> TrySendEmail() => 
         await Http.TryPostRequest<bool>( Urls.ApiResendConfirm, Request );
         
     sealed class ResendConfirmationRequest

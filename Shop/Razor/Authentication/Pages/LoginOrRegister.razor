@@ -156,7 +156,7 @@
     {
         StartLoading( "Logging In..." );
         
-        Opt<LoginReply> loginResult = await TryLogin();
+        Reply<LoginReply> loginResult = await TryLogin();
 
         if (!loginResult.IsOkay) {
             PushError( loginResult, "Failed to login." );
@@ -172,7 +172,7 @@
             return;
         }
 
-        Opt<bool> updateResult = await TryUpdateLocalState( loginResult );
+        Reply<bool> updateResult = await TryUpdateLocalState( loginResult );
         
         if (!updateResult.IsOkay) {
             PushError( updateResult, "Failed to save login." );
@@ -191,7 +191,7 @@
         
         twoFactorRequest.EmailOrUsername = loginRequest.EmailOrUsername;
 
-        Opt<TwoFactorReply> result = await TryTwoFactorLogin();
+        Reply<TwoFactorReply> result = await TryTwoFactorLogin();
 
         if (!result.IsOkay) {
             PushError( result, "Two factor authorization failed!" );
@@ -199,7 +199,7 @@
             return;
         }
 
-        Opt<bool> updateResult = await TryUpdateLocalState( result );
+        Reply<bool> updateResult = await TryUpdateLocalState( result );
 
         if (!updateResult.IsOkay) {
             PushError( result, "Two factor authorization succeeded on the server, but failed to save locally!" );
@@ -216,7 +216,7 @@
     {
         StartLoading( "Registering..." );
         
-        Opt<RegisterReply> reply = await TryRegister();
+        Reply<RegisterReply> reply = await TryRegister();
 
         if (!reply.IsOkay) {
             PushError( reply, "Failed to register account." );
@@ -231,15 +231,15 @@
         StopLoading();
     }
     
-    async Task<Opt<LoginReply>> TryLogin() => 
+    async Task<Reply<LoginReply>> TryLogin() => 
         await Http.TryPostRequest<LoginReply>( Urls.ApiLogin, loginRequest );
-    async Task<Opt<bool>> TryUpdateLocalState( Opt<LoginReply> loginResult ) =>
+    async Task<Reply<bool>> TryUpdateLocalState( Reply<LoginReply> loginResult ) =>
         await Auth.SetState( AuthRefreshEventArgs.With( loginResult.Data.AccessToken, loginResult.Data.RefreshToken ) );
-    async Task<Opt<TwoFactorReply>> TryTwoFactorLogin() => 
+    async Task<Reply<TwoFactorReply>> TryTwoFactorLogin() => 
         await Http.TryPostRequest<TwoFactorReply>( Urls.ApiTwoFactor, twoFactorRequest );
-    async Task<Opt<bool>> TryUpdateLocalState( Opt<TwoFactorReply> twoFactorResult ) =>
+    async Task<Reply<bool>> TryUpdateLocalState( Reply<TwoFactorReply> twoFactorResult ) =>
         await Auth.SetState( AuthRefreshEventArgs.With( twoFactorResult.Data.AccessToken, twoFactorResult.Data.RefreshToken ) );
-    async Task<Opt<RegisterReply>> TryRegister() => 
+    async Task<Reply<RegisterReply>> TryRegister() => 
         await Http.TryPostRequest<RegisterReply>( Urls.ApiRegister, registerRequest );
     
     void GoToRecovery() => 

@@ -1,6 +1,7 @@
 @using Shop.Infrastructure.Catalog
 @using Shop.Infrastructure.Catalog.Categories
 @using Shop.Infrastructure.Common.Optionals
+@using Shop.Infrastructure.Catalog.Categories.Types
 
 <div class="d-flex align-items-center justify-content-start">
     @if ( currentParentId.HasValue )
@@ -52,22 +53,22 @@
     [Parameter] public bool ShowExitButton { get; set; } = false;
     [Inject] public CategoriesService Service { get; set; } = default!;
     
-    CategoryData categoryData = CategoryData.None();
+    CategoriesCollection _categoriesCollection = CategoriesCollection.None();
     Guid? currentParentId = null;
     
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        Opt<CategoryData> getResult = await Service.GetCategories();
+        Reply<CategoriesCollection> getResult = await Service.GetCategories();
         if (getResult.IsOkay)
-            categoryData = getResult.Data;
+            _categoriesCollection = getResult.Data;
     }
 
     IReadOnlyList<Category> GetCurrentCategories()
     {
         return currentParentId is not null
-            ? categoryData.Categories[currentParentId.Value].Children
-            : categoryData.PrimaryCategories;
+            ? _categoriesCollection.Categories[currentParentId.Value].Children
+            : _categoriesCollection.PrimaryCategories;
     }
     void NextCategory( Category c )
     {
@@ -79,7 +80,7 @@
         if (currentParentId is null)
             return;
 
-        Category parent = categoryData.Categories[currentParentId.Value];
+        Category parent = _categoriesCollection.Categories[currentParentId.Value];
         currentParentId = parent.ParentId;
 
         StateHasChanged();

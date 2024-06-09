@@ -1,24 +1,28 @@
+using Shop.Infrastructure.Catalog.Categories.Types;
 using Shop.Infrastructure.Common.Optionals;
 using Shop.Infrastructure.Http;
 
 namespace Shop.Infrastructure.Catalog.Categories;
 
-public sealed class CategoriesService( HttpService httpService, CategoriesCache categoriesCache )
+public sealed class CategoriesService( HttpService http, CategoriesCache cache )
 {
-    readonly HttpService _http = httpService;
-    readonly CategoriesCache _cache = categoriesCache;
+    readonly HttpService _http = http;
+    readonly CategoriesCache _cache = cache;
 
-    public async Task<Opt<CategoryData>> GetCategories()
+    public async Task<Reply<CategoriesCollection>> GetCategories()
     {
-        if (_cache.Categories.IsOkay)
-            return _cache.Categories;
+        Reply<CategoriesCollection> cacheReply = await _cache.Get();
+        if (cacheReply.IsOkay)
+            return cacheReply;
 
-        Opt<List<Category>> fetchResult = await _http.TryGetRequest<List<Category>>( "Get Categories" );
+        Reply<List<CategoryDto>> fetchReply = await _http.TryGetRequest<List<CategoryDto>>( "Get Categories" );
 
-        if (!fetchResult.IsOkay)
-            return Opt<CategoryData>.None( fetchResult );
+        if (!fetchReply.IsOkay)
+            return Reply<CategoriesCollection>.None( fetchReply );
 
-        _cache.Categories = Opt<CategoryData>.With( CategoryData.Create( fetchResult.Data ) );
-        return _cache.Categories;
+        CategoriesCollection data = CategoriesCollection.From( fetchReply.Data );
+
+        Reply<bool> setReply = await _cache.Set( data );
+        return Reply<CategoriesCollection>.With( data );
     }
 }

@@ -4,10 +4,9 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Shop;
 using Shop.Infrastructure.Authentication;
-using Shop.Infrastructure.Catalog;
 using Shop.Infrastructure.Catalog.Categories;
-using Shop.Infrastructure.Common;
 using Shop.Infrastructure.Http;
+using Shop.Infrastructure.Loading;
 using Shop.Infrastructure.Storage;
 
 WebAssemblyHostBuilder builder = WebAssemblyHostBuilder.CreateDefault( args );

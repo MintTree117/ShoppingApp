@@ -60,7 +60,7 @@
     async Task FetchAccount()
     {
         StartLoading( "Fetching account details..." );
-        Opt<AccountModel> reply = await TryGetAccount();
+        Reply<AccountModel> reply = await TryGetAccount();
 
         if (!reply.IsOkay) {
             PushError( reply, "Failed to get account details from the server." );
@@ -75,7 +75,7 @@
     {
         StartLoading( "Updating Account..." );
 
-        Opt<bool> reply = await TryUpdateAccount();
+        Reply<bool> reply = await TryUpdateAccount();
         
         if (!reply.IsOkay) {
             PushError( reply, "Failed to update account details." );
@@ -85,7 +85,7 @@
 
         PushSuccess( "Account details successfully updated." );
 
-        Opt<bool> refreshResult = await Auth.RefreshStateFull();
+        Reply<bool> refreshResult = await Auth.RefreshStateFull();
         if (!refreshResult.IsOkay) {
             Console.WriteLine( refreshResult.Message() );
             await Auth.ClearState();
@@ -96,19 +96,19 @@
         StopLoading();
     }
     
-    async Task<Opt<AccountModel>> TryGetAccount() =>
+    async Task<Reply<AccountModel>> TryGetAccount() =>
         await Http.TryGetRequest<AccountModel>( Urls.ApiGetAccountDetails, null, accessToken );
-    async Task<Opt<bool>> TryUpdateAccount() =>
+    async Task<Reply<bool>> TryUpdateAccount() =>
         await Http.TryPostRequest<bool>( Urls.ApiUpdateAccountDetails, accountModel, accessToken );
 
     async Task UpdateAuthToken()
     {
-        Opt<string> token = await Auth.GetAccessToken();
+        Reply<string> token = await Auth.GetAccessToken();
         accessToken = token.IsOkay
             ? token.Data
             : string.Empty;
     }
-    void UpdateLocalProfile( Opt<AccountModel> reply )
+    void UpdateLocalProfile( Reply<AccountModel> reply )
     {
         accountModel = reply.IsOkay
             ? reply.Data

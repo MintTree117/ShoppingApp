@@ -1,4 +1,4 @@
-namespace Shop.Infrastructure.Common;
+namespace Shop.Infrastructure.Loading;
 
 public enum LoadingState
 {

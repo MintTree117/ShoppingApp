@@ -1,3 +1,4 @@
+using Shop.Infrastructure.Catalog.Brands.Types;
 using Shop.Infrastructure.Common.Optionals;
 using Shop.Infrastructure.Http;
 
@@ -8,28 +9,20 @@ public sealed class BrandsService( HttpService http, BrandsCache cache )
     readonly HttpService _http = http;
     readonly BrandsCache _cache = cache;
 
-    public async Task<Opt<BrandData>> GetBrands()
+    public async Task<Reply<BrandsCollection>> GetBrands()
     {
-        if (_cache.BrandData.IsOkay)
-            return _cache.BrandData;
+        Reply<BrandsCollection> cacheReply = await _cache.Get();
+        if (cacheReply.IsOkay)
+            return cacheReply;
 
-        Opt<BrandsDto> fetchResult = await _http.TryGetRequest<BrandsDto>( "Get Brands" );
+        Reply<BrandsDto> fetchReply = await _http.TryGetRequest<BrandsDto>( "Get Brands" );
 
-        if (!fetchResult.IsOkay)
-            return Opt<BrandData>.None( fetchResult );
+        if (!fetchReply.IsOkay)
+            return Reply<BrandsCollection>.None( fetchReply );
 
-        Dictionary<Guid, Brand> brandsById = [];
-        foreach ( Brand b in fetchResult.Data.Brands )
-            brandsById.TryAdd( b.Id, b );
-        Dictionary<Guid, IReadOnlyList<Brand>> brandsByCategory = [];
-        foreach ( KeyValuePair<Guid, List<Guid>> kvp in fetchResult.Data.BrandCategories ) {
-            List<Brand> brandsForCategory = [];
-            foreach ( Guid brandId in kvp.Value )
-                brandsForCategory.Add( brandsById[brandId] );
-            brandsByCategory.TryAdd( kvp.Key, brandsForCategory );
-        }
-        BrandData data = new( brandsById, brandsByCategory );
-        _cache.BrandData = Opt<BrandData>.With( data );
-        return _cache.BrandData;
+        BrandsCollection data = BrandsCollection.From( fetchReply.Data );
+
+        Reply<bool> setReply = await _cache.Set( data );
+        return Reply<BrandsCollection>.With( data );
     }
 }

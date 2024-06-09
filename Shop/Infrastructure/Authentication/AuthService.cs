@@ -44,7 +44,7 @@ public sealed class AuthService // Singleton
         
         StorageService storage = GetStorage();
         
-        Opt<string> aTokenResult = await storage.Get<string>( AccessKey );
+        Reply<string> aTokenResult = await storage.Get<string>( AccessKey );
         if (!aTokenResult.Fail( out aTokenResult ) && !ShouldRefresh( aTokenResult.Data, _rules )) {
             lock ( _fetchLock )
                 _isFetching = false;
@@ -56,7 +56,7 @@ public sealed class AuthService // Singleton
 
             Dictionary<string, object> parameter = [];
             parameter.Add( "AccessToken", aTokenResult.Data );
-            Opt<bool> isValid = await _http.TryGetRequest<bool>( Urls.ApiLoginCheck, parameter );
+            Reply<bool> isValid = await _http.TryGetRequest<bool>( Urls.ApiLoginCheck, parameter );
             if (!isValid.IsOkay)
                 await ClearAuthentication();
             return new AuthenticationState( new ClaimsPrincipal() );
@@ -64,7 +64,7 @@ public sealed class AuthService // Singleton
 
         _isFirstFetch = false;
 
-        Opt<string> rTokenResult = await storage.Get<string>( RefreshKey );
+        Reply<string> rTokenResult = await storage.Get<string>( RefreshKey );
         if (!rTokenResult.IsOkay) {
             lock ( _fetchLock )
                 _isFetching = false;
@@ -72,7 +72,7 @@ public sealed class AuthService // Singleton
         }
 
         RefreshRequest request = new( aTokenResult.Data, rTokenResult.Data );
-        Opt<RefreshReply> refreshResult = await _http.TryPostRequest<RefreshReply>( Urls.ApiLoginRefresh, request );
+        Reply<RefreshReply> refreshResult = await _http.TryPostRequest<RefreshReply>( Urls.ApiLoginRefresh, request );
 
         if (!refreshResult.IsOkay) {
             lock ( _fetchLock )
@@ -80,108 +80,108 @@ public sealed class AuthService // Singleton
             return new AuthenticationState( new ClaimsPrincipal() );
         }
 
-        Opt<bool> setResult = await SetState( AuthRefreshEventArgs.With( refreshResult.Data.AccessToken, rTokenResult.Data ) );
+        Reply<bool> setResult = await SetState( AuthRefreshEventArgs.With( refreshResult.Data.AccessToken, rTokenResult.Data ) );
         lock ( _fetchLock )
             _isFetching = false;
         return !setResult.IsOkay
             ? new AuthenticationState( new ClaimsPrincipal() )
             : new AuthenticationState( GetIdentityClaimsPrincipal( aTokenResult.Data ) );
     }
-    internal async Task<Opt<bool>> RefreshState( bool forceRefresh = false )
+    internal async Task<Reply<bool>> RefreshState( bool forceRefresh = false )
     {
         StorageService storage = GetStorage();
         
-        Opt<string> aTokenResult = await storage.Get<string>( AccessKey );
+        Reply<string> aTokenResult = await storage.Get<string>( AccessKey );
         if (aTokenResult.Fail( out aTokenResult ) && !forceRefresh && !ShouldRefresh( aTokenResult.Data, _rules ))
-            return IOpt.None( aTokenResult );
+            return IReply.None( aTokenResult );
         
-        Opt<string> rTokenResult = await storage.Get<string>( RefreshKey );
+        Reply<string> rTokenResult = await storage.Get<string>( RefreshKey );
         if (!rTokenResult.IsOkay)
-            return IOpt.None( rTokenResult );
+            return IReply.None( rTokenResult );
 
         Console.WriteLine( "Refreshing" );
 
         RefreshRequest request = new( aTokenResult.Data, rTokenResult.Data );
-        Opt<RefreshReply> refreshResult = await _http.TryPostRequest<RefreshReply>( Urls.ApiLoginRefresh, request );
+        Reply<RefreshReply> refreshResult = await _http.TryPostRequest<RefreshReply>( Urls.ApiLoginRefresh, request );
 
         if (!refreshResult.IsOkay)
-            return IOpt.None( refreshResult );
+            return IReply.None( refreshResult );
 
         return await SetState( AuthRefreshEventArgs.With( refreshResult.Data.AccessToken, rTokenResult.Data ) );
     }
-    internal async Task<Opt<bool>> RefreshStateFull()
+    internal async Task<Reply<bool>> RefreshStateFull()
     {
         StorageService storage = GetStorage();
 
-        Opt<string> aTokenResult = await storage.Get<string>( AccessKey );
+        Reply<string> aTokenResult = await storage.Get<string>( AccessKey );
         if (aTokenResult.Fail( out aTokenResult ))
-            return IOpt.None( aTokenResult );
+            return IReply.None( aTokenResult );
 
-        Opt<string> rTokenResult = await storage.Get<string>( RefreshKey );
+        Reply<string> rTokenResult = await storage.Get<string>( RefreshKey );
         if (!rTokenResult.IsOkay)
-            return IOpt.None( rTokenResult );
+            return IReply.None( rTokenResult );
 
         Console.WriteLine( "Refreshing" );
 
         RefreshRequest request = new( aTokenResult.Data, rTokenResult.Data );
-        Opt<RefreshReply> refreshResult = await _http.TryPostRequest<RefreshReply>( Urls.ApiLoginRefreshFull, request );
+        Reply<RefreshReply> refreshResult = await _http.TryPostRequest<RefreshReply>( Urls.ApiLoginRefreshFull, request );
 
         if (!refreshResult.IsOkay)
-            return IOpt.None( refreshResult );
+            return IReply.None( refreshResult );
 
         return await SetState( AuthRefreshEventArgs.With( refreshResult.Data.AccessToken, rTokenResult.Data ) );
     }
-    internal async Task<Opt<bool>> SetState( AuthRefreshEventArgs args )
+    internal async Task<Reply<bool>> SetState( AuthRefreshEventArgs args )
     {
         if (string.IsNullOrWhiteSpace( args.accessToken ))
-            return IOpt.None( "Invalid access token" );
+            return IReply.None( "Invalid access token" );
 
         if (string.IsNullOrWhiteSpace( args.refreshToken ))
-            return IOpt.None( "Invalid refresh token" );
+            return IReply.None( "Invalid refresh token" );
 
-        Opt<bool> setResult = await SetAuthentication( args );
+        Reply<bool> setResult = await SetAuthentication( args );
         if (!setResult.IsOkay)
-            return IOpt.None( "Failed to save authentication" );
+            return IReply.None( "Failed to save authentication" );
 
         ClaimsPrincipal claims = GetIdentityClaimsPrincipal( args.accessToken );
         OnStateChanged?.Invoke( GetNotifyParams( claims ) );
-        return IOpt.Okay();
+        return IReply.Okay();
     }
-    internal async Task<Opt<bool>> ClearState()
+    internal async Task<Reply<bool>> ClearState()
     {
         OnStateChanged?.Invoke( GetNotifyParams( null ) );
         return await ClearAuthentication();
     }
-    internal async Task<Opt<string>> GetAccessToken() =>
+    internal async Task<Reply<string>> GetAccessToken() =>
         await GetStorage().Get<string>( AccessKey );
 
-    async Task<Opt<bool>> SetAuthentication( AuthRefreshEventArgs args )
+    async Task<Reply<bool>> SetAuthentication( AuthRefreshEventArgs args )
     {
         StorageService storage = GetStorage();
         
-        Opt<bool> accessResult = await storage.Set( AccessKey, args.accessToken );
-        Opt<bool> refreshResult = await storage.Set( RefreshKey, args.refreshToken );
+        Reply<bool> accessResult = await storage.Set( AccessKey, args.accessToken );
+        Reply<bool> refreshResult = await storage.Set( RefreshKey, args.refreshToken );
 
         return accessResult.IsOkay && refreshResult.IsOkay
-            ? IOpt.Okay()
-            : IOpt.None( accessResult.Message() + refreshResult.Message() );
+            ? IReply.Okay()
+            : IReply.None( accessResult.Message() + refreshResult.Message() );
     }
-    async Task<Opt<bool>> ClearAuthentication()
+    async Task<Reply<bool>> ClearAuthentication()
     {
         StorageService storage = GetStorage();
         
-        Opt<bool> result1 = await storage.Remove( AccessKey );
-        Opt<bool> result2 = await storage.Remove( RefreshKey );
+        Reply<bool> result1 = await storage.Remove( AccessKey );
+        Reply<bool> result2 = await storage.Remove( RefreshKey );
 
         return result1.IsOkay && result2.IsOkay
-            ? IOpt.Okay()
-            : IOpt.None( result1.Message() + result2.Message() );
+            ? IReply.Okay()
+            : IReply.None( result1.Message() + result2.Message() );
     }
     
     static bool ShouldRefresh( string token, Jwt rules )
     {
         try {
-            Opt<JwtSecurityToken> jwt = ParseJwtFromString( token, rules );
+            Reply<JwtSecurityToken> jwt = ParseJwtFromString( token, rules );
             if (!jwt.IsOkay)
                 return true;
 
@@ -208,7 +208,7 @@ public sealed class AuthService // Singleton
         AccessLifetime = TimeSpan.Parse( config.GetOrThrow( "Identity:Jwt:AccessLifetime" ) ),
         RefreshLifetime = TimeSpan.Parse( config.GetOrThrow( "Identity:Jwt:RefreshLifetime" ) )
     };
-    static Opt<JwtSecurityToken> ParseJwtFromString( string token, Jwt rules )
+    static Reply<JwtSecurityToken> ParseJwtFromString( string token, Jwt rules )
     {
         try {
             JwtSecurityTokenHandler tokenHandler = new();
@@ -225,12 +225,12 @@ public sealed class AuthService // Singleton
             tokenHandler.ValidateToken( token, validationParameters, out SecurityToken securityToken );
 
             return securityToken is JwtSecurityToken jwtSecurityToken
-                ? Opt<JwtSecurityToken>.With( jwtSecurityToken )
-                : Opt<JwtSecurityToken>.None( "Jwt string is invalid." );
+                ? Reply<JwtSecurityToken>.With( jwtSecurityToken )
+                : Reply<JwtSecurityToken>.None( "Jwt string is invalid." );
         }
         catch ( Exception e ) {
             Console.WriteLine( e );
-            return Opt<JwtSecurityToken>.None( "An exception was thrown while parsing a jwt." );
+            return Reply<JwtSecurityToken>.None( "An exception was thrown while parsing a jwt." );
         }
     }
 
