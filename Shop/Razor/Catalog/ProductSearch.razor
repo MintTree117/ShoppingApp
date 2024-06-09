@@ -1,6 +1,12 @@
 @page "/products/search"
 @using Shop.Infrastructure.Catalog
+@using Shop.Infrastructure.Catalog.Brands
+@using Shop.Infrastructure.Catalog.Brands.Types
+@using Shop.Infrastructure.Catalog.Categories
+@using Shop.Infrastructure.Catalog.Categories.Types
 @implements IDisposable
+@inject CategoriesCache CategoriesCache
+@inject BrandsCache BrandsCache
 
 <div class="content-container">
     <ProductSearchHeader @ref="_header"/>
@@ -8,28 +14,60 @@
 </div>
 
 @code {
-    // On Load
-    // load categories
-    // load filters
-    // load search
-
     ProductSearchHeader _header = default!;
     ProductSearchFilters _filters = default!;
+    CategoriesCollection _categories = CategoriesCollection.None();
+    BrandsCollection _brands = BrandsCollection.None();
+
+    Category? _category = null;
 
     public void Dispose()
     {
+        _header.ToggleMobileFiltersEvent -= OnToggleMobileFilters;
+        _header.PreviousSelectedEvent -= OnPreviousPageSelected;
         _header.PageSizeChangedEvent -= OnPageSizeChanged;
         _header.PageSortChangedEvent -= OnPageSortChanged;
         _filters.OnChangeFilters -= OnSearchFiltersChanged;
     }
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        
+        var cTask = CategoriesCache.GetCategories();
+        var bTask = BrandsCache.GetBrands();
+        // load products
+
+        await Task.WhenAll( cTask, bTask );
+
+        _categories = cTask.Result.IsOkay
+            ? cTask.Result.Data
+            : CategoriesCollection.None();
+        _brands = bTask.Result.IsOkay
+            ? bTask.Result.Data
+            : BrandsCollection.None();
+        // set products
+    }
     protected override async Task OnParametersSetAsync()
     {
         await base.OnParametersSetAsync();
+        
+        _header.ToggleMobileFiltersEvent += OnToggleMobileFilters;
+        _header.PreviousSelectedEvent += OnPreviousPageSelected;
         _header.PageSizeChangedEvent += OnPageSizeChanged;
         _header.PageSortChangedEvent += OnPageSortChanged;
+        
         _filters.OnChangeFilters += OnSearchFiltersChanged;
+        _filters.SetData( _category, _brands.BrandsById.Values );
     }
 
+    void OnToggleMobileFilters()
+    {
+        
+    }
+    async Task OnPreviousPageSelected( Category? category )
+    {
+        
+    }
     async Task OnPageSizeChanged( int newPageSize )
     {
         await Task.Delay( 1000 );
@@ -42,7 +80,18 @@
     }
     async Task OnSearchFiltersChanged( SearchFiltersDto newSearchFiltersDto )
     {
+        // Update Header Breadcrumb
+        Category? category = null;
+        if (newSearchFiltersDto.CategoryId.HasValue )
+            _categories.Categories.TryGetValue( newSearchFiltersDto.CategoryId.Value, out category );
+        _header.SetNavigation( category, category is null ? null : _categories.Categories );
+        
         await Task.Delay( 1000 );
         Console.WriteLine( $"Search Filters Changed: {newSearchFiltersDto}" );
-    } 
+    }
+
+    async Task FetchProducts( SearchFiltersDto filters )
+    {
+        
+    }
 }

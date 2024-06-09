@@ -1,7 +1,7 @@
 namespace Shop.Infrastructure.Catalog;
 
 public readonly record struct SearchFiltersDto(
-    HashSet<Guid> CategoryIds,
+    Guid? CategoryId,
     HashSet<Guid> BrandIds,
     int? MinPrice,
     int? MaxPrice,

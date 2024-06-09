@@ -1,3 +1,5 @@
+@using Shop.Infrastructure.Catalog.Categories.Types
+
 <!-- CONTAINER -->
 <div class="container">
     <div class="row d-flex flex-row align-items-center justify-content-between">
@@ -5,10 +7,10 @@
         <div class="col-12 col-md-auto">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    @foreach (string s in _breadcrumbStrings)
+                    @foreach (string crumb in _breadcrumbStrings)
                     {
-                        <li class="breadcrumb-item @GetActiveBreadcrumbCss(s)">
-                            <button class="btn btn-link">@s</button>
+                        <li class="breadcrumb-item @GetActiveBreadcrumbCss(crumb)">
+                            <button class="btn btn-link" @onclick="()=>OnClickBreadCrumb(crumb)">@crumb</button>
                         </li>
                     }
                 </ol>
@@ -17,11 +19,7 @@
 
         <!-- BUTTONS -->
         <div class="d-flex flex-row align-items-center justify-content-between col-12 col-md-auto">
-            <!-- MOBILE FILTERS -->
-            <div class="d-block d-md-none col-12 mb-2">
-                <button class="btn btn-primary w-100">Filters</button>
-            </div>
-            
+
             <!-- PAGE SIZE -->
             <div class="col-6 col-md-auto mb-2 mb-md-0">
                 <div class="dropdown w-100">
@@ -31,11 +29,10 @@
                     </button>
                     <!-- LIST -->
                     <ul class="dropdown-menu w-100" aria-labelledby="Rows">
-                        @for (int i = 0; i < PageSizeOptions.Length; i++)
-                        {
+                        @for ( int i = 0; i < PageSizeOptions.Length; i++ ) {
                             int localIndex = i; // Create a local copy of the loop variable
                             <li>
-                                <button class="dropdown-item" type="button" @onclick="() => OnSelectPageSize(localIndex)">
+                                <button class="dropdown-item" type="button" @onclick="() => OnSelectPageSize( localIndex )">
                                     @PageSizeOptions[localIndex]
                                 </button>
                             </li>
@@ -53,11 +50,10 @@
                     </button>
                     <!-- LIST -->
                     <ul class="dropdown-menu w-100" aria-labelledby="SortBy">
-                        @for (int i = 0; i < PageSortOptions.Length; i++)
-                        {
+                        @for ( int i = 0; i < PageSortOptions.Length; i++ ) {
                             int localIndex = i; // Create a local copy of the loop variable
                             <li>
-                                <button class="dropdown-item" type="button" @onclick="() => OnSelectPageSort(localIndex)">
+                                <button class="dropdown-item" type="button" @onclick="() => OnSelectPageSort( localIndex )">
                                     @PageSortOptions[localIndex]
                                 </button>
                             </li>
@@ -65,6 +61,12 @@
                     </ul>
                 </div>
             </div>
+            
+            <!-- MOBILE FILTERS -->
+            <div class="d-block d-md-none col-12 mb-2">
+                <button class="btn btn-primary w-100" @onclick="OnClickMobileFilters">Filters</button>
+            </div>
+            
         </div>
     </div>
 </div>
@@ -75,21 +77,55 @@
     static readonly int[] PageSizeOptions = [5, 10, 15, 20, 50, 100];
     static readonly string[] PageSortOptions = ["Featured, On Sale, Price Low, Price High"];
     readonly List<string> _breadcrumbStrings = [BaseBreadcrumbString];
+    readonly List<Category> _categoryChain = [];
     int _selectedPageSizeIndex = 0;
     int _selectedPageSortIndex = 0;
-
+    
+    public event Func<Category?, Task>? PreviousSelectedEvent;
     public event Func<int, Task>? PageSizeChangedEvent;
     public event Func<int, Task>? PageSortChangedEvent;
-    public void OnBreadcrumbChange( IEnumerable<string> categories )
+    public event Action? ToggleMobileFiltersEvent;
+    
+    public void SetNavigation( Category? newCategory, IReadOnlyDictionary<Guid, Category>? categoriesById )
     {
         _breadcrumbStrings.Clear();
         _breadcrumbStrings.Add( BaseBreadcrumbString );
-        _breadcrumbStrings.AddRange( categories );
+        
+        _categoryChain.Clear();
+        if (newCategory is null) {
+            StateHasChanged();
+            return;
+        }
+
+        Category currentCategory = newCategory;
+        while ( true ) {
+            _categoryChain.Add( currentCategory );
+            if (currentCategory.ParentId is null)
+                break;
+            if (!categoriesById!.TryGetValue( currentCategory.ParentId.Value, out Category? parent ))
+                break;
+            currentCategory = parent;
+        }
+
+        _categoryChain.Reverse();
+
+        foreach ( Category c in _categoryChain )
+            _breadcrumbStrings.Add( c.Name );
+        
         StateHasChanged();
     }
     
-    string GetActiveBreadcrumbCss( string s ) =>
-        s == _breadcrumbStrings.Last() ? "active" : string.Empty;
+    string GetActiveBreadcrumbCss( string breadcrumb ) =>
+        breadcrumb == _breadcrumbStrings.Last() ? "active" : string.Empty;
+    void OnClickBreadCrumb( string breadcrumb )
+    {
+        Category? category = _categoryChain.FirstOrDefault( c => c.Name == breadcrumb );
+        PreviousSelectedEvent?.Invoke( category );
+    }
+    void OnClickMobileFilters()
+    {
+        ToggleMobileFiltersEvent?.Invoke();
+    }
     void OnSelectPageSize( int pageSizeOptionIndex )
     {
         _selectedPageSizeIndex = Math.Clamp( pageSizeOptionIndex, 0, PageSizeOptions.Length );

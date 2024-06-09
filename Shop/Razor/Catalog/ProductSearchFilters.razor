@@ -3,6 +3,7 @@
 @using Shop.Infrastructure.Catalog
 @using Shop.Infrastructure.Catalog.Brands.Types
 @using Shop.Infrastructure.Catalog.Categories.Types
+
 <!-- CONTAINER -->
 <div class="d-flex flex-column @GetDisplayCss()">
     
@@ -11,7 +12,7 @@
         <div class="d-flex flex-row justify-content-between mb-3">
                 <!-- TITLE AND CLOSE -->
             <h3 class="text-decoration-underline m-0 mb-lg-3 p-0">Filters</h3>
-            <button class="btn btn-close-white ms-3" @onclick="Hide">
+            <button class="btn btn-close-white ms-3" @onclick="()=>ToggleView(false)">
                 <i class="fa-solid fa-x"></i>
             </button>
         </div>
@@ -30,19 +31,21 @@
     </div>
     
     <!-- CATEGORIES -->
-    <div class="product-filters-section d-grid">
-        <button class="btn product-filters-button" type="button" @onclick="()=>ToggleSectionCollapse( SectionCategories )">
-            <span>Sub-Categories</span>
-            <i class="fa @GetCollapseIconCss( SectionCategories )"></i>
-        </button>
-        <div class="@GetCollapseDisplayCss( SectionCategories )">
-            <ul class="list-unstyled d-flex flex-column">
-                @foreach ( Category c in _subCategories ) {
-                    <button class="btn btn-link" @onclick="()=>OnClickSubcategory( c )"></button>
-                }
-            </ul>
-        </div>
-    </div>
+    @if (ShouldShowCategories()) {
+        <div class="product-filters-section d-grid">
+            <button class="btn product-filters-button" type="button" @onclick="() => ToggleSectionCollapse( SectionCategories )">
+                <span>@GetCategoriesTitle()</span>
+                <i class="fa @GetCollapseIconCss( SectionCategories )"></i>
+            </button>
+            <div class="@GetCollapseDisplayCss( SectionCategories )">
+                <ul class="list-unstyled d-flex flex-column">
+                    @foreach ( Category c in _parentCategory?.Children ?? [] ) {
+                        <button class="btn btn-link" @onclick="() => OnClickCategory( c )"></button>
+                    }
+                </ul>
+            </div>
+        </div>   
+    }
     
     <!-- BRANDS -->
     <div class="product-filters-section d-grid">
@@ -66,26 +69,26 @@
     const string SectionBrands = "Brands";
     bool _altered = false;
     bool _hidden = false;
-    List<Category> _subCategories = [];
+    Category? _parentCategory = null;
+    Category? _selectedCategory = null;
     List<Brand> _brands = [];
 
     readonly Dictionary<string, bool> _collapsedSections = [];
-    readonly HashSet<Guid> _selectedSubcategories = [];
     readonly HashSet<Guid> _selectedBrands = [];
 
-    public Func<SearchFiltersDto, Task>? OnChangeFilters;
-    public void Show()
-    {
-        _hidden = false;
-        StateHasChanged();
-    }
-    public void SetData( IEnumerable<Category> subCategories, IEnumerable<Brand> brands )
+    public event Func<SearchFiltersDto, Task>? OnChangeFilters;
+    public void SetData( Category? category, IEnumerable<Brand> brands )
     {
         Clear();
-        _subCategories = subCategories.ToList();
+        _parentCategory = category;
         _brands = brands.ToList();
     }
-
+    public void ToggleView( bool shouldShow )
+    {
+        _hidden = shouldShow;
+        StateHasChanged();
+    }
+    
     string GetDisplayCss() =>
         _hidden ? "d-none" : "d-flex";
     string GetCollapseIconCss( string sectionName ) => 
@@ -94,17 +97,18 @@
         _collapsedSections[sectionName] ? "collapse" : "collapse-show";
     string GetClearAllCss() =>
         _altered ? "d-block" : "d-none";
+    string GetCategoriesTitle() =>
+        _parentCategory?.ParentId is null ? "Categories" : "Sub-Categories";
+
+    bool ShouldShowCategories() =>
+        _parentCategory is null || _parentCategory.Children.Any();
 
     void Clear()
     {
-        _selectedSubcategories.Clear();
+        _parentCategory = null;
+        _selectedCategory = null;
         _selectedBrands.Clear();
         _altered = false;
-    }
-    void Hide()
-    {
-        _hidden = true;
-        StateHasChanged();
     }
     void ToggleSectionCollapse( string sectionName )
     {
@@ -115,10 +119,11 @@
         bool newValue = !value;
         _collapsedSections[sectionName] = newValue;
     }
-    void OnClickSubcategory( Category category )
+    void OnClickCategory( Category category )
     {
         _altered = true;
-        _selectedSubcategories.Add( category.Id );
+        _selectedCategory = category;
+        InvokeChange();
     }
     void OnClickBrand( Brand brand )
     {
@@ -128,7 +133,7 @@
     void InvokeChange()
     {
         SearchFiltersDto f = new(
-            _selectedSubcategories,
+            _selectedCategory?.Id,
             _selectedBrands,
             null,
             null,
