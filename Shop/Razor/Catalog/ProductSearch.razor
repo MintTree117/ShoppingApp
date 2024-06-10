@@ -4,6 +4,7 @@
 @using Shop.Infrastructure.Catalog.Brands.Types
 @using Shop.Infrastructure.Catalog.Categories
 @using Shop.Infrastructure.Catalog.Categories.Types
+@using Shop.Infrastructure.Common.Optionals
 @implements IDisposable
 @inject CategoriesCache CategoriesCache
 @inject BrandsCache BrandsCache
@@ -33,8 +34,8 @@
     {
         await base.OnInitializedAsync();
         
-        var cTask = CategoriesCache.GetCategories();
-        var bTask = BrandsCache.GetBrands();
+        Task<Reply<CategoriesCollection>> cTask = CategoriesCache.GetCategories();
+        Task<Reply<BrandsCollection>> bTask = BrandsCache.GetBrands();
         // load products
 
         await Task.WhenAll( cTask, bTask );
@@ -50,7 +51,7 @@
     protected override async Task OnParametersSetAsync()
     {
         await base.OnParametersSetAsync();
-        
+
         _header.ToggleMobileFiltersEvent += OnToggleMobileFilters;
         _header.PreviousSelectedEvent += OnPreviousPageSelected;
         _header.PageSizeChangedEvent += OnPageSizeChanged;
@@ -78,19 +79,19 @@
         await Task.Delay( 1000 );
         Console.WriteLine( $"Page Sort Changed: {newPageSortIndex}" );
     }
-    async Task OnSearchFiltersChanged( SearchFiltersDto newSearchFiltersDto )
+    async Task OnSearchFiltersChanged( LocalSearchFiltersDto newLocalSearchFiltersDto )
     {
         // Update Header Breadcrumb
         Category? category = null;
-        if (newSearchFiltersDto.CategoryId.HasValue )
-            _categories.Categories.TryGetValue( newSearchFiltersDto.CategoryId.Value, out category );
+        if (newLocalSearchFiltersDto.CategoryId.HasValue )
+            _categories.Categories.TryGetValue( newLocalSearchFiltersDto.CategoryId.Value, out category );
         _header.SetNavigation( category, category is null ? null : _categories.Categories );
         
         await Task.Delay( 1000 );
-        Console.WriteLine( $"Search Filters Changed: {newSearchFiltersDto}" );
+        Console.WriteLine( $"Search Filters Changed: {newLocalSearchFiltersDto}" );
     }
 
-    async Task FetchProducts( SearchFiltersDto filters )
+    async Task FetchProducts( LocalSearchFiltersDto filters )
     {
         
     }

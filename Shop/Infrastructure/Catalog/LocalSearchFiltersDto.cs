@@ -1,6 +1,6 @@
 namespace Shop.Infrastructure.Catalog;
 
-public readonly record struct SearchFiltersDto(
+public readonly record struct LocalSearchFiltersDto(
     Guid? CategoryId,
     HashSet<Guid> BrandIds,
     int? MinPrice,

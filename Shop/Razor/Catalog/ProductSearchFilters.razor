@@ -76,7 +76,7 @@
     readonly Dictionary<string, bool> _collapsedSections = [];
     readonly HashSet<Guid> _selectedBrands = [];
 
-    public event Func<SearchFiltersDto, Task>? OnChangeFilters;
+    public event Func<LocalSearchFiltersDto, Task>? OnChangeFilters;
     public void SetData( Category? category, IEnumerable<Brand> brands )
     {
         Clear();
@@ -132,7 +132,7 @@
     }
     void InvokeChange()
     {
-        SearchFiltersDto f = new(
+        LocalSearchFiltersDto f = new(
             _selectedCategory?.Id,
             _selectedBrands,
             null,
