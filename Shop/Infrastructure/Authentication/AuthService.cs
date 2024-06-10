@@ -63,7 +63,17 @@ public sealed class AuthService // Singleton
         // CHECK TOKEN
         if (_isFirstFetch || _accessJwt is null || TokenExpired( _accessJwt ))
         {
+            //if (TokenExpired( _accessJwt ))
+                //Logger.LogError( "EXPIREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE" );
+            
             Reply<RefreshReply> refreshReply = await FetchRefresh();
+
+            lock ( _fetchLock )
+            {
+                _isFirstFetch = false;
+                _isFetching = false;   
+            }
+            
             return refreshReply.IsOkay
                 ? new AuthenticationState( GetIdentityClaimsPrincipal( _accessJwt ) )
                 : new AuthenticationState( new ClaimsPrincipal() );
@@ -77,10 +87,17 @@ public sealed class AuthService // Singleton
     internal async Task<Reply<bool>> SetState( AuthRefreshEventArgs args )
     {
         if (string.IsNullOrWhiteSpace( args.AccessToken ))
+        {
+            Logger.LogError( "Invalid access token" );
             return IReply.None( "Invalid access token" );
-
+        }
+        
         if (string.IsNullOrWhiteSpace( args.RefreshToken ))
+        {
+            Logger.LogError( "Invalid refresh token" );
             return IReply.None( "Invalid refresh token" );
+        }
+
 
         lock ( _fetchLock )
         {
@@ -91,7 +108,7 @@ public sealed class AuthService // Singleton
         
         Reply<bool> accessResult = await _storage.Set( AccessKey, _accessString );
         Reply<bool> refreshResult = await _storage.Set( RefreshKey, _refreshString );
-
+        
         InvokeNotify();
 
         return accessResult.IsOkay && refreshResult.IsOkay
@@ -144,7 +161,7 @@ public sealed class AuthService // Singleton
     {
         RefreshRequest request = new( _accessString, _refreshString );
         Reply<RefreshReply> refreshReply = await _http.TryPostRequest<RefreshReply>( Consts.ApiLoginRefresh, request );
-
+        
         if (refreshReply.IsOkay)
         {
             lock ( _fetchLock )
@@ -160,28 +177,32 @@ public sealed class AuthService // Singleton
             _accessString = string.Empty;
             _refreshString = string.Empty;
             _accessJwt = null;
-            _isFirstFetch = false;
-            _isFetching = false;
         }
         
         return refreshReply;
     }
     async Task FetchFromStorage()
     {
+        _accessString = string.Empty;
+        _refreshString = string.Empty;
+        
         if (string.IsNullOrWhiteSpace( _accessString ))
         {
             Reply<string> accessReply = await _storage.Get<string>( AccessKey );
-            if (!accessReply.IsOkay)
+
+            if (accessReply.IsOkay)
+                _accessString = accessReply.Data;
+            else
                 Logger.Log( "No access token found in local storage." );
-            _accessString = accessReply.Data;
         }
 
         if (string.IsNullOrWhiteSpace( _refreshString ))
         {
             Reply<string> refreshReply = await _storage.Get<string>( RefreshKey );
-            if (!refreshReply.IsOkay)
+            if (refreshReply.IsOkay)
+                _refreshString = refreshReply.Data;
+            else
                 Logger.Log( "No refresh token found in local storage." );
-            _refreshString = refreshReply.Data;
         }
 
         _accessJwt = ParseJwtFromString( _accessString );
@@ -216,6 +237,9 @@ public sealed class AuthService // Singleton
         };
     static JwtSecurityToken? ParseJwtFromString( string str )
     {
+        if (string.IsNullOrWhiteSpace( str ))
+            return null;
+        
         JwtSecurityTokenHandler handler = new();
         JwtSecurityToken? token = handler.ReadJwtToken( str );
         return token;

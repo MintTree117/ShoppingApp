@@ -17,6 +17,7 @@
     [Inject] protected NavigationManager Navigation { get; init; } = default!;
     
     bool _isInitialized = false; // Children have own lifecycle so we need state
+    protected bool FirstLoad = true;
     
     public void Dispose()
     {

@@ -5,21 +5,24 @@
 @layout MainLayout
 
 <AuthorizeView>
+    
     <Authorized>
-        <div class="row mx-auto" style="max-width: 900px">
-            <div class="page-content position-relative col-auto flex-grow-1">
+        <div class="content-container">
+            <div class="user-container">
                 <LoadingPanel/>
-                <nav class="account-nav-desktop mx-auto w-100">
-                    <ul class="nav justify-content-center w-100">
+                <nav class="account-nav">
+                    <ul class="nav account-nav-list">
                         <AccountMenuOptions/>
                     </ul>
                 </nav>
-                <hr/>
+                <hr class="divider"/>
                 @Body
             </div>
         </div>
     </Authorized>
+
     <NotAuthorized>
         <AccessDenied/>
     </NotAuthorized>
+    
 </AuthorizeView>

@@ -21,10 +21,10 @@ internal static class Consts
     internal const string ApiResetPassword = ApiIdentityBase + "/password/reset";
     // ACCOUNT
     internal const string ApiAccountBase = ApiBase + "/account";
-    internal const string ApiUpdatePassword = ApiAccountBase + "/password/update";
-    internal const string ApiGetAccountDetails = ApiAccountBase + "/account/view";
-    internal const string ApiUpdateAccountDetails = ApiAccountBase + "/account/update";
-    internal const string ApiDeleteAccount = ApiAccountBase + "/account/delete";
+    internal const string ApiUpdatePassword = ApiAccountBase + "/password";
+    internal const string ApiGetAccountDetails = ApiAccountBase + "/view";
+    internal const string ApiUpdateAccountDetails = ApiAccountBase + "/update";
+    internal const string ApiDeleteAccount = ApiAccountBase + "/delete";
     internal const string ApiGetAddresses = ApiAccountBase + "/address/view";
     internal const string ApiAddAddress = ApiAccountBase + "/address/add";
     internal const string ApiUpdateAddress = ApiAccountBase + "/address/update";

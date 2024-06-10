@@ -6,38 +6,33 @@
 
 <PageTitle>Resend Confirmation Email</PageTitle>
 
-<!-- WRAPPERS -->
-<div class="content-container">
-    <div class="auth-container">
-        @if (isSuccess) {
-            <!-- MESSAGE -->
-            <i class="fa-solid fa-circle-check fa-4x text-success auth-icon"></i>
-            <h3 class="mb-3">Email confirm link sent!</h3>
-            <p class="mb-3">Please click the link sent to your email to activate your account.</p>
-            <!-- RESEND -->
-            <button class="btn btn-submit btn-info btn-icon" @onclick="GoToResend"><i class="fa fa-repeat me-2"></i>Retry</button>
-        }
-        else {
-            <!-- TITLE -->
-            <h3 class="mb-3">Resend Email Confirmation</h3>
-            <p class="text-secondary">Enter Your Email</p>
-            <hr/>
-            <!-- FORM -->
-            <EditForm Model="Request" FormName="resend-email-confirmation" OnValidSubmit="SendConfirmationEmail" method="post">
-                <DataAnnotationsValidator/>
-                <ValidationSummary class="text-danger" role="alert"/>
-                <!-- EMAIL -->
-                <div class="form-floating mb-3">
-                    <InputText type="email" @bind-Value="@Request.Email" id="email" class="form-control" aria-required="true" placeholder="name@example.com"/>
-                    <label for="email" class="form-label">Email</label>
-                    <ValidationMessage For="@(() => Request.Email)" class="text-danger"/>
-                </div>
-                <!-- SUBMIT -->
-                <button type="submit" class="btn btn-submit btn-icon"><i class="fa fa-envelope me-2"></i>Send Email</button>
-            </EditForm>
-        }
-    </div>
-</div>
+@if (isSuccess) {
+    <!-- MESSAGE -->
+    <i class="fa-solid fa-circle-check fa-4x text-success auth-icon"></i>
+    <h3 class="mb-3">Email confirm link sent!</h3>
+    <p class="mb-3">Please click the link sent to your email to activate your account.</p>
+    <!-- RESEND -->
+    <button class="btn btn-submit btn-info btn-icon" @onclick="GoToResend"><i class="fa fa-repeat me-2"></i>Retry</button>
+}
+else {
+    <!-- TITLE -->
+    <h3 class="mb-3">Resend Email Confirmation</h3>
+    <p class="text-secondary">Enter Your Email</p>
+    <hr/>
+    <!-- FORM -->
+    <EditForm Model="Request" FormName="resend-email-confirmation" OnValidSubmit="SendConfirmationEmail" method="post">
+        <DataAnnotationsValidator/>
+        <ValidationSummary class="text-danger" role="alert"/>
+        <!-- EMAIL -->
+        <div class="form-floating mb-3">
+            <InputText type="email" @bind-Value="@Request.Email" id="email" class="form-control" aria-required="true" placeholder="name@example.com"/>
+            <label for="email" class="form-label">Email</label>
+            <ValidationMessage For="@(() => Request.Email)" class="text-danger"/>
+        </div>
+        <!-- SUBMIT -->
+        <button type="submit" class="btn btn-submit btn-icon"><i class="fa fa-envelope me-2"></i>Send Email</button>
+    </EditForm>
+}
 
 @code {
     [SupplyParameterFromForm]

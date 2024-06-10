@@ -1,0 +1,32 @@
+.user-container {
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.account-nav {
+    display: flex;
+    margin-left: auto;
+    margin-right: auto;
+    min-width: 100%;
+    width: 100%;
+}
+
+.account-nav-list {
+    justify-content: center;
+    width: 100%;
+    min-width: 100%;
+}
+
+.account-icon {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 15px;
+}

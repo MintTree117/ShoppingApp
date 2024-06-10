@@ -1,22 +1,24 @@
-<nav aria-label="Search Result Pagination">
-    <ul class="pagination">
-        <li class="page-item @GetPreviousDisabledClass()">
-            <a class="page-link" href="javascript:void(0)" @onclick="() => ChangePage( CurrentPage - 1 )">Previous</a>
+<ul class="pagination mx-auto">
+    <li class="page-item @GetPreviousDisabledClass()">
+        <a class="page-link" href="javascript:void(0)" @onclick="() => ChangePage( CurrentPage - 1 )">
+            <i class="fa-solid fa-caret-left"></i>
+        </a>
+    </li>
+    
+    @for ( int i = StartPage; i <= EndPage; i++ )
+    {
+        int index = i;
+        <li class="page-item @(CurrentPage == i ? "active" : "")">
+            <a class="page-link" href="javascript:void(0)" @onclick="() => ChangePage( index )">@i</a>
         </li>
-        
-        @for ( int i = StartPage; i <= EndPage; i++ )
-        {
-            int index = i;
-            <li class="page-item @(CurrentPage == i ? "active" : "")">
-                <a class="page-link" href="javascript:void(0)" @onclick="() => ChangePage( index )">@i</a>
-            </li>
-        }
-        
-        <li class="page-item @GetNextDisabledClass()">
-            <a class="page-link" href="javascript:void(0)" @onclick="() => ChangePage( CurrentPage + 1 )">Next</a>
-        </li>
-    </ul>
-</nav>
+    }
+    
+    <li class="page-item @GetNextDisabledClass()">
+        <a class="page-link" href="javascript:void(0)" @onclick="() => ChangePage( CurrentPage + 1 )">
+            <i class="fa-solid fa-caret-right"></i>
+        </a>
+    </li>
+</ul>
 
 @code {
     int CurrentPage = 1;

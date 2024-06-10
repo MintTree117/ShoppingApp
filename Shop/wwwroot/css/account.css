@@ -1,9 +1,0 @@
-.account-nav-desktop {
-    display: none;
-}
-
-@media only screen and (min-width: 900px) {
-    .account-nav-desktop {
-        display: flex;
-    }
-}

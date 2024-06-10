@@ -6,7 +6,7 @@ public readonly record struct Reply<T> : IReply
     readonly string? _message = null;
     
     // Intentionally Unsafe: Up to programmer to keep track
-    public T Data => _obj ?? Activator.CreateInstance<T>(); // throw new Exception( "Fatal: Tried to access a null Optional!" );
+    public T Data => _obj ?? throw new Exception( "Fatal: Tried to access a null Optional!" );
     public bool IsOkay { get; init; }
     public string Message() => _message ?? string.Empty;
 

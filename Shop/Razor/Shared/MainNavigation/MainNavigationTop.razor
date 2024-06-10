@@ -1,6 +1,7 @@
 @using Shop.Utilities
 @using Microsoft.AspNetCore.Components.Authorization
 @using Shop.Infrastructure.Authentication
+@using Shop.Razor.Shared.Components
 @implements IDisposable
 @inject IJSRuntime JsRuntime
 
@@ -118,12 +119,7 @@ else {
     string username = DefaultUserText;
     decimal cartPrice = decimal.Zero;
     int cartCount = 0;
-
-    void Log()
-    {
-        Console.WriteLine("Hit");
-    }
-
+    
     public void Dispose()
     {
         dotNetRef?.Dispose();

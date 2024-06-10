@@ -23,15 +23,20 @@ public sealed class CategoriesCache( HttpService http, StorageService storage ) 
         _isFetching = true;
         Reply<CategoriesCollection> cacheReply = await GetCache();
         if (cacheReply.IsOkay)
+        {
+            _isFetching = false;
             return cacheReply;
+        }
 
         Reply<List<CategoryDto>> fetchReply = await _http.TryGetRequest<List<CategoryDto>>( Consts.ApiGetCategories );
 
         if (!fetchReply.IsOkay)
-            return Reply<CategoriesCollection>.None( fetchReply );
+        {
+            _isFetching = false;
+            return Reply<CategoriesCollection>.None( fetchReply );   
+        }
 
         CategoriesCollection data = CategoriesCollection.From( fetchReply.Data );
-
         Reply<bool> setReply = await SetCache( data );
         _isFetching = false;
         return Reply<CategoriesCollection>.With( data );

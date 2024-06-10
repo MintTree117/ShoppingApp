@@ -7,39 +7,34 @@
 
 <PageTitle>Account Security</PageTitle>
 
-<!-- WRAPPERS -->
-<div class="content-container">
-    <div class="auth-container">
-        <!-- TITLE -->
-        <h3>Security</h3>
-        <hr/>
-         <!-- FORM -->
-        <EditForm Model="@Request" FormName="change-password" OnValidSubmit="OnValidSubmitPasswordAsync" method="post">
-            <DataAnnotationsValidator/>
-            <ValidationSummary class="text-danger" role="alert"/>
-            <!-- OLD PASSWORD -->
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="@Request.OldPassword" id="old-password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Please enter your old password."/>
-                <label for="old-password" class="form-label">Old Password</label>
-                <ValidationMessage For="@(() => Request.OldPassword)" class="text-danger"/>
-            </div>
-            <!-- NEW PASSWORD -->
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="@Request.NewPassword" id="new-password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="Please enter your new password."/>
-                <label for="new-password" class="form-label">New Password</label>
-                <ValidationMessage For="@(() => Request.NewPassword)" class="text-danger"/>
-            </div>
-            <!-- CONFIRM PASSWORD -->
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="@Request.ConfirmPassword" id="confirm-password" class="form-control" autocomplete="confirm-password" aria-required="true" placeholder="Please confirm your new password."/>
-                <label for="confirm-password" class="form-label">Confirm Password</label>
-                <ValidationMessage For="@(() => Request.ConfirmPassword)" class="text-danger"/>
-            </div>
-            <!-- SUBMIT -->
-            <button type="submit" class="btn btn-submit btn-icon"><i class="fa fa-key me-2"></i>Update Password</button>
-        </EditForm>
+<!-- TITLE -->
+<h3>Security</h3>
+<hr class="divider"/>
+ <!-- FORM -->
+<EditForm Model="@Request" FormName="change-password" OnValidSubmit="OnValidSubmitPasswordAsync" method="post">
+    <DataAnnotationsValidator/>
+    <ValidationSummary class="text-danger" role="alert"/>
+    <!-- OLD PASSWORD -->
+    <div class="form-floating mb-3">
+        <InputText type="password" @bind-Value="@Request.OldPassword" id="old-password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Please enter your old password."/>
+        <label for="old-password" class="form-label">Old Password</label>
+        <ValidationMessage For="@(() => Request.OldPassword)" class="text-danger"/>
     </div>
-</div>
+    <!-- NEW PASSWORD -->
+    <div class="form-floating mb-3">
+        <InputText type="password" @bind-Value="@Request.NewPassword" id="new-password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="Please enter your new password."/>
+        <label for="new-password" class="form-label">New Password</label>
+        <ValidationMessage For="@(() => Request.NewPassword)" class="text-danger"/>
+    </div>
+    <!-- CONFIRM PASSWORD -->
+    <div class="form-floating mb-3">
+        <InputText type="password" @bind-Value="@Request.ConfirmPassword" id="confirm-password" class="form-control" autocomplete="confirm-password" aria-required="true" placeholder="Please confirm your new password."/>
+        <label for="confirm-password" class="form-label">Confirm Password</label>
+        <ValidationMessage For="@(() => Request.ConfirmPassword)" class="text-danger"/>
+    </div>
+    <!-- SUBMIT -->
+    <button type="submit" class="btn btn-submit btn-icon"><i class="fa fa-key me-2"></i>Update Password</button>
+</EditForm>
 
 @code {
     UpdatePasswordRequest Request = new();

@@ -7,45 +7,40 @@
 
 <PageTitle>Manage Account</PageTitle>
 
-<!-- WRAPPERS -->
-<div class="content-container">
-    <div class="auth-container">
-        <!-- TITLE -->
-        <h3>Profile</h3>
-        <hr/>
-        <!-- FORM -->
-        <EditForm Model="@accountModel" OnValidSubmit="@(async () => await UpdateAccount())" method="post">
-            <DataAnnotationsValidator/>
-            <ValidationSummary class="text-danger" role="alert"/>
-            <!-- EMAIL -->
-            <div class="form-floating mb-3">
-                <InputText type="email" @bind-Value="@accountModel.Email" id="email" class="form-control" autocomplete="email" aria-required="true" placeholder="Email"/>
-                <ValidationMessage For="@(() => accountModel.Email)" class="text-danger"/>
-                <label for="email" class="form-label">Email</label>
-            </div>
-            <!-- USERNAME -->
-            <div class="form-floating mb-3">
-                <InputText type="name" @bind-Value="@accountModel.Username" id="username" class="form-control" autocomplete="username" aria-required="true" placeholder="Username"/>
-                <ValidationMessage For="@(() => accountModel.Username)" class="text-danger"/>
-                <label for="username" class="form-label">Username</label>
-            </div>
-            <!-- PHONE -->
-            <div class="form-floating mb-3">
-                <InputText type="phone" @bind-Value="@accountModel.Phone" id="phone" class="form-control" autocomplete="phone" aria-required="true" placeholder="Phone"/>
-                <ValidationMessage For="@(() => accountModel.Phone)" class="text-danger"/>
-                <label for="phone" class="form-label">Phone</label>
-            </div>
-            <!-- 2FA -->
-            <div class="form-check form-switch mb-3">
-                <InputCheckbox @bind-Value="@accountModel.HasTwoFactor" id="2fa" class="form-check-input" aria-required="true"/>
-                <ValidationMessage For="@(() => accountModel.HasTwoFactor)" class="text-danger"/>
-                <label for="2fa" class="form-check-label">Enable Two Factor Login?</label>
-            </div>
-            <!-- SUBMIT -->
-            <button type="submit" class="btn btn-submit btn-icon"><i class="fa fa-user me-2"></i>Update Profile</button>
-        </EditForm>
+<!-- TITLE -->
+<h3>Profile</h3>
+<hr class="divider"/>
+<!-- FORM -->
+<EditForm Model="@accountModel" OnValidSubmit="@(async () => await UpdateAccount())" method="post">
+    <DataAnnotationsValidator/>
+    <ValidationSummary class="text-danger" role="alert"/>
+    <!-- EMAIL -->
+    <div class="form-floating mb-3">
+        <InputText type="email" @bind-Value="@accountModel.Email" id="email" class="form-control" autocomplete="email" aria-required="true" placeholder="Email"/>
+        <ValidationMessage For="@(() => accountModel.Email)" class="text-danger"/>
+        <label for="email" class="form-label">Email</label>
     </div>
-</div>
+    <!-- USERNAME -->
+    <div class="form-floating mb-3">
+        <InputText type="name" @bind-Value="@accountModel.Username" id="username" class="form-control" autocomplete="username" aria-required="true" placeholder="Username"/>
+        <ValidationMessage For="@(() => accountModel.Username)" class="text-danger"/>
+        <label for="username" class="form-label">Username</label>
+    </div>
+    <!-- PHONE -->
+    <div class="form-floating mb-3">
+        <InputText type="phone" @bind-Value="@accountModel.Phone" id="phone" class="form-control" autocomplete="phone" aria-required="true" placeholder="Phone"/>
+        <ValidationMessage For="@(() => accountModel.Phone)" class="text-danger"/>
+        <label for="phone" class="form-label">Phone</label>
+    </div>
+    <!-- 2FA -->
+    <div class="form-check form-switch mb-3">
+        <InputCheckbox @bind-Value="@accountModel.HasTwoFactor" id="2fa" class="form-check-input" aria-required="true"/>
+        <ValidationMessage For="@(() => accountModel.HasTwoFactor)" class="text-danger"/>
+        <label for="2fa" class="form-check-label">Enable Two Factor Login?</label>
+    </div>
+    <!-- SUBMIT -->
+    <button type="submit" class="btn btn-submit btn-icon"><i class="fa fa-user me-2"></i>Update Profile</button>
+</EditForm>
 
 @code {
     AccountModel accountModel = new();

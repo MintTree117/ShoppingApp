@@ -23,12 +23,18 @@ public sealed class BrandsCache( HttpService http, StorageService storage ) :
         _isFetching = true;
         Reply<BrandsCollection> cacheReply = await GetCache();
         if (cacheReply.IsOkay)
+        {
+            _isFetching = false;
             return cacheReply;
+        }
 
         Reply<BrandsDto> fetchReply = await _http.TryGetRequest<BrandsDto>( Consts.ApiGetBrands );
 
         if (!fetchReply.IsOkay)
+        {
+            _isFetching = false;
             return Reply<BrandsCollection>.None( fetchReply );
+        }
 
         BrandsCollection data = BrandsCollection.From( fetchReply.Data );
 
