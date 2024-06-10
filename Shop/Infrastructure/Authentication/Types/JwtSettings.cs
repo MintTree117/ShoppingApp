@@ -2,7 +2,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Shop.Infrastructure.Authentication.Types;
 
-public sealed class Jwt
+public sealed class JwtSettings
 {
     public SymmetricSecurityKey Key { get; set; } = null!;
     public string Audience { get; set; } = string.Empty;

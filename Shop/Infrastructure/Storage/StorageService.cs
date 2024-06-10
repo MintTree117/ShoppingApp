@@ -55,7 +55,7 @@ public sealed class StorageService( IServiceProvider provider ) // Singleton wra
             return Reply<bool>.Exception( e, $"An exception occurred while trying to remove key {key} from storage." );
         }
     }
-
+    
     ILocalStorageService GetStorage()
     {
         using AsyncServiceScope scope = _provider.CreateAsyncScope();

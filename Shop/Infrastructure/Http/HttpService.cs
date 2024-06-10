@@ -2,6 +2,7 @@ using System.Collections.Specialized;
 using System.Net.Http.Json;
 using System.Web;
 using Shop.Infrastructure.Common.Optionals;
+using Shop.Utilities;
 
 namespace Shop.Infrastructure.Http;
 
@@ -24,7 +25,7 @@ public sealed class HttpService( IHttpClientFactory httpFactory )
             return await HandleHttpResponse<T>( httpResponse );
         }
         catch ( Exception e ) {
-            return HandleHttpException<T>( e, "Get", apiPath );
+            return HandleHttpException<T>( e, "GET", apiPath );
         }
     }
     public async Task<Reply<T>> TryPostRequest<T>( string apiPath, object? body = null, string? authToken = null )
@@ -34,7 +35,7 @@ public sealed class HttpService( IHttpClientFactory httpFactory )
             return await HandleHttpResponse<T>( httpResponse );
         }
         catch ( Exception e ) {
-            return HandleHttpException<T>( e, "Post", apiPath );
+            return HandleHttpException<T>( e, "POST", apiPath );
         }
     }
     public async Task<Reply<T>> TryPutRequest<T>( string apiPath, object? body = null, string? authToken = null )
@@ -44,7 +45,7 @@ public sealed class HttpService( IHttpClientFactory httpFactory )
             return await HandleHttpResponse<T>( httpResponse );
         }
         catch ( Exception e ) {
-            return HandleHttpException<T>( e, "Put", apiPath );
+            return HandleHttpException<T>( e, "PUT", apiPath );
         }
     }
     public async Task<Reply<T>> TryDeleteRequest<T>( string apiPath, Dictionary<string, object>? parameters = null, string? authToken = null )
@@ -55,7 +56,7 @@ public sealed class HttpService( IHttpClientFactory httpFactory )
             return await HandleHttpResponse<T>( httpResponse );
         }
         catch ( Exception e ) {
-            return HandleHttpException<T>( e, "Delete", apiPath );
+            return HandleHttpException<T>( e, "DELETE", apiPath );
         }
     }
     
@@ -89,7 +90,7 @@ public sealed class HttpService( IHttpClientFactory httpFactory )
     }
     static Reply<T> HandleHttpException<T>( Exception e, string requestType, string requestUrl )
     {
-        Console.WriteLine( e );
-        return Reply<T>.Exception( e, $"{requestType}: An exception occured while executing http: {requestUrl}" );
+        Logger.LogError( $"HTTP {requestType} ERROR", requestUrl, e );
+        return Reply<T>.Exception( e, "An error occured during a network request." );
     }
 }

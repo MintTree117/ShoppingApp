@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Shop;
 using Shop.Infrastructure.Authentication;
+using Shop.Infrastructure.Catalog.Brands;
 using Shop.Infrastructure.Catalog.Categories;
 using Shop.Infrastructure.Http;
 using Shop.Infrastructure.Loading;
@@ -26,6 +27,6 @@ builder.Services.AddScoped<AuthenticationStateProvider, AuthProvider>();
 //builder.Services.AddScoped<AuthenticationStateProvider>( provider => provider.GetRequiredService<AuthenticationManager>() );
 builder.Services.AddScoped<LoadingService>();
 builder.Services.AddSingleton<CategoriesCache>();
-builder.Services.AddSingleton<CategoriesCache>();
+builder.Services.AddSingleton<BrandsCache>();
 
 await builder.Build().RunAsync();

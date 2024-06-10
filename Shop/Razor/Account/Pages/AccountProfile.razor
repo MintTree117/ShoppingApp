@@ -85,7 +85,7 @@
 
         PushSuccess( "Account details successfully updated." );
 
-        Reply<bool> refreshResult = await Auth.RefreshStateFull();
+        Reply<bool> refreshResult = await Auth.RefreshState();
         if (!refreshResult.IsOkay) {
             Console.WriteLine( refreshResult.Message() );
             await Auth.ClearState();

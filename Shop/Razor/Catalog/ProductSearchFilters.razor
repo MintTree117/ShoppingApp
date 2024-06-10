@@ -3,6 +3,7 @@
 @using Shop.Infrastructure.Catalog
 @using Shop.Infrastructure.Catalog.Brands.Types
 @using Shop.Infrastructure.Catalog.Categories.Types
+@using Shop.Infrastructure.Catalog.Search.Models
 
 <!-- CONTAINER -->
 <div class="d-flex flex-column @GetDisplayCss()">
@@ -33,7 +34,7 @@
     <!-- CATEGORIES -->
     @if (ShouldShowCategories()) {
         <div class="product-filters-section d-grid">
-            <button class="btn product-filters-button" type="button" @onclick="() => ToggleSectionCollapse( SectionCategories )">
+            <button class="btn product-filters-button" type="button" @onclick="()=>ToggleSectionCollapse( SectionCategories )">
                 <span>@GetCategoriesTitle()</span>
                 <i class="fa @GetCollapseIconCss( SectionCategories )"></i>
             </button>
@@ -62,30 +63,58 @@
         </div>
     </div>
     
+    <!-- TOGGLES FOR FILTERS -->
+    <div class="product-filters-section d-grid">
+        <label>
+            <input type="checkbox" @onchange="OnChangeIsInStock" /> In Stock
+        </label>
+        <label>
+            <input type="checkbox" @onchange="OnChangeIsFeatured" /> Featured
+        </label>
+        <label>
+            <input type="checkbox" @onchange="OnChangeIsOnSale" /> On Sale
+        </label>
+    </div>
+
+    <!-- PRICE RANGE SLIDER -->
+    <div class="product-filters-section d-grid">
+        <label>
+            Price Range: @GetPriceRangeLabel()
+        </label>
+        <input type="range" min="0" max="10000" step="1" @onchange="OnChangeMinPrice" />
+        <input type="range" min="0" max="10000" step="1" @onchange="OnChangeMaxPrice" />
+        <div class="d-flex justify-content-between">
+            <input type="number" min="0" max="10000" step="1" @onchange="OnChangeMinPrice" class="form-control" />
+            <input type="number" min="0" max="10000" step="1" @onchange="OnChangeMaxPrice" class="form-control" />
+        </div>
+    </div>
+    
 </div>
 
 @code {
     const string SectionCategories = "Categories";
     const string SectionBrands = "Brands";
+    List<Brand> _brands = [];
+    
     bool _altered = false;
     bool _hidden = false;
     Category? _parentCategory = null;
-    Category? _selectedCategory = null;
-    List<Brand> _brands = [];
+    LocalSearchFilters _filters = LocalSearchFilters.Empty();
 
     readonly Dictionary<string, bool> _collapsedSections = [];
     readonly HashSet<Guid> _selectedBrands = [];
 
-    public event Func<LocalSearchFiltersDto, Task>? OnChangeFilters;
+    public event Func<LocalSearchFilters, Task>? OnChangeFilters;
     public void SetData( Category? category, IEnumerable<Brand> brands )
     {
         Clear();
         _parentCategory = category;
         _brands = brands.ToList();
     }
-    public void ToggleView( bool shouldShow )
+    public void ToggleView( bool? shouldShow = null )
     {
-        _hidden = shouldShow;
+        shouldShow ??= !_hidden;
+        _hidden = shouldShow.Value;
         StateHasChanged();
     }
     
@@ -99,6 +128,8 @@
         _altered ? "d-block" : "d-none";
     string GetCategoriesTitle() =>
         _parentCategory?.ParentId is null ? "Categories" : "Sub-Categories";
+    string GetPriceRangeLabel() =>
+        $"{(_filters.MinPrice.HasValue ? _filters.MinPrice.Value.ToString() : "0")} - {(_filters.MaxPrice.HasValue ? _filters.MaxPrice.Value.ToString() : "Any")}";
 
     bool ShouldShowCategories() =>
         _parentCategory is null || _parentCategory.Children.Any();
@@ -106,13 +137,13 @@
     void Clear()
     {
         _parentCategory = null;
-        _selectedCategory = null;
         _selectedBrands.Clear();
         _altered = false;
     }
     void ToggleSectionCollapse( string sectionName )
     {
-        if (!_collapsedSections.TryGetValue( sectionName, out bool value )) {
+        if (!_collapsedSections.TryGetValue( sectionName, out bool value ))
+        {
             Console.WriteLine( "Invalid Section Name" );
             return;
         }
@@ -122,7 +153,7 @@
     void OnClickCategory( Category category )
     {
         _altered = true;
-        _selectedCategory = category;
+        _filters = LocalSearchFilters.Empty();
         InvokeChange();
     }
     void OnClickBrand( Brand brand )
@@ -130,17 +161,14 @@
         _altered = true;
         _selectedBrands.Add( brand.Id );
     }
+    void OnChangeIsInStock( ChangeEventArgs args ) { }
+    void OnChangeIsFeatured( ChangeEventArgs args ) { }
+    void OnChangeIsOnSale( ChangeEventArgs args ) { }
+    void OnChangeMinPrice( ChangeEventArgs args ) { }
+    void OnChangeMaxPrice( ChangeEventArgs args ) { }
+
     void InvokeChange()
     {
-        LocalSearchFiltersDto f = new(
-            _selectedCategory?.Id,
-            _selectedBrands,
-            null,
-            null,
-            null,
-            null,
-            false );
-
-        OnChangeFilters?.Invoke( f );
+        OnChangeFilters?.Invoke( _filters );
     }
 }

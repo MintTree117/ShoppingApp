@@ -21,6 +21,11 @@
     public void Dispose()
     {
         Auth.OnStateChanged -= OnAuthStateChange;
+        OnDispose();
+    }
+    protected virtual void OnDispose()
+    {
+        
     }
     protected override void OnParametersSet()
     {

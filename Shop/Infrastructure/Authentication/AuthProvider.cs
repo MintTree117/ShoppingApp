@@ -17,6 +17,7 @@ public sealed class AuthProvider : AuthenticationStateProvider, IDisposable // S
     }
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
+        Console.WriteLine("----------------------------GETTING");
         AuthenticationState result = await _authService.GetState();
         return result;
     }

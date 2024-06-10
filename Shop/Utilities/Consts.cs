@@ -16,7 +16,7 @@ internal static class Consts
     internal const string ApiLogin = ApiIdentityBase + "/login";
     internal const string ApiTwoFactor = ApiIdentityBase + "/2fa";
     internal const string ApiLoginRefresh = ApiIdentityBase + "/refresh";
-    internal const string ApiLoginRefreshFull = ApiIdentityBase + "/refresh-full";
+    internal const string ApiLoginRefreshFull = ApiIdentityBase + "/refreshFull";
     internal const string ApiForgotPassword = ApiIdentityBase + "/password/forgot";
     internal const string ApiResetPassword = ApiIdentityBase + "/password/reset";
     // ACCOUNT
@@ -57,8 +57,8 @@ internal static class Consts
     internal const string PageAccountProfile = PageAccountBase + "/profile";
     internal const string PageAccountSecurity = PageAccountBase + "/security";
     // CATALOG
-    internal const string PageProductDetails = "/productDetails";
-    internal const string PageProductSearch = "/productSearch";
+    internal const string PageProductDetails = "/product";
+    internal const string PageProductSearch = "/search";
     // ORDERING
     internal const string PageCart = "/cart";
 }

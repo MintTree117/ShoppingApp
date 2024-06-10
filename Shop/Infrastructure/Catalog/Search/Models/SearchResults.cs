@@ -20,4 +20,6 @@ public record SearchResults(
 
         return new SearchResults( resultsDto.TotalMatches, searchItems );
     }
+    public static SearchResults Empty() =>
+        new( 0, [] );
 }

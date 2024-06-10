@@ -1,34 +1,45 @@
-@page "/products/search"
-@using Shop.Infrastructure.Catalog
+@page "/search"
 @using Shop.Infrastructure.Catalog.Brands
 @using Shop.Infrastructure.Catalog.Brands.Types
 @using Shop.Infrastructure.Catalog.Categories
 @using Shop.Infrastructure.Catalog.Categories.Types
 @using Shop.Infrastructure.Common.Optionals
-@implements IDisposable
+@using System.Text
+@using System.Web
+@using Shop.Infrastructure
+@using Shop.Infrastructure.Catalog.Search.Dtos
+@using Shop.Infrastructure.Catalog.Search.Models
+@using Shop.Razor.Shared.Components
+@inherits Shop.Razor.Shared.ShopPage
 @inject CategoriesCache CategoriesCache
 @inject BrandsCache BrandsCache
 
 <div class="content-container">
-    <ProductSearchHeader @ref="_header"/>
-    <ProductSearchFilters @ref="_filters"/>
+    <ProductSearchHeader @ref="_headerRazor"/>
+    <ProductSearchFilters @ref="_filtersRazor"/>
+    <PaginationPanel @ref="_paginationRazor"/>
 </div>
 
 @code {
-    ProductSearchHeader _header = default!;
-    ProductSearchFilters _filters = default!;
-    CategoriesCollection _categories = CategoriesCollection.None();
-    BrandsCollection _brands = BrandsCollection.None();
+    ProductSearchHeader _headerRazor = default!;
+    ProductSearchFilters _filtersRazor = default!;
+    PaginationPanel _paginationRazor = default!;
+    
+    CategoriesCollection _categoryCollection = CategoriesCollection.None();
+    BrandsCollection _brandCollection = BrandsCollection.None();
 
-    Category? _category = null;
+    Category? _currentCategory = null;
+    LocalSearchFilters _filters = LocalSearchFilters.Empty();
+    Pagination _pagination = new( 1, 10, 0 );
+    SearchResults _searchResults = SearchResults.Empty();
 
-    public void Dispose()
+    protected override void OnDispose()
     {
-        _header.ToggleMobileFiltersEvent -= OnToggleMobileFilters;
-        _header.PreviousSelectedEvent -= OnPreviousPageSelected;
-        _header.PageSizeChangedEvent -= OnPageSizeChanged;
-        _header.PageSortChangedEvent -= OnPageSortChanged;
-        _filters.OnChangeFilters -= OnSearchFiltersChanged;
+        _headerRazor.ToggleMobileFiltersEvent -= OnToggleMobileFilters;
+        _headerRazor.PreviousSelectedEvent -= OnPreviousCategorySelected;
+        _headerRazor.PageSizeChangedEvent -= OnPageSizeChanged;
+        _headerRazor.PageSortChangedEvent -= OnPageSortChanged;
+        _filtersRazor.OnChangeFilters -= OnSearchFiltersRazorChanged;
     }
     protected override async Task OnInitializedAsync()
     {
@@ -40,10 +51,10 @@
 
         await Task.WhenAll( cTask, bTask );
 
-        _categories = cTask.Result.IsOkay
+        _categoryCollection = cTask.Result.IsOkay
             ? cTask.Result.Data
             : CategoriesCollection.None();
-        _brands = bTask.Result.IsOkay
+        _brandCollection = bTask.Result.IsOkay
             ? bTask.Result.Data
             : BrandsCollection.None();
         // set products
@@ -52,47 +63,98 @@
     {
         await base.OnParametersSetAsync();
 
-        _header.ToggleMobileFiltersEvent += OnToggleMobileFilters;
-        _header.PreviousSelectedEvent += OnPreviousPageSelected;
-        _header.PageSizeChangedEvent += OnPageSizeChanged;
-        _header.PageSortChangedEvent += OnPageSortChanged;
+        _headerRazor.ToggleMobileFiltersEvent += OnToggleMobileFilters;
+        _headerRazor.PreviousSelectedEvent += OnPreviousCategorySelected;
+        _headerRazor.PageSizeChangedEvent += OnPageSizeChanged;
+        _headerRazor.PageSortChangedEvent += OnPageSortChanged;
         
-        _filters.OnChangeFilters += OnSearchFiltersChanged;
-        _filters.SetData( _category, _brands.BrandsById.Values );
+        _filtersRazor.OnChangeFilters += OnSearchFiltersRazorChanged;
+        _filtersRazor.SetData( _currentCategory, _brandCollection.BrandsById.Values );
     }
 
     void OnToggleMobileFilters()
     {
-        
+        _filtersRazor.ToggleView(  );
     }
-    async Task OnPreviousPageSelected( Category? category )
+    
+    async Task OnPreviousCategorySelected( Category? category )
     {
-        
+        Console.WriteLine( $"Previous Category Selected: {category}" );
+        //_localFilters = _localFilters with { CategoryId = category?.Id };
+        await FetchProducts( _filters );
     }
     async Task OnPageSizeChanged( int newPageSize )
     {
-        await Task.Delay( 1000 );
         Console.WriteLine( $"Page Size Changed: {newPageSize}" );
+        //_localFilters = _localFilters with { PageSize = newPageSize };
+        await FetchProducts( _filters );
     }
     async Task OnPageSortChanged( int newPageSortIndex )
     {
-        await Task.Delay( 1000 );
         Console.WriteLine( $"Page Sort Changed: {newPageSortIndex}" );
+        //_localFilters = _localFilters with { SortBy = newPageSortIndex };
+        await FetchProducts( _filters );
     }
-    async Task OnSearchFiltersChanged( LocalSearchFiltersDto newLocalSearchFiltersDto )
+    async Task OnSearchFiltersRazorChanged( LocalSearchFilters newLocalSearchFilters )
     {
-        // Update Header Breadcrumb
-        Category? category = null;
-        if (newLocalSearchFiltersDto.CategoryId.HasValue )
-            _categories.Categories.TryGetValue( newLocalSearchFiltersDto.CategoryId.Value, out category );
-        _header.SetNavigation( category, category is null ? null : _categories.Categories );
+        Console.WriteLine( $"Search Filters Changed: {newLocalSearchFilters}" );
+
+        //_localFilters = newLocalSearchFilters;
         
-        await Task.Delay( 1000 );
-        Console.WriteLine( $"Search Filters Changed: {newLocalSearchFiltersDto}" );
+        await FetchProducts( _filters );
     }
 
-    async Task FetchProducts( LocalSearchFiltersDto filters )
+    async Task FetchProducts( LocalSearchFilters filters )
     {
+        string url = BuildSearchUrl( filters );
+        Reply<SearchResultsDto> reply = await Http.TryGetRequest<SearchResultsDto>( url );
+
+        if (!reply.IsOkay)
+        {
+            PushWarning( "Failed to fetch products." );
+            return;
+        }
         
+        _searchResults = SearchResults.From( reply.Data, _brandCollection );
+        _paginationRazor.Set( _filters.Page, _filters.PageSize, _searchResults.TotalMatches );
+        _currentCategory = null;
+        if (filters.CategoryId.HasValue)
+            _categoryCollection.Categories.TryGetValue( filters.CategoryId.Value, out _currentCategory );
+        _headerRazor.SetNavigation( _currentCategory, _currentCategory is null ? null : _categoryCollection.Categories );
+        StateHasChanged();
+    }
+    static string BuildSearchUrl( LocalSearchFilters filters )
+    {
+        StringBuilder urlString = new();
+        urlString.Append( "fetch/" );
+        
+        Dictionary<string, string> queryParams = new();
+        
+        if (filters.CategoryId.HasValue)
+            queryParams["CategoryId"] = filters.CategoryId.Value.ToString();
+        if (filters.BrandIds != null && filters.BrandIds.Any())
+            queryParams["BrandIds"] = string.Join( ",", filters.BrandIds );
+        
+        if (filters.MinPrice.HasValue)
+            queryParams["MinPrice"] = filters.MinPrice.Value.ToString();
+        if (filters.MaxPrice.HasValue)
+            queryParams["MaxPrice"] = filters.MaxPrice.Value.ToString();
+        
+        queryParams["IsInStock"] = filters.IsInStock.ToString().ToLower();
+        queryParams["IsFeatured"] = filters.IsFeatured.ToString().ToLower();
+        queryParams["IsOnSale"] = filters.IsOnSale.ToString().ToLower();
+        
+        queryParams["Page"] = filters.Page.ToString();
+        queryParams["PageSize"] = filters.PageSize.ToString();
+        queryParams["OrderBy"] = filters.SortBy.ToString();
+        
+        foreach ( KeyValuePair<string, string> param in queryParams )
+        {
+            if (urlString.Length > 0)
+                urlString.Append( "&" );
+            urlString.AppendFormat( "{0}={1}", HttpUtility.UrlEncode( param.Key ), HttpUtility.UrlEncode( param.Value ) );
+        }  
+
+        return urlString.ToString();
     }
 }
