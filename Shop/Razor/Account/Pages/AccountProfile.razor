@@ -72,10 +72,10 @@
 
         PushSuccess( "Account details successfully updated." );
 
-        Reply<bool> refreshResult = await Authentication.RefreshSessionInfo();
+        Reply<bool> refreshResult = await Authentication.RefreshSession();
         if (!refreshResult.IsOkay) {
             Console.WriteLine( refreshResult.Message() );
-            await Authentication.ClearState();
+            await Authentication.ClearSession();
             Navigate( Consts.PageSessionExpired, true );
         }
         

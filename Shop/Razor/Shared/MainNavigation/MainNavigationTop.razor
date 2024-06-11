@@ -114,7 +114,7 @@ else {
     public MainLayout Layout { get; init; } = default!;
     
     [Inject] public NavigationManager Navigation { get; set; } = default!;
-    [Inject] public AuthenticationService AuthenticationService { get; set; } = default!;
+    [Inject] public SessionManager SessionManager { get; set; } = default!;
     MainNavigationSide? _sidebar;
     DotNetObjectReference<MainNavigationTop> _dotNetRef = default!;
 
@@ -132,12 +132,12 @@ else {
     public void Dispose()
     {
         _dotNetRef.Dispose();
-        AuthenticationService.OnStateChanged -= OnAuthenticationStateChanged;
+        SessionManager.OnStateChanged -= OnAuthenticationStateChanged;
     }
     protected override async Task OnInitializedAsync()
     {
         _dotNetRef = DotNetObjectReference.Create( this );
-        AuthenticationService.OnStateChanged += OnAuthenticationStateChanged;
+        SessionManager.OnStateChanged += OnAuthenticationStateChanged;
         await JsRuntime.InvokeVoidAsync( "resizeObserverInterop.initialize", _dotNetRef );
     }
     protected override async Task OnAfterRenderAsync( bool firstRender )

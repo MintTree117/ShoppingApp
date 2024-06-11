@@ -10,7 +10,7 @@
         
         StartLoading( "Logging Out..." );
         
-        await Authentication.ClearState();
+        await Authentication.ClearSession();
         await Http.PostAsyncAuthenticated<bool>( Consts.ApiLogout );
         Navigation.NavigateTo( Consts.PageHome, true );
     }

@@ -228,11 +228,11 @@ else {
     async Task<Reply<LoginReply>> TryLogin() => 
         await Http.PostAsync<LoginReply>( Consts.ApiLogin, _loginRequest );
     async Task<Reply<bool>> TryUpdateLocalState( Reply<LoginReply> loginResult ) =>
-        await Authentication.SetState( loginResult.Data.AccessToken );
+        await Authentication.UpdateSession( loginResult.Data.AccessToken );
     async Task<Reply<TwoFactorReply>> TryTwoFactorLogin() => 
         await Http.PostAsync<TwoFactorReply>( Consts.ApiTwoFactor, _twoFactorRequest );
     async Task<Reply<bool>> TryUpdateLocalState( Reply<TwoFactorReply> twoFactorResult ) =>
-        await Authentication.SetState( twoFactorResult.Data.AccessToken );
+        await Authentication.UpdateSession( twoFactorResult.Data.AccessToken );
     async Task<Reply<RegisterReply>> TryRegister() => 
         await Http.PostAsync<RegisterReply>( Consts.ApiRegister, _registerRequest );
     

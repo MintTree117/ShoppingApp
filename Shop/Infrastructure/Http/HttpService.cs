@@ -7,10 +7,10 @@ using Shop.Utilities;
 
 namespace Shop.Infrastructure.Http;
 
-public sealed class HttpService( IHttpClientFactory httpFactory, AuthenticationService authService ) // SINGLETON
+public sealed class HttpService( IHttpClientFactory httpFactory, SessionManager authService ) // SINGLETON
 {
     readonly IHttpClientFactory _httpFactory = httpFactory;
-    readonly AuthenticationService _authService = authService;
+    readonly SessionManager _authService = authService;
     
     public async Task<Reply<T>> GetAsync<T>( string url, Dictionary<string, object>? parameters = null ) =>
         await ExecuteGetRequest<T>( url, false, parameters );

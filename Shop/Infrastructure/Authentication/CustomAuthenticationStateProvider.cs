@@ -4,20 +4,20 @@ namespace Shop.Infrastructure.Authentication;
 
 public sealed class CustomAuthenticationStateProvider : AuthenticationStateProvider, IDisposable // SCOPED
 {
-    readonly AuthenticationService _authenticationService;
+    readonly SessionManager _sessionManager;
     
-    public CustomAuthenticationStateProvider( AuthenticationService authenticationService )
+    public CustomAuthenticationStateProvider( SessionManager sessionManager )
     {
-        _authenticationService = authenticationService;
-        _authenticationService.OnStateChanged += NotifyAuthenticationStateChanged;
+        _sessionManager = sessionManager;
+        _sessionManager.OnStateChanged += NotifyAuthenticationStateChanged;
     }
     public void Dispose()
     {
-        _authenticationService.OnStateChanged -= NotifyAuthenticationStateChanged;
+        _sessionManager.OnStateChanged -= NotifyAuthenticationStateChanged;
     }
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        AuthenticationState result = await _authenticationService.GetState();
+        AuthenticationState result = await _sessionManager.GetSessionState();
         return result;
     }
 }

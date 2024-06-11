@@ -65,7 +65,7 @@ else {
             return;
         }
 
-        await Authentication.ClearState();
+        await Authentication.ClearSession();
         StopLoading();
         Navigate( Consts.PageAccountDeleted );
     }
