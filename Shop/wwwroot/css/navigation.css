@@ -38,6 +38,23 @@
     max-height: 40px;
 }
 
+.top-nav-cart-count {
+    position: absolute;
+    top: -5px;
+    right: -20px;
+    background-color: #c9002c;
+    color: white;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+    font-weight: bold;
+    z-index: 100;
+}
+
 @media only screen and (min-width: 900px) {
     .top-nav-search-control, .top-nav-search-button {
         height: 50px;
@@ -182,7 +199,8 @@
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
-    justify-content: end;
+    text-align: end;
+    justify-content: space-between;
     padding-left: 5px;
     padding-right: 5px;
 }

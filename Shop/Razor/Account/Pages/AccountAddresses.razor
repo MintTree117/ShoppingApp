@@ -1,8 +1,8 @@
 @page "/account/addresses"
-@using Shop.Infrastructure.Common.Optionals
 @using Shop.Utilities
 @using Shop.Razor.Shared.Components
 @using Shop.Infrastructure.Authentication.Types
+@using Shop.Infrastructure.Common.ReplyTypes
 @inherits AccountPageBase
 @layout AccountLayout
 
@@ -137,7 +137,7 @@ else {
         Dictionary<string, object> parameters = [];
         parameters.Add( "Page", _currentPage );
         parameters.Add( "PageSize", _rowsPerPageSelection );
-        Reply<AddressSearchResponse> result = await Http.TryGetRequest<AddressSearchResponse>( Consts.ApiGetAddresses, parameters, await GetAuthToken() );
+        Reply<AddressSearchResponse> result = await Http.GetAsyncAuthenticated<AddressSearchResponse>( Consts.ApiGetAddresses, parameters );
 
         if (!result.IsOkay) {
             PushError( result, "An error occured while fetching addresses." );
@@ -153,8 +153,8 @@ else {
         StartLoading( "Saving Address..." );
 
         Reply<bool> reply = _isNew
-            ? await Http.TryPutRequest<bool>( Consts.ApiAddAddress, _editModel, await GetAuthToken() )
-            : await Http.TryPostRequest<bool>( Consts.ApiUpdateAddress, _editModel, await GetAuthToken() );
+            ? await Http.PutAsyncAuthenticated<bool>( Consts.ApiAddAddress, _editModel )
+            : await Http.PostAsyncAuthenticated<bool>( Consts.ApiUpdateAddress, _editModel );
 
         if (!reply.IsOkay) {
             PushError( reply, "Failed to save address." );
@@ -174,7 +174,7 @@ else {
         StartLoading( "Deleting Address..." );
 
         Dictionary<string, object> parameters = new() { { "AddressId", address.Id } };
-        Reply<bool> reply = await Http.TryDeleteRequest<bool>( Consts.ApiDeleteAddress, parameters, await GetAuthToken() );
+        Reply<bool> reply = await Http.DeleteAsyncAuthenticated<bool>( Consts.ApiDeleteAddress, parameters );
 
         if (!reply.IsOkay) {
             PushError( reply, "Failed to delete address." );

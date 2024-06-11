@@ -1,13 +1,13 @@
 @page "/account/delete"
 @using System.ComponentModel.DataAnnotations
-@using Shop.Infrastructure.Common.Optionals
+@using Shop.Infrastructure.Common.ReplyTypes
 @using Shop.Utilities
 @inherits AccountPageBase
 @layout  AccountLayout
 
 <PageTitle>Delete Account</PageTitle>
 
-@if (isWarning) {
+@if (_isWarning) {
     <!-- CONFIRM DELETE -->
     <div class="alert alert-warning p-3" role="alert">
         <!-- MESSAGE -->
@@ -27,14 +27,14 @@ else {
     <h3>Delete Personal Data</h3>
     <hr class="divider"/>
     <!-- FORM -->
-    <EditForm Model="@request" FormName="delete-user" OnValidSubmit="@(async () => await OnValidSubmitAsync())" method="post">
+    <EditForm Model="@_request" FormName="delete-user" OnValidSubmit="@(async () => await OnValidSubmitAsync())" method="post">
         <DataAnnotationsValidator/>
         <ValidationSummary class="text-danger" role="alert"/>
         <!-- PASSWORD -->
         <div class="form-floating mb-3">
-            <InputText type="password" @bind-Value="@request.Password" id="password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Please enter your password."/>
+            <InputText type="password" @bind-Value="@_request.Password" id="password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Please enter your password."/>
             <label for="password" class="form-label">Password</label>
-            <ValidationMessage For="@(() => request.Password)" class="text-danger"/>
+            <ValidationMessage For="@(() => _request.Password)" class="text-danger"/>
         </div>
         <!-- SUBMIT -->
          <button class="btn btn-submit btn-warning btn-icon"><i class="fa fa-trash me-2"></i>Delete Data</button>
@@ -42,26 +42,21 @@ else {
 }
 
 @code {
-    readonly DeleteAccountRequest request = new();
-    bool isWarning = false;
+    readonly DeleteAccountRequest _request = new();
+    bool _isWarning = false;
 
     async Task OnValidSubmitAsync()
     {
         await Task.Delay( 1000 ); // protect user from double click second confirm
-        isWarning = true;
+        _isWarning = true;
         StateHasChanged();
     }
     async Task OnConfirmSubmit()
     {
         StartLoading( "Deleting Account..." );
-        
-        Reply<string> token = await Auth.GetAccessToken();
-        if (!token.IsOkay) {
-            PushError( "Invalid Credentials" );
-            StopLoading();
-            return;
-        }
-        Reply<bool> reply = await Http.TryPostRequest<bool>( Consts.ApiDeleteAccount, request, token.Data );
+
+        Dictionary<string, object> parameters = new() { { "password", _request.Password } };
+        Reply<bool> reply = await Http.DeleteAsyncAuthenticated<bool>( Consts.ApiDeleteAccount, parameters );
 
         if (!reply.IsOkay) {
             PushError( reply, "Failed to delete your account." );
@@ -70,13 +65,13 @@ else {
             return;
         }
 
-        await Auth.ClearState();
+        await Authentication.ClearState();
         StopLoading();
         Navigate( Consts.PageAccountDeleted );
     }
     void Cancel()
     {
-        isWarning = false;
+        _isWarning = false;
         StateHasChanged();
     }
 

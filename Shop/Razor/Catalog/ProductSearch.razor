@@ -3,12 +3,12 @@
 @using Shop.Infrastructure.Catalog.Brands.Types
 @using Shop.Infrastructure.Catalog.Categories
 @using Shop.Infrastructure.Catalog.Categories.Types
-@using Shop.Infrastructure.Common.Optionals
 @using System.Text
 @using System.Web
 @using Shop.Infrastructure
 @using Shop.Infrastructure.Catalog.Search.Dtos
 @using Shop.Infrastructure.Catalog.Search.Models
+@using Shop.Infrastructure.Common.ReplyTypes
 @using Shop.Razor.Shared.Components
 @inherits Shop.Razor.Shared.ShopPage
 @inject CategoriesCache CategoriesCache
@@ -107,7 +107,7 @@
     async Task FetchProducts( LocalSearchFilters filters )
     {
         string url = BuildSearchUrl( filters );
-        Reply<SearchResultsDto> reply = await Http.TryGetRequest<SearchResultsDto>( url );
+        Reply<SearchResultsDto> reply = await Http.GetAsync<SearchResultsDto>( url );
 
         if (!reply.IsOkay)
         {

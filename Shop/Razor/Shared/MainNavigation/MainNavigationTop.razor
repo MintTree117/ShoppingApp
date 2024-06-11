@@ -5,7 +5,7 @@
 @implements IDisposable
 @inject IJSRuntime JsRuntime
 
-@if (mobileView) {
+@if (_mobileView) {
     <!-- MOBILE -->
     <div class="top-nav-mobile">
         <!-- TOP ROW -->
@@ -16,13 +16,17 @@
             </a>
             <div class="top-nav-mobile-right">
                 <button class="btn btn-icon" @onclick="@OnClickAccountButton">
-                    <i class="fa-solid fa-user fa-lg"></i>
+                    <i class="fa fa-user fa-lg"></i>
                 </button>
-                <button class="btn btn-icon" @onclick="@GoToCart">
-                    <i class="fa-solid fa-cart-shopping fa-lg"></i>
+                <button class="btn btn-icon position-relative" @onclick="@GoToCart">
+                    <i class="fa fa-cart-shopping fa-lg"></i>
+                    @if (_cartCount > 0)
+                    {
+                        <div class="top-nav-cart-count" style="top: -5px; right: -1px">@_cartCount</div>
+                    }
                 </button>
                 <button class="btn btn-icon pe-0" @onclick="@OpenSide">
-                    <i class="fa-solid fa-bars fa-lg"></i>
+                    <i class="fa fa-bars fa-lg"></i>
                 </button>
             </div>
         </div>
@@ -32,7 +36,7 @@
         </div>
     </div>
     <!-- SIDEBAR -->
-    <MainNavigationSide @ref="sidebar" TopMenu="@this"/>
+    <MainNavigationSide @ref="_sidebar" TopMenu="@this"/>
 }
 else {
     <!-- UPPER -->
@@ -49,14 +53,14 @@ else {
                 <!-- ACCOUNT -->
                 <div class="position-relative" @onmouseenter="@ShowAccountDropdown" @onmouseleave="@HideAccountDropdown">
                     <button class="btn top-nav-button" @onclick="OnClickAccountButton">
+                        <div class="top-nav-upper-right-label">
+                            <span class="d-block fw-bold"><small>@_username</small></span>
+                        </div>
                         <div class="btn btn-icon">
                             <i class="fa fa-user"></i>
                         </div>
-                        <div class="top-nav-upper-right-label">
-                            <span class="d-block"><small>@username</small></span>
-                        </div>
                     </button>
-                    @if (showUserOptions) {
+                    @if (_showUserOptions) {
                         <nav class="top-nav-user-options position-absolute shadow">
                             <ul class="nav justify-content-center w-100">
                                 <AccountMenuOptions/>
@@ -65,12 +69,16 @@ else {
                     }
                 </div>
                 <!-- CART -->
-                <button class="btn top-nav-button" @onclick="GoToCart">
-                    <div class="btn btn-icon">
-                        <i class="fa-solid fa-cart-shopping"></i>
+                <button class="btn top-nav-button pe-0 me-0" @onclick="GoToCart">
+                    <div class="top-nav-upper-right-label">
+                        <span class="d-block fw-bold">$@_cartPrice</span>
                     </div>
-                    <div class="d-flex flex-column align-items-start justify-content-end">
-                        <span class="d-block"><small>@cartCount</small></span>
+                    <div class="btn top-nav-button position-relative pe-0 me-0">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        @if (_cartCount > 0)
+                        {
+                            <div class="top-nav-cart-count" style="top: -5px; right: -1px">@_cartCount</div>
+                        }
                     </div>
                 </button>
             </div>
@@ -86,7 +94,8 @@ else {
             <!-- CATEGORIES -->
             <div class="btn position-relative mx-2 top-nav-categories-button" @onmouseenter="ShowDesktopCategories" @onmouseleave="HideDesktopCategories">
                 <strong>Shop By Category</strong> &nbsp; &#9662
-                @if (showDesktopCategories) {
+                @if (_showDesktopCategories) 
+                {
                     <div class="top-nav-categories-wrapper position-absolute shadow">
                         <MainNavigationCategories ShowExitButton="@(false)"/>
                     </div>
@@ -105,91 +114,91 @@ else {
     public MainLayout Layout { get; init; } = default!;
     
     [Inject] public NavigationManager Navigation { get; set; } = default!;
-    [Inject] public AuthService AuthService { get; set; } = default!;
-    MainNavigationSide? sidebar;
-    DotNetObjectReference<MainNavigationTop> dotNetRef = default!;
-    
-    int screenWidth;
-    int screenHeight;
-    bool mobileView = false;
-    bool showDesktopCategories = false;
-    bool showUserOptions = false;
-    bool authenticated = false;
+    [Inject] public AuthenticationService AuthenticationService { get; set; } = default!;
+    MainNavigationSide? _sidebar;
+    DotNetObjectReference<MainNavigationTop> _dotNetRef = default!;
+
     const string DefaultUserText = "Login";
-    string username = DefaultUserText;
-    decimal cartPrice = decimal.Zero;
-    int cartCount = 0;
+    int _screenWidth;
+    int _screenHeight;
+    bool _mobileView = false;
+    bool _showDesktopCategories = false;
+    bool _showUserOptions = false;
+    bool _authenticated = false;
+    string _username = DefaultUserText;
+    decimal _cartPrice = decimal.Zero;
+    int _cartCount = 0;
     
     public void Dispose()
     {
-        dotNetRef?.Dispose();
-        AuthService.OnStateChanged -= OnAuthStateChanged;
+        _dotNetRef.Dispose();
+        AuthenticationService.OnStateChanged -= OnAuthenticationStateChanged;
     }
     protected override async Task OnInitializedAsync()
     {
-        dotNetRef = DotNetObjectReference.Create( this );
-        AuthService.OnStateChanged += OnAuthStateChanged;
-        await JsRuntime.InvokeVoidAsync( "resizeObserverInterop.initialize", dotNetRef );
+        _dotNetRef = DotNetObjectReference.Create( this );
+        AuthenticationService.OnStateChanged += OnAuthenticationStateChanged;
+        await JsRuntime.InvokeVoidAsync( "resizeObserverInterop.initialize", _dotNetRef );
     }
     protected override async Task OnAfterRenderAsync( bool firstRender )
     {
         await base.OnAfterRenderAsync( firstRender );
         if (firstRender)
-            HandleIdentity( await Layout.Auth.GetAuthenticationStateAsync() );
+            HandleIdentity( await Layout.CustomAuthenticationState.GetAuthenticationStateAsync() );
     }
 
     [JSInvokable] public void OnResize( int width, int height )
     {
-        screenWidth = width;
-        screenHeight = height;
+        _screenWidth = width;
+        _screenHeight = height;
 
-        mobileView = screenWidth < 900;
+        _mobileView = _screenWidth < 900;
 
         StateHasChanged();
     }
-    void OnAuthStateChanged( Task<AuthenticationState> task )
+    void OnAuthenticationStateChanged( Task<AuthenticationState> task )
     {
         HandleIdentity( task.Result );
     }
 
     void HandleIdentity( AuthenticationState state )
     {
-        authenticated = state.User.Identity?.IsAuthenticated ?? false;
+        _authenticated = state.User.Identity?.IsAuthenticated ?? false;
         
-        if (authenticated) {
-            username = state.User.Identity!.Name ?? "Account";
-            sidebar?.OnAccountChange( username );
+        if (_authenticated) {
+            _username = state.User.Identity!.Name ?? "Account";
+            _sidebar?.OnAccountChange( _username );
             StateHasChanged();
             return;
         }
 
-        username = DefaultUserText;
-        sidebar?.OnAccountChange( null );
+        _username = DefaultUserText;
+        _sidebar?.OnAccountChange( null );
         StateHasChanged();
     }
     void ShowDesktopCategories()
     {
-        showDesktopCategories = true;
+        _showDesktopCategories = true;
         StateHasChanged();
     }
     void HideDesktopCategories()
     {
-        showDesktopCategories = false;
+        _showDesktopCategories = false;
         StateHasChanged();
     }
     void ShowAccountDropdown()
     {
-        showUserOptions = authenticated;
+        _showUserOptions = _authenticated;
         StateHasChanged();
     }
     void HideAccountDropdown()
     {
-        showUserOptions = false;
+        _showUserOptions = false;
         StateHasChanged();
     }
     void OnClickAccountButton()
     {
-        string url = authenticated
+        string url = _authenticated
             ? Consts.PageAccountProfile
             : Consts.PageLoginOrRegister;
 
@@ -201,6 +210,6 @@ else {
     }
     void OpenSide()
     {
-        sidebar?.Open();
+        _sidebar?.Open();
     }
 }

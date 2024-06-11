@@ -1,5 +1,5 @@
 using Shop.Infrastructure.Catalog.Categories.Types;
-using Shop.Infrastructure.Common.Optionals;
+using Shop.Infrastructure.Common.ReplyTypes;
 using Shop.Infrastructure.Http;
 using Shop.Infrastructure.Storage;
 using Shop.Utilities;
@@ -28,17 +28,17 @@ public sealed class CategoriesCache( HttpService http, StorageService storage ) 
             return cacheReply;
         }
 
-        Reply<List<CategoryDto>> fetchReply = await _http.TryGetRequest<List<CategoryDto>>( Consts.ApiGetCategories );
+        Reply<List<CategoryDto>> fetchReply = await _http.GetAsync<List<CategoryDto>>( Consts.ApiGetCategories );
 
         if (!fetchReply.IsOkay)
         {
             _isFetching = false;
-            return Reply<CategoriesCollection>.None( fetchReply );   
+            return Reply<CategoriesCollection>.False( fetchReply );   
         }
 
         CategoriesCollection data = CategoriesCollection.From( fetchReply.Data );
         Reply<bool> setReply = await SetCache( data );
         _isFetching = false;
-        return Reply<CategoriesCollection>.With( data );
+        return Reply<CategoriesCollection>.True( data );
     }
 }

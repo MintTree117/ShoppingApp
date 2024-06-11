@@ -1,37 +1,37 @@
 <ul class="pagination mx-auto">
     <li class="page-item @GetPreviousDisabledClass()">
-        <a class="page-link" href="javascript:void(0)" @onclick="() => ChangePage( CurrentPage - 1 )">
+        <a class="page-link" href="javascript:void(0)" @onclick="() => ChangePage( _currentPage - 1 )">
             <i class="fa-solid fa-caret-left"></i>
         </a>
     </li>
     
-    @for ( int i = StartPage; i <= EndPage; i++ )
+    @for ( int i = _startPage; i <= _endPage; i++ )
     {
         int index = i;
-        <li class="page-item @(CurrentPage == i ? "active" : "")">
+        <li class="page-item @(_currentPage == i ? "active" : "")">
             <a class="page-link" href="javascript:void(0)" @onclick="() => ChangePage( index )">@i</a>
         </li>
     }
     
     <li class="page-item @GetNextDisabledClass()">
-        <a class="page-link" href="javascript:void(0)" @onclick="() => ChangePage( CurrentPage + 1 )">
+        <a class="page-link" href="javascript:void(0)" @onclick="() => ChangePage( _currentPage + 1 )">
             <i class="fa-solid fa-caret-right"></i>
         </a>
     </li>
 </ul>
 
 @code {
-    int CurrentPage = 1;
-    int TotalPages = 1;
-    int StartPage = 0;
-    int EndPage = 0;
+    int _currentPage = 1;
+    int _totalPages = 1;
+    int _startPage = 0;
+    int _endPage = 0;
     
     [Parameter] public EventCallback<int> OnPageChange { get; set; } = default!;
 
     internal void Set( int page, int pageSize, int totalResults )
     {
-        TotalPages = ( totalResults + pageSize - 1 ) / pageSize; // Round up to ensure correct page count
-        CurrentPage = page;
+        _totalPages = ( totalResults + pageSize - 1 ) / pageSize; // Round up to ensure correct page count
+        _currentPage = page;
         UpdateStartAndEndPages();
         StateHasChanged();
     }
@@ -41,27 +41,27 @@
         if ( page < 1 )
             page = 1;
 
-        if ( page > TotalPages )
-            page = TotalPages;
+        if ( page > _totalPages )
+            page = _totalPages;
 
-        CurrentPage = page;
+        _currentPage = page;
         await OnPageChange.InvokeAsync( page );
     }
     
     void UpdateStartAndEndPages()
     {
-        int newStartPage = Math.Max( 1, CurrentPage - 2 );
-        int newEndPage = Math.Min( TotalPages, CurrentPage + 2 );
+        int newStartPage = Math.Max( 1, _currentPage - 2 );
+        int newEndPage = Math.Min( _totalPages, _currentPage + 2 );
 
-        if ( CurrentPage - newStartPage < 2 )
-            newEndPage = Math.Min( TotalPages, newEndPage + ( 2 - ( CurrentPage - newStartPage ) ) );
+        if ( _currentPage - newStartPage < 2 )
+            newEndPage = Math.Min( _totalPages, newEndPage + ( 2 - ( _currentPage - newStartPage ) ) );
 
-        if ( newEndPage - CurrentPage < 2 )
-            newStartPage = Math.Max( 1, newStartPage - ( 2 - ( newEndPage - CurrentPage ) ) );
+        if ( newEndPage - _currentPage < 2 )
+            newStartPage = Math.Max( 1, newStartPage - ( 2 - ( newEndPage - _currentPage ) ) );
 
-        StartPage = newStartPage;
-        EndPage = newEndPage;
+        _startPage = newStartPage;
+        _endPage = newEndPage;
     }
-    string GetPreviousDisabledClass() => CurrentPage == 1 ? "disabled" : "";
-    string GetNextDisabledClass() => CurrentPage >= TotalPages ? "disabled" : "";
+    string GetPreviousDisabledClass() => _currentPage == 1 ? "disabled" : "";
+    string GetNextDisabledClass() => _currentPage >= _totalPages ? "disabled" : "";
 }

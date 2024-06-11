@@ -1,3 +1,5 @@
+using Shop.Infrastructure.Common.ReplyTypes;
+
 namespace Shop.Utilities;
 
 public static class Logger
@@ -26,17 +28,22 @@ public static class Logger
         Console.Error.WriteLine( m2 );
         Console.Error.WriteLine( Divider );
     }
-    public static void LogError( string m, Exception e )
+    public static void LogError( Exception e, string m )
     {
         Console.Error.WriteLine( m );
         Console.Error.WriteLine( Divider );
         Console.Error.WriteLine( e );
     }
-    public static void LogError( string m1, string m2, Exception e )
+    public static void LogError( Exception e, string m1, string m2 )
     {
         Console.Error.WriteLine( m1 );
         Console.Error.WriteLine( m2 );
         Console.Error.WriteLine( Divider );
         Console.Error.WriteLine( e );
+    }
+    public static void LogError( IReply reply, string m )
+    {
+        Console.WriteLine( $"{m}{reply.Message()}" );
+        Console.WriteLine( Divider );
     }
 }

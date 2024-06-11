@@ -1,41 +1,35 @@
-using Shop.Infrastructure.Common.Optionals;
+using Shop.Infrastructure.Common.ReplyTypes;
 
 namespace Shop.Infrastructure.Storage;
 
 public abstract class MemoryCache<T> // singleton that handles both storage and in-memory caching
+    ( string storageKey, StorageService storage, TimeSpan cacheLife )
 {
-    readonly string StorageKey;
-    readonly StorageService Storage;
-    readonly TimeSpan CacheLife;
+    readonly string _storageKey = storageKey;
+    readonly StorageService _storage = storage;
+    readonly TimeSpan _cacheLife = cacheLife;
     
     MemoryCacheEntry<T>? _cacheEntry;
 
-    protected MemoryCache( string storageKey, StorageService storage, TimeSpan cacheLife )
-    {
-        StorageKey = storageKey;
-        Storage = storage;
-        CacheLife = cacheLife;
-    }
     protected async Task<Reply<bool>> SetCache( T newData )
     {
         _cacheEntry = MemoryCacheEntry<T>.New( newData );
-        return await Storage.Set( StorageKey, _cacheEntry );
-
+        return await _storage.Set( _storageKey, _cacheEntry );
     }
     protected async Task<Reply<T>> GetCache()
     {
         if (_cacheEntry is not null)
-            if (_cacheEntry.Value.Expired( CacheLife )) _cacheEntry = null;
-            else return Reply<T>.With( _cacheEntry.Value.Data );
+            if (_cacheEntry.Value.Expired( _cacheLife )) _cacheEntry = null;
+            else return Reply<T>.True( _cacheEntry.Value.Data );
         
-        Reply<MemoryCacheEntry<T>> storageReply = await Storage.Get<MemoryCacheEntry<T>>( StorageKey );
+        Reply<MemoryCacheEntry<T>> storageReply = await _storage.Get<MemoryCacheEntry<T>>( _storageKey );
         if (!storageReply.IsOkay)
-            return Reply<T>.None( storageReply );
+            return Reply<T>.False( storageReply, "Get Cache Entry Failed" );
 
-        if (storageReply.Data.Expired( CacheLife ))
-            return Reply<T>.None( "Expired" );
+        if (storageReply.Data.Expired( _cacheLife ))
+            return Reply<T>.False( "Cache Entry Expired." );
 
         _cacheEntry = storageReply.Data;
-        return Reply<T>.With( _cacheEntry.Value.Data );
+        return Reply<T>.True( _cacheEntry.Value.Data );
     }
 }

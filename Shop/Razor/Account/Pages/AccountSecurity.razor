@@ -1,56 +1,59 @@
 @page "/account/security"
 @using System.ComponentModel.DataAnnotations
-@using Shop.Infrastructure.Common.Optionals
+@using Shop.Infrastructure.Common.ReplyTypes
 @using Shop.Utilities
 @inherits AccountPageBase
 @layout AccountLayout
 
 <PageTitle>Account Security</PageTitle>
 
-<!-- TITLE -->
-<h3>Security</h3>
+<!-- PASSWORD -->
+<h3>Password</h3>
 <hr class="divider"/>
- <!-- FORM -->
-<EditForm Model="@Request" FormName="change-password" OnValidSubmit="OnValidSubmitPasswordAsync" method="post">
+<!-- FORM -->
+<EditForm Model="@_passwordModel" FormName="change-password" OnValidSubmit="OnValidSubmitPasswordAsync" method="post">
     <DataAnnotationsValidator/>
     <ValidationSummary class="text-danger" role="alert"/>
     <!-- OLD PASSWORD -->
     <div class="form-floating mb-3">
-        <InputText type="password" @bind-Value="@Request.OldPassword" id="old-password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Please enter your old password."/>
+        <InputText type="password" @bind-Value="@_passwordModel.OldPassword" id="old-password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Please enter your old password."/>
         <label for="old-password" class="form-label">Old Password</label>
-        <ValidationMessage For="@(() => Request.OldPassword)" class="text-danger"/>
+        <ValidationMessage For="@(() => _passwordModel.OldPassword)" class="text-danger"/>
     </div>
     <!-- NEW PASSWORD -->
     <div class="form-floating mb-3">
-        <InputText type="password" @bind-Value="@Request.NewPassword" id="new-password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="Please enter your new password."/>
+        <InputText type="password" @bind-Value="@_passwordModel.NewPassword" id="new-password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="Please enter your new password."/>
         <label for="new-password" class="form-label">New Password</label>
-        <ValidationMessage For="@(() => Request.NewPassword)" class="text-danger"/>
+        <ValidationMessage For="@(() => _passwordModel.NewPassword)" class="text-danger"/>
     </div>
     <!-- CONFIRM PASSWORD -->
     <div class="form-floating mb-3">
-        <InputText type="password" @bind-Value="@Request.ConfirmPassword" id="confirm-password" class="form-control" autocomplete="confirm-password" aria-required="true" placeholder="Please confirm your new password."/>
+        <InputText type="password" @bind-Value="@_passwordModel.ConfirmPassword" id="confirm-password" class="form-control" autocomplete="confirm-password" aria-required="true" placeholder="Please confirm your new password."/>
         <label for="confirm-password" class="form-label">Confirm Password</label>
-        <ValidationMessage For="@(() => Request.ConfirmPassword)" class="text-danger"/>
+        <ValidationMessage For="@(() => _passwordModel.ConfirmPassword)" class="text-danger"/>
     </div>
     <!-- SUBMIT -->
     <button type="submit" class="btn btn-submit btn-icon"><i class="fa fa-key me-2"></i>Update Password</button>
 </EditForm>
 
-@code {
-    UpdatePasswordRequest Request = new();
+<!-- TWO FACTOR -->
+<h3>Two Factor</h3>
+<hr class="divider"/>
+<!-- CHECKBOX -->
+<div class="form-check form-switch mb-3">
+    <checkbox @onchange="@(async (e) => await On2faChange(e))" id="2fa" class="form-check-input" aria-required="true"/>
+    <label for="2fa" class="form-check-label">Enable Two Factor Login?</label>
+</div>
+
+@code 
+{
+    UpdatePasswordRequest _passwordModel = new();
     
     async Task OnValidSubmitPasswordAsync()
     {
         StartLoading( "Updating Password..." );
         
-        Reply<string> token = await Auth.GetAccessToken();
-        if (!token.IsOkay) {
-            PushError( "Invalid credentials." );
-            StopLoading();
-            return;   
-        }
-        
-        Reply<bool> result = await Http.TryPostRequest<bool>( Consts.ApiUpdatePassword, Request, token.Data );
+        Reply<bool> result = await Http.PostAsyncAuthenticated<bool>( Consts.ApiUpdatePassword, _passwordModel );
 
         if (!result.IsOkay) {
             PushError( result, "Failed to update password." );
@@ -59,13 +62,25 @@
         }
         
         PushSuccess( "Password successfully updated." );
-        ClearForm();
+        _passwordModel = new UpdatePasswordRequest();
         StopLoading();
     }
-    void ClearForm()
+    async Task On2faChange( ChangeEventArgs args )
     {
-        Request = new UpdatePasswordRequest();
-        StateHasChanged();
+        bool value = (bool) (args.Value ?? throw new Exception( "Invalid 2fa ChangeEventArgs" ));
+        
+        StartLoading( value ? "Enabling Two Factor Authentication" : "Disabling Two Factor Authentication" );
+        
+        Reply<bool> httpReply = await Http.PostAsyncAuthenticated<bool>( Consts.ApiUpdatePassword, _passwordModel );
+        if (!httpReply.IsOkay)
+        {
+            PushError( httpReply, "Failed to update two factor authentication." );
+            StopLoading();
+            return;
+        }
+
+        PushSuccess( "Updated two factor authentication." );
+        StopLoading();
     }
 
     sealed class UpdatePasswordRequest

@@ -1,46 +1,45 @@
 @page "/loginOrRegister"
 @using System.ComponentModel.DataAnnotations
-@using Shop.Infrastructure.Authentication.Types
-@using Shop.Infrastructure.Common.Optionals
+@using Shop.Infrastructure.Common.ReplyTypes
 @using Shop.Utilities
 @inherits AuthenticationPageBase
 @layout AuthenticationLayout
 
 <PageTitle>Login Or Register</PageTitle>
 
-@if (registered) {
+@if (_registered) {
     <!-- PENDING 2FA -->
     <!-- MESSAGE -->
     <i class="fa-solid fa-circle-check fa-4x text-success auth-icon"></i>
     <h1>Registration Success!</h1>
-    <hr/>
+    <hr class="divider"/>
     <!-- DETAILS -->
     <ul class="text-start">
-        <li><strong>Id:</strong> <small>@( registerReply?.Id ?? "No id returned." )</small></li>
-        <li><strong>Email:</strong> <small>@( registerReply?.Email ?? "No email returned." )</small></li>
-        <li><strong>Username:</strong> <small>@( registerReply?.Username ?? "No username returned." )</small></li>
+        <li><strong>Id:</strong> <small>@( _registerReply?.Id ?? "No id returned." )</small></li>
+        <li><strong>Email:</strong> <small>@( _registerReply?.Email ?? "No email returned." )</small></li>
+        <li><strong>Username:</strong> <small>@( _registerReply?.Username ?? "No username returned." )</small></li>
     </ul>
-    <hr/>
-    <p class="text-secondary text-center">Your account has been created and is awaiting confirmation. A link has been emailed to @( registerReply?.Email ?? "your email" ). Please verify your email before logging in.</p>
+    <hr class="divider"/>
+    <p class="text-secondary text-center">Your account has been created and is awaiting confirmation. A link has been emailed to @( _registerReply?.Email ?? "your email" ). Please verify your email before logging in.</p>
     <!-- LOGIN -->
     <button class="btn btn-submit btn-icon" @onclick="GoToLogin"><i class="fa fa-user me-2"></i>Login</button>
 }
-else if (pendingTwoFactor) {
+else if (_pendingTwoFactor) {
     <!-- PENDING 2FA -->
     <!-- MESSAGE -->
     <i class="fa-solid fa-circle-check fa-4x text-info auth-icon"></i>
     <h1>Two-factor authentication</h1>
-    <hr/>
+    <hr class="divider"/>
     <p>Your login is protected by a two-step verification process. Enter your verification code below.</p>
-    <hr/>
+    <hr class="divider"/>
     <!-- FORM -->
-    <EditForm Model="@twoFactorRequest" FormName="login-with-2fa" OnValidSubmit="OnValidTwoFactorSubmitAsync" method="post">
+    <EditForm Model="@_twoFactorRequest" FormName="login-with-2fa" OnValidSubmit="OnValidTwoFactorSubmitAsync" method="post">
         <DataAnnotationsValidator/>
         <ValidationSummary class="text-danger" role="alert"/>
         <div class="form-floating">
-            <InputText @bind-Value="@twoFactorRequest.Code" id="two-factor-code" class="form-control" autocomplete="off"/>
+            <InputText @bind-Value="@_twoFactorRequest.Code" id="two-factor-code" class="form-control" autocomplete="off"/>
             <label for="two-factor-code" class="form-label">Authenticator code</label>
-            <ValidationMessage For="@(() => twoFactorRequest.Code)" class="text-danger"/>
+            <ValidationMessage For="@(() => _twoFactorRequest.Code)" class="text-danger"/>
         </div>
         <!-- SUBMIT -->
         <button class="btn btn-submit btn-icon" type="submit"><i class="fa fa-user me-2"></i>Log In</button>
@@ -51,16 +50,16 @@ else {
     <h3>Sign In</h3>
     <hr/>
     <!-- LOGIN FORM -->
-    <EditForm Model="@loginRequest" OnValidSubmit="@(async () => await OnValidLoginSubmitAsync())">
+    <EditForm Model="@_loginRequest" OnValidSubmit="@(async () => await OnValidLoginSubmitAsync())">
         <DataAnnotationsValidator/>
         <!-- EMAIL OR USERNAME-->
         <div class="form-floating mb-2">
-            <InputText type="name" class="form-control" id="emailOrUsername" @bind-Value="@loginRequest.EmailOrUsername">></InputText>
+            <InputText type="name" class="form-control" id="emailOrUsername" @bind-Value="@_loginRequest.EmailOrUsername">></InputText>
             <label for="emailOrUsername">Email or Username</label>
         </div>
         <!-- PASSWORD -->
         <div class="form-floating mb-2">
-            <InputText type="password" class="form-control" id="password" @bind-Value="@loginRequest.Password"></InputText>
+            <InputText type="password" class="form-control" id="password" @bind-Value="@_loginRequest.Password"></InputText>
             <label for="password">Password</label>
         </div>
         <!-- SUBMIT -->
@@ -75,33 +74,33 @@ else {
 
     <!-- REGISTER TITLE -->
     <h3>Register</h3>
-    <hr/>
+    <hr class="divider"/>
     <!-- REGISTER FORM -->
-    <EditForm Model="@registerRequest" OnValidSubmit="@(async () => await OnValidRegisterSubmitAsync() )">
+    <EditForm Model="@_registerRequest" OnValidSubmit="@(async () => await OnValidRegisterSubmitAsync() )">
         <DataAnnotationsValidator/>
         <ValidationSummary class="text-danger" role="alert"/>
         <!-- EMAIL -->
         <div class="form-floating mb-2">
-            <InputText type="name" class="form-control" id="email" @bind-Value="@registerRequest.Email"></InputText>
-            <ValidationMessage For="@(() => registerRequest.Email)"/>
+            <InputText type="name" class="form-control" id="email" @bind-Value="@_registerRequest.Email"></InputText>
+            <ValidationMessage For="@(() => _registerRequest.Email)"/>
             <label for="email">Email</label>
         </div>
         <!-- USERNAME -->
         <div class="form-floating mb-2">
-            <InputText type="name" class="form-control" id="username" @bind-Value="@registerRequest.Username"></InputText>
-            <ValidationMessage For="@(() => registerRequest.Username)"/>
+            <InputText type="name" class="form-control" id="username" @bind-Value="@_registerRequest.Username"></InputText>
+            <ValidationMessage For="@(() => _registerRequest.Username)"/>
             <label for="emailOrUsername">Username</label>
         </div>
         <!-- PASSWORD -->
         <div class="form-floating mb-2">
-            <InputText type="password" class="form-control" id="registerPassword" @bind-Value="@registerRequest.Password"></InputText>
-            <ValidationMessage For="@(() => registerRequest.Password)"/>
+            <InputText type="password" class="form-control" id="registerPassword" @bind-Value="@_registerRequest.Password"></InputText>
+            <ValidationMessage For="@(() => _registerRequest.Password)"/>
             <label for="registerPassword">Password</label>
         </div>
         <!-- CONFIRM PASSWORD -->
         <div class="form-floating mb-2">
-            <InputText type="password" class="form-control" id="confirmPassword" @bind-Value="@registerRequest.PasswordConfirm"></InputText>
-            <ValidationMessage For="@(() => registerRequest.PasswordConfirm)"/>
+            <InputText type="password" class="form-control" id="confirmPassword" @bind-Value="@_registerRequest.PasswordConfirm"></InputText>
+            <ValidationMessage For="@(() => _registerRequest.PasswordConfirm)"/>
             <label for="confirmPassword">Confirm Password</label>
         </div>
         <!-- SUBMIT -->
@@ -111,9 +110,9 @@ else {
     <!-- DEVELOPER -->
     <div class="row mt-3">
         <div class="col-12 d-flex flex-column align-items-center">
-            <hr/>
+            <hr class="divider"/>
             <h1>Development</h1>
-            <hr/>
+            <hr class="divider"/>
             <button class="btn-submit" onclick="@(async ()=> await TestRegister())">Test Register</button>
             <button class="btn-submit" onclick="@(async ()=> await TestLogin())">Test Login</button>
         </div>
@@ -124,28 +123,28 @@ else {
 {
     async Task TestRegister()
     {
-        registerRequest.Email = "martygrof3708@gmail.com";
-        registerRequest.Username = "MintTree117";
-        registerRequest.Password = "Password1?";
-        registerRequest.PasswordConfirm = "Password1?";
+        _registerRequest.Email = "martygrof3708@gmail.com";
+        _registerRequest.Username = "MintTree117";
+        _registerRequest.Password = "Password1?";
+        _registerRequest.PasswordConfirm = "Password1?";
 
         await OnValidRegisterSubmitAsync();
     }
     async Task TestLogin()
     {
-        loginRequest.EmailOrUsername = "martygrof3708@gmail.com";
-        loginRequest.Password = "Password1?";
+        _loginRequest.EmailOrUsername = "martygrof3708@gmail.com";
+        _loginRequest.Password = "Password1?";
 
         await OnValidLoginSubmitAsync();
     }
 
-    readonly LoginRequest loginRequest = new();
-    readonly RegisterRequest registerRequest = new();
-    readonly TwoFactorRequest twoFactorRequest = new();
+    readonly LoginRequest _loginRequest = new();
+    readonly RegisterRequest _registerRequest = new();
+    readonly TwoFactorRequest _twoFactorRequest = new();
 
-    bool registered = false;
-    bool pendingTwoFactor = false;
-    RegisterReply? registerReply;
+    bool _registered = false;
+    bool _pendingTwoFactor = false;
+    RegisterReply? _registerReply;
 
     async Task OnValidLoginSubmitAsync()
     {
@@ -159,9 +158,9 @@ else {
             return;
         }
 
-        if (loginResult.Data.IsPending2FA) {
-            pendingTwoFactor = true;
-            twoFactorRequest.EmailOrUsername = loginRequest.EmailOrUsername;
+        if (loginResult.Data.IsPending2Fa) {
+            _pendingTwoFactor = true;
+            _twoFactorRequest.EmailOrUsername = _loginRequest.EmailOrUsername;
             StateHasChanged();
             StopLoading();
             return;
@@ -184,7 +183,7 @@ else {
     {
         StartLoading( "Verifying Two Factor..." );
         
-        twoFactorRequest.EmailOrUsername = loginRequest.EmailOrUsername;
+        _twoFactorRequest.EmailOrUsername = _loginRequest.EmailOrUsername;
 
         Reply<TwoFactorReply> result = await TryTwoFactorLogin();
 
@@ -220,22 +219,22 @@ else {
             return;
         }
 
-        registered = true;
-        registerReply = reply.Data;
+        _registered = true;
+        _registerReply = reply.Data;
         StateHasChanged();
         StopLoading();
     }
     
     async Task<Reply<LoginReply>> TryLogin() => 
-        await Http.TryPostRequest<LoginReply>( Consts.ApiLogin, loginRequest );
+        await Http.PostAsync<LoginReply>( Consts.ApiLogin, _loginRequest );
     async Task<Reply<bool>> TryUpdateLocalState( Reply<LoginReply> loginResult ) =>
-        await Auth.SetState( AuthRefreshEventArgs.With( loginResult.Data.AccessToken, loginResult.Data.RefreshToken ) );
+        await Authentication.SetState( loginResult.Data.AccessToken );
     async Task<Reply<TwoFactorReply>> TryTwoFactorLogin() => 
-        await Http.TryPostRequest<TwoFactorReply>( Consts.ApiTwoFactor, twoFactorRequest );
+        await Http.PostAsync<TwoFactorReply>( Consts.ApiTwoFactor, _twoFactorRequest );
     async Task<Reply<bool>> TryUpdateLocalState( Reply<TwoFactorReply> twoFactorResult ) =>
-        await Auth.SetState( AuthRefreshEventArgs.With( twoFactorResult.Data.AccessToken, twoFactorResult.Data.RefreshToken ) );
+        await Authentication.SetState( twoFactorResult.Data.AccessToken );
     async Task<Reply<RegisterReply>> TryRegister() => 
-        await Http.TryPostRequest<RegisterReply>( Consts.ApiRegister, registerRequest );
+        await Http.PostAsync<RegisterReply>( Consts.ApiRegister, _registerRequest );
     
     // TODO: IMPLEMENT RECOVERY CODES
     void GoToRecovery() => 
@@ -279,11 +278,9 @@ else {
     
     sealed record LoginReply(
         string? AccessToken,
-        string? RefreshToken,
-        bool IsPending2FA );
+        bool IsPending2Fa );
     readonly record struct TwoFactorReply(
-        string AccessToken,
-        string RefreshToken );
+        string AccessToken );
     sealed record RegisterReply(
         string Id,
         string Email,

@@ -22,7 +22,7 @@
 
 @code
 {
-    [Inject] public AuthProvider Auth { get; set; } = null!;
+    [Inject] public CustomAuthenticationStateProvider CustomAuthenticationState { get; set; } = null!;
 
     NoficationsPanel _notifications = default!;
     MainLayout GetSelf() => this;

@@ -1,8 +1,8 @@
 @using Shop.Infrastructure.Http
 @using Shop.Utilities
-@using Shop.Infrastructure.Common.Optionals
 @using Shop.Infrastructure.Authentication
 @using Microsoft.AspNetCore.Components.Authorization
+@using Shop.Infrastructure.Common.ReplyTypes
 @using Shop.Infrastructure.Loading
 @inherits ComponentBase
 @implements IDisposable
@@ -12,7 +12,7 @@
     public MainLayout Layout { get; init; } = default!;
     
     [Inject] protected IConfiguration Configuration { get; init; } = default!;
-    [Inject] protected AuthService Auth { get; init; } = default!;
+    [Inject] protected AuthenticationService Authentication { get; init; } = default!;
     [Inject] protected HttpService Http { get; init; } = default!;
     [Inject] protected NavigationManager Navigation { get; init; } = default!;
     
@@ -21,7 +21,7 @@
     
     public void Dispose()
     {
-        Auth.OnStateChanged -= OnAuthStateChange;
+        Authentication.OnStateChanged -= OnAuthenticationStateChange;
         OnDispose();
     }
     protected virtual void OnDispose()
@@ -33,7 +33,7 @@
         base.OnParametersSet();
         if (_isInitialized)
             return;
-        Auth.OnStateChanged += OnAuthStateChange;
+        Authentication.OnStateChanged += OnAuthenticationStateChange;
     }
     protected override async Task OnParametersSetAsync()
     {
@@ -41,14 +41,6 @@
         if (_isInitialized)
             return;
         _isInitialized = true;
-    }
-
-    protected async Task<string> GetAuthToken()
-    {
-        Reply<string> token = await Auth.GetAccessToken();
-        return token.IsOkay
-            ? token.Data
-            : string.Empty;
     }
     
     protected void GoHome() =>
@@ -64,7 +56,7 @@
     protected void PushError( IReply reply, string message ) => PushAlert( AlertType.Danger, $"{message} : {reply.Message()}" );
     protected void PushError( IReply reply ) => PushAlert( AlertType.Danger, reply.Message() );
 
-    protected virtual async void OnAuthStateChange( Task<AuthenticationState> task )
+    protected virtual async void OnAuthenticationStateChange( Task<AuthenticationState> task )
     {
         StateHasChanged();
     }

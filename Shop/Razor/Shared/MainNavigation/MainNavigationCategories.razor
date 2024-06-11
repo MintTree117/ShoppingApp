@@ -1,10 +1,10 @@
 @using Shop.Infrastructure.Catalog
 @using Shop.Infrastructure.Catalog.Categories
-@using Shop.Infrastructure.Common.Optionals
 @using Shop.Infrastructure.Catalog.Categories.Types
+@using Shop.Infrastructure.Common.ReplyTypes
 
 <div class="d-flex align-items-center justify-content-start">
-    @if ( currentParentId.HasValue )
+    @if ( _currentParentId.HasValue )
     {
         <button class="btn btn-link nav-link me-2 border-end" @onclick="PreviousCategory">
             <i class="fa fa-caret-left"></i> Back
@@ -54,7 +54,7 @@
     [Inject] public CategoriesCache Service { get; set; } = default!;
     
     CategoriesCollection _categoriesCollection = CategoriesCollection.None();
-    Guid? currentParentId = null;
+    Guid? _currentParentId = null;
     
     protected override async Task OnInitializedAsync()
     {
@@ -66,22 +66,22 @@
 
     IReadOnlyList<Category> GetCurrentCategories()
     {
-        return currentParentId is not null
-            ? _categoriesCollection.Categories[currentParentId.Value].Children
+        return _currentParentId is not null
+            ? _categoriesCollection.Categories[_currentParentId.Value].Children
             : _categoriesCollection.PrimaryCategories;
     }
     void NextCategory( Category c )
     {
-        currentParentId = c.Id;
+        _currentParentId = c.Id;
         StateHasChanged();
     }
     void PreviousCategory()
     {
-        if (currentParentId is null)
+        if (_currentParentId is null)
             return;
 
-        Category parent = _categoriesCollection.Categories[currentParentId.Value];
-        currentParentId = parent.ParentId;
+        Category parent = _categoriesCollection.Categories[_currentParentId.Value];
+        _currentParentId = parent.ParentId;
 
         StateHasChanged();
     }

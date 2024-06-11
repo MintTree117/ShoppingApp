@@ -3,21 +3,21 @@
 @using Shop.Utilities
 @implements IDisposable
 
-@switch ( state ) {
+@switch ( _state ) {
     case LoadingState.Loading:
-        <div class="loading-container @displayCss">
+        <div class="loading-container @_displayCss">
             <div class="loading-circle"></div>
-            @if (!string.IsNullOrEmpty( message )) {
-                <p>@message</p>   
+            @if (!string.IsNullOrEmpty( _message )) {
+                <p>@_message</p>   
             }
         </div>
         break;
     case LoadingState.Redirecting:
-        <div class="loading-container @displayCss">
+        <div class="loading-container @_displayCss">
             <div class="loading-circle"></div>
             <p>Redirecting...</p>
-            @if (!string.IsNullOrEmpty( message )) {
-                <p>@message</p>   
+            @if (!string.IsNullOrEmpty( _message )) {
+                <p>@_message</p>   
             }
         </div>
         break;
@@ -53,35 +53,35 @@
 
     void StartRedirecting( int seconds, string? m = null )
     {
-        redirectSeconds = seconds;
-        this.message = m ?? string.Empty;
-        displayCss = ShowCss;
+        _redirectSeconds = seconds;
+        this._message = m ?? string.Empty;
+        _displayCss = ShowCss;
         StateHasChanged();
     } 
     void TickRedirect()
     {
-        state = LoadingState.Redirecting;
-        redirectSeconds--;
+        _state = LoadingState.Redirecting;
+        _redirectSeconds--;
         StateHasChanged();
     }
     void StartLoading( string? m = null )
     {
-        this.message = m ?? string.Empty;
-        state = LoadingState.Loading;
-        displayCss = ShowCss;
+        this._message = m ?? string.Empty;
+        _state = LoadingState.Loading;
+        _displayCss = ShowCss;
         StateHasChanged();
     }
     void StopLoading()
     {
-        state = LoadingState.Ready;
-        displayCss = HideCss;
+        _state = LoadingState.Ready;
+        _displayCss = HideCss;
         StateHasChanged();
     }
     
-    LoadingState state = LoadingState.Loading;
-    string message = string.Empty;
-    int redirectSeconds = 0;
-    string displayCss = HideCss;
+    LoadingState _state = LoadingState.Loading;
+    string _message = string.Empty;
+    int _redirectSeconds = 0;
+    string _displayCss = HideCss;
 
     const string HideCss = "d-none";
     const string ShowCss = "d-flex";

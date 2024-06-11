@@ -2,8 +2,8 @@
 @using Shop.Infrastructure.Loading
 
 <div class="fixed-top" style="z-index: 1050; display: @(Alerts.Any() ? "block" : "none")">
-    <div class="container" style="max-height: calc(100vh / 3); overflow-y: auto;" @ref="messageContainer">
-        @foreach ( Alert alert in Alerts ?? [])
+    <div class="container" style="max-height: calc(100vh / 3); overflow-y: auto;" @ref="_messageContainer">
+        @foreach ( Alert alert in Alerts)
         {
             <div class="alert @GetAlertCss( alert.Type ) alert-dismissible fade show mt-2" role="alert">
                 @alert.Message
@@ -16,10 +16,10 @@
 @code 
 
 {
-    [Inject] protected IJSRuntime JSRuntime { get; set; } = default!;
+    [Inject] protected IJSRuntime JsRuntime { get; set; } = default!;
     
     List<Alert> Alerts { get; set; } = [];
-    ElementReference messageContainer;
+    ElementReference _messageContainer;
 
     internal void PushAlert( AlertType type, string message )
     {
@@ -34,7 +34,7 @@
 
     async Task ScrollToBottom()
     {
-        await JSRuntime.InvokeVoidAsync("ScrollToBottom", messageContainer);
+        await JsRuntime.InvokeVoidAsync("ScrollToBottom", _messageContainer);
     }
     async Task RemoveAlert(Alert alert)
     {

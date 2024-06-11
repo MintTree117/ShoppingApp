@@ -1,6 +1,6 @@
 <div class="input-group top-nav-search">
     <input class="form-control top-nav-search-control" 
-           @bind-value="@searchText"
+           @bind-value="@_searchText"
            type="search"
            list="products"
            @onkeyup="HandleSearch"
@@ -25,7 +25,7 @@
     [Inject] public NavigationManager Navigation { get; set; } = default!;
     
     ElementReference _searchInputElement;
-    string searchText = string.Empty;
+    string _searchText = string.Empty;
     List<string> _suggestions = new();
     
     void SearchProducts()

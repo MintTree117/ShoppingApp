@@ -1,21 +1,21 @@
 @page "/emailConfirm"
-@using Shop.Infrastructure.Common.Optionals
 @using Shop.Utilities
+@using Shop.Infrastructure.Common.ReplyTypes
 @inherits Shop.Razor.Authentication.AuthenticationPageBase
 @layout AuthenticationLayout
 
 <PageTitle>Confirm Email</PageTitle>
 
-@if (confirmFailed) {
+@if (_confirmFailed) {
     <!-- MESSAGE -->
     <i class="fa-solid fa-circle-exclamation fa-4x text-danger auth-icon"></i>
     <h3 class="mb-3">Email Confirmation Failed!</h3>
-    <p class="mb-3">Error Details: @apiReply.Message()</p>
+    <p class="mb-3">Error Details: @_apiReply.Message()</p>
     <p class="mb-3 text-muted">Please try again or contact support.</p>
     <!-- RESEND -->
     <button class="btn btn-submit btn-info btn-icon" @onclick="GoToResend"><i class="fa fa-repeat me-2"></i>Retry</button>
 }
-else if (emailConfirmed) {
+else if (_emailConfirmed) {
     <!-- MESSAGE -->
     <i class="fa-solid fa-circle-check fa-4x text-success auth-icon"></i>
     <h3 class="mb-3">Email Confirmed!</h3>
@@ -29,9 +29,9 @@ else if (emailConfirmed) {
     [SupplyParameterFromQuery] string? Email { get; set; }
     [SupplyParameterFromQuery] string? Code { get; set; }
     
-    bool emailConfirmed = false;
-    bool confirmFailed = false;
-    Reply<bool> apiReply;
+    bool _emailConfirmed = false;
+    bool _confirmFailed = false;
+    Reply<bool> _apiReply;
     
     protected override async Task OnParametersSetAsync()
     {
@@ -43,15 +43,15 @@ else if (emailConfirmed) {
             return;
         }
         
-        apiReply = await TryConfirmEmail( Consts.ApiConfirmEmail, userId, code );
-        emailConfirmed = apiReply.IsOkay;
-        confirmFailed = !emailConfirmed;
+        _apiReply = await TryConfirmEmail( Consts.ApiConfirmEmail, userId, code );
+        _emailConfirmed = _apiReply.IsOkay;
+        _confirmFailed = !_emailConfirmed;
         StateHasChanged();
         StopLoading();
     }
     
     async Task<Reply<bool>> TryConfirmEmail( string url, string userId, string code ) =>
-        await Http.TryPutRequest<bool>( url, new ConfirmEmailRequest( userId, code ) );
+        await Http.PutAsync<bool>( url, new ConfirmEmailRequest( userId, code ) );
     bool TryValidateLink( out string userId, out string code, out string errorMessage )
     {
         userId = string.Empty;

@@ -1,6 +1,5 @@
 @page "/logout"
 @using Shop.Utilities
-@using Shop.Razor.Shared
 @inherits AuthenticationPageBase
 @layout  AuthenticationLayout
 
@@ -11,8 +10,8 @@
         
         StartLoading( "Logging Out..." );
         
-        await Auth.ClearState();
-        await Http.TryPostRequest<bool>( Consts.ApiLogout );
+        await Authentication.ClearState();
+        await Http.PostAsyncAuthenticated<bool>( Consts.ApiLogout );
         Navigation.NavigateTo( Consts.PageHome, true );
     }
 }
