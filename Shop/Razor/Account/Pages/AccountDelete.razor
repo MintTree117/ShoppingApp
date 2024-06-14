@@ -58,7 +58,7 @@ else {
         Dictionary<string, object> parameters = new() { { "password", _request.Password } };
         Reply<bool> reply = await Http.DeleteAsyncAuthenticated<bool>( Consts.ApiDeleteAccount, parameters );
 
-        if (!reply.IsOkay) {
+        if (!reply) {
             PushError( reply, "Failed to delete your account." );
             Cancel();
             StopLoading();

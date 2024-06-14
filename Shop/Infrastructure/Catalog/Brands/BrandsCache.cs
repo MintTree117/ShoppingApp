@@ -7,7 +7,7 @@ using Shop.Utilities;
 namespace Shop.Infrastructure.Catalog.Brands;
 
 public sealed class BrandsCache( HttpService http, StorageService storage ) 
-    : MemoryCache<BrandsCollection>( "Brands", storage, TimeSpan.FromHours( 24 ) ) // Singleton
+    : MemoryCache<BrandsCollection>( "Brands", storage, TimeSpan.FromHours( 24 ) ) // SINGLETON
 {
     readonly HttpService _http = http;
     bool _isFetching = false;
@@ -21,26 +21,30 @@ public sealed class BrandsCache( HttpService http, StorageService storage )
         }
 
         _isFetching = true;
-        Reply<BrandsCollection> cacheReply = await GetCache();
-        if (cacheReply.IsOkay)
+        var cacheReply = await GetCache();
+        if (cacheReply)
         {
             _isFetching = false;
             return cacheReply;
         }
 
-        Reply<BrandsDto> fetchReply = await _http.GetAsync<BrandsDto>( Consts.ApiGetBrands );
-
-        if (!fetchReply.IsOkay)
+        var fetchReply = await _http.GetAsync<BrandsDto>( Consts.ApiGetBrands );
+        if (!fetchReply)
         {
             _isFetching = false;
-            Logger.LogError( fetchReply.Message() );
-            return Reply<BrandsCollection>.False( "Failed to fetch brands from server" );
+            Logger.LogError( fetchReply.GetMessage() );
+            return Reply<BrandsCollection>.ServerError( "Failed to fetch brands from server." );
         }
 
         BrandsCollection data = BrandsCollection.From( fetchReply.Data );
-
-        Reply<bool> setReply = await SetCache( data );
+        var setReply = await SetCache( data );
+        
+        if (!setReply)
+            Logger.LogError( $"Failed to store brands in browser cache. {setReply}" );
+        else
+            Logger.Log( $"Successfully fetched brands from server and stored in browser cache. {setReply}" );
+        
         _isFetching = false;
-        return Reply<BrandsCollection>.True( data );
+        return Reply<BrandsCollection>.Success( data );
     }
 }

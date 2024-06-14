@@ -134,23 +134,14 @@ else {
     public void Dispose()
     {
         _dotNetRef.Dispose();
-        SessionManager.OnStateChanged -= OnAuthenticationStateChanged;
+        SessionManager.OnSessionChanged -= HandleNewSession;
     }
     protected override async Task OnInitializedAsync()
     {
         _dotNetRef = DotNetObjectReference.Create( this );
-        SessionManager.OnStateChanged += OnAuthenticationStateChanged;
+        SessionManager.OnSessionChanged += HandleNewSession;
         await JsRuntime.InvokeVoidAsync( "resizeObserverInterop.initialize", _dotNetRef );
-        //Console.WriteLine( "MAIN NAV TOP: OnInitializedAsync->HandleIdentity( await SessionManager.GetSessionState() );" );
-        //HandleIdentity( await SessionManager.GetSessionState() );
     }
-    protected override async Task OnAfterRenderAsync( bool firstRender )
-    {
-        await base.OnAfterRenderAsync( firstRender );
-        //if (firstRender)
-            //HandleIdentity( await SessionManager.GetSessionState() );
-    }
-
     [JSInvokable] public void OnResize( int width, int height )
     {
         _screenWidth = width;
@@ -160,30 +151,12 @@ else {
 
         StateHasChanged();
     }
-    void OnAuthenticationStateChanged( Task<AuthenticationState> task )
+
+    void HandleNewSession( SessionClaims? claims )
     {
-        HandleIdentity( task.Result );
-    }
-
-    void HandleIdentity( AuthenticationState state )
-    {
-        Console.WriteLine( "MAIN NAV TOP: OnAuthenticationStateChanged->HandleIdentity( AuthenticationState state );" );
-        _authenticated = state.User.Identity?.IsAuthenticated ?? false;
-
-        string? name = SessionManager.Username(); //state.User.Claims.FirstOrDefault( static c => c.Type == ClaimTypes.Name )?.ToString();
-        _username = name ?? "Account";
-        Console.WriteLine( name );
-        
-        if (_authenticated) {
-            Console.WriteLine("AUTHED ----------------------------------------------");
-            _username = state.User.Identity!.Name;
-            _sidebar?.OnAccountChange( _username );
-            StateHasChanged();
-            return;
-        }
-
-        _username = DefaultUserText;
-        _sidebar?.OnAccountChange( null );
+        _authenticated = claims is not null;
+        _username = _authenticated ? claims!.Value.Username : DefaultUserText;
+        _sidebar?.OnAccountChange( _username );
         StateHasChanged();
     }
     void ShowDesktopCategories()

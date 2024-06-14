@@ -138,7 +138,7 @@ else {
         parameters.Add( "PageSize", _rowsPerPageSelection );
         Reply<AddressSearchResponse> result = await Http.GetAsyncAuthenticated<AddressSearchResponse>( Consts.ApiGetAddresses, parameters );
 
-        if (!result.IsOkay) {
+        if (!result) {
             PushError( result, "An error occured while fetching addresses." );
             StopLoading();
             return;
@@ -155,7 +155,7 @@ else {
             ? await Http.PutAsyncAuthenticated<bool>( Consts.ApiAddAddress, _editModel )
             : await Http.PutAsyncAuthenticated<bool>( Consts.ApiUpdateAddress, _editModel );
 
-        if (!reply.IsOkay) {
+        if (!reply) {
             PushError( reply, "Failed to save address." );
             StopLoading();
             return;
@@ -175,7 +175,7 @@ else {
         Dictionary<string, object> parameters = new() { { "AddressId", address.Id } };
         Reply<bool> reply = await Http.DeleteAsyncAuthenticated<bool>( Consts.ApiDeleteAddress, parameters );
 
-        if (!reply.IsOkay) {
+        if (!reply) {
             PushError( reply, "Failed to delete address." );
             StopLoading();
             return;
@@ -190,7 +190,7 @@ else {
         _pagedAddresses = result.Data.Addresses;
         _totalCount = result.Data.TotalCount;
 
-        int count = result.IsOkay ? result.Data.TotalCount : 0;
+        int count = result ? result.Data.TotalCount : 0;
         
         _paginationPanel.Set( page, _rowsPerPageSelection, count );
 

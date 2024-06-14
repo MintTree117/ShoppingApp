@@ -46,7 +46,7 @@ else {
 
         Reply<bool> result = await TrySendEmail();
 
-        if (!result.IsOkay) {
+        if (!result) {
             PushError( result, "Failed to send reset link." );
             StopLoading();
             return;

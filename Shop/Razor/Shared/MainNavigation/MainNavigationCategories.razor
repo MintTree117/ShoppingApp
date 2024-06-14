@@ -60,7 +60,7 @@
     {
         await base.OnInitializedAsync();
         Reply<CategoriesCollection> getResult = await Service.GetCategories();
-        if (getResult.IsOkay)
+        if (getResult)
             _categoriesCollection = getResult.Data;
     }
 

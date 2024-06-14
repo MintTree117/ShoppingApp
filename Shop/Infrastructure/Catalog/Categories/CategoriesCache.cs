@@ -7,7 +7,7 @@ using Shop.Utilities;
 namespace Shop.Infrastructure.Catalog.Categories;
 
 public sealed class CategoriesCache( HttpService http, StorageService storage ) :
-    MemoryCache<CategoriesCollection>( "Categories", storage, TimeSpan.FromHours( 24 ) ) // Singleton
+    MemoryCache<CategoriesCollection>( "Categories", storage, TimeSpan.FromHours( 24 ) ) // SINGLETON
 {
     readonly HttpService _http = http;
     bool _isFetching = false;
@@ -21,24 +21,30 @@ public sealed class CategoriesCache( HttpService http, StorageService storage ) 
         }
         
         _isFetching = true;
-        Reply<CategoriesCollection> cacheReply = await GetCache();
-        if (cacheReply.IsOkay)
+        var cacheReply = await GetCache();
+        if (cacheReply)
         {
             _isFetching = false;
             return cacheReply;
         }
 
-        Reply<List<CategoryDto>> fetchReply = await _http.GetAsync<List<CategoryDto>>( Consts.ApiGetCategories );
-
-        if (!fetchReply.IsOkay)
+        var fetchReply = await _http.GetAsync<List<CategoryDto>>( Consts.ApiGetCategories );
+        if (!fetchReply)
         {
             _isFetching = false;
-            return Reply<CategoriesCollection>.False( fetchReply );   
+            Logger.LogError( "Failed to fetch categories from server." );
+            return Reply<CategoriesCollection>.Fail( fetchReply );   
         }
 
         CategoriesCollection data = CategoriesCollection.From( fetchReply.Data );
-        Reply<bool> setReply = await SetCache( data );
+        var setReply = await SetCache( data );
+        
+        if (!setReply) 
+            Logger.LogError( $"Failed to store categories in browser cache. {setReply}" );
+        else
+            Logger.Log( $"Successfully fetched categories from server and stored in browser cache. {setReply}" );
+        
         _isFetching = false;
-        return Reply<CategoriesCollection>.True( data );
+        return Reply<CategoriesCollection>.Success( data );
     }
 }

@@ -10,7 +10,7 @@
     <!-- MESSAGE -->
     <i class="fa-solid fa-circle-exclamation fa-4x text-danger auth-icon"></i>
     <h3 class="mb-3">Email Confirmation Failed!</h3>
-    <p class="mb-3">Error Details: @_apiReply.Message()</p>
+    <p class="mb-3">Error Details: @_apiReply.GetMessage()</p>
     <p class="mb-3 text-muted">Please try again or contact support.</p>
     <!-- RESEND -->
     <button class="btn btn-submit btn-info btn-icon" @onclick="GoToResend"><i class="fa fa-repeat me-2"></i>Retry</button>
@@ -44,7 +44,7 @@ else if (_emailConfirmed) {
         }
         
         _apiReply = await TryConfirmEmail( Consts.ApiConfirmEmail, userId, code );
-        _emailConfirmed = _apiReply.IsOkay;
+        _emailConfirmed = _apiReply;
         _confirmFailed = !_emailConfirmed;
         StateHasChanged();
         StopLoading();

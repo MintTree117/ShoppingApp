@@ -12,7 +12,7 @@ public sealed class HttpService( IHttpClientFactory httpFactory, IServiceProvide
     readonly IHttpClientFactory _httpFactory = httpFactory;
     readonly IServiceProvider _provider = provider;
 
-    async Task<HttpClient> CreateScopedClient( bool authenticate )
+    HttpClient CreateScopedClient( bool authenticate )
     {
         HttpClient client = _httpFactory.CreateClient( "API" );
 
@@ -23,7 +23,7 @@ public sealed class HttpService( IHttpClientFactory httpFactory, IServiceProvide
 
         // Ensure HttpClient includes credentials
         SessionManager auth = _provider.GetService<SessionManager>() ?? throw new Exception( "HttpService: Failed to get SessionManager from Provider." );
-        client.SetAuthenticationHeader( await auth.AccessToken() );
+        client.SetAuthenticationHeader( auth.AccessToken );
         return client;
     }
     
@@ -47,13 +47,13 @@ public sealed class HttpService( IHttpClientFactory httpFactory, IServiceProvide
     
     async Task<Reply<T>> ExecuteGetRequest<T>( string url, bool authenticate, Dictionary<string, object>? parameters = null )
     {
-        string urlWithParams = ConstructQueryWithParams( url, parameters );
+        string urlWithParams = BuildQueryUrl( url, parameters );
         
         try 
         {
-            using HttpClient client = await CreateScopedClient( authenticate );
+            using HttpClient client = CreateScopedClient( authenticate );
             HttpResponseMessage response = await client.GetAsync( urlWithParams );
-            return await HandleHttpResponse<T>( response );
+            return await ParseHttpResponse<T>( response );
         }
         catch ( Exception e ) 
         {
@@ -64,9 +64,9 @@ public sealed class HttpService( IHttpClientFactory httpFactory, IServiceProvide
     {
         try
         {
-            using HttpClient client = await CreateScopedClient( authenticate );
+            using HttpClient client = CreateScopedClient( authenticate );
             HttpResponseMessage response = await client.PostAsJsonAsync( url, body );
-            return await HandleHttpResponse<T>( response );
+            return await ParseHttpResponse<T>( response );
         }
         catch ( Exception e ) 
         {
@@ -77,9 +77,9 @@ public sealed class HttpService( IHttpClientFactory httpFactory, IServiceProvide
     {
         try
         {
-            using HttpClient client = await CreateScopedClient( authenticate );
+            using HttpClient client = CreateScopedClient( authenticate );
             HttpResponseMessage response = await client.PutAsJsonAsync( url, body );
-            return await HandleHttpResponse<T>( response );
+            return await ParseHttpResponse<T>( response );
         }
         catch ( Exception e ) 
         {
@@ -88,13 +88,13 @@ public sealed class HttpService( IHttpClientFactory httpFactory, IServiceProvide
     }
     async Task<Reply<T>> ExecuteDeleteRequest<T>( string url, bool authenticate, Dictionary<string, object>? parameters = null )
     {
-        string urlWithParams = ConstructQueryWithParams( url, parameters );
+        string urlWithParams = BuildQueryUrl( url, parameters );
         
         try
         {
-            using HttpClient client = await CreateScopedClient( authenticate );
+            using HttpClient client = CreateScopedClient( authenticate );
             HttpResponseMessage response = await client.DeleteAsync( urlWithParams );
-            return await HandleHttpResponse<T>( response );
+            return await ParseHttpResponse<T>( response );
         }
         catch ( Exception e ) 
         {
@@ -102,37 +102,35 @@ public sealed class HttpService( IHttpClientFactory httpFactory, IServiceProvide
         }
     }
     
-    static string ConstructQueryWithParams( string apiPath, Dictionary<string, object>? parameters )
+    static string BuildQueryUrl( string apiPath, Dictionary<string, object>? parameters )
     {
         if (parameters is null)
             return apiPath;
 
         NameValueCollection query = HttpUtility.ParseQueryString( string.Empty );
-
-        foreach ( KeyValuePair<string, object> param in parameters ) query[param.Key] = param.Value.ToString();
+        foreach ( KeyValuePair<string, object> param in parameters ) 
+            query[param.Key] = param.Value.ToString();
 
         return $"{apiPath}?{query}";
     }
-    static async Task<Reply<T>> HandleHttpResponse<T>( HttpResponseMessage httpResponse )
+    static async Task<Reply<T>> ParseHttpResponse<T>( HttpResponseMessage httpResponse )
     {
-        if (httpResponse.IsSuccessStatusCode) {
-            T? httpContent = await httpResponse.Content.ReadFromJsonAsync<T>();
-            return httpContent is not null
-                ? Reply<T>.True( httpContent )
-                : Reply<T>.False( "No data returned from http request." );
-        }
+        if (!httpResponse.IsSuccessStatusCode)
+            return LogReturn<T>( httpResponse.StatusCode + await httpResponse.Content.ReadAsStringAsync() );
 
-        string errorContent = await httpResponse.Content.ReadAsStringAsync();
-        return LogErrorAndReturn<T>( httpResponse.StatusCode + errorContent );
+        T? httpContent = await httpResponse.Content.ReadFromJsonAsync<T>();
+        return httpContent is not null
+            ? Reply<T>.Success( httpContent )
+            : Reply<T>.NetworkError();
     }
-    static Reply<T> LogErrorAndReturn<T>( string message )
+    static Reply<T> LogReturn<T>( string message )
     {
-        Console.WriteLine( $"An error occured during an http request : {message}" );
-        return Reply<T>.False( $"An error occured during an http request : {message}" );
+        Logger.LogError( $"Http response error: {message}" );
+        return Reply<T>.NetworkError();
     }
     static Reply<T> HandleHttpException<T>( Exception e, string requestType, string requestUrl )
     {
-        Logger.LogError( e, $"HTTP {requestType} ERROR", requestUrl );
-        return Reply<T>.False( e, "An error occured during a network request." );
+        Logger.LogError( e, $"Http {requestType} Exception.", requestUrl );
+        return Reply<T>.NetworkError();
     }
 }

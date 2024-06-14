@@ -20,16 +20,16 @@ public abstract class MemoryCache<T> // singleton that handles both storage and 
     {
         if (_cacheEntry is not null)
             if (_cacheEntry.Value.Expired( _cacheLife )) _cacheEntry = null;
-            else return Reply<T>.True( _cacheEntry.Value.Data );
+            else return Reply<T>.Success( _cacheEntry.Value.Data );
         
         Reply<MemoryCacheEntry<T>> storageReply = await _storage.Get<MemoryCacheEntry<T>>( _storageKey );
-        if (!storageReply.IsOkay)
-            return Reply<T>.False( storageReply, "Get Cache Entry Failed" );
+        if (!storageReply)
+            return Reply<T>.Fail( storageReply, "Get Cache Entry Failed" );
 
         if (storageReply.Data.Expired( _cacheLife ))
-            return Reply<T>.False( "Cache Entry Expired." );
+            return Reply<T>.Fail( "Cache Entry Expired." );
 
         _cacheEntry = storageReply.Data;
-        return Reply<T>.True( _cacheEntry.Value.Data );
+        return Reply<T>.Success( _cacheEntry.Value.Data );
     }
 }

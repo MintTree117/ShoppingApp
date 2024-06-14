@@ -49,7 +49,7 @@
         StartLoading( "Fetching account details..." );
         Reply<AccountModel> reply = await TryGetAccount();
 
-        if (!reply.IsOkay) {
+        if (!reply) {
             PushError( reply, "Failed to get account details from the server." );
             StopLoading();
             return;
@@ -64,7 +64,7 @@
 
         Reply<bool> reply = await TryUpdateAccount();
         
-        if (!reply.IsOkay) {
+        if (!reply) {
             PushError( reply, "Failed to update account details." );
             StopLoading();
             return;
@@ -72,9 +72,9 @@
 
         PushSuccess( "Account details successfully updated." );
 
-        Reply<bool> refreshResult = await Authentication.RefreshSession();
-        if (!refreshResult.IsOkay) {
-            Console.WriteLine( refreshResult.Message() );
+        Reply<bool> refreshResult = await Authentication.ForceRefresh();
+        if (!refreshResult) {
+            Console.WriteLine( refreshResult.GetMessage() );
             await Authentication.ClearSession();
             Navigate( Consts.PageSessionExpired, true );
         }
@@ -89,7 +89,7 @@
     
     void UpdateLocalProfile( Reply<AccountModel> reply )
     {
-        _accountModel = reply.IsOkay
+        _accountModel = reply
             ? reply.Data
             : new AccountModel();
         StateHasChanged();

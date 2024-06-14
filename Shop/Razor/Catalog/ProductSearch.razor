@@ -51,10 +51,10 @@
 
         await Task.WhenAll( cTask, bTask );
 
-        _categoryCollection = cTask.Result.IsOkay
+        _categoryCollection = cTask.Result
             ? cTask.Result.Data
             : CategoriesCollection.None();
-        _brandCollection = bTask.Result.IsOkay
+        _brandCollection = bTask.Result
             ? bTask.Result.Data
             : BrandsCollection.None();
         // set products
@@ -109,7 +109,7 @@
         string url = BuildSearchUrl( filters );
         Reply<SearchResultsDto> reply = await Http.GetAsync<SearchResultsDto>( url );
 
-        if (!reply.IsOkay)
+        if (!reply)
         {
             PushWarning( "Failed to fetch products." );
             return;

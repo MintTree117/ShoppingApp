@@ -144,23 +144,27 @@ else {
         
         Reply<LoginReply> loginResult = await TryLogin();
 
-        if (!loginResult.IsOkay) {
+        if (!loginResult)
+        {
+            await Authentication.ClearSession();
             PushError( loginResult, "Failed to login." );
             StopLoading();
             return;
         }
 
-        if (loginResult.Data.IsPending2Fa) {
+        if (loginResult.Data.IsPending2Fa) 
+        {
             _pendingTwoFactor = true;
             _twoFactorRequest.EmailOrUsername = _loginRequest.EmailOrUsername;
             StateHasChanged();
             StopLoading();
             return;
         }
-
-        Reply<bool> updateResult = await TryUpdateLocalState( loginResult );
         
-        if (!updateResult.IsOkay) {
+        var updateResult = await Authentication.CreateNewSession( loginResult.Data.AccessToken ?? string.Empty );
+        
+        if (!updateResult) 
+        {
             PushError( updateResult, "Failed to save login." );
             StopLoading();
             return;
@@ -169,7 +173,7 @@ else {
         //await CartManager.GetCart( reply.Data.Token );
 
         StartLoading( "Login Success! Redirecting..." );
-        //GoHome();
+        GoHome();
     }
     async Task OnValidTwoFactorSubmitAsync()
     {
@@ -179,15 +183,15 @@ else {
 
         Reply<TwoFactorReply> result = await TryTwoFactorLogin();
 
-        if (!result.IsOkay) {
+        if (!result) {
             PushError( result, "Two factor authorization failed!" );
             StopLoading();
             return;
         }
 
-        Reply<bool> updateResult = await TryUpdateLocalState( result );
+        Reply<bool> updateResult = await Authentication.CreateNewSession( result.Data.AccessToken );
 
-        if (!updateResult.IsOkay) {
+        if (!updateResult) {
             PushError( result, "Two factor authorization succeeded on the server, but failed to save locally!" );
             StopLoading();
             return;
@@ -204,9 +208,9 @@ else {
         
         Reply<bool> reply = await TryRegister();
 
-        if (!reply.IsOkay) {
+        if (!reply) {
             PushError( reply, "Failed to register account." );
-            Console.WriteLine( reply.Message() );
+            Console.WriteLine( reply.GetMessage() );
             StopLoading();
             return;
         }
@@ -218,12 +222,8 @@ else {
     
     async Task<Reply<LoginReply>> TryLogin() => 
         await Http.PostAsync<LoginReply>( Consts.ApiLogin, _loginRequest );
-    async Task<Reply<bool>> TryUpdateLocalState( Reply<LoginReply> loginResult ) =>
-        await Authentication.UpdateSession( loginResult.Data.AccessToken );
     async Task<Reply<TwoFactorReply>> TryTwoFactorLogin() => 
         await Http.PostAsync<TwoFactorReply>( Consts.ApiTwoFactor, _twoFactorRequest );
-    async Task<Reply<bool>> TryUpdateLocalState( Reply<TwoFactorReply> twoFactorResult ) =>
-        await Authentication.UpdateSession( twoFactorResult.Data.AccessToken );
     async Task<Reply<bool>> TryRegister() => 
         await Http.PutAsync<bool>( Consts.ApiRegister, _registerRequest );
     

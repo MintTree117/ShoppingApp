@@ -4,7 +4,7 @@ using Shop.Utilities;
 
 namespace Shop.Infrastructure.Storage;
 
-public sealed class StorageService( IServiceProvider provider ) // singleton wrapper for structured replies
+public sealed class StorageService( IServiceProvider provider ) // wrapper for structured replies
 {
     const string ExceptionMessage = "STORAGE SERVICE EXCEPTION";
     readonly IServiceProvider _provider = provider;
@@ -14,12 +14,12 @@ public sealed class StorageService( IServiceProvider provider ) // singleton wra
         try {
             string? o = await GetStorage().GetItemAsync<string>( key );
             return string.IsNullOrWhiteSpace( o )
-                ? Reply<string>.False( $"{key} not found in local storage." )
-                : Reply<string>.True( o );
+                ? Reply<string>.Fail( $"{key} not found in local storage." )
+                : Reply<string>.Success( o );
         }
         catch ( Exception e ) {
             Logger.LogError( e, ExceptionMessage );
-            return Reply<string>.False( $"An exception occurred while trying to fetch key {key} AS STRING from storage." );
+            return Reply<string>.Fail( $"An exception occurred while trying to fetch key {key} AS STRING from storage." );
         }
     }
     public async Task<Reply<T>> Get<T>( string key )
@@ -28,34 +28,34 @@ public sealed class StorageService( IServiceProvider provider ) // singleton wra
         {
             var o = await GetStorage().GetItemAsync<T>( key );
             return o is null 
-                ? Reply<T>.False( $"{key} not found in local storage." ) 
-                : Reply<T>.True( o );
+                ? Reply<T>.Fail( $"{key} not found in local storage." ) 
+                : Reply<T>.Success( o );
         }
         catch ( Exception e ) {
             Logger.LogError( e, ExceptionMessage );
-            return Reply<T>.False( e, $"An exception occurred while trying to fetch key {key} from storage." );
+            return Reply<T>.Fail( e, $"An exception occurred while trying to fetch key {key} from storage." );
         }
     }
     public async Task<Reply<bool>> Set<T>( string key, T value )
     {
         try {
             await GetStorage().SetItemAsync( key, value );
-            return IReply.True();
+            return IReply.Success();
         }
         catch ( Exception e ) {
             Logger.LogError( e, ExceptionMessage );
-            return Reply<bool>.False( e, $"An exception occurred while trying to set key {key} and value {value?.ToString()} from storage." );
+            return Reply<bool>.Fail( e, $"An exception occurred while trying to set key {key} and value {value?.ToString()} from storage." );
         }
     }
     public async Task<Reply<bool>> Remove( string key )
     {
         try {
             await GetStorage().RemoveItemAsync( key );
-            return IReply.True();
+            return IReply.Success();
         }
         catch ( Exception e ) {
             Logger.LogError( e, ExceptionMessage );
-            return Reply<bool>.False( e, $"An exception occurred while trying to remove key {key} from storage." );
+            return Reply<bool>.Fail( e, $"An exception occurred while trying to remove key {key} from storage." );
         }
     }
     

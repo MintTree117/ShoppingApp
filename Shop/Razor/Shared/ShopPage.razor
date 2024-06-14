@@ -53,8 +53,8 @@
     protected void PushSuccess( string message ) => PushAlert( AlertType.Success, message );
     protected void PushWarning( string message ) => PushAlert( AlertType.Warning, message );
     protected void PushError( string message ) => PushAlert( AlertType.Danger, message );
-    protected void PushError( IReply reply, string message ) => PushAlert( AlertType.Danger, $"{message} : {reply.Message()}" );
-    protected void PushError( IReply reply ) => PushAlert( AlertType.Danger, reply.Message() );
+    protected void PushError( IReply reply, string message ) => PushAlert( AlertType.Danger, $"{message} : {reply.GetMessage()}" );
+    protected void PushError( IReply reply ) => PushAlert( AlertType.Danger, reply.GetMessage() );
 
     protected virtual async void OnAuthenticationStateChange( Task<AuthenticationState> task )
     {
