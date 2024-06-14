@@ -1,7 +1,6 @@
 @page "/account/addresses"
 @using Shop.Utilities
 @using Shop.Razor.Shared.Components
-@using Shop.Infrastructure.Authentication.Types
 @using Shop.Infrastructure.Common.ReplyTypes
 @inherits AccountPageBase
 @layout AccountLayout
@@ -154,7 +153,7 @@ else {
 
         Reply<bool> reply = _isNew
             ? await Http.PutAsyncAuthenticated<bool>( Consts.ApiAddAddress, _editModel )
-            : await Http.PostAsyncAuthenticated<bool>( Consts.ApiUpdateAddress, _editModel );
+            : await Http.PutAsyncAuthenticated<bool>( Consts.ApiUpdateAddress, _editModel );
 
         if (!reply.IsOkay) {
             PushError( reply, "Failed to save address." );
@@ -243,5 +242,11 @@ else {
         List<AddressModel> Addresses );
     readonly record struct AddressDeleteRequest(
         Guid AddressId );
-    
+    sealed class AddressModel
+    {
+        public Guid Id { get; set; }
+        public bool IsPrimary { get; set; }
+        public int PosX { get; set; }
+        public int PosY { get; set; }
+    }
 }

@@ -83,9 +83,9 @@
     }
     
     async Task<Reply<AccountModel>> TryGetAccount() =>
-        await Http.GetAsyncAuthenticated<AccountModel>( Consts.ApiGetAccountDetails );
+        await Http.GetAsyncAuthenticated<AccountModel>( Consts.ApiGetAccountProfile );
     async Task<Reply<bool>> TryUpdateAccount() =>
-        await Http.PostAsyncAuthenticated<bool>( Consts.ApiUpdateAccountDetails, _accountModel );
+        await Http.PutAsyncAuthenticated<bool>( Consts.ApiUpdateAccountProfile, _accountModel );
     
     void UpdateLocalProfile( Reply<AccountModel> reply )
     {

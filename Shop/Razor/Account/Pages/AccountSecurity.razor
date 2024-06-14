@@ -53,7 +53,7 @@
     {
         StartLoading( "Updating Password..." );
         
-        Reply<bool> result = await Http.PostAsyncAuthenticated<bool>( Consts.ApiUpdatePassword, _passwordModel );
+        Reply<bool> result = await Http.PutAsyncAuthenticated<bool>( Consts.ApiUpdatePassword, _passwordModel );
 
         if (!result.IsOkay) {
             PushError( result, "Failed to update password." );
@@ -71,7 +71,7 @@
         
         StartLoading( value ? "Enabling Two Factor Authentication" : "Disabling Two Factor Authentication" );
         
-        Reply<bool> httpReply = await Http.PostAsyncAuthenticated<bool>( Consts.ApiUpdatePassword, _passwordModel );
+        Reply<bool> httpReply = await Http.PutAsyncAuthenticated<bool>( Consts.ApiUpdate2Fa, _passwordModel );
         if (!httpReply.IsOkay)
         {
             PushError( httpReply, "Failed to update two factor authentication." );
@@ -81,6 +81,12 @@
 
         PushSuccess( "Updated two factor authentication." );
         StopLoading();
+    }
+    
+    sealed class TwoFactorModel
+    {
+        public bool IsEnabled { get; set; }
+        public string TwoFactorEmail { get; set; } = string.Empty;
     }
 
     sealed class UpdatePasswordRequest

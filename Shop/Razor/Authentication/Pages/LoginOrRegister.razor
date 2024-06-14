@@ -13,14 +13,7 @@
     <i class="fa-solid fa-circle-check fa-4x text-success auth-icon"></i>
     <h1>Registration Success!</h1>
     <hr class="divider"/>
-    <!-- DETAILS -->
-    <ul class="text-start">
-        <li><strong>Id:</strong> <small>@( _registerReply?.Id ?? "No id returned." )</small></li>
-        <li><strong>Email:</strong> <small>@( _registerReply?.Email ?? "No email returned." )</small></li>
-        <li><strong>Username:</strong> <small>@( _registerReply?.Username ?? "No username returned." )</small></li>
-    </ul>
-    <hr class="divider"/>
-    <p class="text-secondary text-center">Your account has been created and is awaiting confirmation. A link has been emailed to @( _registerReply?.Email ?? "your email" ). Please verify your email before logging in.</p>
+    <p class="text-secondary text-center">Your account has been created and is awaiting confirmation. A link has been emailed to your email. Please verify your email before logging in.</p>
     <!-- LOGIN -->
     <button class="btn btn-submit btn-icon" @onclick="GoToLogin"><i class="fa fa-user me-2"></i>Login</button>
 }
@@ -144,7 +137,6 @@ else {
 
     bool _registered = false;
     bool _pendingTwoFactor = false;
-    RegisterReply? _registerReply;
 
     async Task OnValidLoginSubmitAsync()
     {
@@ -177,7 +169,7 @@ else {
         //await CartManager.GetCart( reply.Data.Token );
 
         StartLoading( "Login Success! Redirecting..." );
-        GoHome();
+        //GoHome();
     }
     async Task OnValidTwoFactorSubmitAsync()
     {
@@ -210,7 +202,7 @@ else {
     {
         StartLoading( "Registering..." );
         
-        Reply<RegisterReply> reply = await TryRegister();
+        Reply<bool> reply = await TryRegister();
 
         if (!reply.IsOkay) {
             PushError( reply, "Failed to register account." );
@@ -220,7 +212,6 @@ else {
         }
 
         _registered = true;
-        _registerReply = reply.Data;
         StateHasChanged();
         StopLoading();
     }
@@ -233,8 +224,8 @@ else {
         await Http.PostAsync<TwoFactorReply>( Consts.ApiTwoFactor, _twoFactorRequest );
     async Task<Reply<bool>> TryUpdateLocalState( Reply<TwoFactorReply> twoFactorResult ) =>
         await Authentication.UpdateSession( twoFactorResult.Data.AccessToken );
-    async Task<Reply<RegisterReply>> TryRegister() => 
-        await Http.PostAsync<RegisterReply>( Consts.ApiRegister, _registerRequest );
+    async Task<Reply<bool>> TryRegister() => 
+        await Http.PutAsync<bool>( Consts.ApiRegister, _registerRequest );
     
     // TODO: IMPLEMENT RECOVERY CODES
     void GoToRecovery() => 
@@ -281,8 +272,4 @@ else {
         bool IsPending2Fa );
     readonly record struct TwoFactorReply(
         string AccessToken );
-    sealed record RegisterReply(
-        string Id,
-        string Email,
-        string Username );
 }

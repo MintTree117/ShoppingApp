@@ -1,4 +1,4 @@
-namespace Shop.Infrastructure.Authentication.Types;
+namespace Shop.Infrastructure.Authentication;
 
 public readonly record struct SessionInfo(
     string UserId,

@@ -6,32 +6,44 @@ internal static class Consts
     // ----------------------------------------------------------------------------------------------------------------
     // BASE
     internal const string ApiBase = "https://localhost:7212/api";
+    
+    // ACCOUNT ADDRESSES
+    internal const string ApiGetAddresses = ApiBase + "/account/addresses/view";
+    internal const string ApiAddAddress = ApiBase + "/account/addresses/add";
+    internal const string ApiUpdateAddress = ApiBase + "/account/addresses/update";
+    internal const string ApiDeleteAddress = ApiBase + "/account/addresses/delete";
+
     // AUTHENTICATION
-    internal const string ApiIdentityBase = ApiBase + "/identity";
-    internal const string ApiRegister = ApiIdentityBase + "/register";
-    internal const string ApiConfirmEmail = ApiIdentityBase + "/email/confirm";
-    internal const string ApiResendConfirm = ApiIdentityBase + "/email/resend";
-    internal const string ApiLoginCheck = ApiIdentityBase + "/check";
-    internal const string ApiLogout = ApiIdentityBase + "/logout";
-    internal const string ApiLogin = ApiIdentityBase + "/login";
-    internal const string ApiTwoFactor = ApiIdentityBase + "/2fa";
-    internal const string ApiLoginRefresh = ApiIdentityBase + "/refresh";
-    internal const string ApiLoginRefreshFull = ApiIdentityBase + "/refreshFull";
-    internal const string ApiForgotPassword = ApiIdentityBase + "/password/forgot";
-    internal const string ApiResetPassword = ApiIdentityBase + "/password/reset";
-    // ACCOUNT
-    internal const string ApiAccountBase = ApiBase + "/account";
-    internal const string ApiUpdatePassword = ApiAccountBase + "/password";
-    internal const string ApiGetAccountDetails = ApiAccountBase + "/view";
-    internal const string ApiUpdateAccountDetails = ApiAccountBase + "/update";
-    internal const string ApiDeleteAccount = ApiAccountBase + "/delete";
-    internal const string ApiGetAddresses = ApiAccountBase + "/address/view";
-    internal const string ApiAddAddress = ApiAccountBase + "/address/add";
-    internal const string ApiUpdateAddress = ApiAccountBase + "/address/update";
-    internal const string ApiDeleteAddress = ApiAccountBase + "/address/delete";
+    internal const string ApiLogin = ApiBase + "/authentication/login";
+    internal const string ApiTwoFactor = ApiBase + "/authentication/2fa";
+    internal const string ApiLoginRecovery = ApiBase + "/authentication/recover";
+    internal const string ApiLoginRefresh = ApiBase + "/authentication/refresh";
+    internal const string ApiForgotPassword = ApiBase + "/authentication/forgot";
+    internal const string ApiResetPassword = ApiBase + "/authentication/reset";
+    internal const string ApiLogout = ApiBase + "/authentication/logout";
+    
+    // DELETE ACCOUNT
+    internal const string ApiDeleteAccount = ApiBase + "/account/delete";
+    
+    // ACCOUNT PROFILE
+    internal const string ApiGetAccountProfile = ApiBase + "/account/profile/view";
+    internal const string ApiUpdateAccountProfile = ApiBase + "/account/profile/update";
+    
+    // ACCOUNT REGISTRATION
+    internal const string ApiRegister = ApiBase + "/account/register";
+    internal const string ApiConfirmEmail = ApiBase + "/account/register/confirmEmail";
+    internal const string ApiResendConfirm = ApiBase + "/account/register/resendConfirmEmail";
+
+    // ACCOUNT SECURITY
+    internal const string ApiViewSecurity = ApiBase + "/account/security/view";
+    internal const string ApiUpdatePassword = ApiBase + "/account/security/updatePassword";
+    internal const string ApiUpdate2Fa = ApiBase + "/account/security/update2fa";
+    
+    
     // CATALOG
     internal const string ApiGetCategories = ApiBase + "/categories";
     internal const string ApiGetBrands = ApiBase + "/brands";
+    
     // PARAMS
     // ----------------------------------------------------------------------------------------------------------------
     internal const string ParamReturnUrl = "ReturnUrl";

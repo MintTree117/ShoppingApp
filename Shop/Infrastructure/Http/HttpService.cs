@@ -7,10 +7,25 @@ using Shop.Utilities;
 
 namespace Shop.Infrastructure.Http;
 
-public sealed class HttpService( IHttpClientFactory httpFactory, SessionManager authService ) // SINGLETON
+public sealed class HttpService( IHttpClientFactory httpFactory, IServiceProvider provider ) // SINGLETON
 {
     readonly IHttpClientFactory _httpFactory = httpFactory;
-    readonly SessionManager _authService = authService;
+    readonly IServiceProvider _provider = provider;
+
+    async Task<HttpClient> CreateScopedClient( bool authenticate )
+    {
+        HttpClient client = _httpFactory.CreateClient( "API" );
+
+        if (!authenticate)
+            return client;
+        // Enable sending credentials (cookies) with requests
+        client.DefaultRequestHeaders.Add( "X-Requested-With", "XMLHttpRequest" );
+
+        // Ensure HttpClient includes credentials
+        SessionManager auth = _provider.GetService<SessionManager>() ?? throw new Exception( "HttpService: Failed to get SessionManager from Provider." );
+        client.SetAuthenticationHeader( await auth.AccessToken() );
+        return client;
+    }
     
     public async Task<Reply<T>> GetAsync<T>( string url, Dictionary<string, object>? parameters = null ) =>
         await ExecuteGetRequest<T>( url, false, parameters );
@@ -85,14 +100,6 @@ public sealed class HttpService( IHttpClientFactory httpFactory, SessionManager 
         {
             return HandleHttpException<T>( e, "DELETE", urlWithParams );
         }
-    }
-    
-    async Task<HttpClient> CreateScopedClient( bool authenticate )
-    {
-        HttpClient http = _httpFactory.CreateClient();
-        string? header = authenticate ? await _authService.AccessToken() : null;
-        http.SetAuthenticationHeader( header );
-        return http;
     }
     
     static string ConstructQueryWithParams( string apiPath, Dictionary<string, object>? parameters )

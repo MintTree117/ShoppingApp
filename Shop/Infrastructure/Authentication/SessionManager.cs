@@ -1,7 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Components.Authorization;
-using Shop.Infrastructure.Authentication.Types;
 using Shop.Infrastructure.Common.ReplyTypes;
 using Shop.Infrastructure.Http;
 using Shop.Infrastructure.Storage;
@@ -27,6 +26,9 @@ public sealed class SessionManager
     JwtSecurityToken? _jwt;
     AuthenticationState? _authState;
     SessionInfo? _session;
+
+    readonly TimeSpan RefreshBufferTimespan = TimeSpan.FromSeconds( 15 );
+    DateTime _lastUpdate = DateTime.Now;
     
     // CONSTRUCTOR
     public SessionManager( HttpService http, StorageService storage )
@@ -56,36 +58,45 @@ public sealed class SessionManager
     // FOR AUTH PROVIDER CALLBACK
     internal async Task<AuthenticationState> GetSessionState()
     {
+        Logger.Log( "Getting Authentication State..." );
+        
         // WAIT FOR OTHER REQUESTS TO FINISH
         // DO NOT RE-FETCH IN NETWORK IF IT WAS JUST FETCHED
-        if (await WaitForOthers())
-            return _authState ?? EmptyAuthenticationState();
+        //if (await WaitForOthers())
+            //return _authState ?? EmptyAuthenticationState();
+
+        //if (DateTime.Now - _lastUpdate > RefreshBufferTimespan)
+            //return _authState ?? EmptyAuthenticationState();
         
         // IF ALREADY IN MEMORY
-        if (AuthStateValid( out AuthenticationState state ))
-            return state;
+        //if (AuthStateValid( out AuthenticationState state ))
+            //return state;
         
         StartLoading();
         await GetFromBrowserStorage();
         
         // IF ALREADY IN MEMORY
-        if (AuthStateValid( out state ))
-            return state;
+        //if (AuthStateValid( out var state ))
+            //return state;
         
         await FetchFromServer();
         StopLoading();
         
-        return AuthStateValid( out state )
+        return AuthStateValid( out var state )
             ? state
             : EmptyAuthenticationState();
     }
     internal async Task<Reply<bool>> UpdateSession( string? accessToken )
     {
-        await WaitForOthers();
+        Logger.Log( "Updating Session." );
+        //await WaitForOthers();
         
         // EARLY OUT
         if (string.IsNullOrWhiteSpace( accessToken ))
+        {
+            Logger.LogError( "EMPTY TOKEN" );
             return await ClearSession();
+        }
         
         StartLoading();
         
@@ -95,7 +106,9 @@ public sealed class SessionManager
             _jwt = ParseJwtFromString( accessToken );
         }
 
+        Logger.Log( $"Claims: {_jwt.Claims.FirstOrDefault( c => c.Type == ClaimTypes.Name )}" );
         Reply<bool> accessResult = await _storage.Set( TokenKey, accessToken );
+        await _storage.Set( TokenKey, accessToken );
         InvokeNotify();
         StopLoading();
         
@@ -105,6 +118,7 @@ public sealed class SessionManager
     }
     internal async Task<Reply<bool>> ClearSession()
     {
+        Logger.Log( "Clearing Session." );
         await WaitForOthers();
         
         StartLoading();
@@ -125,7 +139,7 @@ public sealed class SessionManager
         Logger.Log( "Refreshing Authentication State..." );
 
         Reply<string> refreshReply = await FetchFromServer();
-
+        
         Logger.Log( refreshReply.IsOkay
             ? "Authentication State Refreshed."
             : "Authentication Refresh Failed." );
@@ -137,26 +151,31 @@ public sealed class SessionManager
     }
     internal async Task<string?> AccessToken()
     {
-        await WaitForOthers();
-        AuthenticationState state = await GetSessionState();
+        //if (!await WaitForOthers())
+            //await GetSessionState();
         return _token;
+    }
+    internal string? Username()
+    {
+        return _jwt?.Claims.FirstOrDefault( static c => c.Type == ClaimTypes.Name )?.ToString();
     }
     
     // COMMON
     async Task<bool> WaitForOthers()
     {
         bool hadToWait = false;
-        while ( _isLoading )
+        int count = 0;
+        while ( _isLoading && count < 1 )
         {
             hadToWait = true;
             await Task.Delay( 500 );
-            Logger.Log( "AUTH SERVICE: Awaiting another fetch." );
+            count++;
         }
         return hadToWait;
     }
     async Task<Reply<string>> FetchFromServer()
     {
-        Reply<string> refreshReply = await _http.GetAsyncAuthenticated<string>( Consts.ApiLoginRefresh );
+        Reply<string> refreshReply = await _http.PostAsync<string>( Consts.ApiLoginRefresh );
         string? token = refreshReply.IsOkay
             ? refreshReply.Data
             : null;
@@ -174,6 +193,7 @@ public sealed class SessionManager
             _jwt = null;
 
         Reply<string> tokenReply = await _storage.GetString( TokenKey );
+        Logger.Log( $"KEY FROM STORAGE {tokenReply.Data}" );
         if (!tokenReply.IsOkay)
             return;
 
@@ -182,6 +202,8 @@ public sealed class SessionManager
             _token = tokenReply.Data;
             _jwt = ParseJwtFromString( _token );
         }
+        
+        Logger.Log( _jwt?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name).ToString() );
     }
     bool AuthStateValid( out AuthenticationState state )
     {
@@ -195,6 +217,8 @@ public sealed class SessionManager
     {
         lock ( _fetchLock )
         {
+            _lastUpdate = DateTime.Now;
+            
             if (string.IsNullOrWhiteSpace( token ))
             {
                 _token = null;
@@ -269,6 +293,9 @@ public sealed class SessionManager
 
             DateTime currentTime = DateTime.UtcNow;
             TimeSpan timeDifference = expiryDateTime - currentTime;
+            
+            if (timeDifference.TotalMinutes > 5)
+                Logger.LogError( "Token is expired." );
 
             return timeDifference.TotalMinutes <= 5;
         }
