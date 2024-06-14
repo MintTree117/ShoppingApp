@@ -22,7 +22,7 @@ public sealed class HttpService( IHttpClientFactory httpFactory, IServiceProvide
         client.DefaultRequestHeaders.Add( "X-Requested-With", "XMLHttpRequest" );
 
         // Ensure HttpClient includes credentials
-        SessionManager auth = _provider.GetService<SessionManager>() ?? throw new Exception( "HttpService: Failed to get SessionManager from Provider." );
+        AuthenticationStateManager auth = _provider.GetService<AuthenticationStateManager>() ?? throw new Exception( "HttpService: Failed to get SessionManager from Provider." );
         client.SetAuthenticationHeader( auth.AccessToken );
         return client;
     }
@@ -117,7 +117,7 @@ public sealed class HttpService( IHttpClientFactory httpFactory, IServiceProvide
     {
         if (!httpResponse.IsSuccessStatusCode)
             return LogReturn<T>( httpResponse.StatusCode + await httpResponse.Content.ReadAsStringAsync() );
-
+        
         T? httpContent = await httpResponse.Content.ReadFromJsonAsync<T>();
         return httpContent is not null
             ? Reply<T>.Success( httpContent )
@@ -125,7 +125,7 @@ public sealed class HttpService( IHttpClientFactory httpFactory, IServiceProvide
     }
     static Reply<T> LogReturn<T>( string message )
     {
-        Logger.LogError( $"Http response error: {message}" );
+        Logger.Log( $"Http response error: {message}" );
         return Reply<T>.NetworkError();
     }
     static Reply<T> HandleHttpException<T>( Exception e, string requestType, string requestUrl )

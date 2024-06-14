@@ -61,6 +61,7 @@ else {
                             <i class="fa fa-user"></i>
                         </div>
                     </button>
+
                     @if (_showUserOptions) {
                         <nav class="top-nav-user-options position-absolute shadow">
                             <ul class="nav justify-content-center w-100">
@@ -115,7 +116,7 @@ else {
     public MainLayout Layout { get; init; } = default!;
     
     [Inject] public NavigationManager Navigation { get; set; } = default!;
-    [Inject] public SessionManager SessionManager { get; set; } = default!;
+    [Inject] public AuthenticationStateManager AuthenticationStateManager { get; set; } = default!;
     MainNavigationSide? _sidebar;
     DotNetObjectReference<MainNavigationTop> _dotNetRef = default!;
 
@@ -134,28 +135,36 @@ else {
     public void Dispose()
     {
         _dotNetRef.Dispose();
-        SessionManager.OnSessionChanged -= HandleNewSession;
+        AuthenticationStateManager.OnStateChanged -= OnAuthStateChanged;
     }
     protected override async Task OnInitializedAsync()
     {
         _dotNetRef = DotNetObjectReference.Create( this );
-        SessionManager.OnSessionChanged += HandleNewSession;
+        AuthenticationStateManager.OnStateChanged += OnAuthStateChanged;
         await JsRuntime.InvokeVoidAsync( "resizeObserverInterop.initialize", _dotNetRef );
+        /*var state = await AuthenticationStateManager.GetSessionState();
+        if (state.User.Identity != null && state.User.Identity.IsAuthenticated)
+            _username = state.User.Claims.FirstOrDefault( static c => c.Type == ClaimTypes.Name )?.Value ?? "HHHHH";
+        else
+            _username = "baba";*/
     }
     [JSInvokable] public void OnResize( int width, int height )
     {
         _screenWidth = width;
         _screenHeight = height;
-
         _mobileView = _screenWidth < 900;
-
         StateHasChanged();
     }
 
-    void HandleNewSession( SessionClaims? claims )
+    void OnAuthStateChanged( Task<AuthenticationState> state )
     {
-        _authenticated = claims is not null;
-        _username = _authenticated ? claims!.Value.Username : DefaultUserText;
+        Logger.Log( "Top Nav OnAuthStateChanged." );
+        HandleNewSession( state.Result );
+    }
+    void HandleNewSession( AuthenticationState state )
+    {
+        _authenticated = state.User.Identity is not null && state.User.Identity.IsAuthenticated;
+        _username = (_authenticated ? state.User.Identity!.Name : DefaultUserText)!;
         _sidebar?.OnAccountChange( _username );
         StateHasChanged();
     }
@@ -171,6 +180,7 @@ else {
     }
     void ShowAccountDropdown()
     {
+        Logger.Log( "ON HOVER" + _showUserOptions );
         _showUserOptions = _authenticated;
         StateHasChanged();
     }

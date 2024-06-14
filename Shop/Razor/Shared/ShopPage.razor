@@ -12,7 +12,7 @@
     public MainLayout Layout { get; init; } = default!;
     
     [Inject] protected IConfiguration Configuration { get; init; } = default!;
-    [Inject] protected SessionManager Authentication { get; init; } = default!;
+    [Inject] protected AuthenticationStateManager Authentication { get; init; } = default!;
     [Inject] protected HttpService Http { get; init; } = default!;
     [Inject] protected NavigationManager Navigation { get; init; } = default!;
     

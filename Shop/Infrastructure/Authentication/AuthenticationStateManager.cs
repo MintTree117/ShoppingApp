@@ -1,6 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Principal;
 using Microsoft.AspNetCore.Components.Authorization;
 using Shop.Infrastructure.Common.ReplyTypes;
 using Shop.Infrastructure.Http;
@@ -9,29 +8,27 @@ using Shop.Utilities;
 
 namespace Shop.Infrastructure.Authentication;
 
-public sealed class SessionManager
+public sealed class AuthenticationStateManager
 {
     public event Action<Task<AuthenticationState>>? OnStateChanged;
-    public event Action<SessionClaims?>? OnSessionChanged;
     
-    const string TokenKey = "Jwt";
+    const string SessionStorageTokenKey = "Jwt";
 
     readonly HttpService _http;
     readonly StorageService _storage;
     readonly Timer _timer;
     readonly object _fetchLock = new();
-    readonly TimeSpan RefreshBufferTimespan = TimeSpan.FromSeconds( 60 );
     
     bool _isLoading = false;
     bool _isFirstLoad = true; // on startup go to server
     
-    internal string? AccessToken => _token ?? string.Empty;
+    internal string AccessToken => _token ?? string.Empty;
     string? _token;
-    SessionClaims? _session;
+    DateTime? _nextExpiry;
     AuthenticationState _authenticationState = EmptyAuthenticationState();
     
     // CONSTRUCTOR
-    public SessionManager( HttpService http, StorageService storage )
+    public AuthenticationStateManager( HttpService http, StorageService storage )
     {
         _http = http;
         _storage = storage;
@@ -44,91 +41,84 @@ public sealed class SessionManager
 
             var fetchReply = await GetTokenFromServer();
             Logger.Log( fetchReply
-                ? "Refreshed Session."
-                : "Failed to refresh Session." );
+                ? "Session manager auto-refreshed session successfully."
+                : "Session manager failed to auto-refresh session successfully" );
         }
     }
     void InvokeNotify()
     {
         Task<AuthenticationState> stateParam = Task.FromResult( _authenticationState );
         OnStateChanged?.Invoke( stateParam );
-        OnSessionChanged?.Invoke( _session );
     }
     
     // FOR AUTH PROVIDER CALLBACK
     internal async Task<AuthenticationState> GetSessionState()
     {
-        Logger.Log( "Session manager is getting session state." );
-        
-        // On startup, always go to server once
-        if (_isFirstLoad)
+        if (_isFirstLoad) // On startup, always go to server once
         {
+            Logger.Log( "Session manager first load." );
+            StartLoading();
             _isFirstLoad = false;
 
             if (!await GetTokenFromServer())
                 Logger.Log( "Session manager is unauthenticated on first load." );
             
-            InvokeNotify(); // because its the first fetch
+            StopLoading();
+            InvokeNotify(); // because its the first fetch (mostly for Navbar)
             return await Task.FromResult( _authenticationState );
         }
 
-        // Someone else is updating
-        if (await StateIsBeingRefreshed())
-            return await Task.FromResult( _authenticationState );
+        Logger.Log( "Session manager getting session state in memory" );
         
-        // Valid in-memory
+        if (await SessionIsAlreadyBeingRefreshed())
+            return await Task.FromResult( _authenticationState );
         if (IsSessionValid())
             return await Task.FromResult( _authenticationState );
-        
-        // Fetch
+
+        Logger.Log( "Session manager getting session state from server" );
         StartLoading();
         await GetTokenFromBrowserStorage();
         if (!IsSessionValid())
             await GetTokenFromServer();
         StopLoading();
-
+        
         return await Task.FromResult( _authenticationState );
     }
     internal async Task<Reply<bool>> CreateNewSession( string newToken )
     {
-        Logger.Log( "Session manager creating new session." );
-        await StateIsBeingRefreshed();
-        
+        await SessionIsAlreadyBeingRefreshed();
+        Logger.Log( "Session manager creating new session." );        
         StartLoading();
         SetMemory( newToken );
-        await SetStorage( newToken );
+        await _storage.Set( SessionStorageTokenKey, newToken );
         StopLoading();
-
         InvokeNotify();
         return IReply.Success();
     }
-    internal async Task<Reply<bool>> ClearSession()
+    internal async Task ClearSession()
     {
+        await SessionIsAlreadyBeingRefreshed();
         Logger.Log( "Session manager clearing session." );
-        await StateIsBeingRefreshed();
-
         StartLoading();
         ClearMemory();
-        var storageReply = await _storage.Remove( TokenKey );
+        var reply = await _storage.Remove( SessionStorageTokenKey );
+        Logger.Log( reply ? "Session manager cleared session state from storage." : $"Session manager failed to clear token from storage." );
         StopLoading();
-
         InvokeNotify();
-        return IReply.Success();
     }
-    internal async Task<Reply<bool>> ForceRefresh()
+    internal async Task ForceRefresh()
     {
+        await SessionIsAlreadyBeingRefreshed();
         Logger.Log( "Session manager force refreshing." );
-        await StateIsBeingRefreshed();
-
         StartLoading();
-        await GetTokenFromServer();
+        ClearMemory();
+        var reply = await GetTokenFromServer();
+        Logger.Log( reply ? "Session manager refreshed session." : "Session manager failed to refresh session." );
         StopLoading();
-        
         InvokeNotify();
-        return IReply.Success();
     }
     
-    async Task<bool> StateIsBeingRefreshed()
+    async Task<bool> SessionIsAlreadyBeingRefreshed()
     {
         Logger.Log( "Session manager, client is waiting." );
         bool hadToWait = false;
@@ -141,35 +131,33 @@ public sealed class SessionManager
         }
         return hadToWait;
     }
-    async Task<bool> GetTokenFromBrowserStorage()
+    async Task GetTokenFromBrowserStorage()
     {
         ClearMemory();
-        
-        var tokenReply = await _storage.GetString( TokenKey );
-        Logger.Log( $"Session manager, token from browser storage = {tokenReply.Data}" );
+        var tokenReply = await _storage.GetString( SessionStorageTokenKey );
         if (!tokenReply)
-            return false;
-        
+            return;
         SetMemory( tokenReply.Data );
-        return true;
     }
     async Task<bool> GetTokenFromServer()
     {
         Logger.Log( "Session manager is fetching from server." );
-        var refreshReply = await _http.PostAsync<string>( Consts.ApiLoginRefresh );
+        Reply<string> refreshReply = await _http.PostAsync<string>( Consts.ApiLoginRefresh );
         if (!refreshReply)
+        {
+            Logger.Log( "Session manager failed to fetch from server" );
             return false;
+        }
 
         SetMemory( refreshReply.Data );
-        await SetStorage( refreshReply.Data );
+        await _storage.Set( SessionStorageTokenKey, refreshReply.Data );
         return true;
     }
-    async Task<bool> SetStorage( string token )
-    {
-        var reply = await _storage.Set( TokenKey, token );
-        return reply;
-    }
-    
+
+    bool IsSessionValid() =>
+        !string.IsNullOrWhiteSpace( _token ) &&
+        _nextExpiry is not null &&
+        DateTime.Now < _nextExpiry;
     void SetMemory( string token )
     {
         _token = token;
@@ -182,20 +170,17 @@ public sealed class SessionManager
         string sessionId = _jwt.Claims.FirstOrDefault( static c => c.Type == ClaimTypes.Sid )?.Value ?? "SessionId Empty";
         string userId = _jwt.Claims.FirstOrDefault( static c => c.Type == ClaimTypes.NameIdentifier )?.Value ?? "UserId Empty";
         string username = _jwt.Claims.FirstOrDefault( static c => c.Type == ClaimTypes.Name )?.Value ?? "Username Empty";
+        
         long expiryDateUnix = long.Parse( _jwt.Claims.FirstOrDefault( static claim => claim.Type == "exp" )?.Value ?? string.Empty );
         DateTime expiryDateTime = DateTimeOffset.FromUnixTimeSeconds( expiryDateUnix ).UtcDateTime;
-        _session = new SessionClaims(
-            sessionId,
-            userId,
-            username,
-            expiryDateTime );
+        _nextExpiry = expiryDateTime;
     }
     void ClearMemory()
     {
         lock ( _fetchLock )
         {
             _token = null;
-            _session = null;
+            _nextExpiry = null;
             _authenticationState = EmptyAuthenticationState();
         }
     }
@@ -209,10 +194,6 @@ public sealed class SessionManager
         lock ( _fetchLock )
             _isLoading = false;
     }
-    bool IsSessionValid() =>
-        !string.IsNullOrWhiteSpace( _token ) &&
-        _session is not null &&
-        DateTime.Now < _session.Value.Expiry;
     
     static JwtSecurityToken? ParseJwtFromString( string str )
     {

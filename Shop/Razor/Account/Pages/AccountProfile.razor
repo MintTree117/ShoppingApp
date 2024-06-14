@@ -71,14 +71,7 @@
         }
 
         PushSuccess( "Account details successfully updated." );
-
-        Reply<bool> refreshResult = await Authentication.ForceRefresh();
-        if (!refreshResult) {
-            Console.WriteLine( refreshResult.GetMessage() );
-            await Authentication.ClearSession();
-            Navigate( Consts.PageSessionExpired, true );
-        }
-        
+        await Authentication.ForceRefresh();
         StopLoading();
     }
     

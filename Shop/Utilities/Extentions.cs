@@ -2,6 +2,8 @@ namespace Shop.Utilities;
 
 internal static class Extentions
 {
+    
+    
     internal static string GetOrThrow( this IConfiguration configuration, string section ) =>
         configuration[section] ?? throw new Exception( $"Failed to get {section} from IConfiguration." );
     internal static Exception Exception( this IConfiguration configuration, string section ) =>

@@ -21,7 +21,7 @@ builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddSingleton<StorageService>();
 //builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthorizationCore();
-builder.Services.AddSingleton<SessionManager>();
+builder.Services.AddSingleton<AuthenticationStateManager>();
 builder.Services.AddScoped<CustomAuthenticationStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 //builder.Services.AddScoped<AuthenticationStateProvider>( provider => provider.GetRequiredService<AuthenticationManager>() );
