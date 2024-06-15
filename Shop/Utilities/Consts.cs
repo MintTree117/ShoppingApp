@@ -37,6 +37,7 @@ internal static class Consts
     // ACCOUNT SECURITY
     internal const string ApiViewSecurity = ApiBase + "/account/security/view";
     internal const string ApiUpdatePassword = ApiBase + "/account/security/updatePassword";
+    internal const string ApiDisable2Fa = ApiBase + "/account/security/disable2fa";
     internal const string ApiUpdate2Fa = ApiBase + "/account/security/update2fa";
     
     

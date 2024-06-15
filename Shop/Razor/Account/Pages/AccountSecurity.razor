@@ -11,7 +11,7 @@
 <h3>Password</h3>
 <hr class="divider"/>
 <!-- FORM -->
-<EditForm Model="@_passwordModel" FormName="change-password" OnValidSubmit="OnValidSubmitPasswordAsync" method="post">
+<EditForm Model="@_passwordModel" FormName="change-password" OnValidSubmit="OnValidSubmitPassword" method="post">
     <DataAnnotationsValidator/>
     <ValidationSummary class="text-danger" role="alert"/>
     <!-- OLD PASSWORD -->
@@ -37,19 +37,52 @@
 </EditForm>
 
 <!-- TWO FACTOR -->
-<h3>Two Factor</h3>
+<h3>Two-Factor Authentication</h3>
 <hr class="divider"/>
-<!-- CHECKBOX -->
+<!-- TOGGLE -->
 <div class="form-check form-switch mb-3">
-    <checkbox @onchange="@(async (e) => await On2faChange(e))" id="2fa" class="form-check-input" aria-required="true"/>
-    <label for="2fa" class="form-check-label">Enable Two Factor Login?</label>
+    <checkbox id="enable2fa" @onchange="@(async(e)=>await Toggle2Fa(e))" class="form-check-input" aria-required="true"/>
+    <label for="enable2fa" class="form-check-label">@Get2FaText()</label>
 </div>
+@if (_twoFactorModel.IsEnabled)
+{
+    <!-- FORM -->
+    <EditForm Model="@_twoFactorModel" FormName="toggle2fa" OnValidSubmit="OnValidSubmitTwoFactor" method="post">
+        <!-- EMAIL -->
+        <div class="form-floating mb-3">
+            <InputText @bind-Value="@_twoFactorModel.TwoFactorEmail" type="email" id="email" class="form-control" autocomplete="email" aria-required="true" placeholder="Email"/>
+            <ValidationMessage For="@(() => _twoFactorModel.TwoFactorEmail)" class="text-danger"/>
+            <label for="email" class="form-label">Two-Factor Email</label>
+        </div>
+        <!-- SUBMIT -->
+        <button type="submit" class="btn btn-submit btn-icon"><i class="fa fa-key me-2"></i>Update Two Factor</button>
+    </EditForm>
+}
 
 @code 
 {
     UpdatePasswordRequest _passwordModel = new();
-    
-    async Task OnValidSubmitPasswordAsync()
+    TwoFactorModel _twoFactorModel = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        var httpReply = await Http.GetAsyncAuthenticated<ViewSecurityResponse>( Consts.ApiViewSecurity );
+        if (!httpReply)
+        {
+            PushError( httpReply, "Failed to get account security information." );
+            StopLoading();
+            return;
+        }
+
+        _twoFactorModel = new TwoFactorModel() {
+            IsEnabled = httpReply.Data.TwoFactorEnabled,
+            TwoFactorEmail = httpReply.Data.TwoFactorEmail
+        };
+        StateHasChanged();
+        StopLoading();
+    }
+    async Task OnValidSubmitPassword()
     {
         StartLoading( "Updating Password..." );
         
@@ -65,13 +98,11 @@
         _passwordModel = new UpdatePasswordRequest();
         StopLoading();
     }
-    async Task On2faChange( ChangeEventArgs args )
+    async Task OnValidSubmitTwoFactor()
     {
-        bool value = (bool) (args.Value ?? throw new Exception( "Invalid 2fa ChangeEventArgs" ));
+        StartLoading( "Updating Two-Factor Authentication..." );
         
-        StartLoading( value ? "Enabling Two Factor Authentication" : "Disabling Two Factor Authentication" );
-        
-        Reply<bool> httpReply = await Http.PutAsyncAuthenticated<bool>( Consts.ApiUpdate2Fa, _passwordModel );
+        var httpReply = await Http.PutAsyncAuthenticated<bool>( Consts.ApiUpdate2Fa, _twoFactorModel );
         if (!httpReply)
         {
             PushError( httpReply, "Failed to update two factor authentication." );
@@ -82,13 +113,44 @@
         PushSuccess( "Updated two factor authentication." );
         StopLoading();
     }
-    
+    async Task Toggle2Fa( ChangeEventArgs e )
+    {
+        bool enabled = (bool) (e.Value ?? false);
+        _twoFactorModel.IsEnabled = enabled;
+
+        if (enabled)
+        {
+            StateHasChanged();
+            return;
+        }
+        
+        StartLoading( "Disabling two factor authentication..." );
+        
+        var httpReply = await Http.PutAsyncAuthenticated<bool>( Consts.ApiDisable2Fa );
+        if (!httpReply)
+        {
+            PushError( httpReply, "Failed to disable two factor authentication." );
+            StopLoading();
+            return;
+        }
+        
+        PushSuccess( "Updated two factor authentication." );
+        _twoFactorModel = new TwoFactorModel() { IsEnabled = false};
+        StopLoading();
+    }
+
+    string Get2FaText() =>
+        _twoFactorModel.IsEnabled ? "Disable 2fa" : "Enable 2fa";
+
+    readonly record struct ViewSecurityResponse(
+        bool TwoFactorEnabled,
+        string? TwoFactorEmail );
     sealed class TwoFactorModel
     {
         public bool IsEnabled { get; set; }
-        public string TwoFactorEmail { get; set; } = string.Empty;
+        [Required( ErrorMessage = "Email is required." ), EmailAddress( ErrorMessage = "Invalid email address." )] 
+        public string? TwoFactorEmail { get; set; } = string.Empty;
     }
-
     sealed class UpdatePasswordRequest
     {
         [Required, DataType( DataType.Password ), Display( Name = "Current password" )]

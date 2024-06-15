@@ -23,8 +23,8 @@ public sealed class AuthenticationStateManager
     bool _isFirstLoad = true; // on startup go to server
     
     internal string AccessToken => _token ?? string.Empty;
-    string? _token;
-    DateTime? _nextExpiry;
+    string? _token = null;
+    DateTime _nextExpiry = DateTime.Now + TimeSpan.FromHours( 1 );
     AuthenticationState _authenticationState = EmptyAuthenticationState();
     
     // CONSTRUCTOR
@@ -54,6 +54,9 @@ public sealed class AuthenticationStateManager
     // FOR AUTH PROVIDER CALLBACK
     internal async Task<AuthenticationState> GetSessionState()
     {
+        if (await SessionIsAlreadyBeingRefreshed())
+            return await Task.FromResult( _authenticationState );
+        
         if (_isFirstLoad) // On startup, always go to server once
         {
             Logger.Log( "Session manager first load." );
@@ -69,9 +72,6 @@ public sealed class AuthenticationStateManager
         }
 
         Logger.Log( "Session manager getting session state in memory" );
-        
-        if (await SessionIsAlreadyBeingRefreshed())
-            return await Task.FromResult( _authenticationState );
         if (IsSessionValid())
             return await Task.FromResult( _authenticationState );
 
@@ -133,7 +133,7 @@ public sealed class AuthenticationStateManager
     }
     async Task GetTokenFromBrowserStorage()
     {
-        ClearMemory();
+        //ClearMemory();
         var tokenReply = await _storage.GetString( SessionStorageTokenKey );
         if (!tokenReply)
             return;
@@ -150,13 +150,12 @@ public sealed class AuthenticationStateManager
         }
 
         SetMemory( refreshReply.Data );
-        await _storage.Set( SessionStorageTokenKey, refreshReply.Data );
+        await _storage.Set( SessionStorageTokenKey, _token );
         return true;
     }
 
     bool IsSessionValid() =>
         !string.IsNullOrWhiteSpace( _token ) &&
-        _nextExpiry is not null &&
         DateTime.Now < _nextExpiry;
     void SetMemory( string token )
     {
@@ -180,7 +179,7 @@ public sealed class AuthenticationStateManager
         lock ( _fetchLock )
         {
             _token = null;
-            _nextExpiry = null;
+            _nextExpiry = DateTime.Now + TimeSpan.FromHours( 1 );
             _authenticationState = EmptyAuthenticationState();
         }
     }

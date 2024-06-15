@@ -9,13 +9,13 @@ internal static class HttpConfiguration
     {
         builder.Services
             .AddTransient<CookieDelegatingHandler>()
-            .AddScoped( sp => sp
+            .AddScoped( static sp => sp
                 .GetRequiredService<IHttpClientFactory>()
                 .CreateClient( "API" ) )
-            .AddHttpClient( "API", client => client.BaseAddress = new Uri( Consts.ApiBase ) ).AddHttpMessageHandler<CookieDelegatingHandler>();
+            .AddHttpClient( "API", static client => client.BaseAddress = new Uri( Consts.ApiBase ) )
+            .AddHttpMessageHandler<CookieDelegatingHandler>();
         
         builder.Services.AddSingleton<HttpService>();
-
     }
 
     static string GetBaseUrl( WebAssemblyHostBuilder builder ) =>

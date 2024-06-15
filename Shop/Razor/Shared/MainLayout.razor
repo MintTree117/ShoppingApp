@@ -6,7 +6,7 @@
 
 <div class="page">
     <main>
-        <NoficationsPanel @ref="@_notifications"/>
+        <NotificationsPanel @ref="@_notifications"/>
         <CascadingValue Value="@GetSelf()" name="layout">
             <MainNavigationTop/>
         </CascadingValue>
@@ -24,9 +24,9 @@
 {
     [Inject] public CustomAuthenticationStateProvider CustomAuthenticationState { get; set; } = null!;
 
-    NoficationsPanel _notifications = default!;
+    NotificationsPanel _notifications = default!;
     MainLayout GetSelf() => this;
-
+    
     internal void PushAlert( AlertType type, string message )
     {
         _notifications.PushAlert( type, message );
