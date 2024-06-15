@@ -20,11 +20,10 @@ public sealed class AuthenticationStateManager
     readonly object _fetchLock = new();
     
     bool _isLoading = false;
-    bool _isFirstLoad = true; // on startup go to server
-    
+
     internal string AccessToken => _token ?? string.Empty;
     string? _token = null;
-    DateTime _nextExpiry = DateTime.Now + TimeSpan.FromHours( 1 );
+    DateTime _nextExpiry = DateTime.Now - TimeSpan.FromDays( 9 );
     AuthenticationState _authenticationState = EmptyAuthenticationState();
     
     // CONSTRUCTOR
@@ -57,31 +56,26 @@ public sealed class AuthenticationStateManager
         if (await SessionIsAlreadyBeingRefreshed())
             return await Task.FromResult( _authenticationState );
         
-        if (_isFirstLoad) // On startup, always go to server once
+        StartLoading();
+        
+        Logger.Log( "Session manager getting session state from memory" );
+        if (IsSessionValid())
         {
-            Logger.Log( "Session manager first load." );
-            StartLoading();
-            _isFirstLoad = false;
-
-            if (!await GetTokenFromServer())
-                Logger.Log( "Session manager is unauthenticated on first load." );
-            
-            StopLoading();
-            InvokeNotify(); // because its the first fetch (mostly for Navbar)
+            InvokeNotify();
             return await Task.FromResult( _authenticationState );
         }
 
-        Logger.Log( "Session manager getting session state in memory" );
-        if (IsSessionValid())
-            return await Task.FromResult( _authenticationState );
 
-        Logger.Log( "Session manager getting session state from server" );
-        StartLoading();
+        Logger.Log( "Session manager getting session state from storage" );
         await GetTokenFromBrowserStorage();
-        if (!IsSessionValid())
-            await GetTokenFromServer();
-        StopLoading();
         
+        if (!IsSessionValid())
+        {
+            Logger.Log( "Session manager getting session state from server" );
+            await GetTokenFromServer();
+        }
+        StopLoading();
+        InvokeNotify();
         return await Task.FromResult( _authenticationState );
     }
     internal async Task<Reply<bool>> CreateNewSession( string newToken )
@@ -133,10 +127,12 @@ public sealed class AuthenticationStateManager
     }
     async Task GetTokenFromBrowserStorage()
     {
-        //ClearMemory();
+        ClearMemory();
         var tokenReply = await _storage.GetString( SessionStorageTokenKey );
         if (!tokenReply)
             return;
+
+        Logger.Log( $"Token from storage: {tokenReply.Data}" );
         SetMemory( tokenReply.Data );
     }
     async Task<bool> GetTokenFromServer()
@@ -179,7 +175,7 @@ public sealed class AuthenticationStateManager
         lock ( _fetchLock )
         {
             _token = null;
-            _nextExpiry = DateTime.Now + TimeSpan.FromHours( 1 );
+            _nextExpiry = DateTime.Now - TimeSpan.FromDays( 9 );
             _authenticationState = EmptyAuthenticationState();
         }
     }
