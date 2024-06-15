@@ -23,7 +23,7 @@ public sealed class AuthenticationStateManager
 
     internal string AccessToken => _token ?? string.Empty;
     string? _token = null;
-    DateTime _nextExpiry = DateTime.Now - TimeSpan.FromDays( 9 );
+    DateTime _nextExpiryUtc = DateTime.UtcNow - TimeSpan.FromDays( 9 );
     AuthenticationState _authenticationState = EmptyAuthenticationState();
     
     // CONSTRUCTOR
@@ -61,16 +61,18 @@ public sealed class AuthenticationStateManager
         Logger.Log( "Session manager getting session state from memory" );
         if (IsSessionValid())
         {
+            Logger.Log( "---_" + _nextExpiryUtc.ToString() );
             InvokeNotify();
             return await Task.FromResult( _authenticationState );
         }
-
-
+        
         Logger.Log( "Session manager getting session state from storage" );
         await GetTokenFromBrowserStorage();
+        Logger.Log( "---_" + _nextExpiryUtc.ToString() );
         
         if (!IsSessionValid())
         {
+            ClearMemory();
             Logger.Log( "Session manager getting session state from server" );
             await GetTokenFromServer();
         }
@@ -152,7 +154,7 @@ public sealed class AuthenticationStateManager
 
     bool IsSessionValid() =>
         !string.IsNullOrWhiteSpace( _token ) &&
-        DateTime.Now < _nextExpiry;
+        DateTime.UtcNow < _nextExpiryUtc;
     void SetMemory( string token )
     {
         _token = token;
@@ -162,20 +164,23 @@ public sealed class AuthenticationStateManager
         ClaimsPrincipal _claimsPrincipal = new( identity );
         _authenticationState = new AuthenticationState( _claimsPrincipal );
 
-        string sessionId = _jwt.Claims.FirstOrDefault( static c => c.Type == ClaimTypes.Sid )?.Value ?? "SessionId Empty";
-        string userId = _jwt.Claims.FirstOrDefault( static c => c.Type == ClaimTypes.NameIdentifier )?.Value ?? "UserId Empty";
-        string username = _jwt.Claims.FirstOrDefault( static c => c.Type == ClaimTypes.Name )?.Value ?? "Username Empty";
+        /*
+       string sessionId = _jwt.Claims.FirstOrDefault( static c => c.Type == ClaimTypes.Sid )?.Value ?? "SessionId Empty";
+       string userId = _jwt.Claims.FirstOrDefault( static c => c.Type == ClaimTypes.NameIdentifier )?.Value ?? "UserId Empty";
+       string username = _jwt.Claims.FirstOrDefault( static c => c.Type == ClaimTypes.Name )?.Value ?? "Username Empty";
+     */
         
         long expiryDateUnix = long.Parse( _jwt.Claims.FirstOrDefault( static claim => claim.Type == "exp" )?.Value ?? string.Empty );
         DateTime expiryDateTime = DateTimeOffset.FromUnixTimeSeconds( expiryDateUnix ).UtcDateTime;
-        _nextExpiry = expiryDateTime;
+        _nextExpiryUtc = expiryDateTime;
     }
+    
     void ClearMemory()
     {
         lock ( _fetchLock )
         {
             _token = null;
-            _nextExpiry = DateTime.Now - TimeSpan.FromDays( 9 );
+            _nextExpiryUtc = DateTime.Now - TimeSpan.FromDays( 9 );
             _authenticationState = EmptyAuthenticationState();
         }
     }

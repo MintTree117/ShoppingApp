@@ -61,13 +61,17 @@ else {
             <div class="dropdown me-3 h-100">
                 <!-- DROPDOWN TOGGLE -->
                 <button class="btn btn-secondary dropdown-toggle h-100" type="button" id="RowsPerPage" data-bs-toggle="dropdown" aria-expanded="false">
-                    Display: @_rowsPerPageSelection
+                    Display: @_pageSize
                 </button>
                 <!-- DROPDOWN LIST -->
                 <ul class="dropdown-menu" aria-labelledby="RowsPerPage">
-                    @for ( int i = 0; i < _rowCounts.Length; i++ ) {
-                        int localIndex = i; // Create a local copy of the loop variable because of enumeration
-                        <li><button class="dropdown-item" type="button" @onclick="async () => await UpdateRowsPerPage( localIndex )">@_rowCounts[localIndex]</button></li>
+                    @foreach ( int pageSize in _pageSizes )
+                    {
+                        <li>
+                            <button class="dropdown-item" type="button" @onclick="async () => await OnPageSizeChanged( pageSize )">
+                                @pageSize
+                            </button>
+                        </li>
                     }
                 </ul>
             </div>
@@ -111,9 +115,9 @@ else {
                     <td class="text-end">
                         <div class="d-flex flex-row align-items-stretch justify-content-end">
                             <!-- Edit Address -->
-                            <button class="btn btn-primary btn-sm btn-icon me-3" @onclick="() => OnClickEdit( address )">Edit<i class="fa fa-edit ms-2"></i></button>
+                            <button class="btn btn-primary btn-sm btn-icon me-3" @onclick="()=>OnClickEdit( address )">Edit<i class="fa fa-edit ms-2"></i></button>
                             <!-- Delete Address -->
-                            <button class="btn btn-primary btn-sm btn-icon" @onclick="@(async () => await OnClickDelete( address ))">Delete<i class="fa fa-trash ms-2"></i></button>
+                            <button class="btn btn-primary btn-sm btn-icon" @onclick="@(async()=>await OnClickDelete( address ))">Delete<i class="fa fa-trash ms-2"></i></button>
                         </div>
                     </td>
                 </tr>
@@ -124,13 +128,31 @@ else {
     
     <!-- PAGINATION -->
     <PaginationPanel @ref="@_paginationPanel" OnPageChange="@OnPaginationChange"/>
+    
+    <hr class="divider"/>
+    <h4>Development</h4>
+    <button class="btn btn-info mx-auto" @onclick="@(async()=>await OnClickTestGenerate())">Test Generate</button>
 }
 
 @code {
+    async Task OnClickTestGenerate()
+    {
+        for ( int i = 0; i < 20; i++ )
+        {
+            AddressModel testModel = new() {
+                Name = $"Test Address: {i}",
+                WorldGridPosX = i,
+                WorldGridPosY = i * i
+            };
+
+            await Http.PutAsyncAuthenticated<bool>( Consts.ApiAddAddress, testModel );
+        }
+    }
+    
     AddressModel _editAddress = new();
     List<AddressModel> _pagedAddresses = [];
-    readonly int[] _rowCounts = [5, 10, 20];
-    int _rowsPerPageSelection = 5;
+    readonly int[] _pageSizes = [5, 10, 20];
+    int _pageSize = 5;
     int _currentPage = 1;
     int _totalCount = 0;
     bool _isEditing;
@@ -153,7 +175,7 @@ else {
         
         Dictionary<string, object> parameters = [];
         parameters.Add( "Page", _currentPage );
-        parameters.Add( "PageSize", _rowsPerPageSelection );
+        parameters.Add( "PageSize", _pageSize );
         Reply<ViewPagedAddressesResponse> result = await Http.GetAsyncAuthenticated<ViewPagedAddressesResponse>( Consts.ApiGetAddresses, parameters );
 
         if (!result) {
@@ -210,7 +232,7 @@ else {
 
         int count = result ? result.Data.TotalCount : 0;
         
-        _paginationPanel.Set( page, _rowsPerPageSelection, count );
+        _paginationPanel.Set( page, _pageSize, count );
 
         _isEditing = false;
         _isNew = false;
@@ -239,9 +261,9 @@ else {
 
     async Task LoadFreshAddresses() =>
         await GetPagedAddresses( 0 );
-    async Task UpdateRowsPerPage( int rows )
+    async Task OnPageSizeChanged( int pageSize )
     {
-        _rowsPerPageSelection = rows;
+        _pageSize = pageSize;
         await GetPagedAddresses( 0 );
     }
     async Task OnPaginationChange( int page )
@@ -253,7 +275,7 @@ else {
     string GetEditTitle() =>
         _isNew ? "New Address" : "Edit Address";
     string GetViewHeader() =>
-        $"Viewing {Math.Min(_rowsPerPageSelection, _totalCount)} results of {_totalCount} total.";
+        $"Viewing {Math.Min(_pageSize, _totalCount)} results of {_totalCount} total.";
     
     readonly record struct ViewPagedAddressesResponse(
         int TotalCount,
