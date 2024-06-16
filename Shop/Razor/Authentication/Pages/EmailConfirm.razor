@@ -1,4 +1,4 @@
-@page "/emailConfirm"
+@page "/confirmEmail"
 @using Shop.Utilities
 @using Shop.Infrastructure.Common.ReplyTypes
 @inherits Shop.Razor.Authentication.AuthenticationPageBase
@@ -7,21 +7,29 @@
 <PageTitle>Confirm Email</PageTitle>
 
 @if (_confirmFailed) {
-    <!-- MESSAGE -->
-    <i class="fa-solid fa-circle-exclamation fa-4x text-danger auth-icon"></i>
-    <h3 class="mb-3">Email Confirmation Failed!</h3>
-    <p class="mb-3">Error Details: @_apiReply.GetMessage()</p>
-    <p class="mb-3 text-muted">Please try again or contact support.</p>
-    <!-- RESEND -->
-    <button class="btn btn-submit btn-info btn-icon" @onclick="GoToResend"><i class="fa fa-repeat me-2"></i>Retry</button>
+    <div class="auth-result-wrapper">
+        <!-- MESSAGE -->
+        <i class="fa-solid fa-circle-exclamation fa-4x text-danger auth-result-icon"></i>
+        <h3>Email Confirmation Failed!</h3>
+        <p>Error Details: @_apiReply.GetMessage()</p>
+        <p class="text-muted">Please try again or contact support.</p>
+        <!-- RESEND -->
+        <button class="btn btn-submit btn-icon" @onclick="GoToResend"><i class="fa fa-repeat me-2"></i>Retry</button>
+    </div>
 }
 else if (_emailConfirmed) {
-    <!-- MESSAGE -->
-    <i class="fa-solid fa-circle-check fa-4x text-success auth-icon"></i>
-    <h3 class="mb-3">Email Confirmed!</h3>
-    <p class="mb-3 text-muted">Your account has been verified and you can now login normally.</p>
-    <!-- LOGIN -->
-    <button class="btn btn-submit btn-icon mx-auto px-3" @onclick="GoToLogin"><i class="fa fa-user me-2"></i>Login</button>
+    <div class="auth-result-wrapper">
+        <!-- MESSAGE -->
+        <i class="fa-solid fa-circle-check fa-4x text-success auth-result-icon"></i>
+        <h3>Email Confirmed!</h3>
+        <p class="text-muted">Your account has been verified and you can now login normally.</p>
+        <!-- LOGIN -->
+        <button class="btn btn-submit btn-icon" @onclick="GoToLogin"><i class="fa fa-user me-2"></i>Login</button>
+    </div>
+}
+else
+{
+    <span>Nothing Here</span>
 }
 
 @code 
@@ -33,12 +41,14 @@ else if (_emailConfirmed) {
     bool _confirmFailed = false;
     Reply<bool> _apiReply;
     
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnInitializedAsync()
     {
         StartLoading( "Confirming email..." );
 
         if (!TryValidateLink( out string userId, out string code, out string errorMessage )) {
             PushError( errorMessage );
+            _confirmFailed = true;
+            StateHasChanged();
             StopLoading();
             return;
         }
@@ -50,8 +60,8 @@ else if (_emailConfirmed) {
         StopLoading();
     }
     
-    async Task<Reply<bool>> TryConfirmEmail( string url, string userId, string code ) =>
-        await Http.PutAsync<bool>( url, new ConfirmEmailRequest( userId, code ) );
+    async Task<Reply<bool>> TryConfirmEmail( string url, string email, string code ) =>
+        await Http.PutAsync<bool>( url, new ConfirmEmailRequest( email, code ) );
     bool TryValidateLink( out string userId, out string code, out string errorMessage )
     {
         userId = string.Empty;

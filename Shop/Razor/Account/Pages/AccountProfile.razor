@@ -10,8 +10,7 @@
 <!-- WRAPPER -->
 <div class="user-container-small">
     <!-- TITLE -->
-    <h3>Profile</h3>
-    <hr class="divider"/>
+    <h3 class="mb-3 fw-normal">Manage Profile Details</h3>
     <!-- FORM -->
     <EditForm Model="@_accountModel" OnValidSubmit="@(async () => await UpdateAccount())" method="post">
         <DataAnnotationsValidator/>

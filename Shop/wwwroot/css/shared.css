@@ -56,27 +56,33 @@
     }
 }
 
-.btn-icon {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
-
 .btn-submit {
     width: 100%;
     padding: 15px;
     font-weight: bold;
-    font-size: 18px;
     color: white;
+    text-align: left;
     background-color: #1b6ec2;
 }
+
 .btn-submit:hover {
     color: white;
     background-color: #1669c9;    
 }
 
+.btn-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+}
+
 h1, h2, h3, h4, h5, h6 {
-    font-weight: bold;
+    font-weight: normal;
+}
+
+h1, h2, h3 {
+    margin-bottom: 16px;
 }
 
 .divider {
@@ -84,4 +90,17 @@ h1, h2, h3, h4, h5, h6 {
     min-width: 100%;
     color: gray;
     border-top: 2px solid gray;
+}
+
+hr {
+    min-height: 1px;
+    border-bottom: 1px solid dimgrey;
+}
+
+.text-success {
+    color: #00c800;
+}
+
+.btn-success {
+    background-color: #00c800;
 }

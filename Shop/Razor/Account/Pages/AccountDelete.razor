@@ -11,29 +11,31 @@
 <div class="user-container-small">
     @if (_isWarning) {
         <!-- CONFIRM DELETE -->
-        <div class="alert alert-warning p-3" role="alert">
+        <div class="alert alert-warning auth-result-wrapper" role="alert">
             <!-- MESSAGE -->
-            <i class="fa-solid fa-triangle-exclamation fa-4x text-warning auth-icon"></i>
-            <p class="mb-3">
-                <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
-            </p>
+            <i class="fa-solid fa-triangle-exclamation fa-4x text-warning auth-result-icon mx-auto"></i>
+            <p><strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong></p>
+            <hr/>
             <!-- YES -->
-            <button class="btn btn-submit btn-warning btn-icon mx-auto px-3" @onclick="@(async () => await OnConfirmSubmit())"><i class="fa fa-trash me-2"></i>Delete</button>
-            <hr class="divider"/>
+            <button class="btn btn-submit btn-warning btn-icon mx-auto" @onclick="@(async () => await OnConfirmSubmit())">
+                <i class="fa fa-trash me-2"></i>Delete
+            </button>
+            <hr/>
             <!-- NO -->
-            <button class="btn btn-submit btn-warning btn-icon mx-auto px-3" @onclick="Cancel"><i class="fa-solid fa-x me-2"></i>Cancel</button>
+            <button class="btn btn-submit btn-warning btn-icon mx-auto" @onclick="Cancel">
+                <i class="fa-solid fa-x me-2"></i>Cancel
+            </button>
         </div>
     }
     else {
         <!-- TITLE -->
-        <h3>Delete Personal Data</h3>
-        <hr class="divider"/>
+        <h3>Delete Account</h3>
         <!-- FORM -->
         <EditForm Model="@_request" FormName="delete-user" OnValidSubmit="@(async () => await OnValidSubmitAsync())" method="post">
             <DataAnnotationsValidator/>
             <ValidationSummary class="text-danger" role="alert"/>
             <!-- PASSWORD -->
-            <div class="form-floating mb-3">
+            <div class="form-floating mb-2">
                 <InputText type="password" @bind-Value="@_request.Password" id="password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Please enter your password."/>
                 <label for="password" class="form-label">Password</label>
                 <ValidationMessage For="@(() => _request.Password)" class="text-danger"/>

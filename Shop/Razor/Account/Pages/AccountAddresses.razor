@@ -13,7 +13,7 @@
     <div class="user-container-small">
         <!-- TITLE -->
         <div class="d-flex flex-row align-items-center justify-content-between">
-            <h3 class="mb-0">@GetEditTitle()</h3>
+            <h3 class="mb-0 fw-normal">@GetEditTitle()</h3>
             <button class="btn btn-link text-decoration-none btn-icon" @onclick="@(async () => await OnClickCancelEdit())"><i class="fa fa-arrow-left me-2"></i>Back</button>
         </div>
         <hr class="divider"/>
@@ -56,7 +56,7 @@ else {
         <!-- VIEW TOP-->
         <div class="d-flex flex-row align-items-center justify-content-between">
             <!-- TOP LEFT -->
-            <h3 class="d-block mb-0 text-start">Addresses</h3>
+            <h3 class="d-block mb-0 text-start fw-normal">Manage Addresses</h3>
             <!-- TOP RIGHT -->
             <div class="d-flex flex-row align-items-stretch justify-content-between">
                 <!-- ROWS DROPDOWN -->
@@ -137,9 +137,9 @@ else {
 
         <!-- TESTING -->
         <div class="mx-auto">
-            <hr class="divider"/>
+            <hr/>
             <h4>Development</h4>
-            <button class="btn btn-info mx-auto" @onclick="@(async () => await OnClickTestGenerate())">Test Generate</button>
+            <button class="btn btn-info mx-auto text-center" @onclick="@(async () => await OnClickTestGenerate())">Test Generate</button>
         </div>
     </div>
 }
@@ -214,11 +214,16 @@ else {
         }
 
         PushSuccess( "Address Saved." );
-        
-        if (_isNew)
-            await LoadFreshAddresses();
-        else
+
+        if (!_isNew)
+        {
             StopLoading();
+            return;
+        }
+        
+        _isNew = false;
+        _isEditing = false;
+        await LoadFreshAddresses();
     }
     async Task OnClickDelete( AddressModel address )
     {

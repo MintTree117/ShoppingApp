@@ -10,8 +10,7 @@
 <!-- WRAPPER -->
 <div class="user-container-small">
     <!-- PASSWORD -->
-    <h3>Password</h3>
-    <hr class="divider"/>
+    <h3 class="mb-3 fw-normal">Manage Account Password</h3>
     <!-- FORM -->
     <EditForm Model="@_passwordModel" FormName="change-password" OnValidSubmit="OnValidSubmitPassword" method="post">
         <DataAnnotationsValidator/>
@@ -38,9 +37,10 @@
         <button type="submit" class="btn btn-submit btn-icon"><i class="fa fa-key me-2"></i>Update Password</button>
     </EditForm>
     
+    <hr/>
+    
     <!-- TWO FACTOR -->
-    <h3>Two-Factor Authentication</h3>
-    <hr class="divider"/>
+    <h3 class="mb-3 fw-normal">Two-Factor Authentication</h3>
     <!-- TOGGLE -->
     <div class="form-check form-switch mb-3">
         <checkbox id="enable2fa" @onchange="@(async(e)=>await Toggle2Fa(e))" class="form-check-input" aria-required="true"/>

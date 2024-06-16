@@ -102,10 +102,3 @@ a, .btn-link {
 code {
     color: #c02d76;
 }
-
-.btn-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: nowrap;
-}

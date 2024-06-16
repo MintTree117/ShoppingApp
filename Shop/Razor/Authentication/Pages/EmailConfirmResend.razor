@@ -1,4 +1,4 @@
-@page "/emailResend"
+@page "/resendEmailConfirmation"
 @using Shop.Utilities
 @using Shop.Infrastructure.Common.ReplyTypes
 @inherits AuthenticationPageBase
@@ -7,18 +7,19 @@
 <PageTitle>Resend Confirmation Email</PageTitle>
 
 @if (_isSuccess) {
-    <!-- MESSAGE -->
-    <i class="fa-solid fa-circle-check fa-4x text-success auth-icon"></i>
-    <h3 class="mb-3">Email confirm link sent!</h3>
-    <p class="mb-3">Please click the link sent to your email to activate your account.</p>
-    <!-- RESEND -->
-    <button class="btn btn-submit btn-info btn-icon" @onclick="GoToResend"><i class="fa fa-repeat me-2"></i>Retry</button>
+    <div class="auth-result-wrapper">
+        <!-- MESSAGE -->
+        <i class="fa-solid fa-circle-check fa-4x text-success auth-result-icon"></i>
+        <h3>Email confirm link sent!</h3>
+        <p>Please click the link sent to your email to activate your account.</p>
+        <!-- RESEND -->
+        <button class="btn btn-submit btn-icon" @onclick="GoToResend"><i class="fa fa-repeat me-2"></i>Retry</button>
+    </div>
 }
 else {
     <!-- TITLE -->
-    <h3 class="mb-3">Resend Email Confirmation</h3>
+    <h3>Resend Email Confirmation</h3>
     <p class="text-secondary">Enter Your Email</p>
-    <hr/>
     <!-- FORM -->
     <EditForm Model="Request" FormName="resend-email-confirmation" OnValidSubmit="SendConfirmationEmail" method="post">
         <DataAnnotationsValidator/>

@@ -4,7 +4,7 @@
     margin-right: auto;
     width: 100%;
     max-width: 500px;
-    text-align: center;
+    text-align: left;
     display: flex;
     flex-direction: column;
     align-items: stretch;
@@ -16,14 +16,13 @@
     margin-right: auto;
     width: 100%;
     max-width: 800px;
-    text-align: center;
+    text-align: left;
     display: flex;
     flex-direction: column;
     align-items: stretch;
 }
 
 .account-nav {
-    display: flex;
     margin-left: auto;
     margin-right: auto;
     min-width: 100%;
@@ -31,6 +30,8 @@
 }
 
 .account-nav-list {
+    display: flex;
+    flex-direction: column;
     justify-content: center;
     width: 100%;
     min-width: 100%;
@@ -41,4 +42,24 @@
     margin-left: auto;
     margin-right: auto;
     margin-bottom: 15px;
+}
+
+.auth-result-wrapper {
+    width: 100%;
+    min-width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+}
+
+.auth-result-icon {
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+@media only screen and (min-width: 900px) { 
+    .account-nav-list {
+        flex-direction: row;
+    }
 }
