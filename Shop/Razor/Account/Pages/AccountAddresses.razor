@@ -14,7 +14,7 @@
         <!-- TITLE -->
         <div class="d-flex flex-row align-items-center justify-content-between">
             <h3 class="mb-0">@GetEditTitle()</h3>
-            <button class="btn btn-secondary btn-icon" @onclick="@OnClickCancelEdit">Cancel<i class="fa fa-window-close ms-2"></i></button>
+            <button class="btn btn-link text-decoration-none btn-icon" @onclick="@(async () => await OnClickCancelEdit())"><i class="fa fa-arrow-left me-2"></i>Back</button>
         </div>
         <hr class="divider"/>
         <!-- FORM -->
@@ -22,9 +22,9 @@
             <DataAnnotationsValidator/>
             <ValidationSummary class="text-danger" role="alert"/>
             <!-- IS PRIMARY -->
-            <div class="form-check form-switch mb-3">
+            <div class="form-check form-switch mb-3 text-start">
                 <InputCheckbox @bind-Value="@_editAddress.IsPrimary" id="isPrimary" class="form-check-input" aria-required="true"/>
-                <label for="isPrimary" class="form-check-label">Set as Primary?</label>
+                <label for="isPrimary" class="form-check-label ms-1">Set as Primary?</label>
             </div>
             <!-- Name -->
             <div class="form-floating mb-3">
@@ -56,14 +56,14 @@ else {
         <!-- VIEW TOP-->
         <div class="d-flex flex-row align-items-center justify-content-between">
             <!-- TOP LEFT -->
-            <h3 class="mb-0">Addresses</h3>
+            <h3 class="d-block mb-0 text-start">Addresses</h3>
             <!-- TOP RIGHT -->
             <div class="d-flex flex-row align-items-stretch justify-content-between">
                 <!-- ROWS DROPDOWN -->
                 <div class="dropdown me-3 h-100">
                     <!-- DROPDOWN TOGGLE -->
-                    <button class="btn btn-secondary dropdown-toggle h-100" type="button" id="RowsPerPage" data-bs-toggle="dropdown" aria-expanded="false">
-                        Display: @_pageSize
+                    <button class="btn btn-secondary btn-icon dropdown-toggle h-100" type="button" id="RowsPerPage" data-bs-toggle="dropdown" aria-expanded="false">
+                        @_pageSize
                     </button>
                     <!-- DROPDOWN LIST -->
                     <ul class="dropdown-menu" aria-labelledby="RowsPerPage">
@@ -78,65 +78,68 @@ else {
                     </ul>
                 </div>
                 <!-- ADD ADDRESS -->
-                <button class="btn btn-primary btn-icon" @onclick="@OnClickNew">Add Address<i class="fa fa-plus ms-2"></i></button>
+                <button class="btn btn-primary btn-icon" @onclick="@OnClickNew"><i class="fa fa-plus"></i></button>
             </div>
         </div>
         
         <hr class="divider"/>
         
+        <!-- VIEW RESULT INFO -->
+        <span class="text-start text-muted">@GetViewHeader()</span>
+        <hr/>
+        
         <!-- VIEW BOTTOM -->
-        @if (_pagedAddresses.Count < 1) {
-            <p>No Addresses Found.</p>
-        }
-        else {
-            <!-- VIEW HEADER -->
-            <p class="mb-3 text-muted">@GetViewHeader()</p>
-            <hr/>
+        @if (_pagedAddresses.Count > 0) {
             <!-- VIEW TABLE -->
-            <table class="table">
-                <!-- TABLE HEADER -->
-                <thead>
-                <tr>
-                    <th>Id</th>
-                    <th>Primary</th>
-                    <th>Name</th>
-                    <th>GridX</th>
-                    <th>GridY</th>
-                    <th class="text-end">Actions</th>
-                </tr>
-                </thead>
-                <!-- TABLE BODY -->
-                <tbody>
-                @foreach ( AddressModel address in _pagedAddresses ) {
-                    <tr>
-                        <td>@address.Id</td>
-                        <td>@(address.IsPrimary ? "true" : string.Empty)</td>
-                        <td>@address.Name</td>
-                        <td>@address.WorldGridPosX</td>
-                        <td>@address.WorldGridPosY</td>
-                        <td class="text-end">
-                            <div class="d-flex flex-row align-items-stretch justify-content-end">
-                                <!-- Edit Address -->
-                                <button class="btn btn-primary btn-sm btn-icon me-3" @onclick="()=>OnClickEdit( address )">Edit<i class="fa fa-edit ms-2"></i></button>
-                                <!-- Delete Address -->
-                                <button class="btn btn-primary btn-sm btn-icon" @onclick="@(async()=>await OnClickDelete( address ))">Delete<i class="fa fa-trash ms-2"></i></button>
-                            </div>
-                        </td>
+            <div class="table-responsive">
+                <table class="table align-middle table-striped table-hover">
+                    <!-- TABLE HEADER -->
+                    <thead>
+                    <tr class="text-start">
+                        <th>Name</th>
+                        <th>GridX</th>
+                        <th>GridY</th>
+                        <th class="text-end">Actions</th>
                     </tr>
-                }
-                </tbody>
-            </table>
+                    </thead>
+                    <!-- TABLE BODY -->
+                    <tbody>
+                    @foreach ( AddressModel address in _pagedAddresses )
+                    {
+                        <tr class="text-start">
+                            <td>
+                                @if (address.IsPrimary)
+                                {
+                                    <i class="fa-solid fa-star fa-2xs text-warning me-1"></i>
+                                }
+                                @address.Name
+                            </td>
+                            <td class="ps-3">@address.WorldGridPosX</td>
+                            <td class="ps-3">@address.WorldGridPosY</td>
+                            <td>
+                                <div class="d-flex flex-row align-items-stretch justify-content-end">
+                                    <!-- Edit Address -->
+                                    <button class="btn btn-primary btn-sm btn-icon p-2 me-3" @onclick="() => OnClickEdit( address )"><i class="fa fa-edit"></i></button>
+                                    <!-- Delete Address -->
+                                    <button class="btn btn-primary btn-sm p-2 btn-icon" @onclick="@(async () => await OnClickDelete( address ))"><i class="fa fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
         }
         <!-- PAGINATION -->
         <div class="mx-auto">
             <PaginationPanel @ref="@_paginationPanel" OnPageChange="@OnPaginationChange"/>
         </div>
-        
+
         <!-- TESTING -->
         <div class="mx-auto">
             <hr class="divider"/>
             <h4>Development</h4>
-            <button class="btn btn-info mx-auto" @onclick="@(async()=>await OnClickTestGenerate())">Test Generate</button>
+            <button class="btn btn-info mx-auto" @onclick="@(async () => await OnClickTestGenerate())">Test Generate</button>
         </div>
     </div>
 }
@@ -261,10 +264,11 @@ else {
         _isNew = false;
         StateHasChanged();
     }
-    void OnClickCancelEdit()
+    async Task OnClickCancelEdit()
     {
         _isEditing = false;
         _isNew = false;
+        await LoadFreshAddresses();
         StateHasChanged();
     }
 
