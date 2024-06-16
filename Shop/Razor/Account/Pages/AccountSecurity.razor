@@ -10,7 +10,7 @@
 <!-- WRAPPER -->
 <div class="user-container-small">
     <!-- PASSWORD -->
-    <h3 class="mb-3 fw-normal">Manage Account Password</h3>
+    <h3>Manage Account Password</h3>
     <!-- FORM -->
     <EditForm Model="@_passwordModel" FormName="change-password" OnValidSubmit="OnValidSubmitPassword" method="post">
         <DataAnnotationsValidator/>
@@ -34,13 +34,33 @@
             <ValidationMessage For="@(() => _passwordModel.ConfirmPassword)" class="text-danger"/>
         </div>
         <!-- SUBMIT -->
-        <button type="submit" class="btn btn-submit btn-icon"><i class="fa fa-key me-2"></i>Update Password</button>
+        <button type="submit" class="btn btn-submit btn-icon">
+            <i class="fa fa-key me-2"></i>Update Password
+        </button>
     </EditForm>
     
     <hr/>
     
+    <!-- RECOVERY CODES -->
+    <h3>Generate Recovery Codes</h3>
+    <p>Generate a list of one-time use codes that you may use to login/recover your account if you lose access to you password, email, or two-factor.</p>
+    <p>This will invalidate any previously generated codes.</p>
+    <button @onclick="@OnValidSubmitRecoveryCodes" class="btn btn-submit btn-icon">
+        <i class="fa fa-key me-2"></i>Generate
+    </button>
+    <div class="mt-3 @GetRecoveryCodesCss()">
+        <ul>
+            @foreach ( string c in _generatedRecoveryCodes )
+            {
+                <li>@c</li>
+            }
+        </ul>
+    </div>
+    
+    <hr/>
+    
     <!-- TWO FACTOR -->
-    <h3 class="mb-3 fw-normal">Two-Factor Authentication</h3>
+    <h3>Two-Factor Authentication</h3>
     <!-- TOGGLE -->
     <div class="form-check form-switch mb-3">
         <checkbox id="enable2fa" @onchange="@(async(e)=>await Toggle2Fa(e))" class="form-check-input" aria-required="true"/>
@@ -57,7 +77,9 @@
                 <label for="email" class="form-label">Two-Factor Email</label>
             </div>
             <!-- SUBMIT -->
-            <button type="submit" class="btn btn-submit btn-icon"><i class="fa fa-key me-2"></i>Update Two Factor</button>
+            <button type="submit" class="btn btn-submit btn-icon">
+                <i class="fa fa-key me-2"></i>Update Two Factor
+            </button>
         </EditForm>
     }
 </div>
@@ -66,6 +88,7 @@
 {
     UpdatePasswordRequest _passwordModel = new();
     TwoFactorModel _twoFactorModel = new();
+    IEnumerable<string> _generatedRecoveryCodes = new List<string>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -89,16 +112,32 @@
     {
         StartLoading( "Updating Password..." );
         
-        Reply<bool> result = await Http.PutAsyncAuthenticated<bool>( Consts.ApiUpdatePassword, _passwordModel );
-
-        if (!result) {
-            PushError( result, "Failed to update password." );
+        var reply = await Http.PutAsyncAuthenticated<bool>( Consts.ApiUpdatePassword, _passwordModel );
+        if (!reply) {
+            PushError( reply, "Failed to update password." );
             StopLoading();
             return;
         }
         
         PushSuccess( "Password successfully updated." );
         _passwordModel = new UpdatePasswordRequest();
+        StopLoading();
+    }
+    async Task OnValidSubmitRecoveryCodes()
+    {
+        StartLoading( "Generating recovery codes..." );
+
+        var reply = await Http.PostAsyncAuthenticated<IEnumerable<string>>( Consts.ApiGenerateRecoveryCodes );
+        if (!reply)
+        {
+            PushError( reply, "Failed to generate recovery codes." );
+            StopLoading();
+            return;
+        }
+
+        PushSuccess( "Successfully generated recovery codes." );
+        _generatedRecoveryCodes = reply.Data;
+        StateHasChanged();
         StopLoading();
     }
     async Task OnValidSubmitTwoFactor()
@@ -129,10 +168,10 @@
         
         StartLoading( "Disabling two factor authentication..." );
         
-        var httpReply = await Http.PutAsyncAuthenticated<bool>( Consts.ApiDisable2Fa );
-        if (!httpReply)
+        var reply = await Http.PutAsyncAuthenticated<bool>( Consts.ApiDisable2Fa );
+        if (!reply)
         {
-            PushError( httpReply, "Failed to disable two factor authentication." );
+            PushError( reply, "Failed to disable two factor authentication." );
             StopLoading();
             return;
         }
@@ -144,6 +183,8 @@
 
     string Get2FaText() =>
         _twoFactorModel.IsEnabled ? "Disable 2fa" : "Enable 2fa";
+    string GetRecoveryCodesCss() =>
+        _generatedRecoveryCodes.Any() ? "d-flex" : "d-none";
 
     readonly record struct ViewSecurityResponse(
         bool TwoFactorEnabled,

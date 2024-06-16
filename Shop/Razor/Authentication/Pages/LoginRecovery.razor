@@ -1,0 +1,68 @@
+@page "/loginRecovery"
+@using System.ComponentModel.DataAnnotations
+@using Shop.Infrastructure.Common.ReplyTypes
+@using Shop.Utilities
+@inherits AuthenticationPageBase
+@layout AuthenticationLayout
+
+<!-- TITLE -->
+<h2>Recovery Login</h2>
+<p>Enter one of your generated recovery codes to access your account.</p>
+<p>This will invalidate the code.</p>
+<!-- FORM -->
+<EditForm Model="@_request" OnValidSubmit="@(async () => await OnValidLoginSubmitAsync())">
+    <DataAnnotationsValidator/>
+    <!-- EMAIL OR USERNAME-->
+    <div class="form-floating mb-2">
+        <InputText type="name" class="form-control" id="emailOrUsername" @bind-Value="@_request.EmailOrUsername">></InputText>
+        <label for="emailOrUsername">Email or Username</label>
+    </div>
+    <!-- CODE -->
+    <div class="form-floating mb-2">
+        <InputText type="text" class="form-control" id="code" @bind-Value="@_request.RecoveryCode"></InputText>
+        <label for="code">Recovery Code</label>
+    </div>
+    <!-- SUBMIT -->
+    <button class="btn btn-submit btn-icon mb-2" type="submit">
+        <i class="fa fa-sign-in me-2"></i>Login
+    </button>
+</EditForm>
+
+@code {
+    readonly RecoverRequest _request = new();
+
+    async Task OnValidLoginSubmitAsync()
+    {
+        StartLoading( "Logging In..." );
+
+        Reply<string> reply = await Http.PostAsync<string>( Consts.ApiLoginRecovery, _request );
+        
+        if (!reply)
+        {
+            await Authentication.ClearSession();
+            PushError( reply, "Failed to login." );
+            StopLoading();
+            return;
+        }
+        
+        var updateResult = await Authentication.CreateNewSession( reply.Data );
+        if (!updateResult)
+        {
+            PushError( updateResult, "Failed to save login." );
+            StopLoading();
+            return;
+        }
+
+        StartLoading( "Login Success! Redirecting..." );
+        GoHome();
+    }
+    
+    sealed class RecoverRequest
+    {
+        [Required( ErrorMessage = "Email or Username is required." )]
+        public string EmailOrUsername { get; set; } = string.Empty;
+        
+        [Required( ErrorMessage = "Recovery code is required." )]
+        public string RecoveryCode { get; set; } = string.Empty;
+    }
+}

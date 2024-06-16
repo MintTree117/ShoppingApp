@@ -28,6 +28,7 @@ internal static class Consts
     // ACCOUNT SECURITY
     internal const string ApiViewSecurity = ApiBase + "/account/security/view";
     internal const string ApiUpdatePassword = ApiBase + "/account/security/updatePassword";
+    internal const string ApiGenerateRecoveryCodes = ApiBase + "/account/security/generateRecovery";
     internal const string ApiDisable2Fa = ApiBase + "/account/security/disable2fa";
     internal const string ApiUpdate2Fa = ApiBase + "/account/security/update2fa";
 
@@ -56,6 +57,7 @@ internal static class Consts
     internal const string PageEmailConfirm = "/confirmEmail";
     internal const string PageEmailConfirmResend = "/resendEmailConfirmation";
     internal const string PageLoginOrRegister = "/loginOrRegister";
+    internal const string PageLoginRecovery = "/loginRecovery";
     internal const string PageLogout = "/logout";
     internal const string PageForgotPassword = "/forgotPassword";
     internal const string PageResetPassword = "/resetPassword";

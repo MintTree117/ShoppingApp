@@ -35,7 +35,9 @@ else if (_pendingTwoFactor) {
                 <ValidationMessage For="@(() => _twoFactorRequest.Code)" class="text-danger"/>
             </div>
             <!-- SUBMIT -->
-            <button class="btn btn-submit btn-icon" type="submit"><i class="fa fa-key me-2"></i>Authenticate</button>
+            <button class="btn btn-submit btn-icon" type="submit">
+                <i class="fa fa-key me-2"></i>Authenticate
+            </button>
         </EditForm>
     </div>
 }
@@ -56,7 +58,9 @@ else {
             <label for="password">Password</label>
         </div>
         <!-- SUBMIT -->
-        <button class="btn btn-submit btn-icon mb-2" type="submit"><i class="fa fa-sign-in me-2"></i>Sign in</button>
+        <button class="btn btn-submit btn-icon mb-2" type="submit">
+            <i class="fa fa-sign-in me-2"></i>Login
+        </button>
     </EditForm>
 
     <!-- LOGIN ALTERNATIVES -->
@@ -101,7 +105,9 @@ else {
             <label for="2faEmail">2Fa Login Email *</label>
         </div>
         <!-- SUBMIT -->
-        <button class="btn btn-submit btn-icon mb-2" type="submit"><i class="fa fa-user-plus me-2"></i>Register</button>
+        <button class="btn btn-submit btn-icon mb-2" type="submit">
+            <i class="fa fa-user-plus me-2"></i>Register
+        </button>
     </EditForm>
     
     // RESEND EMAIL CONFIRM LINK
@@ -111,8 +117,12 @@ else {
     <hr class="my-3"/>
     <h2>Testing</h2>
     <div class="w-100">
-        <button class="btn-submit btn-icon mb-2 " onclick="@(async ()=> await TestRegister())"><i class="fa fa-user-plus me-2"></i>Test Register</button>
-        <button class="btn-submit btn-icon mb-2" onclick="@(async ()=> await TestLogin())"><i class="fa fa-sign-in me-2"></i>Test Login</button>
+        <button class="btn-submit btn-icon mb-2 " onclick="@( async () => await TestRegister() )">
+            <i class="fa fa-user-plus me-2"></i>Test Register
+        </button>
+        <button class="btn-submit btn-icon mb-2" onclick="@( async () => await TestLogin() )">
+            <i class="fa fa-sign-in me-2"></i>Test Login
+        </button>
     </div>
 }
 
@@ -128,7 +138,6 @@ else {
 
         await OnValidRegisterSubmitAsync();
     }
-    
     async Task TestLogin()
     {
         _loginRequest.EmailOrUsername = "martygrof3708@gmail.com";
@@ -231,7 +240,7 @@ else {
     
     // TODO: IMPLEMENT RECOVERY CODES
     void GoToRecovery() => 
-        Navigate( "" );
+        Navigate( Consts.PageLoginRecovery );
     void GoToResend() => 
         Navigate( Consts.PageEmailConfirmResend );
     void GoToForgot() => 
@@ -249,7 +258,8 @@ else {
     }
     sealed class TwoFactorRequest
     {
-        [Required] public string EmailOrUsername { get; set; } = string.Empty;
+        [Required( ErrorMessage = "Email or Username is required." )]
+        public string EmailOrUsername { get; set; } = string.Empty;
         
         [Required, DataType( DataType.Text ), Display( Name = "Authenticator code" ), StringLength( 40, ErrorMessage = "The two factor code must be at least 6 and at max 40 characters long.", MinimumLength = 6 )]
         public string Code { get; set; } = string.Empty;
