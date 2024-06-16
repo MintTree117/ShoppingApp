@@ -7,57 +7,60 @@
 
 <PageTitle>Account Security</PageTitle>
 
-<!-- PASSWORD -->
-<h3>Password</h3>
-<hr class="divider"/>
-<!-- FORM -->
-<EditForm Model="@_passwordModel" FormName="change-password" OnValidSubmit="OnValidSubmitPassword" method="post">
-    <DataAnnotationsValidator/>
-    <ValidationSummary class="text-danger" role="alert"/>
-    <!-- OLD PASSWORD -->
-    <div class="form-floating mb-3">
-        <InputText type="password" @bind-Value="@_passwordModel.OldPassword" id="old-password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Please enter your old password."/>
-        <label for="old-password" class="form-label">Old Password</label>
-        <ValidationMessage For="@(() => _passwordModel.OldPassword)" class="text-danger"/>
-    </div>
-    <!-- NEW PASSWORD -->
-    <div class="form-floating mb-3">
-        <InputText type="password" @bind-Value="@_passwordModel.NewPassword" id="new-password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="Please enter your new password."/>
-        <label for="new-password" class="form-label">New Password</label>
-        <ValidationMessage For="@(() => _passwordModel.NewPassword)" class="text-danger"/>
-    </div>
-    <!-- CONFIRM PASSWORD -->
-    <div class="form-floating mb-3">
-        <InputText type="password" @bind-Value="@_passwordModel.ConfirmPassword" id="confirm-password" class="form-control" autocomplete="confirm-password" aria-required="true" placeholder="Please confirm your new password."/>
-        <label for="confirm-password" class="form-label">Confirm Password</label>
-        <ValidationMessage For="@(() => _passwordModel.ConfirmPassword)" class="text-danger"/>
-    </div>
-    <!-- SUBMIT -->
-    <button type="submit" class="btn btn-submit btn-icon"><i class="fa fa-key me-2"></i>Update Password</button>
-</EditForm>
-
-<!-- TWO FACTOR -->
-<h3>Two-Factor Authentication</h3>
-<hr class="divider"/>
-<!-- TOGGLE -->
-<div class="form-check form-switch mb-3">
-    <checkbox id="enable2fa" @onchange="@(async(e)=>await Toggle2Fa(e))" class="form-check-input" aria-required="true"/>
-    <label for="enable2fa" class="form-check-label">@Get2FaText()</label>
-</div>
-@if (_twoFactorModel.IsEnabled)
-{
+<!-- WRAPPER -->
+<div class="user-container-small">
+    <!-- PASSWORD -->
+    <h3>Password</h3>
+    <hr class="divider"/>
     <!-- FORM -->
-    <EditForm Model="@_twoFactorModel" FormName="toggle2fa" OnValidSubmit="OnValidSubmitTwoFactor" method="post">
-        <!-- EMAIL -->
+    <EditForm Model="@_passwordModel" FormName="change-password" OnValidSubmit="OnValidSubmitPassword" method="post">
+        <DataAnnotationsValidator/>
+        <ValidationSummary class="text-danger" role="alert"/>
+        <!-- OLD PASSWORD -->
         <div class="form-floating mb-3">
-            <InputText @bind-Value="@_twoFactorModel.TwoFactorEmail" type="email" id="email" class="form-control" autocomplete="email" aria-required="true" placeholder="Email"/>
-            <ValidationMessage For="@(() => _twoFactorModel.TwoFactorEmail)" class="text-danger"/>
-            <label for="email" class="form-label">Two-Factor Email</label>
+            <InputText type="password" @bind-Value="@_passwordModel.OldPassword" id="old-password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Please enter your old password."/>
+            <label for="old-password" class="form-label">Old Password</label>
+            <ValidationMessage For="@(() => _passwordModel.OldPassword)" class="text-danger"/>
+        </div>
+        <!-- NEW PASSWORD -->
+        <div class="form-floating mb-3">
+            <InputText type="password" @bind-Value="@_passwordModel.NewPassword" id="new-password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="Please enter your new password."/>
+            <label for="new-password" class="form-label">New Password</label>
+            <ValidationMessage For="@(() => _passwordModel.NewPassword)" class="text-danger"/>
+        </div>
+        <!-- CONFIRM PASSWORD -->
+        <div class="form-floating mb-3">
+            <InputText type="password" @bind-Value="@_passwordModel.ConfirmPassword" id="confirm-password" class="form-control" autocomplete="confirm-password" aria-required="true" placeholder="Please confirm your new password."/>
+            <label for="confirm-password" class="form-label">Confirm Password</label>
+            <ValidationMessage For="@(() => _passwordModel.ConfirmPassword)" class="text-danger"/>
         </div>
         <!-- SUBMIT -->
-        <button type="submit" class="btn btn-submit btn-icon"><i class="fa fa-key me-2"></i>Update Two Factor</button>
+        <button type="submit" class="btn btn-submit btn-icon"><i class="fa fa-key me-2"></i>Update Password</button>
     </EditForm>
-}
+    
+    <!-- TWO FACTOR -->
+    <h3>Two-Factor Authentication</h3>
+    <hr class="divider"/>
+    <!-- TOGGLE -->
+    <div class="form-check form-switch mb-3">
+        <checkbox id="enable2fa" @onchange="@(async(e)=>await Toggle2Fa(e))" class="form-check-input" aria-required="true"/>
+        <label for="enable2fa" class="form-check-label">@Get2FaText()</label>
+    </div>
+    @if (_twoFactorModel.IsEnabled)
+    {
+        <!-- FORM -->
+        <EditForm Model="@_twoFactorModel" FormName="toggle2fa" OnValidSubmit="OnValidSubmitTwoFactor" method="post">
+            <!-- EMAIL -->
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="@_twoFactorModel.TwoFactorEmail" type="email" id="email" class="form-control" autocomplete="email" aria-required="true" placeholder="Email"/>
+                <ValidationMessage For="@(() => _twoFactorModel.TwoFactorEmail)" class="text-danger"/>
+                <label for="email" class="form-label">Two-Factor Email</label>
+            </div>
+            <!-- SUBMIT -->
+            <button type="submit" class="btn btn-submit btn-icon"><i class="fa fa-key me-2"></i>Update Two Factor</button>
+        </EditForm>
+    }
+</div>
 
 @code 
 {

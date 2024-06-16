@@ -8,19 +8,17 @@
     
     <Authorized>
         <div class="content-container">
-            <div class="user-container">
-                <LoadingPanel/>
-                <nav class="account-nav">
-                    <ul class="nav account-nav-list">
-                        <AccountMenuOptions/>
-                    </ul>
-                </nav>
-                <hr class="divider"/>
-                @Body
-            </div>
+            <LoadingPanel/>
+            <nav class="account-nav">
+                <ul class="nav account-nav-list">
+                    <AccountMenuOptions/>
+                </ul>
+            </nav>
+            <hr class="divider"/>
+            @Body
         </div>
     </Authorized>
-
+    
     <NotAuthorized>
         <AccessDenied/>
     </NotAuthorized>

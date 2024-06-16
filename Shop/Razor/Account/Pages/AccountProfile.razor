@@ -7,34 +7,37 @@
 
 <PageTitle>Account Profile</PageTitle>
 
-<!-- TITLE -->
-<h3>Profile</h3>
-<hr class="divider"/>
-<!-- FORM -->
-<EditForm Model="@_accountModel" OnValidSubmit="@(async () => await UpdateAccount())" method="post">
-    <DataAnnotationsValidator/>
-    <ValidationSummary class="text-danger" role="alert"/>
-    <!-- EMAIL -->
-    <div class="form-floating mb-3">
-        <InputText type="email" @bind-Value="@_accountModel.Email" id="email" class="form-control" autocomplete="email" aria-required="true" placeholder="Email"/>
-        <ValidationMessage For="@(() => _accountModel.Email)" class="text-danger"/>
-        <label for="email" class="form-label">Email</label>
-    </div>
-    <!-- USERNAME -->
-    <div class="form-floating mb-3">
-        <InputText type="name" @bind-Value="@_accountModel.Username" id="username" class="form-control" autocomplete="username" aria-required="true" placeholder="Username"/>
-        <ValidationMessage For="@(() => _accountModel.Username)" class="text-danger"/>
-        <label for="username" class="form-label">Username</label>
-    </div>
-    <!-- PHONE -->
-    <div class="form-floating mb-3">
-        <InputText type="phone" @bind-Value="@_accountModel.Phone" id="phone" class="form-control" autocomplete="phone" aria-required="true" placeholder="Phone"/>
-        <ValidationMessage For="@(() => _accountModel.Phone)" class="text-danger"/>
-        <label for="phone" class="form-label">Phone</label>
-    </div>
-    <!-- SUBMIT -->
-    <button type="submit" class="btn btn-submit btn-icon"><i class="fa fa-user me-2"></i>Update Profile</button>
-</EditForm>
+<!-- WRAPPER -->
+<div class="user-container-small">
+    <!-- TITLE -->
+    <h3>Profile</h3>
+    <hr class="divider"/>
+    <!-- FORM -->
+    <EditForm Model="@_accountModel" OnValidSubmit="@(async () => await UpdateAccount())" method="post">
+        <DataAnnotationsValidator/>
+        <ValidationSummary class="text-danger" role="alert"/>
+        <!-- EMAIL -->
+        <div class="form-floating mb-3">
+            <InputText type="email" @bind-Value="@_accountModel.Email" id="email" class="form-control" autocomplete="email" aria-required="true" placeholder="Email"/>
+            <ValidationMessage For="@(() => _accountModel.Email)" class="text-danger"/>
+            <label for="email" class="form-label">Email</label>
+        </div>
+        <!-- USERNAME -->
+        <div class="form-floating mb-3">
+            <InputText type="name" @bind-Value="@_accountModel.Username" id="username" class="form-control" autocomplete="username" aria-required="true" placeholder="Username"/>
+            <ValidationMessage For="@(() => _accountModel.Username)" class="text-danger"/>
+            <label for="username" class="form-label">Username</label>
+        </div>
+        <!-- PHONE -->
+        <div class="form-floating mb-3">
+            <InputText type="phone" @bind-Value="@_accountModel.Phone" id="phone" class="form-control" autocomplete="phone" aria-required="true" placeholder="Phone"/>
+            <ValidationMessage For="@(() => _accountModel.Phone)" class="text-danger"/>
+            <label for="phone" class="form-label">Phone</label>
+        </div>
+        <!-- SUBMIT -->
+        <button type="submit" class="btn btn-submit btn-icon"><i class="fa fa-user me-2"></i>Update Profile</button>
+    </EditForm>
+</div>
 
 @code {
     AccountModel _accountModel = new();
