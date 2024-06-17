@@ -13,16 +13,16 @@
         <!-- CONFIRM DELETE -->
         <div class="alert alert-warning auth-result-wrapper" role="alert">
             <!-- MESSAGE -->
-            <i class="fa-solid fa-triangle-exclamation fa-4x text-warning auth-result-icon mx-auto"></i>
+            <i class="fa-solid fa-triangle-exclamation fa-4x auth-result-icon mx-auto c-alert"></i>
             <p><strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong></p>
             <hr/>
             <!-- YES -->
-            <button class="btn btn-submit btn-warning btn-icon mx-auto" @onclick="@(async () => await OnConfirmSubmit())">
+            <button class="btn btn-submit btn-icon mx-auto b-danger" @onclick="@(async () => await OnConfirmSubmit())">
                 <i class="fa fa-trash me-2"></i>Delete
             </button>
             <hr/>
             <!-- NO -->
-            <button class="btn btn-submit btn-warning btn-icon mx-auto" @onclick="Cancel">
+            <button class="btn btn-submit btn-icon mx-auto b-primary" @onclick="Cancel">
                 <i class="fa-solid fa-x me-2"></i>Cancel
             </button>
         </div>

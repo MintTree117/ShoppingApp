@@ -12,7 +12,7 @@ internal static class HttpConfiguration
             .AddScoped( static sp => sp
                 .GetRequiredService<IHttpClientFactory>()
                 .CreateClient( "API" ) )
-            .AddHttpClient( "API", static client => client.BaseAddress = new Uri( Consts.ApiBase ) )
+            .AddHttpClient( "API", static client => client.BaseAddress = new Uri( Consts.OrderingApiBase ) )
             .AddHttpMessageHandler<CookieDelegatingHandler>();
         
         builder.Services.AddSingleton<HttpService>();

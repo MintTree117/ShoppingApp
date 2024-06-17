@@ -11,18 +11,18 @@
     <!-- PENDING 2FA -->
     <div class="auth-result-wrapper">
         <!-- MESSAGE -->
-        <i class="fa-solid fa-circle-check fa-4x text-success auth-result-icon"></i>
+        <i class="fa-solid fa-circle-check fa-4x auth-result-icon c-success"></i>
         <h1>Registration Success!</h1>
         <p class="text-secondary">Your account has been created and is awaiting confirmation. A link has been emailed to your email. Please verify your email before logging in.</p>
         <!-- LOGIN -->
-        <button class="btn btn-submit btn-icon" @onclick="GoToLogin"><i class="fa fa-user me-2"></i>Login</button>
+        <button class="btn btn-submit btn-icon b-primary" @onclick="GoToLogin"><i class="fa fa-user me-2"></i>Login</button>
     </div>
 }
 else if (_pendingTwoFactor) {
     <!-- PENDING 2FA -->
     <div class="auth-result-wrapper">
         <!-- MESSAGE -->
-        <i class="fa-solid fa-circle-check fa-4x text-info auth-result-icon"></i>
+        <i class="fa-solid fa-circle-check fa-4x auth-result-icon c-primary"></i>
         <h2>Two-factor authentication</h2>
         <p class="mb-3">Your login is protected by a two-step verification process. Enter your verification code below.</p>
         <!-- FORM -->
@@ -35,7 +35,7 @@ else if (_pendingTwoFactor) {
                 <ValidationMessage For="@(() => _twoFactorRequest.Code)" class="text-danger"/>
             </div>
             <!-- SUBMIT -->
-            <button class="btn btn-submit btn-icon" type="submit">
+            <button class="btn btn-submit btn-icon b-primary" type="submit">
                 <i class="fa fa-key me-2"></i>Authenticate
             </button>
         </EditForm>
@@ -58,7 +58,7 @@ else {
             <label for="password">Password</label>
         </div>
         <!-- SUBMIT -->
-        <button class="btn btn-submit btn-icon mb-2" type="submit">
+        <button class="btn btn-submit btn-icon mb-2 b-primary" type="submit">
             <i class="fa fa-sign-in me-2"></i>Login
         </button>
     </EditForm>
@@ -105,7 +105,7 @@ else {
             <label for="2faEmail">2Fa Login Email *</label>
         </div>
         <!-- SUBMIT -->
-        <button class="btn btn-submit btn-icon mb-2" type="submit">
+        <button class="btn btn-submit btn-icon mb-2 b-primary" type="submit">
             <i class="fa fa-user-plus me-2"></i>Register
         </button>
     </EditForm>
@@ -117,10 +117,10 @@ else {
     <hr class="my-3"/>
     <h2>Testing</h2>
     <div class="w-100">
-        <button class="btn-submit btn-icon mb-2 " onclick="@( async () => await TestRegister() )">
+        <button class="btn-submit btn-icon mb-2 b-primary" onclick="@( async () => await TestRegister() )">
             <i class="fa fa-user-plus me-2"></i>Test Register
         </button>
-        <button class="btn-submit btn-icon mb-2" onclick="@( async () => await TestLogin() )">
+        <button class="btn-submit btn-icon mb-2 b-primary" onclick="@( async () => await TestLogin() )">
             <i class="fa fa-sign-in me-2"></i>Test Login
         </button>
     </div>

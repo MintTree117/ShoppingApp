@@ -254,9 +254,10 @@
 .top-nav-categories-wrapper {
     position: absolute;
     z-index: 1000;
-    width: 100%;
-    min-width: 100%;
-    padding: 15px;
+    min-width: 125%;
+    max-width: 200%;
+    padding: 10px;
+    padding-top: 5px;
     background: white;
     border: 1px solid lightgray;
 }

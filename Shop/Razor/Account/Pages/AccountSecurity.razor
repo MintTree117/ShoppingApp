@@ -34,7 +34,7 @@
             <ValidationMessage For="@(() => _passwordModel.ConfirmPassword)" class="text-danger"/>
         </div>
         <!-- SUBMIT -->
-        <button type="submit" class="btn btn-submit btn-icon">
+        <button type="submit" class="btn btn-submit btn-icon b-primary">
             <i class="fa fa-key me-2"></i>Update Password
         </button>
     </EditForm>
@@ -45,7 +45,7 @@
     <h3>Generate Recovery Codes</h3>
     <p>Generate a list of one-time use codes that you may use to login/recover your account if you lose access to you password, email, or two-factor.</p>
     <p>This will invalidate any previously generated codes.</p>
-    <button @onclick="@OnValidSubmitRecoveryCodes" class="btn btn-submit btn-icon">
+    <button @onclick="@OnValidSubmitRecoveryCodes" class="btn btn-submit btn-icon b-primary">
         <i class="fa fa-key me-2"></i>Generate
     </button>
     <div class="mt-3 @GetRecoveryCodesCss()">
@@ -77,7 +77,7 @@
                 <label for="email" class="form-label">Two-Factor Email</label>
             </div>
             <!-- SUBMIT -->
-            <button type="submit" class="btn btn-submit btn-icon">
+            <button type="submit" class="btn btn-submit btn-icon b-primary">
                 <i class="fa fa-key me-2"></i>Update Two Factor
             </button>
         </EditForm>

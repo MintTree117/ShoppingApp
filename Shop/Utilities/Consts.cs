@@ -5,45 +5,48 @@ internal static class Consts
     // API
     // ----------------------------------------------------------------------------------------------------------------
     // BASE
-    internal const string ApiBase = "https://localhost:7212/api";
+    internal const string OrderingApiBase = "https://localhost:7212/api";
 
     // ACCOUNT REGISTRATION
-    internal const string ApiRegister = ApiBase + "/account/register";
-    internal const string ApiConfirmEmail = ApiBase + "/account/register/confirmEmail";
-    internal const string ApiResendConfirm = ApiBase + "/account/register/resendConfirmEmail";
+    internal const string ApiRegister = OrderingApiBase + "/account/register";
+    internal const string ApiConfirmEmail = OrderingApiBase + "/account/register/confirmEmail";
+    internal const string ApiResendConfirm = OrderingApiBase + "/account/register/resendConfirmEmail";
     
     // AUTHENTICATION
-    internal const string ApiLogin = ApiBase + "/authentication/login";
-    internal const string ApiTwoFactor = ApiBase + "/authentication/2fa";
-    internal const string ApiLoginRecovery = ApiBase + "/authentication/recover";
-    internal const string ApiLoginRefresh = ApiBase + "/authentication/refresh";
-    internal const string ApiForgotPassword = ApiBase + "/authentication/forgot";
-    internal const string ApiResetPassword = ApiBase + "/authentication/reset";
-    internal const string ApiLogout = ApiBase + "/authentication/logout";
+    internal const string ApiLogin = OrderingApiBase + "/authentication/login";
+    internal const string ApiTwoFactor = OrderingApiBase + "/authentication/2fa";
+    internal const string ApiLoginRecovery = OrderingApiBase + "/authentication/recover";
+    internal const string ApiLoginRefresh = OrderingApiBase + "/authentication/refresh";
+    internal const string ApiForgotPassword = OrderingApiBase + "/authentication/forgot";
+    internal const string ApiResetPassword = OrderingApiBase + "/authentication/reset";
+    internal const string ApiLogout = OrderingApiBase + "/authentication/logout";
     
     // ACCOUNT PROFILE
-    internal const string ApiGetAccountProfile = ApiBase + "/account/profile/view";
-    internal const string ApiUpdateAccountProfile = ApiBase + "/account/profile/update";
+    internal const string ApiGetAccountProfile = OrderingApiBase + "/account/profile/view";
+    internal const string ApiUpdateAccountProfile = OrderingApiBase + "/account/profile/update";
 
     // ACCOUNT SECURITY
-    internal const string ApiViewSecurity = ApiBase + "/account/security/view";
-    internal const string ApiUpdatePassword = ApiBase + "/account/security/updatePassword";
-    internal const string ApiGenerateRecoveryCodes = ApiBase + "/account/security/generateRecovery";
-    internal const string ApiDisable2Fa = ApiBase + "/account/security/disable2fa";
-    internal const string ApiUpdate2Fa = ApiBase + "/account/security/update2fa";
+    internal const string ApiViewSecurity = OrderingApiBase + "/account/security/view";
+    internal const string ApiUpdatePassword = OrderingApiBase + "/account/security/updatePassword";
+    internal const string ApiGenerateRecoveryCodes = OrderingApiBase + "/account/security/generateRecovery";
+    internal const string ApiDisable2Fa = OrderingApiBase + "/account/security/disable2fa";
+    internal const string ApiUpdate2Fa = OrderingApiBase + "/account/security/update2fa";
 
     // ACCOUNT ADDRESSES
-    internal const string ApiGetAddresses = ApiBase + "/account/addresses/view";
-    internal const string ApiAddAddress = ApiBase + "/account/addresses/add";
-    internal const string ApiUpdateAddress = ApiBase + "/account/addresses/update";
-    internal const string ApiDeleteAddress = ApiBase + "/account/addresses/delete";
+    internal const string ApiGetAddresses = OrderingApiBase + "/account/addresses/view";
+    internal const string ApiAddAddress = OrderingApiBase + "/account/addresses/add";
+    internal const string ApiUpdateAddress = OrderingApiBase + "/account/addresses/update";
+    internal const string ApiDeleteAddress = OrderingApiBase + "/account/addresses/delete";
 
     // DELETE ACCOUNT
-    internal const string ApiDeleteAccount = ApiBase + "/account/delete";
+    internal const string ApiDeleteAccount = OrderingApiBase + "/account/delete";
     
     // CATALOG
-    internal const string ApiGetCategories = ApiBase + "/categories";
-    internal const string ApiGetBrands = ApiBase + "/brands";
+    // BASE
+    internal const string CatalogApiBase = "https://localhost:7123/api";
+    
+    internal const string ApiGetCategories = CatalogApiBase + "/categories";
+    internal const string ApiGetBrands = CatalogApiBase + "/brands";
     
     // PARAMS
     // ----------------------------------------------------------------------------------------------------------------

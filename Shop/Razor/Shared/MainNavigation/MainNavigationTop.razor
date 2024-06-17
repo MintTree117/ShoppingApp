@@ -142,11 +142,6 @@ else {
         _dotNetRef = DotNetObjectReference.Create( this );
         AuthenticationStateManager.OnStateChanged += OnAuthStateChanged;
         await JsRuntime.InvokeVoidAsync( "resizeObserverInterop.initialize", _dotNetRef );
-        /*var state = await AuthenticationStateManager.GetSessionState();
-        if (state.User.Identity != null && state.User.Identity.IsAuthenticated)
-            _username = state.User.Claims.FirstOrDefault( static c => c.Type == ClaimTypes.Name )?.Value ?? "HHHHH";
-        else
-            _username = "baba";*/
     }
     [JSInvokable] public void OnResize( int width, int height )
     {

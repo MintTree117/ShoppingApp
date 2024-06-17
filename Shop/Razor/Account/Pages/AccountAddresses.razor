@@ -14,9 +14,11 @@
         <!-- TITLE -->
         <div class="d-flex flex-row align-items-center justify-content-between">
             <h3 class="mb-0 fw-normal">@GetEditTitle()</h3>
-            <button class="btn btn-link text-decoration-none btn-icon" @onclick="@(async () => await OnClickCancelEdit())"><i class="fa fa-arrow-left me-2"></i>Back</button>
+            <button class="btn btn-link btn-icon text-decoration-none" @onclick="@(async () => await OnClickCancelEdit())">
+                <i class="fa fa-arrow-left me-2"></i>Back
+            </button>
         </div>
-        <hr class="divider"/>
+        <hr/>
         <!-- FORM -->
         <EditForm Model="@_editAddress" FormName="edit-address" OnValidSubmit="OnClickSave" method="post">
             <DataAnnotationsValidator/>
@@ -45,7 +47,10 @@
                 <ValidationMessage For="@(() => _editAddress.WorldGridPosY)" class="text-danger"/>
             </div>
             <!-- SUBMIT -->
-            <button class="btn btn-submit btn-icon">Save Changes<i class="fa fa-paper-plane ms-2"></i></button>
+            <button class="btn btn-submit btn-icon b-primary">
+                <i class="fa fa-paper-plane ms-2"></i>
+                @GetSubmitText()
+            </button>
         </EditForm>
     </div>
 }
@@ -62,7 +67,7 @@ else {
                 <!-- ROWS DROPDOWN -->
                 <div class="dropdown me-3 h-100">
                     <!-- DROPDOWN TOGGLE -->
-                    <button class="btn btn-secondary btn-icon dropdown-toggle h-100" type="button" id="RowsPerPage" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button class="btn btn-icon dropdown-toggle h-100 b-secondary" type="button" id="RowsPerPage" data-bs-toggle="dropdown" aria-expanded="false">
                         @_pageSize
                     </button>
                     <!-- DROPDOWN LIST -->
@@ -78,13 +83,14 @@ else {
                     </ul>
                 </div>
                 <!-- ADD ADDRESS -->
-                <button class="btn btn-primary btn-icon" @onclick="@OnClickNew"><i class="fa fa-plus"></i></button>
+                <button class="btn btn-icon b-primary" @onclick="@OnClickNew">
+                    <i class="fa fa-plus"></i>
+                </button>
             </div>
         </div>
         
-        <hr class="divider"/>
-        
         <!-- VIEW RESULT INFO -->
+        <hr/>
         <span class="text-start text-muted">@GetViewHeader()</span>
         <hr/>
         
@@ -119,9 +125,13 @@ else {
                             <td>
                                 <div class="d-flex flex-row align-items-stretch justify-content-end">
                                     <!-- Edit Address -->
-                                    <button class="btn btn-primary btn-sm btn-icon p-2 me-3" @onclick="() => OnClickEdit( address )"><i class="fa fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-icon p-2 me-3 b-primary" @onclick="() => OnClickEdit( address )">
+                                        <i class="fa fa-edit"></i>
+                                    </button>
                                     <!-- Delete Address -->
-                                    <button class="btn btn-primary btn-sm p-2 btn-icon" @onclick="@(async () => await OnClickDelete( address ))"><i class="fa fa-trash"></i></button>
+                                    <button class="btn btn-sm p-2 btn-icon b-danger" @onclick="@(async () => await OnClickDelete( address ))">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -139,7 +149,7 @@ else {
         <div class="mx-auto">
             <hr/>
             <h4>Development</h4>
-            <button class="btn btn-info mx-auto text-center" @onclick="@(async () => await OnClickTestGenerate())">Test Generate</button>
+            <button class="btn mx-auto text-center b-alert" @onclick="@(async () => await OnClickTestGenerate())">Test Generate</button>
         </div>
     </div>
 }
@@ -294,6 +304,8 @@ else {
         _isNew ? "New Address" : "Edit Address";
     string GetViewHeader() =>
         $"Viewing {Math.Min(_pageSize, _totalCount)} results of {_totalCount} total.";
+    string GetSubmitText() =>
+        _isNew ? "Submit" : "Save Changes";
     
     readonly record struct ViewPagedAddressesResponse(
         int TotalCount,

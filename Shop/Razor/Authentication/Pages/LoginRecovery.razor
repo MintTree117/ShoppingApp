@@ -8,7 +8,7 @@
 <!-- TITLE -->
 <h2>Recovery Login</h2>
 <p>Enter one of your generated recovery codes to access your account.</p>
-<p>This will invalidate the code.</p>
+<p class="text-muted">This will invalidate the code.</p>
 <!-- FORM -->
 <EditForm Model="@_request" OnValidSubmit="@(async () => await OnValidLoginSubmitAsync())">
     <DataAnnotationsValidator/>
@@ -23,7 +23,7 @@
         <label for="code">Recovery Code</label>
     </div>
     <!-- SUBMIT -->
-    <button class="btn btn-submit btn-icon mb-2" type="submit">
+    <button class="btn btn-submit btn-icon mb-2 b-primary" type="submit">
         <i class="fa fa-sign-in me-2"></i>Login
     </button>
 </EditForm>

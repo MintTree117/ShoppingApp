@@ -5,10 +5,16 @@
 
 <PageTitle>Session Expired</PageTitle>
 
-<!-- TITLE -->
-<h3>Your session has expired. Please login again.</h3>
-<!-- LOGIN -->
-<button class="btn btn-submit btn-icon" @onclick="GoToLogin"><i class="fa fa-sign-in me-2"></i>Login</button>
+<div class="auth-result-wrapper">
+    <!-- TITLE -->
+    <i class="fa-solid fa-triangle-exclamation fa-4x auth-result-icon c-alert"></i>
+    <h3>Your session has expired. Please login again.</h3>
+    <!-- LOGIN -->
+    <button class="btn btn-submit btn-icon b-primary" @onclick="GoToLogin">
+        <i class="fa fa-sign-in me-2"></i>
+        Login
+    </button>
+</div>
 
 @code {
     void GoToLogin() =>

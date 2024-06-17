@@ -3,7 +3,7 @@
 @using Shop.Infrastructure.Catalog.Categories.Types
 @using Shop.Infrastructure.Common.ReplyTypes
 
-<div class="d-flex align-items-center justify-content-start">
+<div class="d-flex align-items-center justify-content-start py-2">
     @if ( _currentParentId.HasValue )
     {
         <button class="btn btn-link nav-link me-2 border-end" @onclick="PreviousCategory">
@@ -16,36 +16,21 @@
             <i class="fa fa-caret-left"></i> Back
         </button>
     }
-    <h4 class="nav-link mb-0 w-100">Categories</h4>
+    <h4 class="nav-link fw-bold mb-0 w-100">Categories</h4>
 </div>
 <ul class="nav flex-column">
     @foreach ( Category c in GetCurrentCategories() )
     {
-        <li class="nav-item d-flex align-items-center">
+        <li class="nav-item d-flex align-items-center text-start">
             <a class="nav-link flex-grow-1" href="">@c.Name</a>
             @if ( c.Children.Any() )
             {
                 <button class="btn" @onclick="() => NextCategory( c )">
-                    <i class="oi oi-caret-right"></i>
+                    <i class="fa fa-arrow-right"></i>
                 </button>
             }
         </li>
     }
-    <li class="nav-item d-flex align-items-center">
-        <a class="nav-link flex-grow-1" href="">Test</a>
-    </li>
-    <li class="nav-item d-flex align-items-center">
-        <a class="nav-link flex-grow-1" href="">Test</a>
-    </li>
-    <li class="nav-item d-flex align-items-center">
-        <a class="nav-link flex-grow-1" href="">Test</a>
-    </li>
-    <li class="nav-item d-flex align-items-center">
-        <a class="nav-link flex-grow-1" href="">Test</a>
-    </li>
-    <li class="nav-item d-flex align-items-center">
-        <a class="nav-link flex-grow-1" href="">Test</a>
-    </li>
 </ul>
 
 @code {

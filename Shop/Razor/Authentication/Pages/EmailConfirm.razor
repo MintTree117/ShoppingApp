@@ -9,27 +9,31 @@
 @if (_confirmFailed) {
     <div class="auth-result-wrapper">
         <!-- MESSAGE -->
-        <i class="fa-solid fa-circle-exclamation fa-4x text-danger auth-result-icon"></i>
+        <i class="fa-solid fa-circle-exclamation fa-4x auth-result-icon c-danger"></i>
         <h3>Email Confirmation Failed!</h3>
         <p>Error Details: @_apiReply.GetMessage()</p>
         <p class="text-muted">Please try again or contact support.</p>
         <!-- RESEND -->
-        <button class="btn btn-submit btn-icon" @onclick="GoToResend"><i class="fa fa-repeat me-2"></i>Retry</button>
+        <button class="btn btn-submit btn-icon c-primary" @onclick="GoToResend">
+            <i class="fa fa-repeat me-2"></i>Retry
+        </button>
     </div>
 }
 else if (_emailConfirmed) {
     <div class="auth-result-wrapper">
         <!-- MESSAGE -->
-        <i class="fa-solid fa-circle-check fa-4x text-success auth-result-icon"></i>
+        <i class="fa-solid fa-circle-check fa-4x auth-result-icon c-success"></i>
         <h3>Email Confirmed!</h3>
         <p class="text-muted">Your account has been verified and you can now login normally.</p>
         <!-- LOGIN -->
-        <button class="btn btn-submit btn-icon" @onclick="GoToLogin"><i class="fa fa-user me-2"></i>Login</button>
+        <button class="btn btn-submit btn-icon b-primary" @onclick="GoToLogin">
+            <i class="fa fa-user me-2"></i>Login
+        </button>
     </div>
 }
 else
 {
-    <span>Nothing Here</span>
+    <span class="d-block mt-3 mx-auto text-center fs-3 fw-bold">Nothing Here.</span>
 }
 
 @code 
