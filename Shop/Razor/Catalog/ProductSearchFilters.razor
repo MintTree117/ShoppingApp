@@ -45,7 +45,7 @@
                 <ul class="search-filters-list">
                     @foreach ( Category c in _parentCategory?.Children ?? [] )
                     {
-                        <button class="btn btn-link" @onclick="() => OnClickCategory( c )">@c.Name</button>
+                        <button class="btn btn-link text-start" @onclick="() => OnClickCategory( c )">@c.Name</button>
                     }
                 </ul>
             </div>
