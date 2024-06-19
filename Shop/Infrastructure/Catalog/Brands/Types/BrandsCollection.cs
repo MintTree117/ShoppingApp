@@ -2,18 +2,18 @@ namespace Shop.Infrastructure.Catalog.Brands.Types;
 
 public sealed record BrandsCollection
 {
-    public BrandsCollection( Dictionary<Guid, Brand> brands, Dictionary<Guid, HashSet<Brand>> brandCategories )
+    public BrandsCollection( Dictionary<Guid, Brand> brandsById, Dictionary<Guid, HashSet<Brand>> brandsByCategory )
     {
-        BrandsById = brands;
+        BrandsById = brandsById;
 
-        Dictionary<Guid, IReadOnlySet<Brand>> dictionary = [];
-        foreach ( var kvp in brandCategories )
+        Dictionary<Guid, HashSet<Brand>> dictionary = [];
+        foreach ( var kvp in brandsByCategory )
             dictionary.Add( kvp.Key, kvp.Value );
         BrandsByCategory = dictionary;
     }
 
-    public readonly IReadOnlyDictionary<Guid, Brand> BrandsById = new Dictionary<Guid, Brand>();
-    public readonly IReadOnlyDictionary<Guid, IReadOnlySet<Brand>> BrandsByCategory = new Dictionary<Guid, IReadOnlySet<Brand>>();
+    public Dictionary<Guid, Brand> BrandsById { get; init; }
+    public Dictionary<Guid, HashSet<Brand>> BrandsByCategory { get; init; }
 
     public static BrandsCollection From( BrandsDto dto )
     {

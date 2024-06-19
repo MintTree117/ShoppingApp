@@ -7,9 +7,9 @@ public sealed record CategoriesCollection
         Categories = categories;
         PrimaryCategories = primaryCategories;
     }
-    
-    public readonly IReadOnlyDictionary<Guid, Category> Categories = new Dictionary<Guid, Category>();
-    public readonly IReadOnlyList<Category> PrimaryCategories = new List<Category>();
+
+    public Dictionary<Guid, Category> Categories { get; init; }
+    public List<Category> PrimaryCategories { get; init; }
 
     public static CategoriesCollection From( List<CategoryDto> dtos )
     {
