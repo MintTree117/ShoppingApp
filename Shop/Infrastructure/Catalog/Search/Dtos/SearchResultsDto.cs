@@ -1,6 +1,6 @@
 namespace Shop.Infrastructure.Catalog.Search.Dtos;
 
-public record SearchResultsDto(
+public readonly record struct SearchResultsDto(
     int TotalMatches,
     List<SearchItemDto> Results,
-    List<int> ShippingEstimates );
+    List<int> ShippingDays );

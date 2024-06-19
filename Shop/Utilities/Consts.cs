@@ -6,7 +6,7 @@ internal static class Consts
     // ----------------------------------------------------------------------------------------------------------------
     // BASE
     internal const string OrderingApiBase = "https://localhost:7212/api";
-
+    
     // ACCOUNT REGISTRATION
     internal const string ApiRegister = OrderingApiBase + "/account/register";
     internal const string ApiConfirmEmail = OrderingApiBase + "/account/register/confirmEmail";
@@ -44,10 +44,9 @@ internal static class Consts
     // CATALOG
     // BASE
     internal const string CatalogApiBase = "https://localhost:7123/api";
-    
     internal const string ApiGetCategories = CatalogApiBase + "/categories";
     internal const string ApiGetBrands = CatalogApiBase + "/brands";
-    
+    internal const string ApiGetSearch = CatalogApiBase + "/search";
     // PARAMS
     // ----------------------------------------------------------------------------------------------------------------
     internal const string ParamReturnUrl = "ReturnUrl";

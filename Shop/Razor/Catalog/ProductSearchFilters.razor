@@ -6,14 +6,14 @@
 @using Shop.Infrastructure.Catalog.Search.Models
 
 <!-- CONTAINER -->
-<div class="d-flex flex-column @GetDisplayCss()">
+<div class="search-filters">
     
     <!-- MOBILE HEADER -->
-    <div class="d-flex flex-column">
+    <div class="search-filters-header-mobile">
         <div class="d-flex flex-row justify-content-between mb-3">
-                <!-- TITLE AND CLOSE -->
+            <!-- TITLE AND CLOSE -->
             <h3 class="text-decoration-underline m-0 mb-lg-3 p-0">Filters</h3>
-            <button class="btn btn-close-white ms-3" @onclick="()=>ToggleView(false)">
+            <button class="btn btn-close-white ms-3" @onclick="() => ToggleView( false )">
                 <i class="fa-solid fa-x"></i>
             </button>
         </div>
@@ -22,57 +22,62 @@
             Clear All
         </button>
     </div>
-    
+
     <!-- DESKTOP HEADER -->
-    <div class="d-flex flex-row justify-content-between mb-3">
-        <h3 class="text-decoration-underline m-0 mb-lg-3 p-0">Filters</h3>
-        <button class="btn btn-primary- ms-3 @GetClearAllCss()" @onclick="Clear">
+    <div class="search-filters-header-desktop">
+        <h3>Filters</h3>
+        <hr/>
+        <button class="btn btn-primary ms-3 @GetClearAllCss()" @onclick="Clear">
             Clear All
         </button>
+        <hr/>
     </div>
-    
+
     <!-- CATEGORIES -->
-    @if (ShouldShowCategories()) {
+    @if (ShouldShowCategories())
+    {
         <div class="product-filters-section d-grid">
-            <button class="btn product-filters-button" type="button" @onclick="()=>ToggleSectionCollapse( SectionCategories )">
+            <button class="btn search-filters-list-header" type="button" @onclick="() => ToggleSectionCollapse( SectionCategories )">
                 <span>@GetCategoriesTitle()</span>
                 <i class="fa @GetCollapseIconCss( SectionCategories )"></i>
             </button>
             <div class="@GetCollapseDisplayCss( SectionCategories )">
-                <ul class="list-unstyled d-flex flex-column">
-                    @foreach ( Category c in _parentCategory?.Children ?? [] ) {
-                        <button class="btn btn-link" @onclick="() => OnClickCategory( c )"></button>
+                <ul class="search-filters-list">
+                    @foreach ( Category c in _parentCategory?.Children ?? [] )
+                    {
+                        <button class="btn btn-link" @onclick="() => OnClickCategory( c )">@c.Name</button>
                     }
                 </ul>
             </div>
-        </div>   
+        </div>
     }
-    
+
     <!-- BRANDS -->
     <div class="product-filters-section d-grid">
-        <button class="btn product-filters-button" type="button" @onclick="()=>ToggleSectionCollapse( SectionBrands )">
+        <button class="btn search-filters-list-header" type="button" @onclick="() => ToggleSectionCollapse( SectionBrands )">
             <span>Brands</span>
             <i class="fa @GetCollapseIconCss( SectionBrands )"></i>
         </button>
         <div class="@GetCollapseDisplayCss( SectionBrands )">
-            <ul class="list-unstyled d-flex flex-column">
-                @foreach ( Brand b in _brands ) {
-                    <button class="btn btn-link" @onclick="()=>OnClickBrand( b )"></button>
+            <ul class="search-filters-list">
+                @foreach ( Brand b in _brands )
+                {
+                    <button class="btn btn-link text-start" @onclick="() => OnClickBrand( b )">@b.Name</button>
                 }
             </ul>
         </div>
     </div>
-    
+
     <!-- TOGGLES FOR FILTERS -->
     <div class="product-filters-section d-grid">
         <label>
-            <input type="checkbox" @onchange="OnChangeIsInStock" /> In Stock
+            <input type="checkbox" @onchange="OnChangeIsInStock"/> In Stock
         </label>
         <label>
-            <input type="checkbox" @onchange="OnChangeIsFeatured" /> Featured
+            <input type="checkbox" @onchange="OnChangeIsFeatured"/> Featured
         </label>
         <label>
-            <input type="checkbox" @onchange="OnChangeIsOnSale" /> On Sale
+            <input type="checkbox" @onchange="OnChangeIsOnSale"/> On Sale
         </label>
     </div>
 
@@ -81,14 +86,14 @@
         <label>
             Price Range: @GetPriceRangeLabel()
         </label>
-        <input type="range" min="0" max="10000" step="1" @onchange="OnChangeMinPrice" />
-        <input type="range" min="0" max="10000" step="1" @onchange="OnChangeMaxPrice" />
+        <input type="range" min="0" max="10000" step="1" @onchange="OnChangeMinPrice"/>
+        <input type="range" min="0" max="10000" step="1" @onchange="OnChangeMaxPrice"/>
         <div class="d-flex justify-content-between">
-            <input type="number" min="0" max="10000" step="1" @onchange="OnChangeMinPrice" class="form-control" />
-            <input type="number" min="0" max="10000" step="1" @onchange="OnChangeMaxPrice" class="form-control" />
+            <input type="number" min="0" max="10000" step="1" @onchange="OnChangeMinPrice" class="form-control"/>
+            <input type="number" min="0" max="10000" step="1" @onchange="OnChangeMaxPrice" class="form-control"/>
         </div>
     </div>
-    
+
 </div>
 
 @code {
@@ -101,7 +106,10 @@
     Category? _parentCategory = null;
     LocalSearchFilters _filters = LocalSearchFilters.Empty();
 
-    readonly Dictionary<string, bool> _collapsedSections = [];
+    readonly Dictionary<string, bool> _collapsedSections = new Dictionary<string, bool>() {
+        { SectionCategories, false },
+        { SectionBrands, false }
+    };
     readonly HashSet<Guid> _selectedBrands = [];
 
     public event Func<LocalSearchFilters, Task>? OnChangeFilters;
@@ -110,11 +118,13 @@
         Clear();
         _parentCategory = category;
         _brands = brands.ToList();
+        StateHasChanged();
     }
     public void ToggleView( bool? shouldShow = null )
     {
         shouldShow ??= !_hidden;
         _hidden = shouldShow.Value;
+        Console.WriteLine("_________________________________________________-TOGGLE VIEW");
         StateHasChanged();
     }
     

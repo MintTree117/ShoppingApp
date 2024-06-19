@@ -2,6 +2,7 @@
 @using Shop.Infrastructure.Catalog.Categories
 @using Shop.Infrastructure.Catalog.Categories.Types
 @using Shop.Infrastructure.Common.ReplyTypes
+@using Shop.Utilities
 
 <div class="d-flex align-items-center justify-content-start py-2">
     @if ( _currentParentId.HasValue )
@@ -22,7 +23,7 @@
     @foreach ( Category c in GetCurrentCategories() )
     {
         <li class="nav-item d-flex align-items-center text-start">
-            <a class="nav-link flex-grow-1" href="">@c.Name</a>
+            <a class="nav-link flex-grow-1" href="@GetCategoryUrl( c )">@c.Name</a>
             @if ( c.Children.Any() )
             {
                 <button class="btn" @onclick="() => NextCategory( c )">
@@ -34,6 +35,8 @@
 </ul>
 
 @code {
+
+    
     [Parameter] public Action OnExitCallback { get; set; } = default!;
     [Parameter] public bool ShowExitButton { get; set; } = false;
     [Inject] public CategoriesCache Service { get; set; } = default!;
@@ -70,9 +73,11 @@
 
         StateHasChanged();
     }
-
     void Exit()
     {
         OnExitCallback();
     }
+
+    static string GetCategoryUrl( Category c ) =>
+        $"{Consts.PageProductSearch}?CategoryId={c.Id}";
 }

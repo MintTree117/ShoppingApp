@@ -22,16 +22,15 @@ public sealed record BrandsCollection
             brandsById.TryAdd( b.Id, b );
 
         Dictionary<Guid, HashSet<Brand>> brandsByCategory = [];
-        foreach ( var kvp in dto.BrandCategories ) {
-            foreach ( Guid id in kvp.Value ) {
-                if (!brandsById.TryGetValue( id, out Brand? b ))
-                    continue;
-                if (!brandsByCategory.TryGetValue( kvp.Key, out HashSet<Brand>? brands )) {
-                    brands = [];
-                    brandsByCategory.Add( kvp.Key, brands );
-                }
-                brands.Add( b );
+        foreach ( BrandCategory bc in dto.BrandCategories ) {
+            if (!brandsById.TryGetValue( bc.BrandId, out Brand? b ))
+                continue;
+            if (!brandsByCategory.TryGetValue( bc.CategoryId, out HashSet<Brand>? brands ))
+            {
+                brands = [];
+                brandsByCategory.Add( bc.CategoryId, brands );
             }
+            brands.Add( b );
         }
 
         return new BrandsCollection( brandsById, brandsByCategory );

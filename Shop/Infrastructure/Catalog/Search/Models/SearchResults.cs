@@ -10,11 +10,11 @@ public record SearchResults(
     public static SearchResults From( SearchResultsDto resultsDto, BrandsCollection brands )
     {
         List<SearchItem> searchItems = [];
-        int maxIndex = resultsDto.ShippingEstimates.Count - 1;
+        int maxIndex = resultsDto.ShippingDays.Count - 1;
         for ( int i = 0; i < resultsDto.Results.Count; i++ )
         {
             SearchItemDto dto = resultsDto.Results[i];
-            int shippingDays = i <= maxIndex ? resultsDto.ShippingEstimates[i] : 0;
+            int shippingDays = i <= maxIndex ? resultsDto.ShippingDays[i] : 0;
             searchItems.Add( SearchItem.From( dto, shippingDays, brands ) );
         }
 

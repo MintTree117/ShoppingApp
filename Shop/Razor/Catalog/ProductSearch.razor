@@ -5,24 +5,29 @@
 @using Shop.Infrastructure.Catalog.Categories.Types
 @using System.Text
 @using System.Web
-@using Shop.Infrastructure
 @using Shop.Infrastructure.Catalog.Search.Dtos
 @using Shop.Infrastructure.Catalog.Search.Models
-@using Shop.Infrastructure.Common.ReplyTypes
 @using Shop.Razor.Shared.Components
+@using Shop.Utilities
 @inherits Shop.Razor.Shared.ShopPage
 @inject CategoriesCache CategoriesCache
 @inject BrandsCache BrandsCache
 
 <div class="content-container">
     <ProductSearchHeader @ref="_headerRazor"/>
-    <ProductSearchFilters @ref="_filtersRazor"/>
-    <PaginationPanel @ref="_paginationRazor"/>
+    <div class="search-body">
+        <ProductSearchFilters @ref="_filtersRazor"/>
+        <div class="search-body-main">
+            <ProductSearchList @ref="_searchList"/>
+            <PaginationPanel @ref="_paginationRazor"/>
+        </div>
+    </div>
 </div>
 
 @code {
     ProductSearchHeader _headerRazor = default!;
     ProductSearchFilters _filtersRazor = default!;
+    ProductSearchList _searchList = default!;
     PaginationPanel _paginationRazor = default!;
     
     CategoriesCollection _categoryCollection = CategoriesCollection.None();
@@ -30,7 +35,6 @@
 
     Category? _currentCategory = null;
     LocalSearchFilters _filters = LocalSearchFilters.Empty();
-    Pagination _pagination = new( 1, 10, 0 );
     SearchResults _searchResults = SearchResults.Empty();
 
     protected override void OnDispose()
@@ -44,19 +48,21 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+        ParseQueryString();
+
+        var categoriesTask = CategoriesCache.GetCategories();
+        var brandsTask = BrandsCache.GetBrands();
         
-        Task<Reply<CategoriesCollection>> cTask = CategoriesCache.GetCategories();
-        Task<Reply<BrandsCollection>> bTask = BrandsCache.GetBrands();
-        // load products
+        await Task.WhenAll( categoriesTask, brandsTask );
 
-        await Task.WhenAll( cTask, bTask );
-
-        _categoryCollection = cTask.Result
-            ? cTask.Result.Data
+        _categoryCollection = categoriesTask.Result
+            ? categoriesTask.Result.Data
             : CategoriesCollection.None();
-        _brandCollection = bTask.Result
-            ? bTask.Result.Data
+        _brandCollection = brandsTask.Result
+            ? brandsTask.Result.Data
             : BrandsCollection.None();
+        
+        await FetchProducts( _filters );
         // set products
     }
     protected override async Task OnParametersSetAsync()
@@ -71,62 +77,57 @@
         _filtersRazor.OnChangeFilters += OnSearchFiltersRazorChanged;
         _filtersRazor.SetData( _currentCategory, _brandCollection.BrandsById.Values );
     }
-
-    void OnToggleMobileFilters()
-    {
-        _filtersRazor.ToggleView(  );
-    }
     
     async Task OnPreviousCategorySelected( Category? category )
     {
-        Console.WriteLine( $"Previous Category Selected: {category}" );
-        //_localFilters = _localFilters with { CategoryId = category?.Id };
+        _filters.CategoryId = category?.Id ?? null;
+        await FetchProducts( _filters );
+    }
+    async Task OnPageChanged( int newPage )
+    {
+        _filters.Page = newPage;
         await FetchProducts( _filters );
     }
     async Task OnPageSizeChanged( int newPageSize )
     {
-        Console.WriteLine( $"Page Size Changed: {newPageSize}" );
-        //_localFilters = _localFilters with { PageSize = newPageSize };
+        _filters.PageSize = newPageSize;
         await FetchProducts( _filters );
     }
     async Task OnPageSortChanged( int newPageSortIndex )
     {
-        Console.WriteLine( $"Page Sort Changed: {newPageSortIndex}" );
-        //_localFilters = _localFilters with { SortBy = newPageSortIndex };
+        _filters.SortBy = newPageSortIndex;
         await FetchProducts( _filters );
     }
     async Task OnSearchFiltersRazorChanged( LocalSearchFilters newLocalSearchFilters )
     {
-        Console.WriteLine( $"Search Filters Changed: {newLocalSearchFilters}" );
-
-        //_localFilters = newLocalSearchFilters;
-        
+        _filters = newLocalSearchFilters;
         await FetchProducts( _filters );
     }
-
     async Task FetchProducts( LocalSearchFilters filters )
     {
-        string url = BuildSearchUrl( filters );
-        Reply<SearchResultsDto> reply = await Http.GetAsync<SearchResultsDto>( url );
-
-        if (!reply)
+        var fetchReply = await Http.GetAsync<SearchResultsDto>( BuildSearchUrl( filters ) );
+        if (!fetchReply)
         {
             PushWarning( "Failed to fetch products." );
             return;
         }
         
-        _searchResults = SearchResults.From( reply.Data, _brandCollection );
-        _paginationRazor.Set( _filters.Page, _filters.PageSize, _searchResults.TotalMatches );
+        // fields
         _currentCategory = null;
         if (filters.CategoryId.HasValue)
             _categoryCollection.Categories.TryGetValue( filters.CategoryId.Value, out _currentCategory );
+        _searchResults = SearchResults.From( fetchReply.Data, _brandCollection );
+        
+        // razor
         _headerRazor.SetNavigation( _currentCategory, _currentCategory is null ? null : _categoryCollection.Categories );
-        StateHasChanged();
+        _searchList.ChangeSearchResults( _searchResults.Results );
+        _paginationRazor.Set( _filters.Page, _filters.PageSize, _searchResults.TotalMatches );
+        //StateHasChanged();
     }
     static string BuildSearchUrl( LocalSearchFilters filters )
     {
         StringBuilder urlString = new();
-        urlString.Append( "fetch/" );
+        urlString.Append( Consts.ApiGetSearch );
         
         Dictionary<string, string> queryParams = new();
         
@@ -140,21 +141,70 @@
         if (filters.MaxPrice.HasValue)
             queryParams["MaxPrice"] = filters.MaxPrice.Value.ToString();
         
-        queryParams["IsInStock"] = filters.IsInStock.ToString().ToLower();
-        queryParams["IsFeatured"] = filters.IsFeatured.ToString().ToLower();
-        queryParams["IsOnSale"] = filters.IsOnSale.ToString().ToLower();
-        
+        if (filters.IsInStock.HasValue)
+            queryParams["IsInStock"] = filters.IsInStock.ToString()?.ToLower();
+        if (filters.IsFeatured.HasValue)
+            queryParams["IsFeatured"] = filters.IsFeatured.ToString()?.ToLower();
+        if (filters.IsOnSale.HasValue)
+            queryParams["IsOnSale"] = filters.IsOnSale.ToString()?.ToLower();
+
         queryParams["Page"] = filters.Page.ToString();
         queryParams["PageSize"] = filters.PageSize.ToString();
-        queryParams["OrderBy"] = filters.SortBy.ToString();
-        
+        queryParams["SortBy"] = filters.SortBy.ToString();
+
+        if (!queryParams.Any())
+            return urlString.ToString();
+
+        urlString.Append( "?" );
+
+        int count = 0;
         foreach ( KeyValuePair<string, string> param in queryParams )
         {
-            if (urlString.Length > 0)
+            if (count != 0)
                 urlString.Append( "&" );
+            count++;
             urlString.AppendFormat( "{0}={1}", HttpUtility.UrlEncode( param.Key ), HttpUtility.UrlEncode( param.Value ) );
-        }  
+        }
 
         return urlString.ToString();
+    }
+    void OnToggleMobileFilters()
+    {
+        _filtersRazor.ToggleView();
+    }
+    void ParseQueryString()
+    {
+        var query = HttpUtility.ParseQueryString( Navigation.Uri );
+
+        if (Guid.TryParse( query.Get( "CategoryId" ), out Guid categoryId ))
+            _filters.CategoryId = categoryId;
+
+        string? brandIds = query.Get( "BrandIds" );
+        if (!string.IsNullOrWhiteSpace( brandIds ))
+            _filters.BrandIds = brandIds.Split( ',' ).Select( Guid.Parse ).ToHashSet();
+
+        if (int.TryParse( query.Get( "MinPrice" ), out int minPrice ))
+            _filters.MinPrice = minPrice;
+
+        if (int.TryParse( query.Get( "MaxPrice" ), out int maxPrice ))
+            _filters.MaxPrice = maxPrice;
+
+        if (bool.TryParse( query.Get( "IsInStock" ), out bool isInStock ))
+            _filters.IsInStock = true;
+
+        /*if (bool.TryParse( query.Get( "IsFeatured" ), out bool isFeatured ))
+            _filters.IsFeatured = isFeatured;*/
+
+        if (bool.TryParse( query.Get( "IsOnSale" ), out bool isOnSale ))
+            _filters.IsOnSale = true;
+
+        if (int.TryParse( query.Get( "Page" ), out int page ))
+            _filters.Page = page;
+
+        if (int.TryParse( query.Get( "PageSize" ), out int pageSize ))
+            _filters.PageSize = pageSize;
+
+        if (int.TryParse( query.Get( "SortBy" ), out int sortBy ))
+            _filters.SortBy = sortBy;
     }
 }

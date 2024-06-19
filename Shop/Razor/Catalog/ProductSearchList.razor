@@ -1,0 +1,47 @@
+@using Shop.Infrastructure.Catalog.Search.Dtos
+@using Shop.Infrastructure.Catalog.Search.Models
+
+<div class="search-list">
+    @foreach (SearchItem item in _searchItems )
+    {
+        <div class="search-item">
+            <div class="search-item-img">
+                <img src="@item.Image" alt="@item.Name"/>
+            </div>
+            <div class="search-item-info">
+                <h3>@item.Name</h3>
+                <p>Sold By: @item.Brand.Name</p>
+                <div class="search-item-pricing">
+                    @if (item.SalePrice > 0)
+                    {
+                        <span class="original-price">$@item.Price</span>
+                        <span class="sale-price">$@item.SalePrice</span>
+                    }
+                    else
+                    {
+                        <span class="price">$@item.Price</span>
+                    }
+                </div>
+    
+                @if (item.IsInStock)
+                {
+                    <button class="btn btn-primary">Add To Cart</button>
+                }
+                else
+                {
+                    <p class="text-muted">Out of stock.</p>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    public void ChangeSearchResults( List<SearchItem> items )
+    {
+        _searchItems = items;
+        StateHasChanged();
+    }
+
+    List<SearchItem> _searchItems = [];
+}
