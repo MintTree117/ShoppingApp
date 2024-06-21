@@ -9,7 +9,7 @@
         <!-- ITEM -->
         <div class="search-item shadow-sm">
             <!-- IMAGE -->
-            <div class="search-item-img">
+            <div class="search-item-img mb-1">
                 <a href="@GetDetailsLink( item )">
                     <img src="@item.Image" alt="@item.Name"/>
                 </a>
@@ -17,32 +17,37 @@
             <!-- INFO -->
             <div class="search-item-info">
                 <!-- TITLE -->
-                <h3 class="search-item-title">
+                <h3 class="search-item-title mb-1">
                     <a href="@GetDetailsLink( item )">@item.Name</a>
                 </h3>
-                <!-- SELLER -->
-                <div class="search-item-seller">
-                    <span class="search-item-brand">
-                        <a class="ms-1" href="@item.Brand.Url">@item.Brand.Name</a>
-                    </span>
-                    <span class="search-item-sold ms-1">
-                         Sold
-                    </span>
-                </div>
                 <!-- RATING -->
-                <div class="search-item-rating">
+                <div class="search-item-rating mb-1">
                     @for ( int i = 1; i <= 5; i++ )
                     {
                         <div>
-                            <i class="fa fa-star fa-sm @GetRatingCss( item, i )"></i>
+                            <i class="fa fa-star fa-xs @GetRatingCss( item, i )"></i>
                         </div>
                     }
-                    <small class="d-block ms-1">@item.NumberRatings</small>
+                    <small class="d-block ms-1 text-muted">(@item.NumberRatings Ratings)</small>
                 </div>
+                <!-- SELLER -->
+                <div class="search-item-seller mb-1">
+                    <span class="search-item-brand">
+                        <small>Brand:</small>
+                        <a class="ms-1" href="@item.Brand.Url">@item.Brand.Name</a>
+                    </span>
+
+                </div>
+                <!-- NUMBER SOLD -->
+                <small class="text-muted mb-0">
+                    @item.NumberSold Sold
+                </small>
                 <!-- SHIPPING -->
-                <p class="search-item-shipping">@GetShippingText( item )</p>
+                <small class="mb-0">
+                    @GetShippingText( item )
+                </small>
                 <!-- PRICING -->
-                <div class="search-item-pricing">
+                <div class="search-item-pricing mb-1">
                     @if (item.SalePrice > 0)
                     {
                         <strong>$@item.SalePrice</strong>
@@ -56,7 +61,7 @@
                 <!-- CART -->
                 @if (item.IsInStock)
                 {
-                    <button class="btn btn-primary search-item-btn">Add To Cart</button>
+                    <button class="btn btn-primary search-item-btn"><small>Add To Cart</small></button>
                 }
                 else
                 {

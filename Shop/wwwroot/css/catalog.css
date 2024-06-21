@@ -1,22 +1,28 @@
 /* HEADER */
 /* ------------------------------------------------------------------------------------------*/
+.search-header-wrapper {
+    width: 100vw;
+    border-bottom: 1px solid lightgray;
+    margin-bottom: 16px;
+}
+
 .search-header {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    padding-top: 14px;
-    padding-bottom: 14px;
+    align-items: start;
+    justify-content: start;
+    padding-top: 16px;
+    padding-bottom: 16px;
 }
 
 .search-header-breadcrumb {
     width: 100%;
     text-align: left;
-    margin-bottom: 10px;
+    margin-bottom: 0;
 }
 
 .search-header-sort-buttons {
-    margin-bottom: 10px;
+    margin-bottom: 0;
     width: 100%;
     display: flex;
     flex-direction: row;
@@ -27,6 +33,11 @@
 
 .search-header-filters {
     display: block;
+    margin-top: 8px;
+}
+
+.search-header-info {
+    margin-bottom: 8px;
 }
 
 @media only screen and (min-width: 992px) {
@@ -46,6 +57,11 @@
     }
     .search-header-filters {
         display: none;
+        margin-top: 0;
+    }
+
+    .search-header-info {
+        margin-bottom: 0;
     }
 }
 
@@ -157,6 +173,10 @@
     font-size: larger;
 }
 
+.search-filters-header span {
+    font-weight: bold;
+}
+
 .search-filters-body {
     flex-direction: column;
     align-items: stretch;
@@ -238,14 +258,13 @@
     flex-direction: column;
     justify-content: space-between;
     width: 100%;
-    padding-top: 8px;
-    padding-left: 8px
+    padding: 8px;
 }
 
 .search-item-title {
-    font-size: larger;
+    font-size: medium;
     font-weight: bold;
-    margin-bottom: 8px;
+    margin-bottom: 0;
 }
 
 .search-item-title a {
@@ -269,14 +288,8 @@
     gap: 0;
 }
 
-.search-item-shipping {
-    margin: 0;
-}
-
 .search-item-btn {
-    width: 100%;
-    padding: 8px;
-    align-self: flex-end;
+    align-self: stretch;
 }
 
 @media only screen and (min-width: 480px) {
@@ -308,6 +321,11 @@
 
     .search-item-info {
         padding: 8px;
+    }
+
+    .search-item-btn {
+        align-self: flex-start;
+        margin-bottom: 0;
     }
 }
 

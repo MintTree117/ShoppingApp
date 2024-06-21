@@ -2,73 +2,75 @@
 @using Shop.Infrastructure.Catalog.Search.Models
 
 <!-- WRAPPER -->
-<div class="search-header">
-    <!-- SEARCH INFO -->
-    <div class="d-flex flex-column align-items-start">
-        <!-- BREADCRUMB -->
-        <nav class="search-header-breadcrumb" aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
-                @foreach ( string crumb in _breadcrumbStrings )
-                {
-                    <li class="breadcrumb-item @GetActiveBreadcrumbCss( crumb )">
-                        <button class="btn btn-link p-0 fw-bold" @onclick="() => OnClickBreadCrumb( crumb )">@crumb</button>
-                    </li>
-                }
-            </ol>
-        </nav>
-        <div>
-            <small class="text-muted text-start">@GetInfoText()</small>
+<div class="search-header-wrapper">
+    <!-- HEADER -->
+    <div class="content-container search-header">
+        <!-- SEARCH INFO -->
+        <div class="d-flex flex-column align-items-start">
+            <!-- BREADCRUMB -->
+            <nav class="search-header-breadcrumb" aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    @foreach ( string crumb in _breadcrumbStrings )
+                    {
+                        <li class="breadcrumb-item @GetActiveBreadcrumbCss( crumb )">
+                            <button class="btn btn-link p-0 fw-bold" @onclick="() => OnClickBreadCrumb( crumb )">@crumb</button>
+                        </li>
+                    }
+                </ol>
+            </nav>
+            <div class="search-header-info">
+                <small class="text-muted text-start">@GetInfoText()</small>
+            </div>
         </div>
+
+        <!-- SORT BUTTONS -->
+        <div class="search-header-sort-buttons">
+            <!-- PAGE SIZE -->
+            <div class="dropdown w-100">
+                <!-- TOGGLE -->
+                <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Page Size: @PageSizeOptions[_selectedPageSizeIndex]
+                </button>
+                <!-- LIST -->
+                <ul class="dropdown-menu w-100" aria-labelledby="Rows">
+                    @foreach ( int pageSize in PageSizeOptions )
+                    {
+                        <li>
+                            <button class="dropdown-item" type="button" @onclick="() => OnSelectPageSize( pageSize )">
+                                @pageSize
+                            </button>
+                        </li>
+                    }
+                </ul>
+            </div>
+            <!-- SORT BY -->
+            <div class="dropdown w-100">
+                <!-- TOGGLE -->
+                <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Sort By: @PageSortOptions[_selectedPageSortIndex]
+                </button>
+                <!-- LIST -->
+                <ul class="dropdown-menu w-100" aria-labelledby="SortBy">
+                    @for ( int i = 0; i < PageSortOptions.Length; i++ )
+                    {
+                        int localIndex = i; // Create a local copy of the loop variable
+                        <li>
+                            <button class="dropdown-item" type="button" @onclick="() => OnSelectPageSort( localIndex )">
+                                @PageSortOptions[localIndex]
+                            </button>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+        
+        <!-- MOBILE FILTERS -->
+        <button class="btn btn-primary w-100 search-header-filters" @onclick="OnClickMobileFilters">
+            <i class="fa-solid fa-filter me-2"></i>
+            Filters
+        </button>
     </div>
-
-
-    <!-- SORT BUTTONS -->
-    <div class="search-header-sort-buttons">
-        <!-- PAGE SIZE -->
-        <div class="dropdown w-100">
-            <!-- TOGGLE -->
-            <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Page Size: @PageSizeOptions[_selectedPageSizeIndex]
-            </button>
-            <!-- LIST -->
-            <ul class="dropdown-menu w-100" aria-labelledby="Rows">
-                @foreach ( int pageSize in PageSizeOptions )
-                {
-                    <li>
-                        <button class="dropdown-item" type="button" @onclick="() => OnSelectPageSize( pageSize )">
-                            @pageSize
-                        </button>
-                    </li>
-                }
-            </ul>
-        </div>
-        <!-- SORT BY -->
-        <div class="dropdown w-100">
-            <!-- TOGGLE -->
-            <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Sort By: @PageSortOptions[_selectedPageSortIndex]
-            </button>
-            <!-- LIST -->
-            <ul class="dropdown-menu w-100" aria-labelledby="SortBy">
-                @for ( int i = 0; i < PageSortOptions.Length; i++ )
-                {
-                    int localIndex = i; // Create a local copy of the loop variable
-                    <li>
-                        <button class="dropdown-item" type="button" @onclick="() => OnSelectPageSort( localIndex )">
-                            @PageSortOptions[localIndex]
-                        </button>
-                    </li>
-                }
-            </ul>
-        </div>
-    </div>
-
-    <!-- MOBILE FILTERS -->
-    <button class="btn btn-primary w-100 search-header-filters" @onclick="OnClickMobileFilters">
-        Filters
-    </button>
 </div>
-
 
 @code 
 {

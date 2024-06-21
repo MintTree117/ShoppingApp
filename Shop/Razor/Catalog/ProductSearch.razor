@@ -14,7 +14,7 @@
 @inject BrandsCache BrandsCache
 
 <ProductSearchHeader @ref="_headerRazor"/>
-<div class="search-body">
+<div class="content-container search-body">
     <ProductSearchFilters @ref="_filtersRazor"/>
     <div class="search-body-main">
         <ProductSearchList @ref="_searchList"/>
@@ -101,6 +101,7 @@
         _searchList.ChangeSearchResults( _searchResults.Results );
         _paginationRazor.Set( _parameters.Page, _parameters.PageSize, _searchResults.TotalMatches );
     }
+    
     void Reload()
     {
         Navigation.NavigateTo( BuildQueryString( Consts.PageProductSearch ), true );
@@ -135,7 +136,7 @@
             _parameters.IsInStock = true;
 
         if (bool.TryParse( query.Get( "IsFeatured" ), out bool isFeatured ))
-            _parameters.IsFeatured = isFeatured;
+            _parameters.IsFeatured = true;
 
         if (bool.TryParse( query.Get( "IsOnSale" ), out bool isOnSale ))
             _parameters.IsOnSale = true;
@@ -148,6 +149,12 @@
 
         if (int.TryParse( query.Get( "SortBy" ), out int sortBy ))
             _parameters.SortBy = sortBy;
+
+        if (int.TryParse( query.Get( "PosX" ), out int posX ))
+            _parameters.PosX = posX;
+
+        if (int.TryParse( query.Get( "PosY" ), out int posY ))
+            _parameters.PosY = posY;
     }
     string BuildQueryString( string baseUrl )
     {
@@ -172,6 +179,11 @@
             queryParams["IsFeatured"] = _parameters.IsFeatured.ToString()?.ToLower() ?? string.Empty;
         if (_parameters.IsOnSale.HasValue)
             queryParams["IsOnSale"] = _parameters.IsOnSale.ToString()?.ToLower() ?? string.Empty;
+
+        if (_parameters.PosX.HasValue)
+            queryParams["PosX"] = _parameters.PosX.ToString()?.ToLower() ?? string.Empty;
+        if (_parameters.PosY.HasValue)
+            queryParams["PosY"] = _parameters.PosY.ToString()?.ToLower() ?? string.Empty;
 
         queryParams["Page"] = _parameters.Page.ToString();
         queryParams["PageSize"] = _parameters.PageSize.ToString();

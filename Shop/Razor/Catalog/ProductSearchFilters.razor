@@ -23,6 +23,24 @@
         </button>
     </div>
     
+    <!-- LOCATION -->
+    <div class="search-filters-section">
+        <button class="btn search-filters-header" type="button" @onclick="() => ToggleSectionCollapse( SectionLocation )">
+            <span>Location</span>
+            <i class="fa @GetCollapseIconCss( SectionLocation )"></i>
+        </button>
+        <div class="search-filters-body @GetCollapseDisplayCss( SectionLocation )">
+            <div class="d-flex justify-content-between gap-1 mb-2">
+                <input type="number" min="0" max="100000" step="1" value="@_posX" @onchange="OnChangeLocationX" class="form-control"/>
+                <input type="number" min="0" max="100000" step="1" value="@_posY" @onchange="OnChangeLocationY" class="form-control"/>
+            </div>
+            <button class="btn btn-primary btn-icon search-filters-btn-main" @onclick="OnClickApplyLocation">
+                <i class="fa-solid fa-circle-check me-2"></i>
+                Apply
+            </button>
+        </div>
+    </div>
+    
     <!-- TRENDS -->
     <div class="search-filters-section">
         <button class="btn search-filters-header" type="button" @onclick="() => ToggleSectionCollapse( SectionTrends )">
@@ -41,7 +59,7 @@
             </label>
         </div>
     </div>
-
+    
     <!-- PRICE RANGE -->
     <div class="search-filters-section">
         <button class="btn search-filters-header" type="button" @onclick="() => ToggleSectionCollapse( SectionPricing )">
@@ -50,8 +68,8 @@
         </button>
         <div class="search-filters-body @GetCollapseDisplayCss( SectionPricing ) px-2">
             <div class="d-flex justify-content-between gap-1 mb-2">
-                <input type="number" min="0" max="10000" step="1" @onchange="OnChangeMinPrice" class="form-control"/>
-                <input type="number" min="0" max="10000" step="1" @onchange="OnChangeMaxPrice" class="form-control"/>
+                <input type="number" min="0" max="10000" step="1" value="@_minPrice" @onchange="OnChangeMinPrice" class="form-control"/>
+                <input type="number" min="0" max="10000" step="1" value="@_maxPrice" @onchange="OnChangeMaxPrice" class="form-control"/>
             </div>
             <button class="btn btn-primary btn-icon search-filters-btn-main" @onclick="OnClickApplyPricing">
                 <i class="fa-solid fa-circle-check me-2"></i>
@@ -59,24 +77,27 @@
             </button>
         </div>
     </div>
-
-    <!-- CATEGORIES -->
-    <div class="search-filters-section">
-        <button class="btn search-filters-header" type="button" @onclick="() => ToggleSectionCollapse( SectionCategories )">
-            <span>@GetCategoriesTitle()</span>
-            <i class="fa @GetCollapseIconCss( SectionCategories )"></i>
-        </button>
-        <div class="search-filters-body @GetCollapseDisplayCss( SectionCategories )">
-            <ul class="search-filters-list">
-                @foreach ( Category c in _categories )
-                {
-                    <li @key="@c.Id">
-                        <button class="btn" @onclick="@(() => OnClickCategory( c ))">@c.Name</button>
-                    </li>
-                }
-            </ul>
+    
+    @if (ShouldShowCategories())
+    {
+        <!-- CATEGORIES -->
+        <div class="search-filters-section">
+            <button class="btn search-filters-header" type="button" @onclick="() => ToggleSectionCollapse( SectionCategories )">
+                <span>@GetCategoriesTitle()</span>
+                <i class="fa @GetCollapseIconCss( SectionCategories )"></i>
+            </button>
+            <div class="search-filters-body @GetCollapseDisplayCss( SectionCategories )">
+                <ul class="search-filters-list">
+                    @foreach ( Category c in _categories )
+                    {
+                        <li @key="@c.Id">
+                            <button class="btn" @onclick="@(() => OnClickCategory( c ))">@c.Name</button>
+                        </li>
+                    }
+                </ul>
+            </div>
         </div>
-    </div>
+    }
 
     <!-- BRANDS -->
     <div class="search-filters-section">
@@ -110,6 +131,7 @@
 
 @code
 {
+    const string SectionLocation = "Location";
     const string SectionTrends = "Trends";
     const string SectionPricing = "Pricing";
     const string SectionCategories = "Categories";
@@ -127,8 +149,13 @@
     bool _initToggleStock = false;
     bool _initToggleFeatured = false;
     bool _initToggleSale = false;
+    int? _posX = 0;
+    int? _posY = 0;
+    int? _minPrice = 0;
+    int? _maxPrice = 0;
 
     readonly Dictionary<string, bool> _collapsedSections = new() {
+        { SectionLocation, false },
         { SectionTrends, false },
         { SectionPricing, false },
         { SectionCategories, true },
@@ -151,9 +178,13 @@
             bool state = (filters.BrandIds ?? []).Any( i => i == b.Id );
             _selectedBrands.TryAdd( b, state );
         }
+        _posX = filters.PosX;
+        _posY = filters.PosY;
         _initToggleStock = filters.IsInStock is true;
         _initToggleFeatured = filters.IsFeatured is true;
         _initToggleSale = filters.IsOnSale is true;
+        _minPrice = filters.MinPrice;
+        _maxPrice = filters.MaxPrice;
         StateHasChanged();
     }
     public void ToggleView( bool? shouldShow = null )
@@ -198,6 +229,26 @@
         }
         bool newValue = !value;
         _collapsedSections[sectionName] = newValue;
+    }
+    void OnChangeLocationX( ChangeEventArgs args )
+    {
+        _altered = true;
+        if (!int.TryParse( args.Value?.ToString(), out int result ))
+            _filters.PosX = null;
+        else
+            _filters.PosX = result;
+    }
+    void OnChangeLocationY( ChangeEventArgs args )
+    {
+        _altered = true;
+        if (!int.TryParse( args.Value?.ToString(), out int result ))
+            _filters.PosY = null;
+        else
+            _filters.PosY = result;
+    }
+    void OnClickApplyLocation()
+    {
+        OnChangeFilters?.Invoke();
     }
     void OnChangeIsInStock( ChangeEventArgs args )
     {
