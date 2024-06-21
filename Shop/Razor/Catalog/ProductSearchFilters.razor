@@ -6,144 +6,176 @@
 @using Shop.Infrastructure.Catalog.Search.Models
 
 <!-- CONTAINER -->
-<div class="search-filters">
-    
-    <!-- MOBILE HEADER -->
-    <div class="search-filters-header-mobile">
-        <div class="d-flex flex-row justify-content-between mb-3">
-            <!-- TITLE AND CLOSE -->
-            <h3 class="text-decoration-underline m-0 mb-lg-3 p-0">Filters</h3>
-            <button class="btn btn-close-white ms-3" @onclick="() => ToggleView( false )">
+<div class="search-filters @GetDisplayCss()">
+    <!-- HEADER -->
+    <div class="search-filters-top">
+        <!-- TITLE AND CLOSE -->
+        <div class="search-filters-top-title">
+            <h3 class="search-filters-title">Filters</h3>
+            <button class="btn btn-icon search-filters-close" @onclick="() => ToggleView( false )">
                 <i class="fa-solid fa-x"></i>
             </button>
         </div>
         <!-- CLEAR ALL -->
-        <button class="btn btn-close-white ms-3 @GetClearAllCss()" @onclick="Clear">
+        <button class="btn btn-primary btn-icon search-filters-btn-main search-filters-clear" @onclick="Clear">
+            <i class="fa-solid fa-eraser me-2"></i>
             Clear All
         </button>
     </div>
-
-    <!-- DESKTOP HEADER -->
-    <div class="search-filters-header-desktop">
-        <h3>Filters</h3>
-        <hr/>
-        <button class="btn btn-primary ms-3 @GetClearAllCss()" @onclick="Clear">
-            Clear All
+    
+    <!-- TRENDS -->
+    <div class="search-filters-section">
+        <button class="btn search-filters-header" type="button" @onclick="() => ToggleSectionCollapse( SectionTrends )">
+            <span>Trends</span>
+            <i class="fa @GetCollapseIconCss( SectionTrends )"></i>
         </button>
-        <hr/>
+        <div class="search-filters-body @GetCollapseDisplayCss( SectionTrends )">
+            <label>
+                <input type="checkbox" @onchange="OnChangeIsInStock"/> In Stock
+            </label>
+            <label>
+                <input type="checkbox" @onchange="OnChangeIsFeatured"/> Featured
+            </label>
+            <label>
+                <input type="checkbox" @onchange="OnChangeIsOnSale"/> On Sale
+            </label>
+        </div>
+    </div>
+
+    <!-- PRICE RANGE -->
+    <div class="search-filters-section">
+        <button class="btn search-filters-header" type="button" @onclick="() => ToggleSectionCollapse( SectionPricing )">
+            <span>Pricing</span>
+            <i class="fa @GetCollapseIconCss( SectionPricing )"></i>
+        </button>
+        <div class="search-filters-body @GetCollapseDisplayCss( SectionPricing ) px-2">
+            <div class="d-flex justify-content-between gap-1 mb-2">
+                <input type="number" min="0" max="10000" step="1" @onchange="OnChangeMinPrice" class="form-control"/>
+                <input type="number" min="0" max="10000" step="1" @onchange="OnChangeMaxPrice" class="form-control"/>
+            </div>
+            <button class="btn btn-primary btn-icon search-filters-btn-main" @onclick="Clear">
+                <i class="fa-solid fa-circle-check me-2"></i>
+                Apply
+            </button>
+        </div>
     </div>
 
     <!-- CATEGORIES -->
-    @if (ShouldShowCategories())
-    {
-        <div class="product-filters-section d-grid">
-            <button class="btn search-filters-list-header" type="button" @onclick="() => ToggleSectionCollapse( SectionCategories )">
-                <span>@GetCategoriesTitle()</span>
-                <i class="fa @GetCollapseIconCss( SectionCategories )"></i>
-            </button>
-            <div class="@GetCollapseDisplayCss( SectionCategories )">
-                <ul class="search-filters-list">
-                    @foreach ( Category c in _parentCategory?.Children ?? [] )
-                    {
-                        <button class="btn btn-link text-start" @onclick="() => OnClickCategory( c )">@c.Name</button>
-                    }
-                </ul>
-            </div>
-        </div>
-    }
-
-    <!-- BRANDS -->
-    <div class="product-filters-section d-grid">
-        <button class="btn search-filters-list-header" type="button" @onclick="() => ToggleSectionCollapse( SectionBrands )">
-            <span>Brands</span>
-            <i class="fa @GetCollapseIconCss( SectionBrands )"></i>
+    <div class="search-filters-section">
+        <button class="btn search-filters-header" type="button" @onclick="() => ToggleSectionCollapse( SectionCategories )">
+            <span>@GetCategoriesTitle()</span>
+            <i class="fa @GetCollapseIconCss( SectionCategories )"></i>
         </button>
-        <div class="@GetCollapseDisplayCss( SectionBrands )">
+        <div class="search-filters-body @GetCollapseDisplayCss( SectionCategories )">
             <ul class="search-filters-list">
-                @foreach ( Brand b in _brands )
+                @foreach ( Category c in _categories )
                 {
-                    <button class="btn btn-link text-start" @onclick="() => OnClickBrand( b )">@b.Name</button>
+                    <li @key="@c.Id">
+                        <button class="btn" @onclick="@(() => OnClickCategory( c ))">@c.Name</button>
+                    </li>
                 }
             </ul>
         </div>
     </div>
 
-    <!-- TOGGLES FOR FILTERS -->
-    <div class="product-filters-section d-grid">
-        <label>
-            <input type="checkbox" @onchange="OnChangeIsInStock"/> In Stock
-        </label>
-        <label>
-            <input type="checkbox" @onchange="OnChangeIsFeatured"/> Featured
-        </label>
-        <label>
-            <input type="checkbox" @onchange="OnChangeIsOnSale"/> On Sale
-        </label>
-    </div>
-
-    <!-- PRICE RANGE SLIDER -->
-    <div class="product-filters-section d-grid">
-        <label>
-            Price Range: @GetPriceRangeLabel()
-        </label>
-        <input type="range" min="0" max="10000" step="1" @onchange="OnChangeMinPrice"/>
-        <input type="range" min="0" max="10000" step="1" @onchange="OnChangeMaxPrice"/>
-        <div class="d-flex justify-content-between">
-            <input type="number" min="0" max="10000" step="1" @onchange="OnChangeMinPrice" class="form-control"/>
-            <input type="number" min="0" max="10000" step="1" @onchange="OnChangeMaxPrice" class="form-control"/>
+    <!-- BRANDS -->
+    <div class="search-filters-section">
+        <button class="btn search-filters-header" type="button" @onclick="() => ToggleSectionCollapse( SectionBrands )">
+            <span>Brands</span>
+            <i class="fa @GetCollapseIconCss( SectionBrands )"></i>
+        </button>
+        <div class="search-filters-body @GetCollapseDisplayCss( SectionBrands )">
+            <ul class="search-filters-list">
+                @foreach ( Brand b in _brands )
+                {
+                    <li>
+                        <label>
+                            @if (GetCheckedBrand( b ))
+                            {
+                                <input type="checkbox" checked @onclick="() => OnClickBrand( b )"/>
+                                @b.Name
+                            }
+                            else
+                            {
+                                <input type="checkbox" @onclick="()=>OnClickBrand(b)"/>
+                                @b.Name
+                            }
+                        </label>
+                    </li>
+                }
+            </ul>
         </div>
     </div>
-
 </div>
 
-@code {
+@code 
+{
+    const string SectionTrends = "Trends";
+    const string SectionPricing = "Pricing";
     const string SectionCategories = "Categories";
     const string SectionBrands = "Brands";
+    
     List<Brand> _brands = [];
+    List<Category> _categories = [];
+    Category? _parentCategory = null;
     
     bool _altered = false;
-    bool _hidden = false;
-    Category? _parentCategory = null;
-    LocalSearchFilters _filters = LocalSearchFilters.Empty();
+    bool _shouldShow = true;
+    SearchParameters _filters = SearchParameters.Empty();
+    Dictionary<Brand, bool> _selectedBrands = [];
 
-    readonly Dictionary<string, bool> _collapsedSections = new Dictionary<string, bool>() {
-        { SectionCategories, false },
-        { SectionBrands, false }
+    readonly Dictionary<string, bool> _collapsedSections = new() {
+        { SectionTrends, false },
+        { SectionPricing, false },
+        { SectionCategories, true },
+        { SectionBrands, true }
     };
-    readonly HashSet<Guid> _selectedBrands = [];
 
-    public event Func<LocalSearchFilters, Task>? OnChangeFilters;
-    public void SetData( Category? category, IEnumerable<Brand> brands )
+    public event Action? OnChangeFilters;
+    public void SetData( Category? parentCategory, CategoriesCollection categories, IEnumerable<Brand> brands, SearchParameters filters )
     {
         Clear();
-        _parentCategory = category;
+        _filters = filters;
+        _categories = parentCategory is null 
+            ? categories.PrimaryCategories 
+            : parentCategory.Children;
+        _parentCategory = parentCategory;
         _brands = brands.ToList();
+        _selectedBrands = [];
+        foreach ( var b in _brands )
+        {
+            bool state = (filters.BrandIds ?? []).Any( i => i == b.Id );
+            _selectedBrands.TryAdd( b, state );
+        }
         StateHasChanged();
     }
     public void ToggleView( bool? shouldShow = null )
     {
-        shouldShow ??= !_hidden;
-        _hidden = shouldShow.Value;
-        Console.WriteLine("_________________________________________________-TOGGLE VIEW");
+        if (shouldShow is null)
+            _shouldShow = !_shouldShow;
+        else
+            _shouldShow = shouldShow.Value;
         StateHasChanged();
+    }
+
+    bool ShouldShowCategories() =>
+        _parentCategory is null || _parentCategory.Children.Any();
+    bool GetCheckedBrand( Brand b )
+    {
+        return _selectedBrands.TryGetValue( b, out bool brand ) && brand;
     }
     
     string GetDisplayCss() =>
-        _hidden ? "d-none" : "d-flex";
+        _shouldShow ? "d-flex" : "d-none";
     string GetCollapseIconCss( string sectionName ) => 
         _collapsedSections[sectionName] ? "fa-plus" : "fa-minus";
-    string GetCollapseDisplayCss( string sectionName ) => 
-        _collapsedSections[sectionName] ? "collapse" : "collapse-show";
+    string GetCollapseDisplayCss( string sectionName ) =>
+        _collapsedSections[sectionName] ? "d-none" : "d-flex";
     string GetClearAllCss() =>
         _altered ? "d-block" : "d-none";
     string GetCategoriesTitle() =>
         _parentCategory?.ParentId is null ? "Categories" : "Sub-Categories";
-    string GetPriceRangeLabel() =>
-        $"{(_filters.MinPrice.HasValue ? _filters.MinPrice.Value.ToString() : "0")} - {(_filters.MaxPrice.HasValue ? _filters.MaxPrice.Value.ToString() : "Any")}";
-
-    bool ShouldShowCategories() =>
-        _parentCategory is null || _parentCategory.Children.Any();
-
+    
     void Clear()
     {
         _parentCategory = null;
@@ -160,25 +192,30 @@
         bool newValue = !value;
         _collapsedSections[sectionName] = newValue;
     }
-    void OnClickCategory( Category category )
-    {
-        _altered = true;
-        _filters = LocalSearchFilters.Empty();
-        InvokeChange();
-    }
-    void OnClickBrand( Brand brand )
-    {
-        _altered = true;
-        _selectedBrands.Add( brand.Id );
-    }
     void OnChangeIsInStock( ChangeEventArgs args ) { }
     void OnChangeIsFeatured( ChangeEventArgs args ) { }
     void OnChangeIsOnSale( ChangeEventArgs args ) { }
     void OnChangeMinPrice( ChangeEventArgs args ) { }
     void OnChangeMaxPrice( ChangeEventArgs args ) { }
-
-    void InvokeChange()
+    void OnClickCategory( Category category )
     {
-        OnChangeFilters?.Invoke( _filters );
+        if (_altered)
+            return;
+
+        _altered = true;
+        _filters.CategoryId = category.Id;
+        OnChangeFilters?.Invoke();
+    }
+    void OnClickBrand( Brand b )
+    {
+        if (_altered)
+            return;
+        _altered = true;
+        _filters.BrandIds ??= [];
+
+        if (!_filters.BrandIds.Add( b.Id ))
+            _filters.BrandIds.Remove( b.Id );
+
+        OnChangeFilters?.Invoke();
     }
 }

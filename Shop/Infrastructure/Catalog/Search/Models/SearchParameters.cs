@@ -1,6 +1,6 @@
 namespace Shop.Infrastructure.Catalog.Search.Models;
 
-public class LocalSearchFilters(
+public class SearchParameters(
     Guid? categoryId,
     HashSet<Guid>? brandIds,
     bool? isInStock,
@@ -23,6 +23,6 @@ public class LocalSearchFilters(
     public int PageSize { get; set; } = pageSize;
     public int SortBy { get; set; } = sortBy;
     
-    public static LocalSearchFilters Empty() =>
+    public static SearchParameters Empty() =>
         new( null, null, null, null, null, null, null, 1, 5, 0 );
 }

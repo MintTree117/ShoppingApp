@@ -1,35 +1,49 @@
 @using Shop.Infrastructure.Catalog.Search.Dtos
 @using Shop.Infrastructure.Catalog.Search.Models
+@using Shop.Utilities
 
+<!-- CONTAINER -->
 <div class="search-list">
     @foreach (SearchItem item in _searchItems )
     {
-        <div class="search-item">
+        <!-- ITEM -->
+        <div class="search-item shadow-sm">
+            <!-- IMAGE -->
             <div class="search-item-img">
-                <img src="@item.Image" alt="@item.Name"/>
+                <a href="@GetDetailsLink( item )">
+                    <img src="@item.Image" alt="@item.Name"/>
+                </a>
             </div>
+            <!-- INFO -->
             <div class="search-item-info">
-                <h3>@item.Name</h3>
-                <p>Sold By: @item.Brand.Name</p>
+                <!-- TITLE -->
+                <h3 class="search-item-title">
+                    <a href="@GetDetailsLink( item )">@item.Name</a>
+                </h3>
+                <!-- BRAND -->
+                <p class="search-item-brand">Sold By: @item.Brand.Name</p>
+                <!-- SHIPPING -->
+                <p class="search-item-shipping">@GetShippingText( item )</p>
+                <!-- PRICING -->
                 <div class="search-item-pricing">
                     @if (item.SalePrice > 0)
                     {
-                        <span class="original-price">$@item.Price</span>
-                        <span class="sale-price">$@item.SalePrice</span>
+                        <strong>$@item.SalePrice</strong>
+                        <small class="text-muted text-decoration-line-through">$@item.Price</small>
                     }
                     else
                     {
-                        <span class="price">$@item.Price</span>
+                        <strong>$@item.Price</strong>
                     }
                 </div>
-    
+                <!-- CART -->
                 @if (item.IsInStock)
                 {
-                    <button class="btn btn-primary">Add To Cart</button>
+                    <button class="btn btn-primary search-item-btn">Add To Cart</button>
                 }
                 else
                 {
-                    <p class="text-muted">Out of stock.</p>
+                    <span class="btn search-item-btn mb-0">Out of stock.</span>
                 }
             </div>
         </div>
@@ -44,4 +58,9 @@
     }
 
     List<SearchItem> _searchItems = [];
+
+    static string GetDetailsLink( SearchItem item ) =>
+        $"{Consts.PageProductDetails}?ProductId={item.ProductId}";
+    static string GetShippingText( SearchItem item ) =>
+        item.IsInStock ? $"Get within {item.ShippingDays} days." : "Out of stock.";
 }

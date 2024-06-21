@@ -26,7 +26,7 @@
     int _startPage = 0;
     int _endPage = 0;
     
-    [Parameter] public EventCallback<int> OnPageChange { get; set; } = default!;
+    [Parameter] public Action<int> OnPageChange { get; set; } = default!;
 
     internal void Set( int page, int pageSize, int totalResults )
     {
@@ -45,7 +45,7 @@
             page = _totalPages;
 
         _currentPage = page;
-        await OnPageChange.InvokeAsync( page );
+        OnPageChange?.Invoke( _currentPage );
     }
     
     void UpdateStartAndEndPages()

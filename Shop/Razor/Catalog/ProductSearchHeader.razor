@@ -62,7 +62,7 @@
 
 
 @code {
-    const string BaseBreadcrumbString = "Search Catalog/";
+    const string BaseBreadcrumbString = "Search Catalog";
     static readonly int[] PageSizeOptions = [5, 10, 15, 20, 50, 100];
     static readonly string[] PageSortOptions = ["Price Low", "Price High"];
     readonly List<string> _breadcrumbStrings = [BaseBreadcrumbString];
@@ -70,9 +70,9 @@
     int _selectedPageSizeIndex = 0;
     int _selectedPageSortIndex = 0;
     
-    public event Func<Category?, Task>? PreviousSelectedEvent;
-    public event Func<int, Task>? PageSizeChangedEvent;
-    public event Func<int, Task>? PageSortChangedEvent;
+    public event Action<Category?>? PreviousSelectedEvent;
+    public event Action<int>? PageSizeChangedEvent;
+    public event Action<int>? PageSortChangedEvent;
     public event Action? ToggleMobileFiltersEvent;
     
     public void SetNavigation( Category? newCategory, IReadOnlyDictionary<Guid, Category>? categoriesById )
