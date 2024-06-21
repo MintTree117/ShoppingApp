@@ -140,8 +140,8 @@
         if (bool.TryParse( query.Get( "IsInStock" ), out bool isInStock ))
             _parameters.IsInStock = true;
 
-        /*if (bool.TryParse( query.Get( "IsFeatured" ), out bool isFeatured ))
-            _filters.IsFeatured = isFeatured;*/
+        if (bool.TryParse( query.Get( "IsFeatured" ), out bool isFeatured ))
+            _parameters.IsFeatured = isFeatured;
 
         if (bool.TryParse( query.Get( "IsOnSale" ), out bool isOnSale ))
             _parameters.IsOnSale = true;
