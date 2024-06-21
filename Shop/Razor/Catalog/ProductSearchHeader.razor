@@ -1,18 +1,26 @@
 @using Shop.Infrastructure.Catalog.Categories.Types
+@using Shop.Infrastructure.Catalog.Search.Models
 
 <!-- WRAPPER -->
 <div class="search-header">
-    <!-- BREADCRUMB -->
-    <nav class="search-header-breadcrumb" aria-label="breadcrumb">
-        <ol class="breadcrumb mb-0">
-            @foreach (string crumb in _breadcrumbStrings)
-            {
-                <li class="breadcrumb-item @GetActiveBreadcrumbCss(crumb)">
-                    <button class="btn btn-link p-0 fw-bold" @onclick="()=>OnClickBreadCrumb(crumb)">@crumb</button>
-                </li>
-            }
-        </ol>
-    </nav>
+    <!-- SEARCH INFO -->
+    <div class="d-flex flex-column align-items-center">
+        <!-- BREADCRUMB -->
+        <nav class="search-header-breadcrumb" aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                @foreach ( string crumb in _breadcrumbStrings )
+                {
+                    <li class="breadcrumb-item @GetActiveBreadcrumbCss( crumb )">
+                        <button class="btn btn-link p-0 fw-bold" @onclick="() => OnClickBreadCrumb( crumb )">@crumb</button>
+                    </li>
+                }
+            </ol>
+        </nav>
+        <div>
+            <small class="text-muted">@GetInfoText()</small>
+        </div>
+    </div>
+
 
     <!-- SORT BUTTONS -->
     <div class="search-header-sort-buttons">
@@ -42,7 +50,8 @@
             </button>
             <!-- LIST -->
             <ul class="dropdown-menu w-100" aria-labelledby="SortBy">
-                @for ( int i = 0; i < PageSortOptions.Length; i++ ) {
+                @for ( int i = 0; i < PageSortOptions.Length; i++ )
+                {
                     int localIndex = i; // Create a local copy of the loop variable
                     <li>
                         <button class="dropdown-item" type="button" @onclick="() => OnSelectPageSort( localIndex )">
@@ -53,8 +62,8 @@
             </ul>
         </div>
     </div>
-    
-     <!-- MOBILE FILTERS -->
+
+    <!-- MOBILE FILTERS -->
     <button class="btn btn-primary w-100 search-header-filters" @onclick="OnClickMobileFilters">
         Filters
     </button>
@@ -63,23 +72,31 @@
 
 @code {
     const string BaseBreadcrumbString = "Search Catalog";
-    static readonly int[] PageSizeOptions = [5, 10, 15, 20, 50, 100];
+    static readonly List<int> PageSizeOptions = [5, 10, 15, 20, 50, 100];
     static readonly string[] PageSortOptions = ["Price Low", "Price High"];
     readonly List<string> _breadcrumbStrings = [BaseBreadcrumbString];
     readonly List<Category> _categoryChain = [];
     int _selectedPageSizeIndex = 0;
     int _selectedPageSortIndex = 0;
+    int _currentPage = 1;
+    int _totalResults = 0;
     
     public event Action<Category?>? PreviousSelectedEvent;
     public event Action<int>? PageSizeChangedEvent;
     public event Action<int>? PageSortChangedEvent;
     public event Action? ToggleMobileFiltersEvent;
     
-    public void SetNavigation( Category? newCategory, IReadOnlyDictionary<Guid, Category>? categoriesById )
+    public void SetNavigation( Category? newCategory, IReadOnlyDictionary<Guid, Category>? categoriesById, SearchParameters parameters, int count )
     {
         _breadcrumbStrings.Clear();
         _breadcrumbStrings.Add( BaseBreadcrumbString );
         _categoryChain.Clear();
+
+        _selectedPageSizeIndex = PageSizeOptions.IndexOf( parameters.PageSize );
+        _selectedPageSizeIndex = Math.Max( 0, _selectedPageSizeIndex );
+        _selectedPageSortIndex = parameters.SortBy < PageSortOptions.Length && parameters.SortBy >= 0 ? parameters.SortBy : 0;
+        _currentPage = Math.Max( 1, parameters.Page );
+        _totalResults = count;
         
         if (newCategory is null) {
             StateHasChanged();
@@ -103,7 +120,9 @@
         
         StateHasChanged();
     }
-    
+
+    string GetInfoText() =>
+        $"Viewing {PageSizeOptions[_selectedPageSizeIndex]} on page {_currentPage} of {_totalResults} matches";
     string GetActiveBreadcrumbCss( string breadcrumb ) =>
         breadcrumb == _breadcrumbStrings.Last() ? "active" : string.Empty;
     void OnClickBreadCrumb( string breadcrumb )

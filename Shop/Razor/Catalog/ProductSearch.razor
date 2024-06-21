@@ -90,6 +90,7 @@
     {
         string apiUrl = BuildQueryString( Consts.ApiGetSearch );
         var fetchReply = await Http.GetAsync<SearchResultsDto>( apiUrl );
+        SetCurrentCategory();
         if (!fetchReply)
         {
             PushWarning( "Failed to fetch products." );
@@ -107,13 +108,9 @@
     void SetCurrentCategory()
     {
         if (_parameters.CategoryId.HasValue)
-        {
-            Console.WriteLine($"----------------------------- HAS VALUE {_parameters.CategoryId.Value}");
             _categoryCollection.Categories.TryGetValue( _parameters.CategoryId.Value, out _currentCategory );
-            Console.WriteLine( $"----------------------------- CAT {_currentCategory}" );
-        }
 
-        _headerRazor.SetNavigation( _currentCategory, _categoryCollection.Categories );
+        _headerRazor.SetNavigation( _currentCategory, _categoryCollection.Categories, _parameters, _searchResults.TotalMatches );
     }
     void ParseQueryString()
     {
@@ -121,11 +118,8 @@
         var query = HttpUtility.ParseQueryString( uri.Query );
 
         if (Guid.TryParse( query.Get( "CategoryId" ), out Guid categoryId ))
-        {
             _parameters.CategoryId = categoryId;
-            SetCurrentCategory();
-            Console.WriteLine( $"CategoryId parsed: {_parameters.CategoryId}" );
-        }
+        SetCurrentCategory();
 
         string? brandIds = query.Get( "BrandIds" );
         if (!string.IsNullOrWhiteSpace( brandIds ))
