@@ -12,7 +12,10 @@ public record SearchItem(
     bool IsInStock,
     int ShippingDays,
     decimal Price,
-    decimal SalePrice )
+    decimal SalePrice,
+    int NumberSold,
+    int NumberRatings,
+    float Rating )
 {
     public static SearchItem From( SearchItemDto dto, int shippingDays, BrandsCollection brands )
     {
@@ -20,13 +23,16 @@ public record SearchItem(
 
         return new SearchItem(
             dto.ProductId,
-            (b ? brand : new Brand( Guid.Empty, "None" ))!,
+            (b ? brand : new Brand( Guid.Empty, "None", "None" ))!,
             dto.Name,
             dto.Image,
             dto.IsFeatured,
             dto.IsInStock,
             shippingDays,
             dto.Price,
-            dto.SalePrice );
+            dto.SalePrice,
+            dto.NumberSold,
+            dto.NumberRatings,
+            dto.Rating );
     }
 }

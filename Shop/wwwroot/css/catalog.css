@@ -196,7 +196,7 @@
         padding: 24px;
     }
 
-    .search-filters-header-close {
+    .search-filters-close {
         display: none;
     }
 }
@@ -253,8 +253,24 @@
     color: black;
 }
 
-.search-item-brand {
-    display: none;
+.search-item-seller {
+    margin: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+}
+
+.search-item-rating {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+    gap: 0;
+}
+
+.search-item-shipping {
+    margin: 0;
 }
 
 .search-item-btn {
@@ -292,11 +308,6 @@
 
     .search-item-info {
         padding: 8px;
-    }
-
-    .search-item-brand {
-        display: block;
-        font-size: small;
     }
 }
 

@@ -4,7 +4,7 @@
 <!-- WRAPPER -->
 <div class="search-header">
     <!-- SEARCH INFO -->
-    <div class="d-flex flex-column align-items-center">
+    <div class="d-flex flex-column align-items-start">
         <!-- BREADCRUMB -->
         <nav class="search-header-breadcrumb" aria-label="breadcrumb">
             <ol class="breadcrumb mb-0">
@@ -17,7 +17,7 @@
             </ol>
         </nav>
         <div>
-            <small class="text-muted">@GetInfoText()</small>
+            <small class="text-muted text-start">@GetInfoText()</small>
         </div>
     </div>
 
@@ -70,10 +70,11 @@
 </div>
 
 
-@code {
+@code 
+{
     const string BaseBreadcrumbString = "Search Catalog";
     static readonly List<int> PageSizeOptions = [5, 10, 15, 20, 50, 100];
-    static readonly string[] PageSortOptions = ["Price Low", "Price High"];
+    static readonly string[] PageSortOptions = ["Best Selling", "Best Rating", "Most Ratings", "Price Ascending", "Price Descending"];
     readonly List<string> _breadcrumbStrings = [BaseBreadcrumbString];
     readonly List<Category> _categoryChain = [];
     int _selectedPageSizeIndex = 0;

@@ -20,8 +20,25 @@
                 <h3 class="search-item-title">
                     <a href="@GetDetailsLink( item )">@item.Name</a>
                 </h3>
-                <!-- BRAND -->
-                <p class="search-item-brand">Sold By: @item.Brand.Name</p>
+                <!-- SELLER -->
+                <div class="search-item-seller">
+                    <span class="search-item-brand">
+                        <a class="ms-1" href="@item.Brand.Url">@item.Brand.Name</a>
+                    </span>
+                    <span class="search-item-sold ms-1">
+                         Sold
+                    </span>
+                </div>
+                <!-- RATING -->
+                <div class="search-item-rating">
+                    @for ( int i = 1; i <= 5; i++ )
+                    {
+                        <div>
+                            <i class="fa fa-star fa-sm @GetRatingCss( item, i )"></i>
+                        </div>
+                    }
+                    <small class="d-block ms-1">@item.NumberRatings</small>
+                </div>
                 <!-- SHIPPING -->
                 <p class="search-item-shipping">@GetShippingText( item )</p>
                 <!-- PRICING -->
@@ -58,6 +75,11 @@
     }
 
     List<SearchItem> _searchItems = [];
+
+    static string GetRatingCss( SearchItem item, int level )
+    {
+        return item.Rating >= level ? "rating-star-full" : "rating-star-empty";
+    }
 
     static string GetDetailsLink( SearchItem item ) =>
         $"{Consts.PageProductDetails}?ProductId={item.ProductId}";
