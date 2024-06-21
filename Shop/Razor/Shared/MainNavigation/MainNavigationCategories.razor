@@ -23,7 +23,7 @@
     @foreach ( Category c in GetCurrentCategories() )
     {
         <li class="nav-item d-flex align-items-center text-start">
-            <a class="nav-link flex-grow-1" href="@GetCategoryUrl( c )">@c.Name</a>
+            <button class="btn btn-link nav-link flex-grow-1" @onclick="()=>Navigate(c)">@c.Name</button>
             @if ( c.Children.Any() )
             {
                 <button class="btn" @onclick="() => NextCategory( c )">
@@ -34,12 +34,12 @@
     }
 </ul>
 
-@code {
-
-    
+@code 
+{
     [Parameter] public Action OnExitCallback { get; set; } = default!;
     [Parameter] public bool ShowExitButton { get; set; } = false;
     [Inject] public CategoriesCache Service { get; set; } = default!;
+    [Inject] public NavigationManager Navigation { get; set; } = default!;
     
     CategoriesCollection _categoriesCollection = CategoriesCollection.None();
     Guid? _currentParentId = null;
@@ -77,7 +77,6 @@
     {
         OnExitCallback();
     }
-
-    static string GetCategoryUrl( Category c ) =>
-        $"{Consts.PageProductSearch}?CategoryId={c.Id}";
+    void Navigate( Category c ) =>
+        Navigation.NavigateTo( $"{Consts.PageProductSearch}?CategoryId={c.Id}", true );
 }
