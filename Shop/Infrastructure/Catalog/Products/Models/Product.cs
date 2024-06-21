@@ -15,12 +15,31 @@ public record Product(
     int ShippingDays,
     decimal Price,
     decimal SalePrice,
-    string Description,
-    string Xml )
+    int NumberSold,
+    int NumberRatings,
+    float Rating,
+    string? Description,
+    string? Xml )
 {
-    public static Product From( SearchItemDto dto, BrandsCollection brands, CategoriesCollection categories )
+    public static Product From( SearchItemDto dto, int shippingDays, BrandsCollection brands )
     {
         bool b = brands.BrandsById.TryGetValue( dto.BrandId, out Brand? brand );
-        throw new Exception( "From not implemented on Product." );
+
+        return new Product(
+            dto.Id,
+            (b ? brand : new Brand( Guid.Empty, "None", "None" ))!,
+            [],
+            dto.Name,
+            dto.Image,
+            dto.IsFeatured,
+            dto.IsInStock,
+            shippingDays,
+            dto.Price,
+            dto.SalePrice,
+            dto.NumberSold,
+            dto.NumberRatings,
+            dto.Rating,
+            null,
+            null );
     }
 }

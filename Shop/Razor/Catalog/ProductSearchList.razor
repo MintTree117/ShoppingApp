@@ -1,93 +1,39 @@
 @using Shop.Infrastructure.Catalog.Search.Dtos
 @using Shop.Infrastructure.Catalog.Search.Models
 @using Shop.Utilities
+@using Shop.Infrastructure.Catalog.Products.Models
 
 <!-- CONTAINER -->
 <div class="search-list">
-    @foreach (SearchItem item in _searchItems )
+    @foreach (Product product in _searchItems )
     {
         <!-- ITEM -->
         <div class="search-item shadow-sm">
             <!-- IMAGE -->
             <div class="search-item-img mb-1">
-                <a href="@GetDetailsLink( item )">
-                    <img src="@item.Image" alt="@item.Name"/>
+                <a href="@GetDetailsLink( product )">
+                    <img src="@product.Image" alt="@product.Name"/>
                 </a>
             </div>
-            <!-- INFO -->
-            <div class="search-item-info">
-                <!-- TITLE -->
-                <h3 class="search-item-title mb-1">
-                    <a href="@GetDetailsLink( item )">@item.Name</a>
-                </h3>
-                <!-- RATING -->
-                <div class="search-item-rating mb-1">
-                    @for ( int i = 1; i <= 5; i++ )
-                    {
-                        <div>
-                            <i class="fa fa-star fa-xs @GetRatingCss( item, i )"></i>
-                        </div>
-                    }
-                    <small class="d-block ms-1 text-muted">(@item.NumberRatings Ratings)</small>
-                </div>
-                <!-- SELLER -->
-                <div class="search-item-seller mb-1">
-                    <span class="search-item-brand">
-                        <small>Brand:</small>
-                        <a class="ms-1" href="@item.Brand.Url">@item.Brand.Name</a>
-                    </span>
-
-                </div>
-                <!-- NUMBER SOLD -->
-                <small class="text-muted mb-0">
-                    @item.NumberSold Sold
-                </small>
-                <!-- SHIPPING -->
-                <small class="mb-0">
-                    @GetShippingText( item )
-                </small>
-                <!-- PRICING -->
-                <div class="search-item-pricing mb-1">
-                    @if (item.SalePrice > 0)
-                    {
-                        <strong>$@item.SalePrice</strong>
-                        <small class="text-muted text-decoration-line-through">$@item.Price</small>
-                    }
-                    else
-                    {
-                        <strong>$@item.Price</strong>
-                    }
-                </div>
-                <!-- CART -->
-                @if (item.IsInStock)
-                {
-                    <button class="btn btn-primary search-item-btn"><small>Add To Cart</small></button>
-                }
-                else
-                {
-                    <span class="btn search-item-btn mb-0">Out of stock.</span>
-                }
-            </div>
+            <!-- SUMMARY -->
+            <ProductSummary Product="@product"/>
         </div>
     }
 </div>
 
 @code {
-    public void ChangeSearchResults( List<SearchItem> items )
+    public void ChangeSearchResults( List<Product> items )
     {
         _searchItems = items;
         StateHasChanged();
     }
 
-    List<SearchItem> _searchItems = [];
+    List<Product> _searchItems = [];
 
-    static string GetRatingCss( SearchItem item, int level )
-    {
-        return item.Rating >= level ? "rating-star-full" : "rating-star-empty";
-    }
-
-    static string GetDetailsLink( SearchItem item ) =>
+    static string GetDetailsLink( Product item ) =>
         $"{Consts.PageProductDetails}?ProductId={item.ProductId}";
-    static string GetShippingText( SearchItem item ) =>
+    static string GetRatingCss( Product item, int level ) =>
+        item.Rating >= level ? "rating-star-full" : "rating-star-empty";
+    static string GetShippingText( Product item ) =>
         item.IsInStock ? $"Get within {item.ShippingDays} days." : "Out of stock.";
 }

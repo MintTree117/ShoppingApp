@@ -1,0 +1,26 @@
+@page "/product{ProductId}"
+@using Shop.Infrastructure.Catalog.Products.Models
+
+<div class="content-container">
+    <div class="product-top">
+        <div class="product-image">
+            <img src="@_product.Image" alt="@_product.Name"/>
+        </div>
+        <div>
+            <ProductSummary Product="@_product"/>
+        </div>
+    </div>
+    <div class="product-categories">
+        
+    </div>
+    <div class="product-description">
+        
+    </div>
+    <div class="product-xml">
+        
+    </div>
+</div>
+
+@code {
+    Product _product;
+}

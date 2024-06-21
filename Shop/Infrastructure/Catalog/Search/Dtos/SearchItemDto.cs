@@ -1,7 +1,7 @@
 namespace Shop.Infrastructure.Catalog.Search.Dtos;
 
 public readonly record struct SearchItemDto(
-    Guid ProductId,
+    Guid Id,
     Guid BrandId,
     string Name,
     string Image,
