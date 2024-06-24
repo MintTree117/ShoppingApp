@@ -24,7 +24,8 @@
     </div>
 </div>
 
-@code {
+@code 
+{
     ProductSearchHeader _headerRazor = default!;
     ProductSearchFilters _filtersRazor = default!;
     ProductSearchList _searchList = default!;
@@ -46,6 +47,7 @@
         _headerRazor.PageSizeChangedEvent -= OnPageSizeChanged;
         _headerRazor.PageSortChangedEvent -= OnPageSortChanged;
         _filtersRazor.OnChangeFilters -= OnSearchFiltersRazorChanged;
+        _filtersRazor.OnChangeLocation -= GetEstimates;
     }
     protected override async Task OnInitializedAsync()
     {
@@ -64,7 +66,7 @@
         
         ParseQueryString();
         _filtersRazor.SetData( _currentCategory, _categoryCollection, _brandCollection.BrandsById.Values, _parameters );
-        await FetchProducts();
+        await SearchProducts();
     }
     protected override async Task OnParametersSetAsync()
     {
@@ -81,30 +83,59 @@
             _headerRazor.PageSizeChangedEvent += OnPageSizeChanged;
             _headerRazor.PageSortChangedEvent += OnPageSortChanged;
             _filtersRazor.OnChangeFilters += OnSearchFiltersRazorChanged;
+            _filtersRazor.OnChangeLocation += GetEstimates;
             _paginationRazor.OnPageChange += OnPageChanged;
             _parametersSet = true;
         }
     }
 
-    async Task FetchProducts()
+    async Task SearchProducts()
     {
-        string apiUrl = BuildQueryString( Consts.ApiGetSearch );
-        var fetchReply = await Http.GetAsync<SearchResultsDto>( apiUrl );
+        string apiUrl = BuildSearchQueryString( Consts.ApiGetSearch );
+        var searchReply = await Http.GetAsync<SearchResultsDto>( apiUrl );
         SetCurrentCategory();
-        if (!fetchReply)
+        if (!searchReply)
         {
             PushWarning( "Failed to fetch products." );
             return;
         }
 
-        _searchResults = SearchResults.From( fetchReply.Data, _brandCollection );
+        _searchResults = SearchResults.From( searchReply.Data, _brandCollection );
         _searchList.ChangeSearchResults( _searchResults.Results );
         _paginationRazor.Set( _parameters.Page, _parameters.PageSize, _searchResults.TotalMatches );
+    }
+    async Task GetEstimates()
+    {
+        string apiUrl = BuildEstimatesQueryString( Consts.ApiGetEstimates );
+        string browserUrl = BuildSearchQueryString( Consts.PageProductSearch );
+        var estimatesReply = await Http.GetAsync<List<int>>( apiUrl );
+        SetCurrentCategory();
+        
+        if (!estimatesReply)
+        {
+            PushWarning( "Failed to get estimates." );
+            return;
+        }
+        
+        for ( int i = 0; i < estimatesReply.Data.Count; i++ )
+        {
+            // TODO: Remove In Production: For Testing Only
+            if (i >= _searchResults.Results.Count())
+            {
+                PushWarning( "There was a miscount in the delivery time estimates. The displayed timings may not reflect the products they represent." );
+                break;
+            }
+
+            _searchResults.Results[i].ShippingDays = estimatesReply.Data[i];
+        }
+        
+        Navigation.NavigateTo( browserUrl, false, true );
+        _searchList.Refresh();
     }
     
     void Reload()
     {
-        Navigation.NavigateTo( BuildQueryString( Consts.PageProductSearch ), true );
+        Navigation.NavigateTo( BuildSearchQueryString( Consts.PageProductSearch ), true );
     }
     void SetCurrentCategory()
     {
@@ -156,7 +187,7 @@
         if (int.TryParse( query.Get( "PosY" ), out int posY ))
             _parameters.PosY = posY;
     }
-    string BuildQueryString( string baseUrl )
+    string BuildSearchQueryString( string baseUrl )
     {
         StringBuilder urlString = new();
         urlString.Append( baseUrl );
@@ -188,6 +219,35 @@
         queryParams["Page"] = _parameters.Page.ToString();
         queryParams["PageSize"] = _parameters.PageSize.ToString();
         queryParams["SortBy"] = _parameters.SortBy.ToString();
+
+        if (!queryParams.Any())
+            return urlString.ToString();
+
+        urlString.Append( "?" );
+        int count = 0;
+        foreach ( KeyValuePair<string, string> param in queryParams )
+        {
+            if (count != 0)
+                urlString.Append( "&" );
+            count++;
+            urlString.AppendFormat( "{0}={1}", HttpUtility.UrlEncode( param.Key ), HttpUtility.UrlEncode( param.Value ) );
+        }
+
+        return urlString.ToString();
+    }
+    string BuildEstimatesQueryString( string baseUrl )
+    {
+        StringBuilder urlString = new();
+        urlString.Append( baseUrl );
+
+        Dictionary<string, string> queryParams = new();
+        string c = string.Join( ",", _searchResults.Results.Select( static p => p.Id ) );
+        queryParams["ProductIds"] = c;
+        
+        if (_parameters.PosX.HasValue)
+            queryParams["PosX"] = _parameters.PosX.ToString()?.ToLower() ?? string.Empty;
+        if (_parameters.PosY.HasValue)
+            queryParams["PosY"] = _parameters.PosY.ToString()?.ToLower() ?? string.Empty;
 
         if (!queryParams.Any())
             return urlString.ToString();

@@ -5,10 +5,9 @@ public readonly record struct SearchItemDto(
     Guid BrandId,
     string Name,
     string Image,
-    bool IsFeatured,
     bool IsInStock,
+    bool IsFeatured,
     decimal Price,
     decimal SalePrice,
-    int NumberSold,
     int NumberRatings,
     float Rating );

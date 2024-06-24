@@ -30,8 +30,13 @@
 
     List<Product> _searchItems = [];
 
+    public void Refresh()
+    {
+        StateHasChanged();
+    }
+
     static string GetDetailsLink( Product item ) =>
-        $"{Consts.PageProductDetails}?ProductId={item.ProductId}";
+        $"{Consts.PageProductDetails}?ProductId={item.Id}";
     static string GetRatingCss( Product item, int level ) =>
         item.Rating >= level ? "rating-star-full" : "rating-star-empty";
     static string GetShippingText( Product item ) =>

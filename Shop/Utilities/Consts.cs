@@ -47,6 +47,8 @@ internal static class Consts
     internal const string ApiGetCategories = CatalogApiBase + "/categories";
     internal const string ApiGetBrands = CatalogApiBase + "/brands";
     internal const string ApiGetSearch = CatalogApiBase + "/search";
+    internal const string ApiGetEstimates = CatalogApiBase + "/estimates";
+    internal const string ApiGetDetails = CatalogApiBase + "/details";
     // PARAMS
     // ----------------------------------------------------------------------------------------------------------------
     internal const string ParamReturnUrl = "ReturnUrl";

@@ -163,6 +163,7 @@
     };
 
     public event Action? OnChangeFilters;
+    public event Func<Task>? OnChangeLocation; 
     public void SetData( Category? parentCategory, CategoriesCollection categories, IEnumerable<Brand> brands, SearchParameters filters )
     {
         Clear();
@@ -248,7 +249,7 @@
     }
     void OnClickApplyLocation()
     {
-        OnChangeFilters?.Invoke();
+        OnChangeLocation?.Invoke();
     }
     void OnChangeIsInStock( ChangeEventArgs args )
     {

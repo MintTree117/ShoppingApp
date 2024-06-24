@@ -4,10 +4,12 @@ using Shop.Infrastructure.Catalog.Search.Dtos;
 
 namespace Shop.Infrastructure.Catalog.Search.Models;
 
-public record SearchResults(
-    int TotalMatches,
-    List<Product> Results )
+public class SearchResults(
+    int totalMatches,
+    List<Product> results )
 {
+    public int TotalMatches { get; set; } = totalMatches;
+    public List<Product> Results { get; set; } = results;
     public static SearchResults From( SearchResultsDto resultsDto, BrandsCollection brands )
     {
         List<Product> searchItems = [];

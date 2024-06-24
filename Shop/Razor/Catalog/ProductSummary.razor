@@ -1,69 +1,75 @@
 @using Shop.Utilities
 @using Shop.Infrastructure.Catalog.Products.Models
-<div class="product-summary">
-    <!-- TITLE -->
-    <h3 class="product-summary-title mb-1">
-        <a href="@GetDetailsLink( Product )">@Product.Name</a>
-    </h3>
-    <!-- RATING -->
-    <div class="product-summary-rating mb-1">
-        @for ( int i = 1; i <= 5; i++ )
-        {
-            <div>
-                <i class="fa fa-star fa-xs @GetRatingCss( Product, i )"></i>
-            </div>
-        }
-        <small class="d-block ms-1 text-muted">(@Product.NumberRatings Ratings)</small>
-    </div>
-    <!-- SELLER -->
-    <div class="product-summary-seller mb-1">
-        <span class="search-item-brand">
-            <small>Brand:</small>
-            <a class="ms-1" href="@Product.Brand.Url">@Product.Brand.Name</a>
-        </span>
 
-    </div>
-    <!-- NUMBER SOLD -->
-    <small class="text-muted mb-0">
-        @Product.NumberSold Sold
-    </small>
-    <!-- SHIPPING -->
-    <small class="mb-0">
-        @GetShippingText( Product )
-    </small>
-    <!-- PRICING -->
-    <div class="product-summary-pricing mb-1">
-        @if (Product.SalePrice > 0)
+@if (Product is not null)
+{
+    <div class="product-summary">
+        <!-- TITLE -->
+        <h3 class="product-summary-title mb-1">
+            <a href="@GetDetailsLink( Product )">@Product.Name</a>
+        </h3>
+        <!-- SELLER -->
+        <div class="product-summary-seller mb-1">
+            <small class="search-item-brand">
+                <a href="@Product.Brand.Url">Brand: @Product.Brand.Name</a>
+            </small>
+        </div>
+        <!-- RATING -->
+        <div class="product-summary-rating mb-1">
+            @for ( int i = 1; i <= 5; i++ )
+            {
+                int local = i;
+                <div>
+                    <i class="fa fa-star fa-xs @GetRatingCss( Product, local )"></i>
+                </div>
+            }
+            <small class="d-block ms-1 text-muted">(@Product.NumberRatings Ratings)</small>
+        </div>
+        <!-- SHIPPING -->
+        <small class="mb-0">
+            @GetShippingText( Product )
+        </small>
+        <!-- PRICING -->
+        <div class="product-summary-pricing mb-1">
+            @if (Product.SalePrice > 0)
+            {
+                <strong>$@Product.SalePrice</strong>
+                <small class="text-muted text-decoration-line-through">$@Product.Price</small>
+            }
+            else
+            {
+                <strong>$@Product.Price</strong>
+            }
+        </div>
+        <!-- CART -->
+        @if (Product.IsInStock)
         {
-            <strong>$@Product.SalePrice</strong>
-            <small class="text-muted text-decoration-line-through">$@Product.Price</small>
+            <button class="btn btn-primary product-summary-btn btn-icon">
+                <i class="fa fa-shopping-cart me-2"></i>
+                <small>Add To Cart</small>
+            </button>
         }
         else
         {
-            <strong>$@Product.Price</strong>
+            <span class="btn product-summary-btn mb-0">Out of stock.</span>
         }
     </div>
-    <!-- CART -->
-    @if (Product.IsInStock)
-    {
-        <button class="btn btn-primary product-summary-btn btn-icon">
-            <i class="fa fa-shopping-cart me-2"></i>
-            <small>Add To Cart</small>
-        </button>
-    }
-    else
-    {
-        <span class="btn product-summary-btn mb-0">Out of stock.</span>
-    }
-</div>
+}
+
 
 @code
 {
     [Parameter]
-    public Product Product { get; set; } = default!;
+    public Product? Product { get; set; }
+
+    public void Set( Product p )
+    {
+        Product = p;
+        StateHasChanged();
+    }
 
     static string GetDetailsLink( Product item ) =>
-        $"{Consts.PageProductDetails}?ProductId={item.ProductId}";
+        $"{Consts.PageProductDetails}?ProductId={item.Id}";
     static string GetRatingCss( Product item, int level ) =>
         item.Rating >= level ? "rating-star-full" : "rating-star-empty";
     static string GetShippingText( Product item ) =>
