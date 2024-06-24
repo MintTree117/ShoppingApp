@@ -7,6 +7,7 @@
 @using Shop.Infrastructure.Catalog.Categories.Types
 @using System.Xml.Linq
 @using Shop.Infrastructure.Catalog.Brands.Types
+@using Shop.Infrastructure.Common.ReplyTypes
 @inherits Shop.Razor.Shared.ShopPage
 @inject CategoriesCache Categories;
 @inject BrandsCache Brands;
@@ -71,8 +72,8 @@
                         <div class="product-pricing">
                             @if (_product.SalePrice > 0)
                             {
-                                <span class="product-price">$@_product.SalePrice</span>
-                                <span class="ms-2 text-muted text-decoration-line-through">$@_product.Price</span>
+                                <div class="product-price me-2">$@_product.SalePrice</div>
+                                <div class="text-muted text-decoration-line-through">$@_product.Price</div>
                             }
                             else
                             {
@@ -84,12 +85,33 @@
                             <small class="@GetDeliveryEstimateColor( _product )">
                                 @GetDeliveryEstimateText( _product )
                             </small>
-                            <button class="btn btn-link btn-icon">
-                                <i class="fa fa-location-dot ms-1"></i>
-                                &nbsp;Delivery To: @GetDeliveryToText()
+                            <button class="btn btn-link btn-icon product-shipping-button" @onclick="OnClickAddress">
+                                <div>
+                                    <i class="fa fa-location-dot ms-1"></i>
+                                    &nbsp;Deliver To:&nbsp;
+                                </div>
+                                <div>
+                                    @GetDeliveryToText()
+                                    <i class="fa ms-1 @GetDeliveryToIcon()"></i>
+                                </div>
                             </button>
                         </div>
                     </div>
+                    
+                    @if (_showAddressBox)
+                    {
+                        <!-- ADDRESS FORM -->
+                        <div class="product-address-form">
+                            <div class="product-address-form-inputs mb-2">
+                                <input type="number" min="0" max="100000" step="1" value="@PosX" @onchange="OnChangePosX" class="form-control"/>
+                                <input type="number" min="0" max="100000" step="1" value="@PosY" @onchange="OnChangePosY" class="form-control"/>
+                            </div>
+                            <button class="btn btn-primary btn-icon search-filters-btn-main" @onclick="OnClickApplyLocation">
+                                <i class="fa-solid fa-circle-check me-2"></i>
+                                Save Address
+                            </button>
+                        </div>
+                    }
 
                     <!-- CART -->
                     <div class="product-cart">
@@ -112,27 +134,18 @@
                         else
                         {
                             <!-- ADD BUTTON -->
-                            <button class="btn btn-primary btn-icon" @onclick="@(async () => await AddToCart())">
+                            <button class="btn btn-primary btn-icon" @onclick="@(async () => await OnClickAddToCart())">
                                 <i class="fa-solid fa-shopping-cart fa-xs"></i>
                                 <small>Add To Cart</small>
                             </button>
-                            <!-- QUANTITY DROPDOWN -->
-                            <div class="dropdown w-50">
-                                <!-- DROPDOWN TOGGLE -->
-                                <button class="btn btn-icon btn-secondary dropdown-toggle w-100" type="button" id="quantity" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Quantity @_selectedQuantity
-                                </button>
-                                <!-- DROPDOWN LIST -->
-                                <ul class="dropdown-menu" aria-labelledby="quantity">
+                            <!-- DROPDOWN LIST -->
+                            <div class="form-group w-50">
+                                <select id="quantitySelect" class="btn btn-outline-secondary btn-icon form-select h-100 w-100" @onchange="OnQuantityChange" value="@_selectedQuantity">
                                     @foreach ( int quantity in Quantities )
                                     {
-                                        <li>
-                                            <button class="dropdown-item" type="button" @onclick="() => OnClickQuantity( quantity )">
-                                                @quantity
-                                            </button>
-                                        </li>
+                                        <option value="@quantity" selected="@( _selectedQuantity == quantity )">Qty: @quantity</option>
                                     }
-                                </ul>
+                                </select>
                             </div>
                         }
                     </div>
@@ -155,8 +168,8 @@
                     @foreach ( var kvp in _productSpecs )
                     {
                         <tr>
-                            <th class="bg-white p-3">@kvp.Key</th>
-                            <td class="p-3">@kvp.Value</td>
+                            <th class="product-xml-th bg-light">@kvp.Key</th>
+                            <td class="product-xml-td">@kvp.Value</td>
                         </tr>
                     }
                     </tbody>
@@ -177,10 +190,11 @@
     public int? PosY { get; set; }
 
     readonly int[] Quantities = [1, 2, 3, 5, 10];
-    int _selectedQuantity = 0;
-    
+    int _selectedQuantity = 1;
+
     Product _product = default!;
     bool _productLoaded = false;
+    bool _showAddressBox = false;
     Dictionary<string, string> _productSpecs = [];
 
     protected override async Task OnInitializedAsync()
@@ -205,7 +219,7 @@
         var brands = Brands.GetBrands();
 
         await Task.WhenAll( cats, brands );
-        
+
         if (!cats.Result.Succeeded || !brands.Result.Succeeded)
             return;
 
@@ -214,9 +228,33 @@
         _productLoaded = true;
         StateHasChanged();
     }
-    async Task AddToCart()
+    
+    async Task OnClickAddToCart()
     {
         await Task.Delay( 1000 );
+        StateHasChanged();
+    }
+    async Task OnClickApplyLocation()
+    {
+        if (!PosX.HasValue || !PosY.HasValue)
+        {
+            PushWarning( "Invalid Location!" );
+            return;
+        }
+
+        string apiUrl = $"{Consts.ApiGetEstimates}?ProductIds={_product.Id}&PosX={PosX}&PosY={PosY}";
+        string pageUrl = $"{Consts.PageProductDetails}?ProductId={_product.Id}&PosX={PosX}&PosY={PosY}";
+        
+        Navigation.NavigateTo( pageUrl );
+        Reply<List<int>> estimateReply = await Http.GetAsync<List<int>>( apiUrl );
+
+        if (!estimateReply.Succeeded)
+        {
+            PushWarning( "Failed to get delivery estimate." );
+            return;
+        }
+
+        _product.ShippingDays = estimateReply.Data.FirstOrDefault();
         StateHasChanged();
     }
     
@@ -230,7 +268,8 @@
     }
     void OnClickAddress()
     {
-        
+        _showAddressBox = !_showAddressBox;
+        StateHasChanged();
     }
     void OnChangePosX( ChangeEventArgs args )
     {
@@ -246,15 +285,11 @@
         else
             PosY = result;
     }
-    void OnClickApplyLocation()
-    {
-        //OnChangeFilters?.Invoke();
-    }
-    void OnClickQuantity( int quantity )
-    {
-        _selectedQuantity = quantity;
-    }
 
+    void OnQuantityChange( ChangeEventArgs e )
+    {
+        _selectedQuantity = int.Parse( e.Value?.ToString() ?? string.Empty );
+    }
     bool IsProductInCart( Product p, out int count )
     {
         // TODO: Implement
@@ -266,7 +301,7 @@
     {
         if (string.IsNullOrWhiteSpace( xmlString ))
             return [];
-        
+
         var xmlDictionary = new Dictionary<string, string>();
         XDocument xDoc = XDocument.Parse( xmlString );
 
@@ -277,14 +312,21 @@
 
         return xmlDictionary;
     }
-    static string GetDetailsLink( Product item ) =>
-        $"{Consts.PageProductDetails}?ProductId={item.Id}";
     static string GetRatingCss( Product item, int level ) =>
         item.Rating >= level ? "rating-star-full" : "rating-star-empty";
     string GetDeliveryToText() =>
         PosX is null || PosY is null ? "(0 , 0)" : $"({PosX} , {PosY})";
-    static string GetDeliveryEstimateText( Product item ) =>
-        item.IsInStock ? $"Get within {item.ShippingDays} days." : "Out of stock.";
+    string GetDeliveryToIcon() =>
+        _showAddressBox ? "fa-angle-up" : "fa-angle-down";
+    static string GetDeliveryEstimateText( Product item )
+    {
+        if (item.ShippingDays <= 0)
+            return "Enter an address";
+        
+        return item.IsInStock 
+            ? $"Get within {item.ShippingDays} days" 
+            : "Out of stock";
+    }
     static string GetDeliveryEstimateColor( Product item ) =>
         item.IsInStock ? "text-success" : "text-danger";
 }

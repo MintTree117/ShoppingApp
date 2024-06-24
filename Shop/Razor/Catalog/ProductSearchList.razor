@@ -13,20 +13,18 @@
             
             <!-- IMAGE -->
             <div class="search-item-img">
-                <a href="@GetDetailsLink( p )">
+                <button class="btn" @onclick="@(()=>OnClickDetails(p))">
                     <img src="@p.Image" alt="@p.Name"/>
-                </a>
+                </button>
             </div>
 
             <!-- BODY -->
             <div class="search-item-body ">
                 
                 <!-- TITLE -->
-                <a class="search-item-title" href="@GetDetailsLink( p )">
-                    <h3>
-                        @p.Name
-                    </h3>
-                </a>
+                <button class="btn search-item-title" @onclick="@(()=>OnClickDetails(p))">
+                    <h3>@p.Name</h3>
+                </button>
 
                 <!-- RATING -->
                 <div class="search-item-rating mb-1">

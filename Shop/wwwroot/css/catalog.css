@@ -255,6 +255,15 @@
     padding-bottom: 16px;
 }
 
+/* DETAILS BUTTON */
+.search-item-img .btn, .search-item-title {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    text-align: left;
+}
+
 /* IMAGE */
 .search-item-img {
     flex: 0 0 auto;
@@ -530,6 +539,7 @@
 .product-pricing {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: end;
 }
 
@@ -561,17 +571,46 @@
     text-align: right;
 }
 
+.product-shipping-button {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    text-align: right;
+}
+
+.product-shipping-button:hover {
+    font-weight: bold;
+}
+
 /* LOCATION */
 .product-location-fields {
     display: flex;
     flex-direction: row;
 }
 
+/* ADDRESS FORM */
+.product-address-form {
+    display: flex;
+    flex-direction: column;
+    padding-left: 16px;
+    padding-right: 16px;
+    margin-bottom: 16px;
+}
+
+.product-address-form-inputs {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: stretch;
+}
+
 /* CART */
 .product-cart {
     display: flex;
     flex-direction: row;
-    align-items: center;
+    align-items: stretch;
     justify-content: stretch;
     gap: 16px;
 }
@@ -593,11 +632,12 @@
 }
 
 .product-description p {
-
+    font-size: smaller;
 }
 
 /* XML */
 .product-xml {
+    margin-bottom: 24px;
     padding-top: 24px;
     padding-left: 8px;
     padding-right: 8px;
@@ -607,6 +647,7 @@
     max-height: 450px;
     overflow-x: auto;
     overflow-y: auto;
+    border: 1px solid lightgray;
 }
 
 .product-xml .table {
@@ -614,9 +655,18 @@
     table-layout: fixed;
 }
 
+.product-xml th {
+    padding: 16px;
+    font-size: small;
+    background-color: white;
+}
+
 .product-xml td {
     white-space: normal;
     word-wrap: break-word;
+    font-size: small;
+    padding: 16px;
+    background-color: #e9ecef;
 }
 
 /* @ 992px */
@@ -640,14 +690,5 @@
 
     .product-top-main {
         align-self: start;
-    }
-
-    .product-title {
-        padding-left: 0;
-        padding-right: 0;
-    }
-
-    .product-top-main-content {
-        padding: 0;
     }
 }

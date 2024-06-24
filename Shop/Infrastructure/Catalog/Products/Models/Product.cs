@@ -7,46 +7,46 @@ namespace Shop.Infrastructure.Catalog.Products.Models;
 
 public class Product(
     Guid id,
-    Brand Brand,
-    List<Category> Categories,
-    string Name,
-    string Image,
-    bool IsInStock,
-    bool IsFeatured,
-    int ShippingDays,
-    decimal Price,
-    decimal SalePrice,
-    int NumberRatings,
-    float Rating,
-    string? Description,
-    string? Xml )
+    Brand brand,
+    List<Category> categories,
+    string name,
+    string image,
+    bool isFeatured,
+    bool isInStock,
+    int shippingDays,
+    decimal price,
+    decimal salePrice,
+    int numberRatings,
+    float rating,
+    string? description,
+    string? xml )
 {
     public Guid Id { get; set; } = id;
-    public Brand Brand { get; set; } = Brand;
-    public List<Category> Categories { get; set; } = Categories;
-    public string Name { get; set; } = Name;
-    public string Image { get; set; } = Image;
-    public bool IsInStock { get; set; } = IsInStock;
-    public bool IsFeatured { get; set; } = IsFeatured;
-    public int ShippingDays { get; set; } = ShippingDays;
-    public decimal Price { get; set; } = Price;
-    public decimal SalePrice { get; set; } = SalePrice;
-    public int NumberRatings { get; set; } = NumberRatings;
-    public float Rating { get; set; } = Rating;
-    public string? Description { get; set; } = Description;
-    public string? Xml { get; set; } = Xml;
+    public Brand Brand { get; set; } = brand;
+    public List<Category> Categories { get; set; } = categories;
+    public string Name { get; set; } = name;
+    public string Image { get; set; } = image;
+    public bool IsFeatured { get; set; } = isFeatured;
+    public bool IsInStock { get; set; } = isInStock;
+    public int ShippingDays { get; set; } = shippingDays;
+    public decimal Price { get; set; } = price;
+    public decimal SalePrice { get; set; } = salePrice;
+    public int NumberRatings { get; set; } = numberRatings;
+    public float Rating { get; set; } = rating;
+    public string? Description { get; set; } = description;
+    public string? Xml { get; set; } = xml;
+    
     public static Product From( SearchItemDto dto, int shippingDays, BrandsCollection brands )
     {
         bool b = brands.BrandsById.TryGetValue( dto.BrandId, out Brand? brand );
-
         return new Product(
             dto.Id,
             (b ? brand : new Brand( Guid.Empty, "None", "None" ))!,
             [],
             dto.Name,
             dto.Image,
-            dto.IsInStock,
             dto.IsFeatured,
+            dto.IsInStock,
             shippingDays,
             dto.Price,
             dto.SalePrice,
@@ -55,22 +55,24 @@ public class Product(
             null,
             null );
     }
-
     public static Product From( ProductDto dto, CategoriesCollection categories, BrandsCollection brands )
     {
         bool b = brands.BrandsById.TryGetValue( dto.BrandId, out Brand? brand );
         List<Category> c = [];
-        foreach ( Guid cid in dto.CategoryIds )
-            if (categories.Categories.TryGetValue( cid, out var category ))
-                c.Add( category );
+        
+        if (dto.CategoryIds != null)
+            foreach ( Guid cid in dto.CategoryIds )
+                if (categories.Categories.TryGetValue( cid, out var category ))
+                    c.Add( category );
+        
         return new Product(
             dto.Id,
             (b ? brand : new Brand( Guid.Empty, "None", "None" ))!,
             c,
             dto.Name,
             dto.Image,
-            dto.IsInStock,
             dto.IsFeatured,
+            dto.IsInStock,
             dto.ShippingDays,
             dto.Price,
             dto.SalePrice,
