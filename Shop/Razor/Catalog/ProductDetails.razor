@@ -25,128 +25,146 @@
             
             <!-- MAIN -->
             <div class="product-top-main">
-            
+                
                 <!-- TITLE -->
                 <h3 class="product-title">
                     @_product.Name
                 </h3>
                 
-                <!-- SUMMARY -->
-                <div class="product-summary">
+                <!-- CONTENT -->
+                <div class="product-top-main-content">
+                    
+                    <!-- SUMMARY -->
+                    <div class="product-summary">
 
-                    <!-- RATING & BRAND -->
-                    <div class="product-rating-brand">
-                        <!-- RATING -->
-                        <div class="product-rating">
-                            @for ( int i = 1; i <= 5; i++ )
-                            {
-                                <div>
-                                    <i class="fa fa-star fa-xs @GetRatingCss( _product, i )"></i>
-                                </div>
-                            }
-                            <small class="d-block ms-1 text-muted">(@_product.NumberRatings Ratings)</small>
-                        </div>
-                        <!-- BRAND -->
-                        <div class="product-brand">
-                            <span class="d-block text-muted">Brand:&nbsp;</span>
-                            <button class="d-block btn btn-link" @onclick="@(()=>OnClickBrand(_product.Brand))">@_product.Brand.Name</button>
+                        <!-- RATING & BRAND -->
+                        <div class="product-rating-brand">
+                            <!-- RATING -->
+                            <div class="product-rating">
+                                @for ( int i = 1; i <= 5; i++ )
+                                {
+                                    <div>
+                                        <i class="fa fa-star fa-xs @GetRatingCss( _product, i )"></i>
+                                    </div>
+                                }
+                                <small class="d-block ms-1 text-muted">(@_product.NumberRatings Ratings)</small>
+                            </div>
+                            <!-- BRAND -->
+                            <div class="product-brand">
+                                <span class="d-block text-muted">Brand:&nbsp;</span>
+                                <button class="d-block btn btn-link" @onclick="@(() => OnClickBrand( _product.Brand ))">@_product.Brand.Name</button>
+                            </div>
                         </div>
                     </div>
-                </div>
-                
-                <!-- CATEGORIES -->
-                <div class="product-categories d-flex flex-row flex-wrap align-items-center justify-content-start gap-2 py-3">
-                    @foreach ( Category c in _product.Categories )
-                    {
-                        <button class="d-inline-block btn btn-sm btn-outline-secondary mb-1" @onclick="() => OnClickCategory( c )">@c.Name</button>
-                    }
-                </div>
-                
-                <!-- PRICE & SHIPPING -->
-                <div class="product-pricing-shipping">
-                    <!-- PRICING -->
-                    <div class="product-pricing">
-                        @if (_product.SalePrice > 0)
+
+                    <!-- CATEGORIES -->
+                    <div class="product-categories d-flex flex-row flex-wrap align-items-center justify-content-start gap-2 py-3">
+                        @foreach ( Category c in _product.Categories )
                         {
-                            <span class="product-price">$@_product.SalePrice</span>
-                            <span class="text-muted text-decoration-line-through">$@_product.Price</span>
+                            <button class="d-inline-block btn btn-sm btn-outline-secondary mb-1" @onclick="() => OnClickCategory( c )">@c.Name</button>
+                        }
+                    </div>
+
+                    <!-- PRICE & SHIPPING -->
+                    <div class="product-pricing-shipping">
+                        <!-- PRICING -->
+                        <div class="product-pricing">
+                            @if (_product.SalePrice > 0)
+                            {
+                                <span class="product-price">$@_product.SalePrice</span>
+                                <span class="ms-2 text-muted text-decoration-line-through">$@_product.Price</span>
+                            }
+                            else
+                            {
+                                <span class="product-price">$@_product.Price</span>
+                            }
+                        </div>
+                        <!-- SHIPPING -->
+                        <div class="product-shipping">
+                            <small class="@GetDeliveryEstimateColor( _product )">
+                                @GetDeliveryEstimateText( _product )
+                            </small>
+                            <button class="btn btn-link btn-icon">
+                                <i class="fa fa-location-dot ms-1"></i>
+                                &nbsp;Delivery To: @GetDeliveryToText()
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- CART -->
+                    <div class="product-cart">
+                        @if (IsProductInCart( _product, out int count ))
+                        {
+                            <!-- CART BUTTON -->
+                            <a class="btn btn-primary btn-icon w-100">
+                                <i class="fa fa-shopping-cart me-2"></i>
+                                <small>View In Cart (@count)</small>
+                            </a>
+                        }
+                        else if (!_product.IsInStock)
+                        {
+                            <!-- DISABLED BUTTON -->
+                            <button disabled class="btn btn-secondary btn-icon w-100">
+                                <i class="fa-solid fa-circle-xmark fa-xs"></i>
+                                <small>Out of Stock</small>
+                            </button>
                         }
                         else
                         {
-                            <span class="product-price">$@_product.Price</span>
+                            <!-- ADD BUTTON -->
+                            <button class="btn btn-primary btn-icon" @onclick="@(async () => await AddToCart())">
+                                <i class="fa-solid fa-shopping-cart fa-xs"></i>
+                                <small>Add To Cart</small>
+                            </button>
+                            <!-- QUANTITY DROPDOWN -->
+                            <div class="dropdown w-50">
+                                <!-- DROPDOWN TOGGLE -->
+                                <button class="btn btn-icon btn-secondary dropdown-toggle w-100" type="button" id="quantity" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Quantity @_selectedQuantity
+                                </button>
+                                <!-- DROPDOWN LIST -->
+                                <ul class="dropdown-menu" aria-labelledby="quantity">
+                                    @foreach ( int quantity in Quantities )
+                                    {
+                                        <li>
+                                            <button class="dropdown-item" type="button" @onclick="() => OnClickQuantity( quantity )">
+                                                @quantity
+                                            </button>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
                         }
-                    </div>
-                    <!-- SHIPPING -->
-                    <div class="product-shipping">
-                        <small class="@GetDeliveryEstimateColor(_product)">
-                            @GetDeliveryEstimateText( _product )
-                        </small>
-                        <button class="btn btn-link btn-icon">
-                            <i class="fa fa-location-dot ms-1"></i>
-                            &nbsp;Delivery To: @GetDeliveryToText()
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- CART -->
-                <div class="product-cart">
-                    <!-- ADD -->
-                    @if (_product.IsInStock)
-                    {
-                        <button class="btn btn-primary btn-icon w-50">
-                            <i class="fa fa-shopping-cart me-2"></i>
-                            <small>Add To Cart</small>
-                        </button>
-                    }
-                    else
-                    {
-                        <button disabled class="btn btn-primary btn-icon w-50">
-                            <i class="fa fa-x me-2"></i>
-                            <small>Out of Stock</small>
-                        </button>
-                    }
-                    <!-- QUANTITY DROPDOWN -->
-                    <div class="dropdown w-50">
-                        <!-- DROPDOWN TOGGLE -->
-                        <button class="btn btn-icon btn-secondary dropdown-toggle w-100" type="button" id="quantity" data-bs-toggle="dropdown" aria-expanded="false">
-                            Quantity @_selectedQuantity
-                        </button>
-                        <!-- DROPDOWN LIST -->
-                        <ul class="dropdown-menu" aria-labelledby="quantity">
-                            @foreach ( int quantity in Quantities )
-                            {
-                                <li>
-                                    <button class="dropdown-item" type="button" @onclick="() => OnClickQuantity( quantity )">
-                                        @quantity
-                                    </button>
-                                </li>
-                            }
-                        </ul>
                     </div>
                 </div>
             </div>
         </div>
         
         <!-- DESCRIPTION -->
-        <div class="product-description mb-3">
-            <p>@_product.Description</p>
+        <div class="product-description">
+            <h3>Description</h3>
+            <p class="mb-0">@_product.Description</p>
         </div>
         
         <!-- XML -->
         <div class="product-xml">
-            <table class="table table-bordered">
-                <tbody>
-                @foreach ( var kvp in _productSpecs )
-                {
-                    <tr>
-                        <th class="bg-white p-3">@kvp.Key</th>
-                        <td class="p-3">@kvp.Value</td>
-                    </tr>
-                }
-                </tbody>
-            </table>
+            <h3>Specifications</h3>
+            <div class="product-xml-wrapper">
+                <table class="table table-bordered">
+                    <tbody>
+                    @foreach ( var kvp in _productSpecs )
+                    {
+                        <tr>
+                            <th class="bg-white p-3">@kvp.Key</th>
+                            <td class="p-3">@kvp.Value</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
+        
+</div>
 }
 
 @code 
@@ -196,7 +214,12 @@
         _productLoaded = true;
         StateHasChanged();
     }
-
+    async Task AddToCart()
+    {
+        await Task.Delay( 1000 );
+        StateHasChanged();
+    }
+    
     void OnClickCategory( Category c )
     {
         Navigation.NavigateTo( $"{Consts.PageProductSearch}?CategoryId={c.Id}", true );
@@ -230,6 +253,13 @@
     void OnClickQuantity( int quantity )
     {
         _selectedQuantity = quantity;
+    }
+
+    bool IsProductInCart( Product p, out int count )
+    {
+        // TODO: Implement
+        count = 0;
+        return false;
     }
 
     static Dictionary<string, string> ParseXmlToDictionary( string? xmlString )

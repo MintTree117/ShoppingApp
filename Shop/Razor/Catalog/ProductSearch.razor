@@ -13,6 +13,7 @@
 @inject CategoriesCache CategoriesCache
 @inject BrandsCache BrandsCache
 
+<!-- MARKUP -->
 <ProductSearchHeader @ref="_headerRazor"/>
 <div class="content-container search-body">
     <ProductSearchFilters @ref="_filtersRazor"/>
@@ -23,6 +24,7 @@
         </div>
     </div>
 </div>
+<!-- MARKUP -->
 
 @code 
 {
@@ -48,6 +50,8 @@
         _headerRazor.PageSortChangedEvent -= OnPageSortChanged;
         _filtersRazor.OnChangeFilters -= OnSearchFiltersRazorChanged;
         _filtersRazor.OnChangeLocation -= GetEstimates;
+        _searchList.OnClickProductBrand -= OnClickProductBrand;
+        _searchList.OnClickProductDetails -= OnClickProductDetails;
     }
     protected override async Task OnInitializedAsync()
     {
@@ -85,6 +89,8 @@
             _filtersRazor.OnChangeFilters += OnSearchFiltersRazorChanged;
             _filtersRazor.OnChangeLocation += GetEstimates;
             _paginationRazor.OnPageChange += OnPageChanged;
+            _searchList.OnClickProductBrand += OnClickProductBrand;
+            _searchList.OnClickProductDetails += OnClickProductDetails;
             _parametersSet = true;
         }
     }
@@ -130,7 +136,7 @@
         }
         
         Navigation.NavigateTo( browserUrl, false, true );
-        _searchList.Refresh();
+        _searchList.RefreshState();
     }
     
     void Reload()
@@ -309,5 +315,18 @@
     void OnToggleMobileFilters()
     {
         _filtersRazor.ToggleView();
+    }
+    void OnClickProductBrand( Brand b )
+    {
+        Navigation.NavigateTo( $"{Consts.PageProductSearch}?BrandIds={b.Id}", true );
+    }
+    void OnClickProductDetails( Guid productId )
+    {
+        string url = $"{Consts.PageProductDetails}?ProductId={productId}";
+
+        if (_parameters.PosX.HasValue && _parameters.PosY.HasValue)
+            url += $"&PosX={_parameters.PosX.Value}&PosY={_parameters.PosY.Value}";
+
+        Navigation.NavigateTo( url, true );
     }
 }

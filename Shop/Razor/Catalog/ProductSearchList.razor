@@ -2,26 +2,112 @@
 @using Shop.Infrastructure.Catalog.Search.Models
 @using Shop.Utilities
 @using Shop.Infrastructure.Catalog.Products.Models
+@using Shop.Infrastructure.Catalog.Brands.Types
 
 <!-- CONTAINER -->
 <div class="search-list">
-    @foreach (Product product in _searchItems )
+    @foreach ( Product p in _searchItems )
     {
         <!-- ITEM -->
-        <div class="search-item shadow-sm">
+        <div class="search-item">
+            
             <!-- IMAGE -->
-            <div class="search-item-img mb-1">
-                <a href="@GetDetailsLink( product )">
-                    <img src="@product.Image" alt="@product.Name"/>
+            <div class="search-item-img">
+                <a href="@GetDetailsLink( p )">
+                    <img src="@p.Image" alt="@p.Name"/>
                 </a>
             </div>
-            <!-- SUMMARY -->
-            <ProductSummary Product="@product"/>
+
+            <!-- BODY -->
+            <div class="search-item-body ">
+                
+                <!-- TITLE -->
+                <a class="search-item-title" href="@GetDetailsLink( p )">
+                    <h3>
+                        @p.Name
+                    </h3>
+                </a>
+
+                <!-- RATING -->
+                <div class="search-item-rating mb-1">
+                    @for ( int i = 1; i <= 5; i++ )
+                    {
+                        <div>
+                            <i class="fa fa-star fa-xs @GetRatingCss( p, i )"></i>
+                        </div>
+                    }
+                    <small class="d-block ms-1 text-muted">
+                        @p.NumberRatings
+                    </small>
+                </div>
+
+                <!-- BRAND -->
+                <div class="search-item-brand mb-2">
+                    <span class="d-block text-muted">
+                        Brand:&nbsp;
+                    </span>
+                    <button class="d-block btn btn-link" @onclick="@(() => OnClickBrand( p.Brand ))">
+                        @p.Brand.Name
+                    </button>
+                </div>
+                
+                <!-- SHIPPING -->
+                <div class="search-item-shipping mb-1">
+                    <small class="@GetDeliveryEstimateColor( p )">
+                        @GetDeliveryEstimateText( p )
+                    </small>
+                </div>
+                
+                <!-- PRICING -->
+                <div class="search-item-pricing mb-3">
+                    @if (p.SalePrice > 0)
+                    {
+                        <span class="search-item-price">
+                            $@p.SalePrice
+                        </span>
+                        <span class="ms-2 text-muted text-decoration-line-through">
+                            $@p.Price
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="search-item-price">
+                            $@p.Price
+                        </span>
+                    }
+                </div>
+                
+                <!-- CART -->
+                @if (IsProductInCart( p, out int count ))
+                {
+                    <a class="btn btn-info btn-icon search-item-cart-button" href="cart">
+                        <i class="fa-solid fa-circle-check fa-xs"></i>
+                        <small>View In Cart (@count)</small>
+                    </a>
+                }
+                else if (p.IsInStock)
+                {
+                    <button class="btn btn-primary btn-icon search-item-cart-button" @onclick="@(async ()=> await AddToCart(p))">
+                        <i class="fa-solid fa-shopping-cart fa-xs"></i>
+                        <small>Add To Cart</small>
+                    </button>
+                }
+                else
+                {
+                    <button disabled class="btn btn-secondary btn-icon search-item-cart-button">
+                        <i class="fa-solid fa-circle-xmark fa-xs"></i>
+                        <small>Out of Stock</small>
+                    </button>
+                }
+            </div>
         </div>
     }
 </div>
 
-@code {
+@code 
+{
+    public event Action<Brand>? OnClickProductBrand; 
+    public event Action<Guid>? OnClickProductDetails; 
     public void ChangeSearchResults( List<Product> items )
     {
         _searchItems = items;
@@ -30,11 +116,35 @@
 
     List<Product> _searchItems = [];
 
-    public void Refresh()
+    public void RefreshState()
     {
         StateHasChanged();
     }
 
+    async Task AddToCart( Product p )
+    {
+        await Task.Delay( 1000 );
+        StateHasChanged();
+    }
+    void OnClickBrand( Brand brand )
+    {
+        OnClickProductBrand?.Invoke( brand );
+    }
+    void OnClickDetails( Product p )
+    {
+        OnClickProductDetails?.Invoke( p.Id );
+    }
+    bool IsProductInCart( Product p, out int count )
+    {
+        // TODO: Implement
+        count = 0;
+        return false;
+    }
+    
+    static string GetDeliveryEstimateText( Product item ) =>
+        item.IsInStock ? $"Get within {item.ShippingDays} days." : "Out of stock.";
+    static string GetDeliveryEstimateColor( Product item ) =>
+        item.IsInStock ? "text-success" : "text-danger";
     static string GetDetailsLink( Product item ) =>
         $"{Consts.PageProductDetails}?ProductId={item.Id}";
     static string GetRatingCss( Product item, int level ) =>
