@@ -8,6 +8,8 @@
 @using System.Xml.Linq
 @using Shop.Infrastructure.Catalog.Brands.Types
 @using Shop.Infrastructure.Common.ReplyTypes
+@using Shop.Infrastructure.Ordering
+@using Shop.Infrastructure.Ordering.Types
 @inherits Shop.Razor.Shared.ShopPage
 @inject CategoriesCache Categories;
 @inject BrandsCache Brands;
@@ -189,6 +191,9 @@
     [SupplyParameterFromQuery]
     public int? PosY { get; set; }
 
+    [Inject] public Cart Cart { get; init; } = default!;
+    CartSummary _cartSummary = CartSummary.Empty();
+
     readonly int[] Quantities = [1, 2, 3, 5, 10];
     int _selectedQuantity = 1;
 
@@ -226,12 +231,31 @@
         _product = Product.From( reply.Data, cats.Result.Data, brands.Result.Data );
         _productSpecs = ParseXmlToDictionary( _product.Xml );
         _productLoaded = true;
+
+        var cartReply = await Cart.Get();
+        if (cartReply)
+            _cartSummary = cartReply.Data;
+        
         StateHasChanged();
     }
     
     async Task OnClickAddToCart()
     {
-        await Task.Delay( 1000 );
+        var cartReply = await Cart.Add( _product );
+        if (!cartReply)
+        {
+            PushError( $"Failed to add item to cart. {cartReply.GetMessage()}" );
+            return;
+        }
+
+        var newSummary = await Cart.Get();
+        if (!newSummary)
+        {
+            PushError( $"An error occured while getting updated cart information. {newSummary.GetMessage()}" );
+            return;
+        }
+
+        _cartSummary = newSummary.Data;
         StateHasChanged();
     }
     async Task OnClickApplyLocation()
@@ -292,9 +316,8 @@
     }
     bool IsProductInCart( Product p, out int count )
     {
-        // TODO: Implement
-        count = 0;
-        return false;
+        var isInCart = _cartSummary.Contains( p.Id, out count );
+        return isInCart;
     }
 
     static Dictionary<string, string> ParseXmlToDictionary( string? xmlString )

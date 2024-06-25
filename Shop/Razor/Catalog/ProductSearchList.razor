@@ -108,7 +108,6 @@
 @code 
 {
     [Inject] public Cart Cart { get; init; } = default!;
-    [Inject] public AuthenticationStateManager Auth { get; init; } = default!;
     CartSummary _cartSummary = CartSummary.Empty();
     
     public event Action<Brand>? OnClickProductBrand; 
@@ -129,16 +128,14 @@
 
     async Task AddToCart( Product p )
     {
-        var authState = await Auth.GetSessionState();
-        var authenticated = authState.User.Identity is { IsAuthenticated: true };
-        var cartReply = await Cart.Add( p, authenticated );
+        var cartReply = await Cart.Add( p );
         if (!cartReply)
         {
             OnItemAddedToCart?.Invoke( false, cartReply.GetMessage() );
             return;
         }
 
-        var newSummary = await Cart.Get( authenticated );
+        var newSummary = await Cart.Get();
         if (!newSummary)
         {
             OnItemAddedToCart?.Invoke( false, cartReply.GetMessage() );
