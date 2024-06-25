@@ -107,8 +107,8 @@
 
 @code 
 {
-    [Inject] public Cart Cart { get; init; } = default!;
-    CartSummary _cartSummary = CartSummary.Empty();
+    [Inject] public CartManager CartManager { get; init; } = default!;
+    CartItems _cartItems = CartItems.Empty();
     
     public event Action<Brand>? OnClickProductBrand; 
     public event Action<Guid>? OnClickProductDetails;
@@ -128,21 +128,21 @@
 
     async Task AddToCart( Product p )
     {
-        var cartReply = await Cart.Add( p );
+        var cartReply = await CartManager.Add( p );
         if (!cartReply)
         {
             OnItemAddedToCart?.Invoke( false, cartReply.GetMessage() );
             return;
         }
 
-        var newSummary = await Cart.Get();
+        var newSummary = await CartManager.Get();
         if (!newSummary)
         {
             OnItemAddedToCart?.Invoke( false, cartReply.GetMessage() );
             return;
         }
         
-        _cartSummary = newSummary.Data;
+        _cartItems = newSummary.Data;
         OnItemAddedToCart?.Invoke( true, null );
         StateHasChanged();
     }
@@ -156,7 +156,7 @@
     }
     bool IsProductInCart( Product p, out int count )
     {
-        bool isInCart = _cartSummary.Contains( p.Id, out count );
+        bool isInCart = _cartItems.Contains( p.Id, out count );
         return isInCart;
     }
     

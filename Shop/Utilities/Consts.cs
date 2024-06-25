@@ -55,7 +55,9 @@ internal static class Consts
     internal const string ApiPostGetCart = ApiCartBase + "/postGet";
     internal const string ApiAddToCart = ApiCartBase + "/add";
     internal const string ApiUpdateCart = ApiCartBase + "/update";
+    internal const string ApiUpdateCartBulk = ApiCartBase + "/updateBulk";
     internal const string ApiDeleteFromCart = ApiCartBase + "/delete";
+    internal const string ApiClearCart = ApiCartBase + "/clear";
     
     // PARAMS
     // ----------------------------------------------------------------------------------------------------------------

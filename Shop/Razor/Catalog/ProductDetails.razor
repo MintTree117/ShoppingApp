@@ -191,8 +191,8 @@
     [SupplyParameterFromQuery]
     public int? PosY { get; set; }
 
-    [Inject] public Cart Cart { get; init; } = default!;
-    CartSummary _cartSummary = CartSummary.Empty();
+    [Inject] public CartManager CartManager { get; init; } = default!;
+    CartItems _cartItems = CartItems.Empty();
 
     readonly int[] Quantities = [1, 2, 3, 5, 10];
     int _selectedQuantity = 1;
@@ -232,30 +232,30 @@
         _productSpecs = ParseXmlToDictionary( _product.Xml );
         _productLoaded = true;
 
-        var cartReply = await Cart.Get();
+        var cartReply = await CartManager.Get();
         if (cartReply)
-            _cartSummary = cartReply.Data;
+            _cartItems = cartReply.Data;
         
         StateHasChanged();
     }
     
     async Task OnClickAddToCart()
     {
-        var cartReply = await Cart.Add( _product );
+        var cartReply = await CartManager.Add( _product );
         if (!cartReply)
         {
             PushError( $"Failed to add item to cart. {cartReply.GetMessage()}" );
             return;
         }
 
-        var newSummary = await Cart.Get();
+        var newSummary = await CartManager.Get();
         if (!newSummary)
         {
             PushError( $"An error occured while getting updated cart information. {newSummary.GetMessage()}" );
             return;
         }
 
-        _cartSummary = newSummary.Data;
+        _cartItems = newSummary.Data;
         StateHasChanged();
     }
     async Task OnClickApplyLocation()
@@ -316,7 +316,7 @@
     }
     bool IsProductInCart( Product p, out int count )
     {
-        var isInCart = _cartSummary.Contains( p.Id, out count );
+        var isInCart = _cartItems.Contains( p.Id, out count );
         return isInCart;
     }
 
