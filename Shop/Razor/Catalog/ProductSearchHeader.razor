@@ -79,15 +79,16 @@
     static readonly string[] PageSortOptions = ["Best Selling", "Best Rating", "Most Ratings", "Price Ascending", "Price Descending"];
     readonly List<string> _breadcrumbStrings = [BaseBreadcrumbString];
     readonly List<Category> _categoryChain = [];
+    
     int _selectedPageSizeIndex = 0;
     int _selectedPageSortIndex = 0;
     int _currentPage = 1;
     int _totalResults = 0;
     
-    public event Action<Category?>? PreviousSelectedEvent;
-    public event Action<int>? PageSizeChangedEvent;
-    public event Action<int>? PageSortChangedEvent;
-    public event Action? ToggleMobileFiltersEvent;
+    public event Action<Category?>? OnPreviousSelected;
+    public event Action<int>? OnPageSizeChanged;
+    public event Action<int>? OnPageSortChanged;
+    public event Action? OnToggleMobileFilters;
     
     public void SetNavigation( Category? newCategory, IReadOnlyDictionary<Guid, Category>? categoriesById, SearchParameters parameters, int count )
     {
@@ -131,20 +132,20 @@
     void OnClickBreadCrumb( string breadcrumb )
     {
         Category? category = _categoryChain.FirstOrDefault( c => c.Name == breadcrumb );
-        PreviousSelectedEvent?.Invoke( category );
+        OnPreviousSelected?.Invoke( category );
     }
     void OnClickMobileFilters()
     {
-        ToggleMobileFiltersEvent?.Invoke();
+        OnToggleMobileFilters?.Invoke();
     }
     void OnSelectPageSize( int pageSize )
     {
         _selectedPageSizeIndex = Math.Clamp( pageSize, 0, PageSizeOptions.Last() );
-        PageSizeChangedEvent?.Invoke( pageSize );
+        OnPageSizeChanged?.Invoke( pageSize );
     }
     void OnSelectPageSort( int pageSortOptionIndex )
     {
         _selectedPageSortIndex = Math.Clamp( pageSortOptionIndex, 0, PageSortOptions.Length - 1 );
-        PageSortChangedEvent?.Invoke( pageSortOptionIndex );
+        OnPageSortChanged?.Invoke( pageSortOptionIndex );
     }
 }

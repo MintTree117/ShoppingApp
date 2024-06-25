@@ -3,6 +3,9 @@
 @using Shop.Utilities
 @using Shop.Infrastructure.Catalog.Products.Models
 @using Shop.Infrastructure.Catalog.Brands.Types
+@using Shop.Infrastructure.Ordering;
+@using Shop.Infrastructure.Ordering.Types
+@using Shop.Infrastructure.Authentication
 
 <!-- CONTAINER -->
 <div class="search-list">
@@ -78,7 +81,7 @@
                 <!-- CART -->
                 @if (IsProductInCart( p, out int count ))
                 {
-                    <a class="btn btn-info btn-icon search-item-cart-button" href="cart">
+                    <a class="btn btn-info btn-icon search-item-cart-button" href="@Consts.PageCart">
                         <i class="fa-solid fa-circle-check fa-xs"></i>
                         <small>View In Cart (@count)</small>
                     </a>
@@ -104,8 +107,13 @@
 
 @code 
 {
+    [Inject] public Cart Cart { get; init; } = default!;
+    [Inject] public AuthenticationStateManager Auth { get; init; } = default!;
+    CartSummary _cartSummary = CartSummary.Empty();
+    
     public event Action<Brand>? OnClickProductBrand; 
-    public event Action<Guid>? OnClickProductDetails; 
+    public event Action<Guid>? OnClickProductDetails;
+    public event Action<bool,string?>? OnItemAddedToCart; 
     public void ChangeSearchResults( List<Product> items )
     {
         _searchItems = items;
@@ -121,7 +129,24 @@
 
     async Task AddToCart( Product p )
     {
-        await Task.Delay( 1000 );
+        var authState = await Auth.GetSessionState();
+        var authenticated = authState.User.Identity is { IsAuthenticated: true };
+        var cartReply = await Cart.Add( p, authenticated );
+        if (!cartReply)
+        {
+            OnItemAddedToCart?.Invoke( false, cartReply.GetMessage() );
+            return;
+        }
+
+        var newSummary = await Cart.Get( authenticated );
+        if (!newSummary)
+        {
+            OnItemAddedToCart?.Invoke( false, cartReply.GetMessage() );
+            return;
+        }
+        
+        _cartSummary = newSummary.Data;
+        OnItemAddedToCart?.Invoke( true, null );
         StateHasChanged();
     }
     void OnClickBrand( Brand brand )
@@ -134,9 +159,8 @@
     }
     bool IsProductInCart( Product p, out int count )
     {
-        // TODO: Implement
-        count = 0;
-        return false;
+        bool isInCart = _cartSummary.Contains( p.Id, out count );
+        return isInCart;
     }
     
     static string GetDeliveryEstimateText( Product item ) =>

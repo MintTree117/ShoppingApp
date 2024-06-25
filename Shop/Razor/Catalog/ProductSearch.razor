@@ -44,14 +44,16 @@
 
     protected override void OnDispose()
     {
-        _headerRazor.ToggleMobileFiltersEvent -= OnToggleMobileFilters;
-        _headerRazor.PreviousSelectedEvent -= OnBreadcrumbSelected;
-        _headerRazor.PageSizeChangedEvent -= OnPageSizeChanged;
-        _headerRazor.PageSortChangedEvent -= OnPageSortChanged;
+        _headerRazor.OnToggleMobileFilters -= OnToggleMobileFilters;
+        _headerRazor.OnPreviousSelected -= OnBreadcrumbSelected;
+        _headerRazor.OnPageSizeChanged -= OnPageSizeChanged;
+        _headerRazor.OnPageSortChanged -= OnPageSortChanged;
         _filtersRazor.OnChangeFilters -= OnSearchFiltersRazorChanged;
         _filtersRazor.OnChangeLocation -= GetEstimates;
         _searchList.OnClickProductBrand -= OnClickProductBrand;
         _searchList.OnClickProductDetails -= OnClickProductDetails;
+        _searchList.OnItemAddedToCart -= OnItemAddedToCart;
+        _paginationRazor.OnPageChange -= OnPageChanged;
     }
     protected override async Task OnInitializedAsync()
     {
@@ -82,15 +84,16 @@
 
         if (!_parametersSet)
         {
-            _headerRazor.ToggleMobileFiltersEvent += OnToggleMobileFilters;
-            _headerRazor.PreviousSelectedEvent += OnBreadcrumbSelected;
-            _headerRazor.PageSizeChangedEvent += OnPageSizeChanged;
-            _headerRazor.PageSortChangedEvent += OnPageSortChanged;
+            _headerRazor.OnToggleMobileFilters += OnToggleMobileFilters;
+            _headerRazor.OnPreviousSelected += OnBreadcrumbSelected;
+            _headerRazor.OnPageSizeChanged += OnPageSizeChanged;
+            _headerRazor.OnPageSortChanged += OnPageSortChanged;
             _filtersRazor.OnChangeFilters += OnSearchFiltersRazorChanged;
             _filtersRazor.OnChangeLocation += GetEstimates;
-            _paginationRazor.OnPageChange += OnPageChanged;
             _searchList.OnClickProductBrand += OnClickProductBrand;
             _searchList.OnClickProductDetails += OnClickProductDetails;
+            _searchList.OnItemAddedToCart += OnItemAddedToCart;
+            _paginationRazor.OnPageChange += OnPageChanged;
             _parametersSet = true;
         }
     }
@@ -328,5 +331,10 @@
             url += $"&PosX={_parameters.PosX.Value}&PosY={_parameters.PosY.Value}";
 
         Navigation.NavigateTo( url, true );
+    }
+    void OnItemAddedToCart( bool success, string? failureMessage )
+    {
+        if (success) PushSuccess( "Added item to cart." );
+        else PushError( $"Failed to add item to cart. {failureMessage}" );
     }
 }
