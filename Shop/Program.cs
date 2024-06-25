@@ -1,4 +1,5 @@
 using Blazored.LocalStorage;
+using Blazored.SessionStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -18,6 +19,7 @@ builder.Configuration.AddJsonFile( "appsettings.json", optional: false, reloadOn
 
 builder.ConfigureHttp();
 builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddBlazoredSessionStorage();
 builder.Services.AddSingleton<StorageService>();
 //builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthorizationCore();

@@ -78,6 +78,13 @@ public readonly record struct Reply<T> : IReply
     public static Reply<T> Conflict( IReply other ) =>
         Fail( $"{MsgConflictError} {other.GetMessage()}" );
 
+    public static Reply<T> StorageError() =>
+        Fail( MsgStorageError );
+    public static Reply<T> StorageError( string msg ) =>
+        Fail( $"{MsgStorageError} {msg}" );
+    public static Reply<T> StorageError( IReply other ) =>
+        Fail( $"{MsgStorageError} {other.GetMessage()}" );
+    
     public static Reply<T> ServerError() =>
         Fail( MsgServerError );
     public static Reply<T> ServerError( string msg ) =>
@@ -113,6 +120,7 @@ public readonly record struct Reply<T> : IReply
     const string MsgPasswordFailure = "Invalid password.";
     const string MsgChangesNotSaved = "Failed to save changes to storage.";
     const string MsgConflictError = "A conflict has occured.";
+    const string MsgStorageError = "A storage error has occured.";
     const string MsgServerError = "An internal server error occured.";
     const string MsgNetworkError = "An network server error occured.";
     const string MsgUnauthorized = "Unauthorized.";

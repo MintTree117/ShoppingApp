@@ -42,13 +42,21 @@ internal static class Consts
     internal const string ApiDeleteAccount = OrderingApiBase + "/account/delete";
     
     // CATALOG
-    // BASE
     internal const string CatalogApiBase = "https://localhost:7123/api";
     internal const string ApiGetCategories = CatalogApiBase + "/categories";
     internal const string ApiGetBrands = CatalogApiBase + "/brands";
     internal const string ApiGetSearch = CatalogApiBase + "/search";
     internal const string ApiGetEstimates = CatalogApiBase + "/estimates";
     internal const string ApiGetDetails = CatalogApiBase + "/details";
+    internal const string ApiGetProductsByIds = CatalogApiBase + "/get";
+    
+    // ORDERING
+    internal const string ApiCartBase = "/cart";
+    internal const string ApiPostGetCart = ApiCartBase + "/postGet";
+    internal const string ApiAddToCart = ApiCartBase + "/add";
+    internal const string ApiUpdateCart = ApiCartBase + "/update";
+    internal const string ApiDeleteFromCart = ApiCartBase + "/delete";
+    
     // PARAMS
     // ----------------------------------------------------------------------------------------------------------------
     internal const string ParamReturnUrl = "ReturnUrl";
@@ -79,4 +87,5 @@ internal static class Consts
     internal const string PageProductSearch = "/search";
     // ORDERING
     internal const string PageCart = "/cart";
+    internal const string PageCheckout = "/checkout";
 }

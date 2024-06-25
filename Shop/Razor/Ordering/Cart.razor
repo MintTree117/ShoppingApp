@@ -1,0 +1,81 @@
+@page "/cart"
+@using Shop.Infrastructure.Ordering
+@using Shop.Infrastructure.Ordering.Types
+@using Shop.Utilities
+@inherits Shop.Razor.Shared.ShopPage
+
+<div class="cart-container">
+    <div class="cart-items">
+        @foreach ( CartItem i in _items )
+        {
+            <div class="cart-item">
+                <a class="cart-item-image">
+                    <img src="@i.ProductImage" alt="@i.ProductName"/>
+                </a>
+                <div class="cart-item-info">
+                    <a class="cart-item-title" href="">
+                        <h3>@i.ProductName</h3>
+                    </a>
+                    @if (!i.IsInStock)
+                    {
+                        <div class="cart-item-out">
+                            <i class="fa fa-circle-x"></i>
+                            <span>Out of stock</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="cart-item-estimate">
+                            
+                        </div>
+                        <div class="cart-item-counter">
+                            
+                        </div>
+                    }
+                    <!-- BOTTOM -->
+                    <div class="cart-item-buttons">
+                        <!-- PRICING -->
+                        <div class="search-item-pricing">
+                            @if (i.SalePrice > 0)
+                            {
+                                <span class="search-item-price">
+                                    $@i.SalePrice
+                                </span>
+                                <span class="ms-2 text-muted text-decoration-line-through">
+                                    $@i.Price
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="search-item-price">
+                                    $@i.Price
+                                </span>
+                            }
+                        </div>
+                        <button class="btn btn-link btn-icon text-decoration-none">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    <div class="cart-summary">
+    </div>
+</div>
+
+@code
+{
+    List<CartItem> _items = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        List<CartItem> localItems = [];
+        var reply = await Http.PostAsyncAuthenticated<List<CartItemDto>>( Consts.ApiPostGetCart, CartItem.ToDtos( localItems ) );
+        
+    }
+    
+    bool ValidCart() =>
+        _items.Any( static i => !i.IsInStock );
+}

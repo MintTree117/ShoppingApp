@@ -67,6 +67,13 @@ public interface IReply
     public static Reply<bool> Conflict(IReply other) =>
         Reply<bool>.Fail($"{MsgConflictError} {other.GetMessage()}");
 
+    public static Reply<bool> StorageError() =>
+        Fail( MsgStorageError );
+    public static Reply<bool> StorageError( string msg ) =>
+        Fail( $"{MsgStorageError} {msg}" );
+    public static Reply<bool> StorageError( IReply other ) =>
+        Fail( $"{MsgStorageError} {other.GetMessage()}" );
+    
     public static Reply<bool> ServerError() =>
         Reply<bool>.Fail( MsgServerError );
     public static Reply<bool> ServerError(string msg) =>
@@ -102,7 +109,8 @@ public interface IReply
     public const string MsgPasswordFailure = "Invalid password.";
     public const string MsgChangesNotSaved = "Failed to save changes to storage.";
     public const string MsgConflictError = "A conflict has occured.";
+    public const string MsgStorageError = "A storage error has occured.";
     public const string MsgServerError = "An internal server error occured.";
-    const string MsgNetworkError = "An network server error occured.";
+    public const string MsgNetworkError = "An network server error occured.";
     public const string MsgBadRequest = "Bad Request.";
 }

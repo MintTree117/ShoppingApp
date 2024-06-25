@@ -9,27 +9,27 @@ public abstract class MemoryCache<T> // singleton that handles both storage and 
     readonly StorageService _storage = storage;
     readonly TimeSpan _cacheLife = cacheLife;
     
-    MemoryCacheEntry<T>? _cacheEntry;
+    MemoryCacheEntry<T>? _inMemory;
 
     protected async Task<Reply<bool>> SetCache( T newData )
     {
-        _cacheEntry = MemoryCacheEntry<T>.New( newData );
-        return await _storage.Set( _storageKey, _cacheEntry );
+        _inMemory = MemoryCacheEntry<T>.New( newData );
+        return await _storage.SetLocalStorage( _storageKey, _inMemory );
     }
     protected async Task<Reply<T>> GetCache()
     {
-        if (_cacheEntry is not null)
-            if (_cacheEntry.Value.Expired( _cacheLife )) _cacheEntry = null;
-            else return Reply<T>.Success( _cacheEntry.Value.Data );
+        if (_inMemory is not null)
+            if (_inMemory.Value.Expired( _cacheLife )) _inMemory = null;
+            else return Reply<T>.Success( _inMemory.Value.Data );
         
-        Reply<MemoryCacheEntry<T>> storageReply = await _storage.Get<MemoryCacheEntry<T>>( _storageKey );
+        var storageReply = await _storage.GetLocalStorage<MemoryCacheEntry<T>>( _storageKey );
         if (!storageReply)
-            return Reply<T>.Fail( storageReply, "Get Cache Entry Failed" );
+            return Reply<T>.NotFound( "Get Cache Entry Failed" );
 
         if (storageReply.Data.Expired( _cacheLife ))
-            return Reply<T>.Fail( "Cache Entry Expired." );
+            return Reply<T>.Invalid( "Cache Entry Expired." );
 
-        _cacheEntry = storageReply.Data;
-        return Reply<T>.Success( _cacheEntry.Value.Data );
+        _inMemory = storageReply.Data;
+        return Reply<T>.Success( _inMemory.Value.Data );
     }
 }
