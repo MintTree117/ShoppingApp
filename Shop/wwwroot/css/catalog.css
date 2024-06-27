@@ -2,42 +2,157 @@
 /* ------------------------------------------------------------------------------------------*/
 /* ------------------------------------------------------------------------------------------*/
 /* ------------------------------------------------------------------------------------------*/
-.product-slider {
-    display: flex;
-    align-items: center;
-}
-
 .product-slider-container {
     display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-width: 100%;
+    max-width: 100%;
+    padding: 16px;
+    background-color: #e9ecef;
+}
+
+.product-slider-button {
+    display: none;
+}
+
+.product-slider {
+    display: flex;
+    flex-grow: 1;
     overflow: hidden;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.product-slider-heading {
+    font-weight: bold;
+    font-size: x-large;
+    text-align: left;
+    margin-bottom: 16px;
+}
+
+.product-slider-list {
     width: 100%;
+    padding-bottom: 16px;
+    display: flex;
+    overflow-x: scroll;
     scroll-behavior: smooth;
 }
 
 .product-slider-item {
-    flex: 0 0 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: space-between;
+    flex: 0 0 0;
+    min-width: 125px;
+    max-width: 125px;
+    min-height: 100%;
+    max-height: 100%;
+    padding-left: 0;
+    padding-right: 12px;
     transition: transform 0.5s ease-in-out;
 }
 
-.product-slider-button {
-    background-color: transparent;
-    border: none;
-    font-size: 2rem;
-    cursor: pointer;
+.product-slider-item-top {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: start;
 }
 
-@media (max-width: 768px) {
+.product-slider-item-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: end;
+}
+
+.product-slider-image {
+    display: block;
+    min-width: 100%;
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 8px;
+}
+
+.product-slider-image img {
+    min-width: 100%;
+    max-width: 100%;
+    height: auto;
+}
+
+.product-slider-title {
+    min-height: 75px;
+    max-height: 75px;
+    display: block;
+    word-break: break-all;
+    font-size: small;
+    text-decoration: none;
+    color: black;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 8px;
+}
+
+.product-slider-title:hover {
+    text-decoration: underline;
+}
+
+.product-slider-divider {
+    margin-top: 4px;
+    margin-bottom: 4px;
+    min-height: 1px;
+    max-height: 1px;
+    border-bottom: 1px solid darkgray;
+}
+
+.product-slider-rating {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+    gap: 0;
+}
+
+.product-slider-rating-count {
+    display: block;
+    justify-self: end;
+    margin-left: 8px;
+}
+
+.product-slider-price {
+    font-size: medium;
+    font-weight: bold;
+}
+
+.product-slider-sale-price {
+    margin-left: 8px;
+    font-size: x-small;
+    text-decoration: line-through;
+}
+
+@media (min-width: 992px) {
+    .product-slider-button {
+        cursor: pointer;
+        display: block;
+        font-size: 1rem;
+        box-shadow: none;
+    }
+    
+    .product-slider-list {
+        overflow: hidden;
+        padding-bottom: 0;
+    }
+    
     .product-slider-item {
-        flex: 0 0 100%;
+        min-width: 200px;
+        max-width: 200px;
     }
 }
-
-@media (min-width: 769px) {
-    .product-slider-item {
-        flex: 0 0 calc(100% / 3); /* Adjust based on the number of items you want to show */
-    }
-}
-
 
 /* HEADER */
 /* ------------------------------------------------------------------------------------------*/
@@ -121,7 +236,16 @@
 @media only screen and (min-width: 992px) {
     .search-body {
         flex-direction: row;
-        justify-content: stretch;
+        justify-content: space-between;
+    }
+    
+    .search-body-main {
+        display: flex;
+        flex-direction: column;
+        align-self: end;
+        justify-self: end;
+        flex-grow: 0;
+        flex-shrink: 1;
     }
 }
 
@@ -263,6 +387,7 @@
         height: 100%;
         min-height: 400px;
         max-height: 800px;
+        padding-left: 0;
     }
 
     .search-filters-close {
@@ -275,8 +400,6 @@
 /* ------------------------------------------------------------------------------------------*/
 /* ------------------------------------------------------------------------------------------*/
 .search-list {
-    min-width: 100%;
-    width: 100%;
     display: flex;
     flex-direction: column;
 }
@@ -288,12 +411,12 @@
 /* SEARCH ITEM */
 .search-item {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: stretch;
+    flex-grow: 1;
     background-color: transparent;
     margin: 0;
-    padding-top: 16px;
-    padding-bottom: 16px;
+    padding: 16px;
 }
 
 /* DETAILS BUTTON */
@@ -307,39 +430,53 @@
 
 /* IMAGE */
 .search-item-img {
-    flex: 0 0 auto;
-    margin-right: 16px;
+    min-width: 100%;
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 16px;
 }
 
 .search-item-img img {
-    max-width: 150px;
+    max-width: 100%;
     height: 100%;
     object-fit: fill;
 }
 
-/* BODY */
-.search-item-body {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-}
-
 /* TITLE */
 .search-item-title {
-    margin-bottom: 12px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid lightgray;
+    margin-bottom: 8px;
+    word-wrap: break-word;
     text-decoration: none;
+    font-size: medium;
+    word-break: break-word;
     color: black;
+    min-height: 100px;
+    max-height: 100px;
+    overflow: hidden;
+    text-overflow: clip;
 }
 
 .search-item-title * {
     margin: 0;
+    font-size: medium;
+    line-height: 1.5em;
+    word-break: break-word;
+    text-overflow: clip;
 }
 
 .search-item-title:hover {
     text-decoration: underline;
     color: #0d6efd;
+}
+
+/* RATING/BRAND */
+.search-item-rating-brand {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 8px;
+    border-top: 1px solid lightgray;
 }
 
 /* RATING */
@@ -362,6 +499,14 @@
 
 .search-item-brand .btn {
     padding: 0;
+}
+
+/* SHIPPING/PRICING */
+.search-item-shipping-pricing {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
 }
 
 /* SHIPPING */
@@ -405,7 +550,10 @@
     .search-list {
         flex-direction: row;
         flex-wrap: wrap;
+        align-items: stretch;
         justify-content: flex-start;
+        flex-grow: 0;
+        flex-shrink: 1;
     }
     
     .search-list > * {
@@ -417,28 +565,9 @@
     }
     
     .search-item {
-        flex-direction: column;
-        align-items: stretch;
-        min-width: 49%;
-        max-width: 49%;
+        min-width: 50%;
+        max-width: 50%;
         padding: 24px;
-    }
-    
-    .search-item-body {
-        padding-left: 4px;
-        padding-right: 4px;
-    }
-
-    .search-item-img {
-        min-width: 100%;
-        max-width: 100%;
-        height: auto;
-        margin-bottom: 16px;
-    }
-
-    .search-item-img img {
-        max-width: 100%;
-        height: 100%;
     }
 
     .search-item-btn {
@@ -448,16 +577,21 @@
 
 /* @ 992px */
 @media only screen and (min-width: 992px) {
-    .search-list {
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-items: stretch;
-        justify-content: flex-start;
-    }
-    
     .search-item {
-        min-width: 24%;
-        max-width: 24%;
+        min-width: 25%;
+        max-width: 25%;
+    }
+
+    /*.search-item-rating-brand {
+        flex-direction: column;
+        align-items: start;
+        justify-content: start;
+    }*/
+
+    .search-item-shipping-pricing {
+        flex-direction: column;
+        align-items: start;
+        justify-content: start;
     }
 }
 
@@ -513,6 +647,7 @@
     padding-left: 8px;
     padding-right: 8px;
     align-self: stretch;
+    word-wrap: break-word;
     text-align: start;
     font-size: 36px;
     border-bottom: 1px solid lightgray;

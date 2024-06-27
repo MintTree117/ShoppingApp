@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Http;
 
 namespace Shop.Infrastructure.Http;
 
-public class CookieDelegatingHandler( ILogger<CookieDelegatingHandler> logger ) : DelegatingHandler
+public sealed class CookieDelegatingHandler( ILogger<CookieDelegatingHandler> logger ) : DelegatingHandler
 {
     readonly ILogger<CookieDelegatingHandler> _logger = logger;
 

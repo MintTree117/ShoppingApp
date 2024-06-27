@@ -14,21 +14,20 @@
             
             <!-- IMAGE -->
             <div class="search-item-img">
-                <button class="btn" @onclick="@(()=>OnClickDetails(p))">
+                <a class="btn" @onclick="@(()=>OnClickDetails(p))">
                     <img src="@p.Image" alt="@p.Name"/>
-                </button>
+                </a>
             </div>
-
-            <!-- BODY -->
-            <div class="search-item-body ">
-                
-                <!-- TITLE -->
-                <button class="btn search-item-title" @onclick="@(()=>OnClickDetails(p))">
-                    <h3>@p.Name</h3>
-                </button>
-
+            
+            <!-- TITLE -->
+            <a class="btn search-item-title" @onclick="@(()=>OnClickDetails(p))">
+                <h3>@p.Name</h3>
+            </a>
+            
+            <!-- RATING/BRAND -->
+            <div class="search-item-rating-brand">
                 <!-- RATING -->
-                <div class="search-item-rating mb-1">
+                <div class="search-item-rating">
                     @for ( int i = 1; i <= 5; i++ )
                     {
                         <div>
@@ -41,7 +40,7 @@
                 </div>
 
                 <!-- BRAND -->
-                <div class="search-item-brand mb-2">
+                <div class="search-item-brand">
                     <span class="d-block text-muted">
                         Brand:&nbsp;
                     </span>
@@ -49,14 +48,16 @@
                         @p.Brand.Name
                     </button>
                 </div>
-                
+            </div>
+            
+            <!-- SHIPPING/PRICING -->
+            <div class="search-item-shipping-pricing">
                 <!-- SHIPPING -->
                 <div class="search-item-shipping mb-1">
                     <small class="@GetDeliveryEstimateColor( p )">
                         @GetDeliveryEstimateText( p )
                     </small>
                 </div>
-                
                 <!-- PRICING -->
                 <div class="search-item-pricing mb-3">
                     @if (p.SalePrice > 0)
@@ -75,30 +76,30 @@
                         </span>
                     }
                 </div>
-                
-                <!-- CART -->
-                @if (IsProductInCart( p, out int count ))
-                {
-                    <a class="btn btn-info btn-icon search-item-cart-button" href="@Consts.PageCart">
-                        <i class="fa-solid fa-circle-check fa-xs"></i>
-                        <small>View In Cart (@count)</small>
-                    </a>
-                }
-                else if (p.IsInStock)
-                {
-                    <button class="btn btn-primary btn-icon search-item-cart-button" @onclick="@(async ()=> await AddToCart(p))">
-                        <i class="fa-solid fa-shopping-cart fa-xs"></i>
-                        <small>Add To Cart</small>
-                    </button>
-                }
-                else
-                {
-                    <button disabled class="btn btn-secondary btn-icon search-item-cart-button">
-                        <i class="fa-solid fa-circle-xmark fa-xs"></i>
-                        <small>Out of Stock</small>
-                    </button>
-                }
             </div>
+            
+            <!-- CART -->
+            @if (IsProductInCart( p, out int count ))
+            {
+                <a class="btn btn-info btn-icon search-item-cart-button" href="@Consts.PageCart">
+                    <i class="fa-solid fa-circle-check fa-xs"></i>
+                    <small>View In Cart (@count)</small>
+                </a>
+            }
+            else if (p.IsInStock)
+            {
+                <button class="btn btn-outline-primary btn-icon search-item-cart-button" @onclick="@(async ()=> await AddToCart(p))">
+                    <i class="fa-solid fa-shopping-cart fa-xs"></i>
+                    <small>Add To Cart</small>
+                </button>
+            }
+            else
+            {
+                <button disabled class="btn btn-secondary btn-icon search-item-cart-button">
+                    <i class="fa-solid fa-circle-xmark fa-xs"></i>
+                    <small>Out of Stock</small>
+                </button>
+            }
         </div>
     }
 </div>

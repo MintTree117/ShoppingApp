@@ -1,5 +1,6 @@
 using System.Collections.Specialized;
 using System.Net.Http.Json;
+using System.Text.Json;
 using System.Web;
 using Shop.Infrastructure.Authentication;
 using Shop.Infrastructure.Common.ReplyTypes;
@@ -11,7 +12,11 @@ public sealed class HttpService( IHttpClientFactory httpFactory, IServiceProvide
 {
     readonly IHttpClientFactory _httpFactory = httpFactory;
     readonly IServiceProvider _provider = provider;
-
+    readonly JsonSerializerOptions JsonOptions = new() {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNameCaseInsensitive = true
+    };
+    
     HttpClient CreateScopedClient( bool authenticate )
     {
         HttpClient client = _httpFactory.CreateClient( "API" );
@@ -113,12 +118,12 @@ public sealed class HttpService( IHttpClientFactory httpFactory, IServiceProvide
 
         return $"{apiPath}?{query}";
     }
-    static async Task<Reply<T>> ParseHttpResponse<T>( HttpResponseMessage httpResponse )
+    async Task<Reply<T>> ParseHttpResponse<T>( HttpResponseMessage httpResponse )
     {
         if (!httpResponse.IsSuccessStatusCode)
             return LogReturn<T>( httpResponse.StatusCode + await httpResponse.Content.ReadAsStringAsync() );
         
-        T? httpContent = await httpResponse.Content.ReadFromJsonAsync<T>();
+        var httpContent = await httpResponse.Content.ReadFromJsonAsync<T>();
         return httpContent is not null
             ? Reply<T>.Success( httpContent )
             : Reply<T>.NetworkError();

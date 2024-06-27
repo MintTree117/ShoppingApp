@@ -1,4 +1,9 @@
 /* SHARED */
+.logo {
+    padding: 0;
+    margin: 0;
+}
+
 .nav-link {
     display: flex;
     align-items: center;

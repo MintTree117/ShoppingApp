@@ -1,16 +1,7 @@
 namespace Shop.Infrastructure.Catalog.Categories.Types;
 
-public sealed record CategoriesCollection
+public sealed record CategoriesCollection( Dictionary<Guid, Category> Categories, List<Category> PrimaryCategories )
 {
-    public CategoriesCollection( Dictionary<Guid, Category> categories, List<Category> primaryCategories )
-    {
-        Categories = categories;
-        PrimaryCategories = primaryCategories;
-    }
-
-    public Dictionary<Guid, Category> Categories { get; init; }
-    public List<Category> PrimaryCategories { get; init; }
-
     public static CategoriesCollection From( List<CategoryDto> dtos )
     {
         Dictionary<Guid, Category> dictionary = [];

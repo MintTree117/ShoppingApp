@@ -9,10 +9,10 @@
 
 <div class="content-container position-relative">
     <LoadingPanelComponent @ref="@_loadingPanel"/>
-    <div class="d-flex flex-column align-items-center justify-content-start gap-3">
-        <ProductSlider @ref="_featuredSlider"/>
-        <ProductSlider @ref="_salesSlider"/>
-        <ProductSlider @ref="_sellingSlider"/>
+    <div class="d-flex flex-column align-items-stretch justify-content-start px-0 py-3 gap-3">
+        <ProductSlider @ref="_featuredSlider" Title="Featured Products"/>
+        <ProductSlider @ref="_salesSlider" Title="Hot Deals"/>
+        <ProductSlider @ref="_sellingSlider" Title="Best Selling"/>
     </div>
 </div>
 
@@ -22,29 +22,28 @@
     ProductSlider _featuredSlider = default!;
     ProductSlider _salesSlider = default!;
     ProductSlider _sellingSlider = default!;
-    bool _parametersSet = false;
     ProductSpecialsDto _specials = ProductSpecialsDto.Empty();
+    bool _parametersSet = false;
 
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnAfterRenderAsync( bool firstRender )
     {
-        await base.OnParametersSetAsync();
+        await base.OnAfterRenderAsync( firstRender );
         if (_parametersSet)
             return;
-        _loadingPanel.ToggleLoading( true );
+        _parametersSet = true;
+        _loadingPanel.ToggleLoading( true, "Loading product specials..." );
         var reply = await Http.GetAsync<ProductSpecialsDto>( Consts.ApiGetSpecials );
         if (!reply)
         {
             PushWarning( "Failed to load product specials." );
-            //_loadingPanel.ToggleLoading( false );
+            _loadingPanel.ToggleLoading( false );
             return;
         }
         _specials = reply.Data;
-        _loadingPanel.ToggleLoading( true, "Loading product specials..." );
         _featuredSlider.SetProducts( _specials.TopFeatured );
         _salesSlider.SetProducts( _specials.TopSales );
         _sellingSlider.SetProducts( _specials.TopSelling );
-        _parametersSet = true;
-        //_loadingPanel.ToggleLoading( false );
+        _loadingPanel.ToggleLoading( false );
         StateHasChanged();
     }
 }

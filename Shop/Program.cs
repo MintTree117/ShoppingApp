@@ -9,6 +9,7 @@ using Shop.Infrastructure.Catalog.Brands;
 using Shop.Infrastructure.Catalog.Categories;
 using Shop.Infrastructure.Http;
 using Shop.Infrastructure.Loading;
+using Shop.Infrastructure.Ordering;
 using Shop.Infrastructure.Storage;
 
 WebAssemblyHostBuilder builder = WebAssemblyHostBuilder.CreateDefault( args );
@@ -24,6 +25,7 @@ builder.Services.AddSingleton<StorageService>();
 //builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddSingleton<AuthenticationStateManager>();
+builder.Services.AddSingleton<CartManager>();
 builder.Services.AddScoped<CustomAuthenticationStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 //builder.Services.AddScoped<AuthenticationStateProvider>( provider => provider.GetRequiredService<AuthenticationManager>() );

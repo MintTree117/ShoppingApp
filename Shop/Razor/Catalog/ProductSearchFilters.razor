@@ -17,7 +17,7 @@
             </button>
         </div>
         <!-- CLEAR ALL -->
-        <button class="btn btn-primary btn-icon search-filters-btn-main search-filters-clear" @onclick="Clear">
+        <button class="btn btn-outline-secondary btn-icon search-filters-btn-main search-filters-clear" @onclick="Clear">
             <i class="fa-solid fa-eraser me-2"></i>
             Clear All
         </button>
@@ -34,7 +34,7 @@
                 <input type="number" min="0" max="100000" step="1" value="@_posX" @onchange="OnChangeLocationX" class="form-control"/>
                 <input type="number" min="0" max="100000" step="1" value="@_posY" @onchange="OnChangeLocationY" class="form-control"/>
             </div>
-            <button class="btn btn-primary btn-icon search-filters-btn-main" @onclick="OnClickApplyLocation">
+            <button class="btn btn-outline-secondary btn-icon search-filters-btn-main" @onclick="OnClickApplyLocation">
                 <i class="fa-solid fa-circle-check me-2"></i>
                 Apply
             </button>
@@ -71,7 +71,7 @@
                 <input type="number" min="0" max="10000" step="1" value="@_minPrice" @onchange="OnChangeMinPrice" class="form-control"/>
                 <input type="number" min="0" max="10000" step="1" value="@_maxPrice" @onchange="OnChangeMaxPrice" class="form-control"/>
             </div>
-            <button class="btn btn-primary btn-icon search-filters-btn-main" @onclick="OnClickApplyPricing">
+            <button class="btn btn-outline-secondary btn-icon search-filters-btn-main" @onclick="OnClickApplyPricing">
                 <i class="fa-solid fa-circle-check me-2"></i>
                 Apply
             </button>

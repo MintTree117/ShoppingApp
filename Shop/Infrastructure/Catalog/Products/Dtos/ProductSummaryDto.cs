@@ -10,4 +10,5 @@ public readonly record struct ProductSummaryDto(
     decimal Price,
     decimal SalePrice,
     float Rating,
-    int NumberRatings );
+    int NumberRatings
+);

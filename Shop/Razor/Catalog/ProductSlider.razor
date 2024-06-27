@@ -1,70 +1,121 @@
 @using Shop.Infrastructure.Catalog.Products.Dtos
 @using System.Timers
-@implements IDisposable
+@using Shop.Utilities
 
-<div class="product-slider">
-    <button class="product-slider-button" @onclick="Previous">❮</button>
-    <div class="product-slider-container">
-        @foreach (var product in _visibleProducts)
-        {
-            <div class="product-slider-item">
-                <img src="@product.Image" alt="@product.Name" />
-                <h3>@product.Name</h3>
-            </div>
-        }
+<!-- CONTAINER -->
+<div class="product-slider-container">
+    
+    <!-- LEFT BUTTON -->
+    <button class="btn btn-outline-secondary product-slider-button" @onclick="OnClickPrevious">❮</button>
+
+    <!-- SLIDER -->
+    <div class="product-slider">
+        
+        <!-- TITLE -->
+        <h6 class="product-slider-heading">
+            @Title
+        </h6>
+
+        <!-- ITEMS -->
+        <div class="product-slider-list">
+            @foreach ( ProductSummaryDto p in _products )
+            {
+                <!-- ITEM -->
+                <div class="product-slider-item">
+
+                    <!-- TOP -->
+                    <div class="product-slider-item-top">
+                        <!-- IMAGE -->
+                        <a class="product-slider-image" href="@GetLinkText( p )">
+                            <img src="@p.Image" alt="@p.Name"/>
+                        </a>
+
+                        <!-- TITLE -->
+                        <a class="product-slider-title" href="@GetLinkText( p )">
+                            @p.Name
+                        </a>
+                        <hr class="product-slider-divider"/>
+                    </div>
+
+                    <!-- BOTTOM -->
+                    <div class="product-slider-item-bottom">
+                        <!-- RATING -->
+                        <div class="product-slider-rating">
+                            @for ( int i = 1; i <= 5; i++ )
+                            {
+                                <div>
+                                    <i class="fa fa-star fa-xs @GetRatingCss( p, i )"></i>
+                                </div>
+                            }
+                            <small class="product-slider-rating-count text-muted">
+                                @p.NumberRatings
+                            </small>
+                        </div>
+
+                        <!-- PRICING -->
+                        <div class="product-slider-pricing">
+                            @if (p.SalePrice > 0)
+                            {
+                                <span class="product-slider-price">
+                                    $@p.SalePrice
+                                </span>
+                                <span class="text-muted product-slider-sale-price">
+                                    $@p.Price
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="product-slider-price">
+                                    $@p.Price
+                                </span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
     </div>
-    <button class="product-slider-button" @onclick="Next">❯</button>
+    
+    <!-- RIGHT BUTTON -->
+    <button class="btn btn-outline-secondary product-slider-button" @onclick="OnClickNext">❯</button>
 </div>
 
 @code
 {
-    const int VisibleCount = 3; // Adjust this for desktop view
-
+    [Parameter] public string Title { get; set; } = string.Empty;
     List<ProductSummaryDto> _products = [];
-    List<ProductSummaryDto> _visibleProducts = [];
     Timer _timer = default!;
     int _currentIndex = 0;
 
     public void SetProducts( List<ProductSummaryDto> products )
     {
         _products = products;
-        _visibleProducts = _products.Take( VisibleCount ).ToList();
         _currentIndex = 0;
         StateHasChanged();
     }
-    public void Dispose()
-    {
-        throw new NotImplementedException();
-    }
-    protected override void OnInitialized()
-    {
-        _timer = new Timer( 3000 );
-        _timer.Elapsed += OnTimedEvent;
-        _timer.AutoReset = true;
-        _timer.Enabled = true;
-    }
-
-    void OnTimedEvent( object? source, ElapsedEventArgs e )
-    {
-        InvokeAsync( () => {
-            Next();
-            StateHasChanged();
-        } );
-    }
     void UpdateVisibleProducts()
     {
-        _visibleProducts = _products.Skip( _currentIndex ).Take( VisibleCount ).ToList();
-        if (_visibleProducts.Count < VisibleCount)
-            _visibleProducts.AddRange( _products.Take( VisibleCount - _visibleProducts.Count ) );
+        List<ProductSummaryDto> newProducts = [];
+        newProducts.AddRange( _products.Skip( _currentIndex ) );
+        newProducts.AddRange( _products.Take( _currentIndex ) );
+        _products = newProducts;
     }
-    void Next()
+    void OnClickNext()
     {
-        _currentIndex = (_currentIndex + 1) % _products.Count;
+        _currentIndex++;
+        if (_currentIndex >= _products.Count)
+            _currentIndex = 0;
         UpdateVisibleProducts();
     }
-    void Previous()
+    void OnClickPrevious()
     {
-        _currentIndex = (_currentIndex - 1 + _products.Count) % _products.Count;
+        _currentIndex--;
+        if (_currentIndex < 0)
+            _currentIndex = _products.Count - 1;
         UpdateVisibleProducts();
     }
+    static string GetLinkText( ProductSummaryDto dto ) =>
+        $"{Consts.PageProductDetails}?ProductId={dto.Id}";
+    static string GetRatingCss( ProductSummaryDto item, int level ) =>
+        item.Rating >= level ? "rating-star-full" : "rating-star-empty";
 }
