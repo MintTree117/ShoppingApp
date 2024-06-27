@@ -202,9 +202,17 @@
     bool _showAddressBox = false;
     Dictionary<string, string> _productSpecs = [];
 
+    protected override void OnDispose()
+    {
+        base.OnDispose();
+        Navigation.LocationChanged -= HandleLocationChanged;
+    }
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+
+        Navigation.LocationChanged += HandleLocationChanged;
+        
         Dictionary<string, object> parameters = new() {
             { "ProductId", ProductId }
         };
@@ -237,6 +245,11 @@
             _cartItems = cartReply.Data;
         
         StateHasChanged();
+    }
+
+    void HandleLocationChanged( object? obj, LocationChangedEventArgs args )
+    {
+        Navigation.Refresh( true );
     }
     
     async Task OnClickAddToCart()
