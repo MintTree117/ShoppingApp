@@ -13,12 +13,12 @@ public sealed class StorageService( IJSRuntime jsRuntime )
     {
         Get, Set, Remove, Clear
     }
-    const string JsLocalHelper = "LocalStorageHelper";
-    const string JsSessionHelper = "SessionStorageHelper";
+    const string JsLocalHelper = "localStorageHelper";
+    const string JsSessionHelper = "sessionStorageHelper";
     static string LocalMethod( ActionType actionType ) =>
-        $"{JsLocalHelper}.{actionType.ToString()}";
+        $"{JsLocalHelper}.{actionType.ToString().ToLower()}";
     static string SessionMethod( ActionType actionType ) =>
-        $"{JsSessionHelper}.{actionType.ToString()}";
+        $"{JsSessionHelper}.{actionType.ToString().ToLower()}";
     static void StorageException( Exception e, ActionType actionType )
     {
         Logger.LogError( e, $"An exception occurred during a local storage operation: {actionType.ToString()}" );

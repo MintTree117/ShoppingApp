@@ -1,12 +1,11 @@
-// storage.js
 window.localStorageHelper = {
-    setItem: function (key, value) {
+    set: function (key, value) {
         localStorage.setItem(key, value);
     },
-    getItem: function (key) {
+    get: function (key) {
         return localStorage.getItem(key);
     },
-    removeItem: function (key) {
+    remove: function (key) {
         localStorage.removeItem(key);
     },
     clear: function () {
@@ -15,13 +14,13 @@ window.localStorageHelper = {
 };
 
 window.sessionStorageHelper = {
-    setItem: function (key, value) {
+    set: function (key, value) {
         sessionStorage.setItem(key, value);
     },
-    getItem: function (key) {
+    get: function (key) {
         return sessionStorage.getItem(key);
     },
-    removeItem: function (key) {
+    remove: function (key) {
         sessionStorage.removeItem(key);
     },
     clear: function () {

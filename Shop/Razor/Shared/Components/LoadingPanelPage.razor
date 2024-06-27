@@ -5,7 +5,7 @@
 
 @switch ( _state ) {
     case LoadingState.Loading:
-        <div class="loading-container @_displayCss">
+        <div class="loading-spinner @_displayCss">
             <div class="loading-circle"></div>
             @if (!string.IsNullOrEmpty( _message )) 
             {
@@ -14,7 +14,7 @@
         </div>
         break;
     case LoadingState.Redirecting:
-        <div class="loading-container @_displayCss">
+        <div class="loading-spinner @_displayCss">
             <div class="loading-circle"></div>
             <p>Redirecting...</p>
             @if (!string.IsNullOrEmpty( _message )) 

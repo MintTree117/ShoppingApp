@@ -3,4 +3,8 @@ namespace Shop.Infrastructure.Catalog.Products.Dtos;
 public readonly record struct ProductSpecialsDto(
     List<ProductSummaryDto> TopFeatured,
     List<ProductSummaryDto> TopSales,
-    List<ProductSummaryDto> TopSelling );
+    List<ProductSummaryDto> TopSelling )
+{
+    public static ProductSpecialsDto Empty() =>
+        new( [], [], [] );
+}

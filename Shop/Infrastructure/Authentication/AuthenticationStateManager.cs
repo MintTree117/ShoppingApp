@@ -140,7 +140,7 @@ public sealed class AuthenticationStateManager
         var serverReply = await _http.PostAsync<string>( Consts.ApiLoginRefresh );
         if (!serverReply)
         {
-            Logger.Log( $"Session manager failed to fetch from server. {serverReply}" );
+            Logger.Log( $"Session manager failed to fetch from server. {serverReply.GetMessage()}" );
             return false;
         }
 
