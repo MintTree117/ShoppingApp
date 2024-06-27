@@ -18,7 +18,7 @@
 
         <!-- ITEMS -->
         <div class="product-slider-list">
-            @foreach ( ProductSummaryDto p in _products )
+            @foreach ( ProductSummaryDto p in _showProducts )
             {
                 <!-- ITEM -->
                 <div class="product-slider-item">
@@ -84,6 +84,7 @@
 {
     [Parameter] public string Title { get; set; } = string.Empty;
     List<ProductSummaryDto> _products = [];
+    List<ProductSummaryDto> _showProducts = [];
     Timer _timer = default!;
     int _currentIndex = 0;
 
@@ -91,14 +92,19 @@
     {
         _products = products;
         _currentIndex = 0;
+        UpdateVisibleProducts();
         StateHasChanged();
     }
     void UpdateVisibleProducts()
     {
         List<ProductSummaryDto> newProducts = [];
-        newProducts.AddRange( _products.Skip( _currentIndex ) );
-        newProducts.AddRange( _products.Take( _currentIndex ) );
-        _products = newProducts;
+
+        for ( int i = _currentIndex; i < _products.Count; i++ )
+            newProducts.Add( _products[i] );
+        for ( int i = 0; i < _currentIndex; i++ )
+            newProducts.Add( _products[i] );
+        _showProducts = newProducts;
+        StateHasChanged();
     }
     void OnClickNext()
     {
