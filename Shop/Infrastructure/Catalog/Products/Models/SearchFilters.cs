@@ -1,4 +1,4 @@
-namespace Shop.Infrastructure.Catalog.Search.Models;
+namespace Shop.Infrastructure.Catalog.Products.Models;
 
 public class SearchFilters(
     Guid? CategoryId,

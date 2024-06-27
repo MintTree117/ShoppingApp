@@ -37,7 +37,7 @@ public sealed class CartManager( StorageService storage, HttpService http, Authe
         await _storage.SetLocalStorage( SummaryStorageKey, summary );
         return Reply<CartItems>.Success( summary );
     }
-    public async Task<Reply<bool>> Add( Product p )
+    public async Task<Reply<bool>> Add( ProductDetails p )
     {
         var cartReply = await Get();
         if (!cartReply)

@@ -7,7 +7,8 @@
     case LoadingState.Loading:
         <div class="loading-container @_displayCss">
             <div class="loading-circle"></div>
-            @if (!string.IsNullOrEmpty( _message )) {
+            @if (!string.IsNullOrEmpty( _message )) 
+            {
                 <p>@_message</p>   
             }
         </div>
@@ -16,7 +17,8 @@
         <div class="loading-container @_displayCss">
             <div class="loading-circle"></div>
             <p>Redirecting...</p>
-            @if (!string.IsNullOrEmpty( _message )) {
+            @if (!string.IsNullOrEmpty( _message )) 
+            {
                 <p>@_message</p>   
             }
         </div>

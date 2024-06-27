@@ -1,4 +1,5 @@
 namespace Shop.Infrastructure.Catalog.Products.Dtos;
 
-public sealed class ProductsDto(
-    List<ProductDto> Products );
+public readonly record struct ProductsDto(
+    List<ProductSummaryDto> Products,
+    List<int> ShippingDays );

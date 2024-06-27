@@ -1,8 +1,48 @@
 ﻿@page "/"
+@using Shop.Infrastructure.Catalog.Products.Dtos
+@using Shop.Razor.Catalog
+@using Shop.Razor.Shared.Components
+@using Shop.Utilities
+@inherits Shop.Razor.Shared.ShopPage
 
 <PageTitle>Home</PageTitle>
 
-<div class="content-container">
-    <h1>Hello, world!</h1>
-    <p>Welcome to your new app.</p>
+<LoadingPanelComponent @ref="_loadingPanel"/>
+
+<div class="content-container d-flex flex-column align-items-center justify-content-start gap-3">
+    <ProductSlider @ref="_featuredSlider"/>
+    <ProductSlider @ref="_salesSlider"/>
+    <ProductSlider @ref="_sellingSlider"/>
 </div>
+
+@code 
+{
+    LoadingPanelComponent _loadingPanel = default!;
+    ProductSlider _featuredSlider = default!;
+    ProductSlider _salesSlider = default!;
+    ProductSlider _sellingSlider = default!;
+    
+    ProductSpecialsDto _specials;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        _loadingPanel.ToggleLoading( true, "Loading product specials..." );
+        var reply = await Http.GetAsync<ProductSpecialsDto>( Consts.ApiGetSpecials );
+        if (!reply)
+        {
+            PushWarning( "Failed to load product specials." );
+            _loadingPanel.ToggleLoading( false );
+            return;
+        }
+        
+        _specials = reply.Data;
+        
+        _featuredSlider.SetProducts( _specials.TopFeatured );
+        _salesSlider.SetProducts( _specials.TopSales );
+        _sellingSlider.SetProducts( _specials.TopSelling );
+
+        _loadingPanel.ToggleLoading( false );
+        StateHasChanged();
+    }
+}

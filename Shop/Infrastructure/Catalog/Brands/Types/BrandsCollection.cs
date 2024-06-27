@@ -2,18 +2,18 @@ namespace Shop.Infrastructure.Catalog.Brands.Types;
 
 public sealed record BrandsCollection
 {
-    public BrandsCollection( Dictionary<Guid, Brand> brandsById, Dictionary<Guid, HashSet<Brand>> brandsByCategory )
+    public BrandsCollection( Dictionary<Guid, Brand> brandsById, Dictionary<Guid, HashSet<Brand>> brandsByCategoryId )
     {
         BrandsById = brandsById;
 
         Dictionary<Guid, HashSet<Brand>> dictionary = [];
-        foreach ( var kvp in brandsByCategory )
+        foreach ( var kvp in brandsByCategoryId )
             dictionary.Add( kvp.Key, kvp.Value );
-        BrandsByCategory = dictionary;
+        BrandsByCategoryId = dictionary;
     }
 
     public Dictionary<Guid, Brand> BrandsById { get; init; }
-    public Dictionary<Guid, HashSet<Brand>> BrandsByCategory { get; init; }
+    public Dictionary<Guid, HashSet<Brand>> BrandsByCategoryId { get; init; }
 
     public static BrandsCollection From( BrandsDto dto )
     {
@@ -22,15 +22,17 @@ public sealed record BrandsCollection
             brandsById.TryAdd( b.Id, b );
 
         Dictionary<Guid, HashSet<Brand>> brandsByCategory = [];
-        foreach ( BrandCategory bc in dto.BrandCategories ) {
-            if (!brandsById.TryGetValue( bc.BrandId, out Brand? b ))
+        foreach ( var kvp in dto.BrandCategories ) 
+        {
+            if (brandsByCategory.ContainsKey( kvp.Key ))
                 continue;
-            if (!brandsByCategory.TryGetValue( bc.CategoryId, out HashSet<Brand>? brands ))
-            {
-                brands = [];
-                brandsByCategory.Add( bc.CategoryId, brands );
-            }
-            brands.Add( b );
+
+            HashSet<Brand> brands = [];
+            foreach ( Guid id in kvp.Value )
+                if (brandsById.TryGetValue( id, out Brand? b ))
+                    brands.Add( b );
+
+            brandsByCategory.Add( kvp.Key, brands );
         }
 
         return new BrandsCollection( brandsById, brandsByCategory );

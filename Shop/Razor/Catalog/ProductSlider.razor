@@ -1,0 +1,70 @@
+@using Shop.Infrastructure.Catalog.Products.Dtos
+@using System.Timers
+@implements IDisposable
+
+<div class="product-slider">
+    <button class="product-slider-button" @onclick="Previous">❮</button>
+    <div class="product-slider-container">
+        @foreach (var product in _visibleProducts)
+        {
+            <div class="product-slider-item">
+                <img src="@product.Image" alt="@product.Name" />
+                <h3>@product.Name</h3>
+            </div>
+        }
+    </div>
+    <button class="product-slider-button" @onclick="Next">❯</button>
+</div>
+
+@code
+{
+    const int VisibleCount = 3; // Adjust this for desktop view
+
+    List<ProductSummaryDto> _products = [];
+    List<ProductSummaryDto> _visibleProducts = [];
+    Timer _timer = default!;
+    int _currentIndex = 0;
+
+    public void SetProducts( List<ProductSummaryDto> products )
+    {
+        _products = products;
+        _visibleProducts = _products.Take( VisibleCount ).ToList();
+        _currentIndex = 0;
+        StateHasChanged();
+    }
+    public void Dispose()
+    {
+        throw new NotImplementedException();
+    }
+    protected override void OnInitialized()
+    {
+        _timer = new Timer( 3000 );
+        _timer.Elapsed += OnTimedEvent;
+        _timer.AutoReset = true;
+        _timer.Enabled = true;
+    }
+
+    void OnTimedEvent( object? source, ElapsedEventArgs e )
+    {
+        InvokeAsync( () => {
+            Next();
+            StateHasChanged();
+        } );
+    }
+    void UpdateVisibleProducts()
+    {
+        _visibleProducts = _products.Skip( _currentIndex ).Take( VisibleCount ).ToList();
+        if (_visibleProducts.Count < VisibleCount)
+            _visibleProducts.AddRange( _products.Take( VisibleCount - _visibleProducts.Count ) );
+    }
+    void Next()
+    {
+        _currentIndex = (_currentIndex + 1) % _products.Count;
+        UpdateVisibleProducts();
+    }
+    void Previous()
+    {
+        _currentIndex = (_currentIndex - 1 + _products.Count) % _products.Count;
+        UpdateVisibleProducts();
+    }
+}

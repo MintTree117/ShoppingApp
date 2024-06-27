@@ -5,8 +5,8 @@
 @using Shop.Infrastructure.Catalog.Categories.Types
 @using System.Text
 @using System.Web
-@using Shop.Infrastructure.Catalog.Search.Dtos
-@using Shop.Infrastructure.Catalog.Search.Models
+@using Shop.Infrastructure.Catalog.Products.Dtos
+@using Shop.Infrastructure.Catalog.Products.Models
 @using Shop.Razor.Shared.Components
 @using Shop.Utilities
 @inherits Shop.Razor.Shared.ShopPage
@@ -101,7 +101,7 @@
     async Task SearchProducts()
     {
         string apiUrl = BuildSearchQueryString( Consts.ApiGetSearch );
-        var searchReply = await Http.GetAsync<SearchResultsDto>( apiUrl );
+        var searchReply = await Http.GetAsync<ProductSearchDto>( apiUrl );
         SetCurrentCategory();
         if (!searchReply)
         {

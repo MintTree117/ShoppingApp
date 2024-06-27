@@ -109,7 +109,7 @@
 
         var summary = cartReply.Data;
         var productIds = new Dictionary<string, object>() { { "ProductIds", summary.GetIds() } };
-        var productsReply = await Http.GetAsync<List<ProductDto>>( Consts.ApiGetProductsByIds, productIds );
+        var productsReply = await Http.GetAsync<List<ProductDetailsDto>>( Consts.ApiGetProductsByIds, productIds );
         if (!productsReply)
         {
             _products = CartProducts.FromItems( summary );
@@ -119,7 +119,7 @@
         }
 
         List<CartProduct> items = [];
-        List<ProductDto> products = productsReply.Data;
+        List<ProductDetailsDto> products = productsReply.Data;
         foreach ( var s in summary.Items )
         {
             var contains = products.Any( p => p.Id == s.ProductId );

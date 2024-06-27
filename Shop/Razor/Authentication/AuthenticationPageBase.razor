@@ -2,7 +2,8 @@
 @layout AuthenticationLayout
 @using Shop.Infrastructure.Loading
 
-@code {
+@code 
+{
     [Inject] public LoadingService LoadingService { get; set; } = default!;
 
     protected void StartLoading( string? message )

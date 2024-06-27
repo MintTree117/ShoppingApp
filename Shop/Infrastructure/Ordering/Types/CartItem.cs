@@ -9,7 +9,7 @@ public sealed class CartItem(
     public Guid ProductId { get; set; } = productId;
     public int Quantity { get; set; } = quantity;
     
-    public static CartItem FromProduct( Product p ) =>
+    public static CartItem FromProduct( ProductDetails p ) =>
         new( p.Id, 1 );
     public static CartItem FromCartProduct( CartProduct p ) =>
         new( p.ProductId, p.Quantity );

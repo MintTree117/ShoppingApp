@@ -23,7 +23,7 @@
             
             <!-- IMAGE -->
             <div class="product-top-image">
-                <img src="@_product.Image" alt="@_product.Name"/>
+                <img src="@_productDetails.Image" alt="@_productDetails.Name"/>
             </div>
             
             <!-- MAIN -->
@@ -31,7 +31,7 @@
                 
                 <!-- TITLE -->
                 <h3 class="product-title">
-                    @_product.Name
+                    @_productDetails.Name
                 </h3>
                 
                 <!-- CONTENT -->
@@ -47,22 +47,22 @@
                                 @for ( int i = 1; i <= 5; i++ )
                                 {
                                     <div>
-                                        <i class="fa fa-star fa-xs @GetRatingCss( _product, i )"></i>
+                                        <i class="fa fa-star fa-xs @GetRatingCss( _productDetails, i )"></i>
                                     </div>
                                 }
-                                <small class="d-block ms-1 text-muted">(@_product.NumberRatings Ratings)</small>
+                                <small class="d-block ms-1 text-muted">(@_productDetails.NumberRatings Ratings)</small>
                             </div>
                             <!-- BRAND -->
                             <div class="product-brand">
                                 <span class="d-block text-muted">Brand:&nbsp;</span>
-                                <button class="d-block btn btn-link" @onclick="@(() => OnClickBrand( _product.Brand ))">@_product.Brand.Name</button>
+                                <button class="d-block btn btn-link" @onclick="@(() => OnClickBrand( _productDetails.Brand ))">@_productDetails.Brand.Name</button>
                             </div>
                         </div>
                     </div>
 
                     <!-- CATEGORIES -->
                     <div class="product-categories d-flex flex-row flex-wrap align-items-center justify-content-start gap-2 py-3">
-                        @foreach ( Category c in _product.Categories )
+                        @foreach ( Category c in _productDetails.Categories )
                         {
                             <button class="d-inline-block btn btn-sm btn-outline-secondary mb-1" @onclick="() => OnClickCategory( c )">@c.Name</button>
                         }
@@ -72,20 +72,20 @@
                     <div class="product-pricing-shipping">
                         <!-- PRICING -->
                         <div class="product-pricing">
-                            @if (_product.SalePrice > 0)
+                            @if (_productDetails.SalePrice > 0)
                             {
-                                <div class="product-price me-2">$@_product.SalePrice</div>
-                                <div class="text-muted text-decoration-line-through">$@_product.Price</div>
+                                <div class="product-price me-2">$@_productDetails.SalePrice</div>
+                                <div class="text-muted text-decoration-line-through">$@_productDetails.Price</div>
                             }
                             else
                             {
-                                <span class="product-price">$@_product.Price</span>
+                                <span class="product-price">$@_productDetails.Price</span>
                             }
                         </div>
                         <!-- SHIPPING -->
                         <div class="product-shipping">
-                            <small class="@GetDeliveryEstimateColor( _product )">
-                                @GetDeliveryEstimateText( _product )
+                            <small class="@GetDeliveryEstimateColor( _productDetails )">
+                                @GetDeliveryEstimateText( _productDetails )
                             </small>
                             <button class="btn btn-link btn-icon product-shipping-button" @onclick="OnClickAddress">
                                 <div>
@@ -117,7 +117,7 @@
 
                     <!-- CART -->
                     <div class="product-cart">
-                        @if (IsProductInCart( _product, out int count ))
+                        @if (IsProductInCart( _productDetails, out int count ))
                         {
                             <!-- CART BUTTON -->
                             <a class="btn btn-primary btn-icon w-100">
@@ -125,7 +125,7 @@
                                 <small>View In Cart (@count)</small>
                             </a>
                         }
-                        else if (!_product.IsInStock)
+                        else if (!_productDetails.IsInStock)
                         {
                             <!-- DISABLED BUTTON -->
                             <button disabled class="btn btn-secondary btn-icon w-100">
@@ -158,7 +158,7 @@
         <!-- DESCRIPTION -->
         <div class="product-description">
             <h3>Description</h3>
-            <p class="mb-0">@_product.Description</p>
+            <p class="mb-0">@_productDetails.Description</p>
         </div>
         
         <!-- XML -->
@@ -197,7 +197,7 @@
     readonly int[] Quantities = [1, 2, 3, 5, 10];
     int _selectedQuantity = 1;
 
-    Product _product = default!;
+    ProductDetails _productDetails = default!;
     bool _productLoaded = false;
     bool _showAddressBox = false;
     Dictionary<string, string> _productSpecs = [];
@@ -213,7 +213,7 @@
             parameters.Add( nameof( PosX ), PosX );
             parameters.Add( nameof( PosY ), PosY );
         }
-        var reply = await Http.GetAsync<ProductDto>( Consts.ApiGetDetails, parameters );
+        var reply = await Http.GetAsync<ProductDetailsDto>( Consts.ApiGetDetails, parameters );
         if (!reply)
         {
             PushError( reply, "Failed to get product details." );
@@ -228,8 +228,8 @@
         if (!cats.Result.Succeeded || !brands.Result.Succeeded)
             return;
 
-        _product = Product.From( reply.Data, cats.Result.Data, brands.Result.Data );
-        _productSpecs = ParseXmlToDictionary( _product.Xml );
+        _productDetails = ProductDetails.From( reply.Data, cats.Result.Data, brands.Result.Data );
+        _productSpecs = ParseXmlToDictionary( _productDetails.Xml );
         _productLoaded = true;
 
         var cartReply = await CartManager.Get();
@@ -241,7 +241,7 @@
     
     async Task OnClickAddToCart()
     {
-        var cartReply = await CartManager.Add( _product );
+        var cartReply = await CartManager.Add( _productDetails );
         if (!cartReply)
         {
             PushError( $"Failed to add item to cart. {cartReply.GetMessage()}" );
@@ -266,8 +266,8 @@
             return;
         }
 
-        string apiUrl = $"{Consts.ApiGetEstimates}?ProductIds={_product.Id}&PosX={PosX}&PosY={PosY}";
-        string pageUrl = $"{Consts.PageProductDetails}?ProductId={_product.Id}&PosX={PosX}&PosY={PosY}";
+        string apiUrl = $"{Consts.ApiGetEstimates}?ProductIds={_productDetails.Id}&PosX={PosX}&PosY={PosY}";
+        string pageUrl = $"{Consts.PageProductDetails}?ProductId={_productDetails.Id}&PosX={PosX}&PosY={PosY}";
         
         Navigation.NavigateTo( pageUrl );
         Reply<List<int>> estimateReply = await Http.GetAsync<List<int>>( apiUrl );
@@ -278,7 +278,7 @@
             return;
         }
 
-        _product.ShippingDays = estimateReply.Data.FirstOrDefault();
+        _productDetails.ShippingDays = estimateReply.Data.FirstOrDefault();
         StateHasChanged();
     }
     
@@ -314,7 +314,7 @@
     {
         _selectedQuantity = int.Parse( e.Value?.ToString() ?? string.Empty );
     }
-    bool IsProductInCart( Product p, out int count )
+    bool IsProductInCart( ProductDetails p, out int count )
     {
         var isInCart = _cartItems.Contains( p.Id, out count );
         return isInCart;
@@ -335,13 +335,13 @@
 
         return xmlDictionary;
     }
-    static string GetRatingCss( Product item, int level ) =>
+    static string GetRatingCss( ProductDetails item, int level ) =>
         item.Rating >= level ? "rating-star-full" : "rating-star-empty";
     string GetDeliveryToText() =>
         PosX is null || PosY is null ? "(0 , 0)" : $"({PosX} , {PosY})";
     string GetDeliveryToIcon() =>
         _showAddressBox ? "fa-angle-up" : "fa-angle-down";
-    static string GetDeliveryEstimateText( Product item )
+    static string GetDeliveryEstimateText( ProductDetails item )
     {
         if (item.ShippingDays <= 0)
             return "Enter an address";
@@ -350,6 +350,6 @@
             ? $"Get within {item.ShippingDays} days" 
             : "Out of stock";
     }
-    static string GetDeliveryEstimateColor( Product item ) =>
+    static string GetDeliveryEstimateColor( ProductDetails item ) =>
         item.IsInStock ? "text-success" : "text-danger";
 }

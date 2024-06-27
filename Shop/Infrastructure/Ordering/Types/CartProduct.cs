@@ -17,7 +17,7 @@ public sealed class CartProduct
             ProductId = dto.ProductId,
             Quantity = dto.Quantity
         };
-    public static CartProduct FromProduct( ProductDto p, int quantity ) =>
+    public static CartProduct FromProduct( ProductDetailsDto p, int quantity ) =>
         new() {
             ProductId = p.Id,
             ProductName = p.Name,

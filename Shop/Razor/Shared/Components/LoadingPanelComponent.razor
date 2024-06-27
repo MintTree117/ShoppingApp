@@ -1,0 +1,24 @@
+<div class="loading-container @_displayCss">
+    <div class="loading-circle"></div>
+    @if (!string.IsNullOrEmpty( _message )) 
+    {
+        <p>@_message</p>   
+    }
+</div>
+
+@code 
+{ 
+    const string HideCss = "d-none";
+    const string ShowCss = "d-flex";
+    string _displayCss = HideCss;
+    string _message = string.Empty;
+    bool _isLoading = false;
+
+    public void ToggleLoading( bool value, string? message = null )
+    {
+        _displayCss = _isLoading ? ShowCss : HideCss;
+        _isLoading = value;
+        _message = message ?? string.Empty;
+        StateHasChanged();
+    }
+}

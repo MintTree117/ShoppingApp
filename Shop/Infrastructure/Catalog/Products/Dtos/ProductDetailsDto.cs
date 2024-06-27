@@ -1,17 +1,17 @@
 namespace Shop.Infrastructure.Catalog.Products.Dtos;
 
-public readonly record struct ProductDto(
+public readonly record struct ProductDetailsDto(
     Guid Id,
     Guid BrandId,
     string Name,
     string Image,
-    bool IsInStock,
     bool IsFeatured,
-    int ShippingDays,
+    bool IsInStock,
     decimal Price,
     decimal SalePrice,
-    int NumberRatings,
     float Rating,
+    int NumberRatings,
+    int ShippingDays,
     List<Guid>? CategoryIds,
     string? Description,
     string? Xml );

@@ -11,10 +11,10 @@ public sealed class LoadingService
         get => _isLoading;
         private set
         {
-            if (_isLoading != value) {
-                _isLoading = value;
-                NotifyStateChanged();
-            }
+            if (_isLoading == value) 
+                return;
+            _isLoading = value;
+            NotifyStateChanged();
         }
     }
     internal string? Message
@@ -22,10 +22,10 @@ public sealed class LoadingService
         get => _message;
         private set
         {
-            if (_message != value) {
-                _message = value;
-                NotifyStateChanged();
-            }
+            if (_message == value) 
+                return;
+            _message = value;
+            NotifyStateChanged();
         }
     }
     internal void StartLoading( string? message = null )
@@ -39,5 +39,6 @@ public sealed class LoadingService
         Message = null;
     }
 
-    void NotifyStateChanged() => OnChange?.Invoke();
+    void NotifyStateChanged() => 
+        OnChange?.Invoke();
 }
