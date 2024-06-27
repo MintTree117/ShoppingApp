@@ -1,6 +1,7 @@
 namespace Shop.Infrastructure.Catalog.Products.Models;
 
 public class SearchParameters(
+    string? searchText,
     Guid? categoryId,
     HashSet<Guid>? brandIds,
     bool? isInStock,
@@ -14,6 +15,7 @@ public class SearchParameters(
     int? posX,
     int? posY )
 {
+    public string? SearchText { get; set; } = searchText;
     public Guid? CategoryId { get; set; } = categoryId;
     public HashSet<Guid>? BrandIds { get; set; } = brandIds;
     public bool? IsInStock { get; set; } = isInStock;
@@ -28,5 +30,5 @@ public class SearchParameters(
     public int? PosY { get; set; } = posY;
 
     public static SearchParameters Empty() =>
-        new( null, null, null, null, null, null, null, 1, 5, 0, null, null );
+        new( null, null, null, null, null, null, null, null, 1, 5, 0, null, null );
 }

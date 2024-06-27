@@ -162,6 +162,10 @@
             _parameters.CategoryId = categoryId;
         SetCurrentCategory();
 
+        string? searchText = query.Get( "SearchText" );
+        if (!string.IsNullOrWhiteSpace( searchText ))
+            _parameters.SearchText = searchText;
+
         string? brandIds = query.Get( "BrandIds" );
         if (!string.IsNullOrWhiteSpace( brandIds ))
             _parameters.BrandIds = brandIds.Split( ',' ).Select( Guid.Parse ).ToHashSet();

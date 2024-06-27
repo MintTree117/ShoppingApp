@@ -1,10 +1,13 @@
+@using Shop.Utilities
+@using Shop.Infrastructure.Http
+
 <div class="input-group top-nav-search">
     <input class="form-control top-nav-search-control" 
-           @bind-value="@_searchText"
            type="search"
            list="products"
-           @onkeyup="HandleSearch"
            placeholder="Search All Products..."
+           @bind-value="@_searchText"
+           @onkeyup="HandleSearch"
            @ref="_searchInputElement"/>
     <datalist id="products">
         @foreach ( string s in _suggestions )
@@ -22,32 +25,47 @@
 
 @code 
 {
+    [Inject] public HttpService Http { get; set; } = default!;
     [Inject] public NavigationManager Navigation { get; set; } = default!;
     
     ElementReference _searchInputElement;
     string _searchText = string.Empty;
-    List<string> _suggestions = new();
+    List<string> _suggestions = [];
+    TimeSpan _delayTimeSpan = TimeSpan.FromMilliseconds( 500 );
+    DateTime _lastFetch;
+    Timer? _timer;
     
     void SearchProducts()
     {
-        Navigation.NavigateTo( "" );
+        Navigation.NavigateTo( $"{Consts.PageProductSearch}?SearchText={_searchText}", true );
     }
     async Task HandleSearch( KeyboardEventArgs args )
     {
-        if (args.Key is null or "Enter") {
+        if (args.Key is null or "Enter") 
+        {
             SearchProducts();
             return;
         }
 
-
-        /*ServiceReply<List<string>?> reply = await ProductService.GetProductSearchSuggestions( _searchText );
-        
-        if ( reply.Data is null || !reply.Success )
+        if (DateTime.Now - _lastFetch < _delayTimeSpan)
         {
-            _suggestions = new List<string>();
+            _timer?.Dispose();
+            _timer = new Timer( async _ => await GetSuggestions(), null, _delayTimeSpan, TimeSpan.MaxValue );
             return;
         }
 
-        _suggestions = reply.Data;*/
+        await GetSuggestions();
+    }
+
+    async Task GetSuggestions()
+    {
+        var parameter = new Dictionary<string, object>() { { "searchText", _searchText } };
+        var reply = await Http.GetAsync<List<string>>( Consts.ApiGetSuggestions, parameter );
+
+        if (!reply)
+            return;
+
+        _suggestions = reply.Data;
+        StateHasChanged();
     }
 }
