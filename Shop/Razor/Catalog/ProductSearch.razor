@@ -207,6 +207,9 @@
 
         Dictionary<string, string> queryParams = new();
 
+        if (!string.IsNullOrWhiteSpace( _parameters.SearchText ))
+            queryParams["SearchText"] = _parameters.SearchText;
+        
         if (_parameters.CategoryId.HasValue)
             queryParams["CategoryId"] = _parameters.CategoryId.Value.ToString();
         if (_parameters.BrandIds != null && _parameters.BrandIds.Any())

@@ -30,7 +30,7 @@
             <div class="product-top-main">
                 
                 <!-- TITLE -->
-                <h3 class="product-title">
+                <h3 class="d-inline product-title">
                     @_productDetails.Name
                 </h3>
                 
@@ -67,6 +67,8 @@
                             <button class="d-inline-block btn btn-sm btn-outline-secondary mb-1" @onclick="() => OnClickCategory( c )">@c.Name</button>
                         }
                     </div>
+                    
+                    <div class="product-top-main-spacer"></div>
 
                     <!-- PRICE & SHIPPING -->
                     <div class="product-pricing-shipping">
@@ -179,7 +181,12 @@
             </div>
         </div>
         
-</div>
+        <!-- SLIDERS -->
+        <div class="product-details-sliders">
+            <!-- SIMILAR PRODUCTS -->
+            <ProductSlider @ref="_similarSlider" Title="Similar Products"/>
+        </div>
+    </div>
 }
 
 @code 
@@ -202,6 +209,8 @@
     bool _showAddressBox = false;
     Dictionary<string, string> _productSpecs = [];
 
+    ProductSlider _similarSlider = default!;
+
     protected override void OnDispose()
     {
         base.OnDispose();
@@ -212,7 +221,7 @@
         await base.OnInitializedAsync();
 
         Navigation.LocationChanged += HandleLocationChanged;
-        
+
         Dictionary<string, object> parameters = new() {
             { "ProductId", ProductId }
         };
@@ -244,14 +253,20 @@
         if (cartReply)
             _cartItems = cartReply.Data;
         
+        FireAndForget();
         StateHasChanged();
+
+        async void FireAndForget()
+        {
+            await FetchSimilarProducts();
+        }
     }
 
     void HandleLocationChanged( object? obj, LocationChangedEventArgs args )
     {
         Navigation.Refresh( true );
     }
-    
+
     async Task OnClickAddToCart()
     {
         var cartReply = await CartManager.Add( _productDetails );
@@ -281,7 +296,7 @@
 
         string apiUrl = $"{Consts.ApiGetEstimates}?ProductIds={_productDetails.Id}&PosX={PosX}&PosY={PosY}";
         string pageUrl = $"{Consts.PageProductDetails}?ProductId={_productDetails.Id}&PosX={PosX}&PosY={PosY}";
-        
+
         Navigation.NavigateTo( pageUrl );
         Reply<List<int>> estimateReply = await Http.GetAsync<List<int>>( apiUrl );
 
@@ -294,7 +309,18 @@
         _productDetails.ShippingDays = estimateReply.Data.FirstOrDefault();
         StateHasChanged();
     }
-    
+    async Task FetchSimilarProducts()
+    {
+        var param = new Dictionary<string, object>() { { "productId", ProductId } };
+        var reply = await Http.GetAsync<List<ProductSummaryDto>>( Consts.ApiGetSimilarProducts, param );
+        if (!reply)
+        {
+            PushWarning( $"Failed to find similar products. {reply.GetMessage()}" );
+            return;
+        }
+        _similarSlider.SetProducts( reply.Data );
+    }
+
     void OnClickCategory( Category c )
     {
         Navigation.NavigateTo( $"{Consts.PageProductSearch}?CategoryId={c.Id}", true );
@@ -358,9 +384,9 @@
     {
         if (item.ShippingDays <= 0)
             return "Enter an address";
-        
-        return item.IsInStock 
-            ? $"Get within {item.ShippingDays} days" 
+
+        return item.IsInStock
+            ? $"Get within {item.ShippingDays} days"
             : "Out of stock";
     }
     static string GetDeliveryEstimateColor( ProductDetails item ) =>

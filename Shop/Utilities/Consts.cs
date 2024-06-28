@@ -45,12 +45,13 @@ internal static class Consts
     internal const string CatalogApiBase = "https://localhost:7123/api";
     internal const string ApiGetCategories = CatalogApiBase + "/categories";
     internal const string ApiGetBrands = CatalogApiBase + "/brands";
-    internal const string ApiGetSuggestions = CatalogApiBase + "/suggestions";
-    internal const string ApiGetSearch = CatalogApiBase + "/search";
-    internal const string ApiGetEstimates = CatalogApiBase + "/estimates";
-    internal const string ApiGetDetails = CatalogApiBase + "/details";
-    internal const string ApiGetProductsByIds = CatalogApiBase + "/view";
     internal const string ApiGetSpecials = CatalogApiBase + "/specials";
+    internal const string ApiGetSuggestions = CatalogApiBase + "/searchSuggestions";
+    internal const string ApiGetProductsByIds = CatalogApiBase + "/searchIds";
+    internal const string ApiGetSimilarProducts = CatalogApiBase + "/searchSimilar";
+    internal const string ApiGetEstimates = CatalogApiBase + "/shippingEstimates";
+    internal const string ApiGetSearch = CatalogApiBase + "/searchFull";
+    internal const string ApiGetDetails = CatalogApiBase + "/productDetails";
     
     // ORDERING
     internal const string ApiCartBase = "/cart";
