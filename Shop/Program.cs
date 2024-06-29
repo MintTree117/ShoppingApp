@@ -4,11 +4,13 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Shop;
+using Shop.Infrastructure;
 using Shop.Infrastructure.Authentication;
 using Shop.Infrastructure.Catalog.Brands;
 using Shop.Infrastructure.Catalog.Categories;
 using Shop.Infrastructure.Http;
 using Shop.Infrastructure.Loading;
+using Shop.Infrastructure.Locations;
 using Shop.Infrastructure.Ordering;
 using Shop.Infrastructure.Storage;
 
@@ -30,6 +32,7 @@ builder.Services.AddScoped<CustomAuthenticationStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 //builder.Services.AddScoped<AuthenticationStateProvider>( provider => provider.GetRequiredService<AuthenticationManager>() );
 builder.Services.AddScoped<LoadingService>();
+builder.Services.AddSingleton<LocationManager>();
 builder.Services.AddSingleton<CategoriesCache>();
 builder.Services.AddSingleton<BrandsCache>();
 

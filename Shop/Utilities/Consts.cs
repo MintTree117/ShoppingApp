@@ -65,6 +65,12 @@ internal static class Consts
     // PARAMS
     // ----------------------------------------------------------------------------------------------------------------
     internal const string ParamReturnUrl = "ReturnUrl";
+    internal const string DefaultSearchParams = "Page=1&PageSize=5&SortBy=0";
+    internal static string GetProductSearchUrl( string parameters ) =>
+        $"{PageProductSearch}{parameters}{DefaultSearchParams}";
+    internal static string GetProductDetailsUrl( Guid productId ) =>
+        $"{PageProductDetails}?ProductId={productId}";
+
 
     // PAGES
     // ----------------------------------------------------------------------------------------------------------------
@@ -93,4 +99,6 @@ internal static class Consts
     // ORDERING
     internal const string PageCart = "/cart";
     internal const string PageCheckout = "/checkout";
+    // SUPPORT
+    internal const string PageSupport = "/support";
 }

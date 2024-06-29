@@ -171,7 +171,7 @@ public sealed class CartManager( StorageService storage, HttpService http, Authe
         int iterations = 0;
         while ( _isBusy && iterations < 3 )
         {
-            await Task.Delay( 1000 );
+            await Task.Delay( 300 );
             iterations++;
             wasBusy = true;
         }

@@ -27,7 +27,7 @@
     int _startPage = 0;
     int _endPage = 0;
 
-    public event Action<int>? OnPageChange;
+    public event Func<int, Task>? OnPageChange;
 
     internal void Set( int page, int pageSize, int totalResults )
     {

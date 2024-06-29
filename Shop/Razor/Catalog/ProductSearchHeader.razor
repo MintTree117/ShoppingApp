@@ -85,9 +85,9 @@
     int _currentPage = 1;
     int _totalResults = 0;
     
-    public event Action<Category?>? OnPreviousSelected;
-    public event Action<int>? OnPageSizeChanged;
-    public event Action<int>? OnPageSortChanged;
+    public event Func<Category?, Task>? OnBreadcrumbSelected;
+    public event Func<int, Task>? OnPageSizeChanged;
+    public event Func<int, Task>? OnPageSortChanged;
     public event Action? OnToggleMobileFilters;
     
     public void SetNavigation( Category? newCategory, IReadOnlyDictionary<Guid, Category>? categoriesById, SearchParameters parameters, int count )
@@ -132,7 +132,7 @@
     void OnClickBreadCrumb( string breadcrumb )
     {
         Category? category = _categoryChain.FirstOrDefault( c => c.Name == breadcrumb );
-        OnPreviousSelected?.Invoke( category );
+        OnBreadcrumbSelected?.Invoke( category );
     }
     void OnClickMobileFilters()
     {

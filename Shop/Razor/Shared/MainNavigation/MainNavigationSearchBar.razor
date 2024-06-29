@@ -70,10 +70,10 @@
     }
     void SearchProducts()
     {
-        Navigation.NavigateTo( $"{Consts.PageProductSearch}?SearchText={_searchText}", true );
+        Navigation.NavigateTo( Consts.GetProductSearchUrl( $"?SearchText={_searchText}&" ) );
     }
     void NavigateToProductDetails( ProductSuggestionDto dto )
     {
-        Navigation.NavigateTo( $"{Consts.PageProductDetails}?ProductId={dto.Id}", true );
+        Navigation.NavigateTo( $"{Consts.PageProductDetails}?ProductId={dto.Id}" );
     }
 }

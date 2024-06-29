@@ -1,5 +1,4 @@
 @page "/product"
-@using Shop.Infrastructure.Catalog.Products.Models
 @using Shop.Utilities
 @using Shop.Infrastructure.Catalog.Products.Dtos
 @using Shop.Infrastructure.Catalog.Categories
@@ -7,12 +6,14 @@
 @using Shop.Infrastructure.Catalog.Categories.Types
 @using System.Xml.Linq
 @using Shop.Infrastructure.Catalog.Brands.Types
-@using Shop.Infrastructure.Common.ReplyTypes
+@using Shop.Infrastructure.Catalog.Products.Models
+@using Shop.Infrastructure.Locations
 @using Shop.Infrastructure.Ordering
 @using Shop.Infrastructure.Ordering.Types
 @inherits Shop.Razor.Shared.ShopPage
 @inject CategoriesCache Categories;
 @inject BrandsCache Brands;
+@inject LocationManager LocationManager;
 
 @if (_productLoaded)
 {
@@ -42,20 +43,29 @@
 
                         <!-- RATING & BRAND -->
                         <div class="product-rating-brand">
+                            
                             <!-- RATING -->
                             <div class="product-rating">
+                                <!-- STARS -->
                                 @for ( int i = 1; i <= 5; i++ )
                                 {
                                     <div>
                                         <i class="fa fa-star fa-xs @GetRatingCss( _productDetails, i )"></i>
                                     </div>
                                 }
-                                <small class="d-block ms-1 text-muted">(@_productDetails.NumberRatings Ratings)</small>
+                                <!-- COUNT -->
+                                <small class="d-block ms-1 text-muted">
+                                    (@_productDetails.NumberRatings Ratings)
+                                </small>
                             </div>
                             <!-- BRAND -->
                             <div class="product-brand">
-                                <span class="d-block text-muted">Brand:&nbsp;</span>
-                                <button class="d-block btn btn-link" @onclick="@(() => OnClickBrand( _productDetails.Brand ))">@_productDetails.Brand.Name</button>
+                                <span class="d-block text-muted">
+                                    Brand:&nbsp;
+                                </span>
+                                <a class="d-block btn btn-link" href="@GetBrandUrl( _productDetails.Brand )">
+                                    @_productDetails.Brand.Name
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -64,11 +74,13 @@
                     <div class="product-categories d-flex flex-row flex-wrap align-items-center justify-content-start gap-2 py-3">
                         @foreach ( Category c in _productDetails.Categories )
                         {
-                            <button class="d-inline-block btn btn-sm btn-outline-secondary mb-1" @onclick="() => OnClickCategory( c )">@c.Name</button>
+                            <a class="d-inline-block btn btn-sm btn-outline-secondary mb-1" href="@GetCategoryUrl(c)">
+                                @c.Name
+                            </a>
                         }
                     </div>
                     
-                    <div class="product-top-main-spacer"></div>
+                    <!--<div class="product-top-main-spacer"></div>-->
 
                     <!-- PRICE & SHIPPING -->
                     <div class="product-pricing-shipping">
@@ -107,8 +119,8 @@
                         <!-- ADDRESS FORM -->
                         <div class="product-address-form">
                             <div class="product-address-form-inputs mb-2">
-                                <input type="number" min="0" max="100000" step="1" value="@PosX" @onchange="OnChangePosX" class="form-control"/>
-                                <input type="number" min="0" max="100000" step="1" value="@PosY" @onchange="OnChangePosY" class="form-control"/>
+                                <input type="number" min="0" max="100000" step="1" value="@_posX" @onchange="OnChangePosX" class="form-control"/>
+                                <input type="number" min="0" max="100000" step="1" value="@_posY" @onchange="OnChangePosY" class="form-control"/>
                             </div>
                             <button class="btn btn-primary btn-icon search-filters-btn-main" @onclick="OnClickApplyLocation">
                                 <i class="fa-solid fa-circle-check me-2"></i>
@@ -193,13 +205,12 @@
 {
     [SupplyParameterFromQuery]
     public Guid ProductId { get; set; }
-    [SupplyParameterFromQuery]
-    public int? PosX { get; set; }
-    [SupplyParameterFromQuery]
-    public int? PosY { get; set; }
 
     [Inject] public CartManager CartManager { get; init; } = default!;
     CartItems _cartItems = CartItems.Empty();
+
+    CategoriesCollection _categoriesCollection = default!;
+    BrandsCollection _brandsCollection = default!;
 
     readonly int[] Quantities = [1, 2, 3, 5, 10];
     int _selectedQuantity = 1;
@@ -208,65 +219,55 @@
     bool _productLoaded = false;
     bool _showAddressBox = false;
     Dictionary<string, string> _productSpecs = [];
+    
+    int? _posX;
+    int? _posY;
 
     ProductSlider _similarSlider = default!;
-
-    protected override void OnDispose()
+    
+    protected override async Task OnParametersSetAsync()
     {
-        base.OnDispose();
-        Navigation.LocationChanged -= HandleLocationChanged;
+        await base.OnParametersSetAsync();
+
+        if (ProductId == Guid.Empty)
+            return;
+        
+        var cats = Categories.GetCategories();
+        var brands = Brands.GetBrands();
+        await Task.WhenAll( cats, brands );
+        if (!cats.Result.Succeeded || !brands.Result.Succeeded)
+            return;
+        _categoriesCollection = cats.Result.Data;
+        _brandsCollection = brands.Result.Data;
+        
+        await LoadDetails();
     }
-    protected override async Task OnInitializedAsync()
+
+    async Task LoadDetails()
     {
-        await base.OnInitializedAsync();
-
-        Navigation.LocationChanged += HandleLocationChanged;
-
-        Dictionary<string, object> parameters = new() {
-            { "ProductId", ProductId }
-        };
-        if (PosX is not null && PosY is not null)
-        {
-            parameters.Add( nameof( PosX ), PosX );
-            parameters.Add( nameof( PosY ), PosY );
-        }
-        var reply = await Http.GetAsync<ProductDetailsDto>( Consts.ApiGetDetails, parameters );
+        var reply = await Http.GetAsync<ProductDetailsDto>( Consts.ApiGetDetails, GetUrlParamsDetails() );
         if (!reply)
         {
             PushError( reply, "Failed to get product details." );
             return;
         }
 
-        var cats = Categories.GetCategories();
-        var brands = Brands.GetBrands();
-
-        await Task.WhenAll( cats, brands );
-
-        if (!cats.Result.Succeeded || !brands.Result.Succeeded)
-            return;
-
-        _productDetails = ProductDetails.From( reply.Data, cats.Result.Data, brands.Result.Data );
+        _productDetails = ProductDetails.From( reply.Data, _categoriesCollection, _brandsCollection );
         _productSpecs = ParseXmlToDictionary( _productDetails.Xml );
         _productLoaded = true;
 
-        var cartReply = await CartManager.Get();
+        /*var cartReply = await CartManager.Get();
         if (cartReply)
-            _cartItems = cartReply.Data;
-        
+            _cartItems = cartReply.Data;*/
+
         FireAndForget();
-        StateHasChanged();
+        //StateHasChanged();
 
         async void FireAndForget()
         {
             await FetchSimilarProducts();
         }
     }
-
-    void HandleLocationChanged( object? obj, LocationChangedEventArgs args )
-    {
-        Navigation.Refresh( true );
-    }
-
     async Task OnClickAddToCart()
     {
         var cartReply = await CartManager.Add( _productDetails );
@@ -286,29 +287,6 @@
         _cartItems = newSummary.Data;
         StateHasChanged();
     }
-    async Task OnClickApplyLocation()
-    {
-        if (!PosX.HasValue || !PosY.HasValue)
-        {
-            PushWarning( "Invalid Location!" );
-            return;
-        }
-
-        string apiUrl = $"{Consts.ApiGetEstimates}?ProductIds={_productDetails.Id}&PosX={PosX}&PosY={PosY}";
-        string pageUrl = $"{Consts.PageProductDetails}?ProductId={_productDetails.Id}&PosX={PosX}&PosY={PosY}";
-
-        Navigation.NavigateTo( pageUrl );
-        Reply<List<int>> estimateReply = await Http.GetAsync<List<int>>( apiUrl );
-
-        if (!estimateReply.Succeeded)
-        {
-            PushWarning( "Failed to get delivery estimate." );
-            return;
-        }
-
-        _productDetails.ShippingDays = estimateReply.Data.FirstOrDefault();
-        StateHasChanged();
-    }
     async Task FetchSimilarProducts()
     {
         var param = new Dictionary<string, object>() { { "productId", ProductId } };
@@ -320,15 +298,21 @@
         }
         _similarSlider.SetProducts( reply.Data );
     }
+    async Task OnClickApplyLocation()
+    {
+        await LocationManager.SetLocation( _posX, _posY );
+        var reply = await Http.GetAsync<List<int>>( Consts.ApiGetEstimates, GetUrlParamsEstimate() );
+        if (!reply)
+        {
+            PushError( reply, "Failed to update delivery estimate." );
+            return;
+        }
 
-    void OnClickCategory( Category c )
-    {
-        Navigation.NavigateTo( $"{Consts.PageProductSearch}?CategoryId={c.Id}", true );
+        _productDetails.ShippingDays = reply.Data.FirstOrDefault();
+        PushSuccess( "Updated delivery estimate." );
+        StateHasChanged();
     }
-    void OnClickBrand( Brand b )
-    {
-        Navigation.NavigateTo( $"{Consts.PageProductSearch}?BrandIds={b.Id}", true );
-    }
+    
     void OnClickAddress()
     {
         _showAddressBox = !_showAddressBox;
@@ -337,28 +321,48 @@
     void OnChangePosX( ChangeEventArgs args )
     {
         if (!int.TryParse( args.Value?.ToString(), out int result ))
-            PosX = null;
+            _posX = null;
         else
-            PosX = result;
+            _posX = result;
     }
     void OnChangePosY( ChangeEventArgs args )
     {
         if (!int.TryParse( args.Value?.ToString(), out int result ))
-            PosY = null;
+            _posY = null;
         else
-            PosY = result;
+            _posY = result;
     }
-
     void OnQuantityChange( ChangeEventArgs e )
     {
         _selectedQuantity = int.Parse( e.Value?.ToString() ?? string.Empty );
     }
-    bool IsProductInCart( ProductDetails p, out int count )
+    bool IsProductInCart( Infrastructure.Catalog.Products.Models.ProductDetails p, out int count )
     {
         var isInCart = _cartItems.Contains( p.Id, out count );
         return isInCart;
     }
-
+    Dictionary<string, object> GetUrlParamsDetails()
+    {
+        Dictionary<string, object> parameters = new() {
+            { "ProductId", ProductId }
+        };
+        if (_posX is null || _posY is null)
+            return parameters;
+        parameters.Add( "PosX", _posX.Value );
+        parameters.Add( "PosY", _posY.Value );
+        return parameters;
+    }
+    Dictionary<string, object> GetUrlParamsEstimate()
+    {
+        Dictionary<string, object> parameters = new() {
+            { "ProductIds", new List<Guid>() { ProductId } }
+        };
+        if (_posX is null || _posY is null)
+            return parameters;
+        parameters.Add( "PosX", _posX.Value );
+        parameters.Add( "PosY", _posY.Value );
+        return parameters;
+    }
     static Dictionary<string, string> ParseXmlToDictionary( string? xmlString )
     {
         if (string.IsNullOrWhiteSpace( xmlString ))
@@ -374,13 +378,17 @@
 
         return xmlDictionary;
     }
-    static string GetRatingCss( ProductDetails item, int level ) =>
+    static string GetRatingCss( Infrastructure.Catalog.Products.Models.ProductDetails item, int level ) =>
         item.Rating >= level ? "rating-star-full" : "rating-star-empty";
     string GetDeliveryToText() =>
-        PosX is null || PosY is null ? "(0 , 0)" : $"({PosX} , {PosY})";
+        _posX is null || _posY is null ? "(0 , 0)" : $"({_posX} , {_posY})";
     string GetDeliveryToIcon() =>
         _showAddressBox ? "fa-angle-up" : "fa-angle-down";
-    static string GetDeliveryEstimateText( ProductDetails item )
+    static string GetBrandUrl( Brand b ) =>
+        Consts.GetProductSearchUrl( $"?BrandIds={b.Id}&" );
+    static string GetCategoryUrl( Category c ) =>
+        Consts.GetProductSearchUrl( $"?CategoryId={c.Id}&" );
+    static string GetDeliveryEstimateText( Infrastructure.Catalog.Products.Models.ProductDetails item )
     {
         if (item.ShippingDays <= 0)
             return "Enter an address";
@@ -389,6 +397,6 @@
             ? $"Get within {item.ShippingDays} days"
             : "Out of stock";
     }
-    static string GetDeliveryEstimateColor( ProductDetails item ) =>
+    static string GetDeliveryEstimateColor( Infrastructure.Catalog.Products.Models.ProductDetails item ) =>
         item.IsInStock ? "text-success" : "text-danger";
 }

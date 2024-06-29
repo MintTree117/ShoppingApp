@@ -7,11 +7,13 @@
 @using System.Web
 @using Shop.Infrastructure.Catalog.Products.Dtos
 @using Shop.Infrastructure.Catalog.Products.Models
+@using Shop.Infrastructure.Locations
 @using Shop.Razor.Shared.Components
 @using Shop.Utilities
 @inherits Shop.Razor.Shared.ShopPage
 @inject CategoriesCache CategoriesCache
 @inject BrandsCache BrandsCache
+@inject LocationManager LocationManager;
 
 <!-- MARKUP -->
 <ProductSearchHeader @ref="_headerRazor"/>
@@ -36,28 +38,26 @@
     CategoriesCollection _categoryCollection = CategoriesCollection.None();
     BrandsCollection _brandCollection = BrandsCollection.None();
 
-    Category? _currentCategory = null;
+    Category? _currentCategory;
     SearchParameters _parameters = SearchParameters.Empty();
     SearchResults _searchResults = SearchResults.Empty();
-
-    bool _parametersSet = false; // stop multiple event subscriptions on param set
-
+    
     protected override void OnDispose()
     {
         _headerRazor.OnToggleMobileFilters -= OnToggleMobileFilters;
-        _headerRazor.OnPreviousSelected -= OnBreadcrumbSelected;
+        _headerRazor.OnBreadcrumbSelected -= OnBreadcrumbSelected;
         _headerRazor.OnPageSizeChanged -= OnPageSizeChanged;
         _headerRazor.OnPageSortChanged -= OnPageSortChanged;
         _filtersRazor.OnChangeFilters -= OnSearchFiltersRazorChanged;
-        _filtersRazor.OnChangeLocation -= GetEstimates;
-        _searchList.OnClickProductBrand -= OnClickProductBrand;
-        _searchList.OnClickProductDetails -= OnClickProductDetails;
         _searchList.OnItemAddedToCart -= OnItemAddedToCart;
         _paginationRazor.OnPageChange -= OnPageChanged;
+
+        LocationManager.OnLocationChanged -= OnChangeLocation;
     }
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+        
         var categoriesTask = CategoriesCache.GetCategories();
         var brandsTask = BrandsCache.GetBrands();
         
@@ -69,98 +69,49 @@
         _brandCollection = brandsTask.Result
             ? brandsTask.Result.Data
             : BrandsCollection.None();
-        
-        ParseQueryString();
-        _filtersRazor.SetData( _currentCategory, _categoryCollection, _brandCollection.BrandsById.Values, _parameters );
-        await SearchProducts();
     }
     protected override async Task OnParametersSetAsync()
     {
         await base.OnParametersSetAsync();
-
         ParseQueryString();
+        await GetLocation();
+        await SearchProducts();
+    }
+    protected override async Task OnAfterRenderAsync( bool firstRender )
+    {
+        await base.OnAfterRenderAsync( firstRender );
+
         if (_parameters.CategoryId.HasValue)
             _categoryCollection.Categories.TryGetValue( _parameters.CategoryId.Value, out _currentCategory );
-
-        if (!_parametersSet)
+        _headerRazor.SetNavigation( _currentCategory, _categoryCollection.Categories, _parameters, _searchResults.TotalMatches );
+        _filtersRazor.SetData( _currentCategory, _categoryCollection, _brandCollection.BrandsById.Values, _parameters );
+        
+        if (firstRender)
         {
             _headerRazor.OnToggleMobileFilters += OnToggleMobileFilters;
-            _headerRazor.OnPreviousSelected += OnBreadcrumbSelected;
+            _headerRazor.OnBreadcrumbSelected += OnBreadcrumbSelected;
             _headerRazor.OnPageSizeChanged += OnPageSizeChanged;
             _headerRazor.OnPageSortChanged += OnPageSortChanged;
             _filtersRazor.OnChangeFilters += OnSearchFiltersRazorChanged;
-            _filtersRazor.OnChangeLocation += GetEstimates;
-            _searchList.OnClickProductBrand += OnClickProductBrand;
-            _searchList.OnClickProductDetails += OnClickProductDetails;
             _searchList.OnItemAddedToCart += OnItemAddedToCart;
             _paginationRazor.OnPageChange += OnPageChanged;
-            _parametersSet = true;
-        }
-    }
 
-    async Task SearchProducts()
-    {
-        string apiUrl = BuildSearchQueryString( Consts.ApiGetSearch );
-        var searchReply = await Http.GetAsync<ProductSearchDto>( apiUrl );
-        SetCurrentCategory();
-        if (!searchReply)
-        {
-            PushWarning( "Failed to fetch products." );
-            return;
-        }
+            LocationManager.OnLocationChanged += OnChangeLocation;
 
-        _searchResults = SearchResults.From( searchReply.Data, _brandCollection );
-        _searchList.ChangeSearchResults( _searchResults.Results );
-        _paginationRazor.Set( _parameters.Page, _parameters.PageSize, _searchResults.TotalMatches );
-    }
-    async Task GetEstimates()
-    {
-        string apiUrl = BuildEstimatesQueryString( Consts.ApiGetEstimates );
-        string browserUrl = BuildSearchQueryString( Consts.PageProductSearch );
-        var estimatesReply = await Http.GetAsync<List<int>>( apiUrl );
-        SetCurrentCategory();
-        
-        if (!estimatesReply)
-        {
-            PushWarning( "Failed to get estimates." );
-            return;
+            await Reload();
         }
-        
-        for ( int i = 0; i < estimatesReply.Data.Count; i++ )
-        {
-            // TODO: Remove In Production: For Testing Only
-            if (i >= _searchResults.Results.Count())
-            {
-                PushWarning( "There was a miscount in the delivery time estimates. The displayed timings may not reflect the products they represent." );
-                break;
-            }
-
-            _searchResults.Results[i].ShippingDays = estimatesReply.Data[i];
-        }
-        
-        Navigation.NavigateTo( browserUrl, false, true );
-        _searchList.RefreshState();
     }
     
-    void Reload()
-    {
-        Navigation.NavigateTo( BuildSearchQueryString( Consts.PageProductSearch ), true );
-    }
-    void SetCurrentCategory()
-    {
-        if (_parameters.CategoryId.HasValue)
-            _categoryCollection.Categories.TryGetValue( _parameters.CategoryId.Value, out _currentCategory );
-
-        _headerRazor.SetNavigation( _currentCategory, _categoryCollection.Categories, _parameters, _searchResults.TotalMatches );
-    }
     void ParseQueryString()
     {
+        _currentCategory = null;
+        _parameters = SearchParameters.Empty();
+
         var uri = Navigation.ToAbsoluteUri( Navigation.Uri );
         var query = HttpUtility.ParseQueryString( uri.Query );
 
         if (Guid.TryParse( query.Get( "CategoryId" ), out Guid categoryId ))
             _parameters.CategoryId = categoryId;
-        SetCurrentCategory();
 
         string? searchText = query.Get( "SearchText" );
         if (!string.IsNullOrWhiteSpace( searchText ))
@@ -176,13 +127,13 @@
         if (int.TryParse( query.Get( "MaxPrice" ), out int maxPrice ))
             _parameters.MaxPrice = maxPrice;
 
-        if (bool.TryParse( query.Get( "IsInStock" ), out bool isInStock ))
+        if (!string.IsNullOrWhiteSpace( query.Get( "IsInStock" ) ))
             _parameters.IsInStock = true;
 
-        if (bool.TryParse( query.Get( "IsFeatured" ), out bool isFeatured ))
+        if (!string.IsNullOrWhiteSpace( query.Get( "IsFeatured" ) ))
             _parameters.IsFeatured = true;
 
-        if (bool.TryParse( query.Get( "IsOnSale" ), out bool isOnSale ))
+        if (!string.IsNullOrWhiteSpace( query.Get( "IsOnSale" ) ))
             _parameters.IsOnSale = true;
 
         if (int.TryParse( query.Get( "Page" ), out int page ))
@@ -193,14 +144,8 @@
 
         if (int.TryParse( query.Get( "SortBy" ), out int sortBy ))
             _parameters.SortBy = sortBy;
-
-        if (int.TryParse( query.Get( "PosX" ), out int posX ))
-            _parameters.PosX = posX;
-
-        if (int.TryParse( query.Get( "PosY" ), out int posY ))
-            _parameters.PosY = posY;
     }
-    string BuildSearchQueryString( string baseUrl )
+    string BuildSearchQueryString( string baseUrl, bool isApi )
     {
         StringBuilder urlString = new();
         urlString.Append( baseUrl );
@@ -227,10 +172,13 @@
         if (_parameters.IsOnSale.HasValue)
             queryParams["IsOnSale"] = _parameters.IsOnSale.ToString()?.ToLower() ?? string.Empty;
 
-        if (_parameters.PosX.HasValue)
-            queryParams["PosX"] = _parameters.PosX.ToString()?.ToLower() ?? string.Empty;
-        if (_parameters.PosY.HasValue)
-            queryParams["PosY"] = _parameters.PosY.ToString()?.ToLower() ?? string.Empty;
+        if (isApi)
+        {
+            if (_parameters.PosX.HasValue)
+                queryParams["PosX"] = _parameters.PosX.ToString()?.ToLower() ?? string.Empty;
+            if (_parameters.PosY.HasValue)
+                queryParams["PosY"] = _parameters.PosY.ToString()?.ToLower() ?? string.Empty;
+        }
 
         queryParams["Page"] = _parameters.Page.ToString();
         queryParams["PageSize"] = _parameters.PageSize.ToString();
@@ -251,10 +199,10 @@
 
         return urlString.ToString();
     }
-    string BuildEstimatesQueryString( string baseUrl )
+    string BuildEstimatesQueryString()
     {
         StringBuilder urlString = new();
-        urlString.Append( baseUrl );
+        urlString.Append( Consts.ApiGetEstimates );
 
         Dictionary<string, string> queryParams = new();
         string c = string.Join( ",", _searchResults.Results.Select( static p => p.Id ) );
@@ -281,24 +229,98 @@
         return urlString.ToString();
     }
     
-    void OnPageChanged( int newPage )
+    async Task Reload()
+    {
+        Navigation.NavigateTo( BuildSearchQueryString( Consts.PageProductSearch, false ), false, true );
+        //await SearchProducts();
+    }
+    async Task SearchProducts()
+    {
+        var searchReply = await Http.GetAsync<ProductSearchDto>( 
+            BuildSearchQueryString( Consts.ApiGetSearch, true ) );
+        
+        if (!searchReply)
+            PushWarning( "Failed to fetch products." );
+        
+        _searchResults = searchReply
+            ? SearchResults.From( searchReply.Data, _brandCollection )
+            : SearchResults.Empty();
+
+        _headerRazor.SetNavigation( _currentCategory, _categoryCollection.Categories, _parameters, _searchResults.TotalMatches );
+        _searchList.ChangeSearchResults( _searchResults.Results );
+        _searchList.SetLocation( _parameters.PosX, _parameters.PosY );
+        _paginationRazor.Set( _parameters.Page, _parameters.PageSize, _searchResults.TotalMatches );
+    }
+    async Task GetLocation()
+    {
+        var reply = await LocationManager.GetLocation();
+        if (reply is null)
+        {
+            _parameters.PosX = null;
+            _parameters.PosY = null;
+        }
+        else
+        {
+            _parameters.PosX = reply.PosX;
+            _parameters.PosY = reply.PosY;
+        }
+    }
+    async Task OnChangeLocation( Location? location )
+    {
+        var estimatesReply = await Http.GetAsync<List<int>>(
+            BuildEstimatesQueryString() );
+
+        if (!estimatesReply)
+            PushWarning( "Failed to get estimates." );
+
+        try
+        {
+            for ( int i = 0; i < estimatesReply.Data.Count; i++ )
+            {
+                // TODO: Remove In Production: For Testing Only
+                if (i >= _searchResults.Results.Count())
+                {
+                    PushWarning( "There was a miscount in the delivery time estimates. The displayed timings may not reflect the products they represent." );
+                    break;
+                }
+
+                _searchResults.Results[i].ShippingDays = estimatesReply.Data[i];
+            }
+        }
+        catch ( Exception e )
+        {
+            PushWarning( "There was a miscount in the delivery time estimates. The displayed timings may not reflect the products they represent." );
+            Console.Error.WriteLine( e );
+        }
+
+
+        _searchList.RefreshState();
+    }
+    async Task OnBreadcrumbSelected( Category? category )
+    {
+        _parameters = SearchParameters.Empty();
+        _parameters.CategoryId = category?.Id ?? null;
+        
+        await Reload();
+    }
+    async Task OnPageChanged( int newPage )
     {
         _parameters.Page = newPage;
-        Reload();
+        await Reload();
     }
-    void OnPageSizeChanged( int newPageSize )
+    async Task OnPageSizeChanged( int newPageSize )
     {
         _parameters.Page = 0;
         _parameters.PageSize = newPageSize;
-        Reload();
+        await Reload();
     }
-    void OnPageSortChanged( int newPageSortIndex )
+    async Task OnPageSortChanged( int newPageSortIndex )
     {
         _parameters.Page = 0;
         _parameters.SortBy = newPageSortIndex;
-        Reload();
+        await Reload();
     }
-    void OnSearchFiltersRazorChanged()
+    async Task OnSearchFiltersRazorChanged()
     {
         if (_parameters.CategoryId != _currentCategory?.Id)
         {  
@@ -312,32 +334,12 @@
         {
             Console.WriteLine("EQUAL");
         }
-        
-        SetCurrentCategory();
-        Reload();
-    }
-    void OnBreadcrumbSelected( Category? category )
-    {
-        _parameters.Page = 0;
-        _parameters.CategoryId = category?.Id ?? null;
-        Reload();
+
+        await Reload();
     }
     void OnToggleMobileFilters()
     {
         _filtersRazor.ToggleView();
-    }
-    void OnClickProductBrand( Brand b )
-    {
-        Navigation.NavigateTo( $"{Consts.PageProductSearch}?BrandIds={b.Id}", true );
-    }
-    void OnClickProductDetails( Guid productId )
-    {
-        string url = $"{Consts.PageProductDetails}?ProductId={productId}";
-
-        if (_parameters.PosX.HasValue && _parameters.PosY.HasValue)
-            url += $"&PosX={_parameters.PosX.Value}&PosY={_parameters.PosY.Value}";
-
-        Navigation.NavigateTo( url, true );
     }
     void OnItemAddedToCart( bool success, string? failureMessage )
     {

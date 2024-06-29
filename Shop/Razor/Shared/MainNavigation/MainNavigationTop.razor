@@ -45,9 +45,10 @@ else {
         <div class="top-nav-content content-container">
             <!-- TOP LEFT -->
             <nav class="top-nav-upper-left">
-                <a href="#">Help & Contact</a>
-                <a href="#">Featured Items</a>
-                <a href="#">Top Deals</a>
+                <a href="@Consts.PageSupport">Help & Contact</a>
+                <a href="@Consts.GetProductSearchUrl( "?" )">All Products</a>
+                <a href="@Consts.GetProductSearchUrl( "?IsFeatured=true&" )">Featured Items</a>
+                <a href="@Consts.GetProductSearchUrl( "?IsOnSale=true&" )">Top Deals</a>
             </nav>
             <!-- TOP RIGHT -->
             <div class="top-nav-upper-right">

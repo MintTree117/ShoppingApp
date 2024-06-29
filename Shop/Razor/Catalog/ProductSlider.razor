@@ -18,7 +18,7 @@
 
         <!-- ITEMS -->
         <div class="product-slider-list">
-            @foreach ( ProductSummaryDto p in _showProducts )
+            @foreach ( ProductSummaryDto dto in _showProducts )
             {
                 <!-- ITEM -->
                 <div class="product-slider-item">
@@ -26,13 +26,13 @@
                     <!-- TOP -->
                     <div class="product-slider-item-top">
                         <!-- IMAGE -->
-                        <a class="product-slider-image" href="@GetLinkText( p )">
-                            <img src="@p.Image" alt="@p.Name"/>
+                        <a class="product-slider-image" href="@GetDetailsUrl( dto )">
+                            <img src="@dto.Image" alt="@dto.Name"/>
                         </a>
 
                         <!-- TITLE -->
-                        <a class="product-slider-title" href="@GetLinkText( p )">
-                            @p.Name
+                        <a class="product-slider-title" href="@GetDetailsUrl( dto )">
+                            @dto.Name
                         </a>
                         <hr class="product-slider-divider"/>
                     </div>
@@ -44,29 +44,29 @@
                             @for ( int i = 1; i <= 5; i++ )
                             {
                                 <div>
-                                    <i class="fa fa-star fa-xs @GetRatingCss( p, i )"></i>
+                                    <i class="fa fa-star fa-xs @GetRatingCss( dto, i )"></i>
                                 </div>
                             }
                             <small class="product-slider-rating-count text-muted">
-                                @p.NumberRatings
+                                @dto.NumberRatings
                             </small>
                         </div>
 
                         <!-- PRICING -->
                         <div class="product-slider-pricing">
-                            @if (p.SalePrice > 0)
+                            @if (dto.SalePrice > 0)
                             {
                                 <span class="product-slider-price">
-                                    $@p.SalePrice
+                                    $@dto.SalePrice
                                 </span>
                                 <span class="text-muted product-slider-sale-price">
-                                    $@p.Price
+                                    $@dto.Price
                                 </span>
                             }
                             else
                             {
                                 <span class="product-slider-price">
-                                    $@p.Price
+                                    $@dto.Price
                                 </span>
                             }
                         </div>
@@ -87,7 +87,15 @@
     List<ProductSummaryDto> _showProducts = [];
     Timer _timer = default!;
     int _currentIndex = 0;
+    int? _posX;
+    int? _posY;
 
+    public void SetLocation( int? x, int? y )
+    {
+        _posX = x;
+        _posY = y;
+        StateHasChanged();
+    }
     public void SetProducts( List<ProductSummaryDto> products )
     {
         _products = products;
@@ -120,8 +128,8 @@
             _currentIndex = _products.Count - 1;
         UpdateVisibleProducts();
     }
-    static string GetLinkText( ProductSummaryDto dto ) =>
-        $"{Consts.PageProductDetails}?ProductId={dto.Id}";
+    string GetDetailsUrl( ProductSummaryDto p ) =>
+        Consts.GetProductDetailsUrl( p.Id );
     static string GetRatingCss( ProductSummaryDto item, int level ) =>
         item.Rating >= level ? "rating-star-full" : "rating-star-empty";
 }

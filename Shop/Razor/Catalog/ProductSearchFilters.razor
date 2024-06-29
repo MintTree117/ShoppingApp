@@ -4,6 +4,8 @@
 @using Shop.Infrastructure.Catalog.Brands.Types
 @using Shop.Infrastructure.Catalog.Categories.Types
 @using Shop.Infrastructure.Catalog.Products.Models
+@using Shop.Infrastructure.Locations
+@inject LocationManager LocationManager
 
 <!-- CONTAINER -->
 <div class="search-filters @GetDisplayCss()">
@@ -16,11 +18,14 @@
                 <i class="fa-solid fa-x"></i>
             </button>
         </div>
-        <!-- CLEAR ALL -->
-        <button class="btn btn-outline-secondary btn-icon search-filters-btn-main search-filters-clear" @onclick="Clear">
-            <i class="fa-solid fa-eraser me-2"></i>
-            Clear All
-        </button>
+        @if (_altered)
+        {
+            <!-- CLEAR ALL -->
+            <button class="btn btn-outline-secondary btn-icon search-filters-btn-main search-filters-clear" @onclick="Clear">
+                <i class="fa-solid fa-eraser me-2"></i>
+                Clear All
+            </button>   
+        }
     </div>
     
     <!-- LOCATION -->
@@ -34,7 +39,7 @@
                 <input type="number" min="0" max="100000" step="1" value="@_posX" @onchange="OnChangeLocationX" class="form-control"/>
                 <input type="number" min="0" max="100000" step="1" value="@_posY" @onchange="OnChangeLocationY" class="form-control"/>
             </div>
-            <button class="btn btn-outline-secondary btn-icon search-filters-btn-main" @onclick="OnClickApplyLocation">
+            <button class="btn btn-outline-secondary btn-icon search-filters-btn-main" @onclick="@(async () => await OnClickApplyLocation())">
                 <i class="fa-solid fa-circle-check me-2"></i>
                 Apply
             </button>
@@ -162,8 +167,14 @@
         { SectionBrands, true }
     };
 
-    public event Action? OnChangeFilters;
-    public event Func<Task>? OnChangeLocation; 
+    public event Func<Task>? OnChangeFilters;
+    public event Func<Task>? OnChangeLocation;
+    public void Clear()
+    {
+        _parentCategory = null;
+        _selectedBrands.Clear();
+        _altered = false;
+    }
     public void SetData( Category? parentCategory, CategoriesCollection categories, IEnumerable<Brand> brands, SearchParameters filters )
     {
         Clear();
@@ -215,12 +226,6 @@
     string GetCategoriesTitle() =>
         _parentCategory?.ParentId is null ? "Categories" : "Sub-Categories";
     
-    void Clear()
-    {
-        _parentCategory = null;
-        _selectedBrands.Clear();
-        _altered = false;
-    }
     void ToggleSectionCollapse( string sectionName )
     {
         if (!_collapsedSections.TryGetValue( sectionName, out bool value ))
@@ -247,9 +252,10 @@
         else
             _filters.PosY = result;
     }
-    void OnClickApplyLocation()
+    async Task OnClickApplyLocation()
     {
-        OnChangeLocation?.Invoke();
+        await LocationManager.SetLocation( _posX, _posY );
+        //OnChangeLocation?.Invoke();
     }
     void OnChangeIsInStock( ChangeEventArgs args )
     {
