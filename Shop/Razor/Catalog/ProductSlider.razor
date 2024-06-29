@@ -3,7 +3,7 @@
 @using Shop.Utilities
 
 <!-- CONTAINER -->
-<div class="product-slider-container">
+<div class="product-slider-container shadow-sm">
     
     <!-- LEFT BUTTON -->
     <button class="btn btn-outline-secondary product-slider-button" @onclick="OnClickPrevious">❮</button>
@@ -40,16 +40,17 @@
                     <!-- BOTTOM -->
                     <div class="product-slider-item-bottom">
                         <!-- RATING -->
-                        <div class="product-slider-rating">
+                        <div class="rating">
                             @for ( int i = 1; i <= 5; i++ )
                             {
                                 <div>
-                                    <i class="fa fa-star fa-xs @GetRatingCss( dto, i )"></i>
+                                    <i class="@Utils.GetRatingCss( dto.Rating, i )"></i>
                                 </div>
                             }
-                            <small class="product-slider-rating-count text-muted">
+                            
+                            <a class="rating-count" href="@Consts.GetProductDetailsUrlRatings( dto.Id )">
                                 @dto.NumberRatings
-                            </small>
+                            </a>
                         </div>
 
                         <!-- PRICING -->
@@ -130,6 +131,4 @@
     }
     string GetDetailsUrl( ProductSummaryDto p ) =>
         Consts.GetProductDetailsUrl( p.Id );
-    static string GetRatingCss( ProductSummaryDto item, int level ) =>
-        item.Rating >= level ? "rating-star-full" : "rating-star-empty";
 }

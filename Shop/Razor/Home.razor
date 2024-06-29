@@ -7,12 +7,14 @@
 
 <PageTitle>Home</PageTitle>
 
-<div class="content-container position-relative">
-    <LoadingPanelComponent @ref="@_loadingPanel"/>
-    <div class="d-flex flex-column align-items-stretch justify-content-start px-0 py-3 gap-3">
-        <ProductSlider @ref="_featuredSlider" Title="Featured Products"/>
-        <ProductSlider @ref="_salesSlider" Title="Hot Deals"/>
-        <ProductSlider @ref="_sellingSlider" Title="Best Selling"/>
+<div style="background-color: #dee2e6;">
+    <div class="content-container position-relative">
+        <LoadingPanelComponent @ref="@_loadingPanel"/>
+        <div class="d-flex flex-column align-items-stretch justify-content-start px-0 py-3 gap-3">
+            <ProductSlider @ref="_featuredSlider" Title="Featured Products"/>
+            <ProductSlider @ref="_salesSlider" Title="Hot Deals"/>
+            <ProductSlider @ref="_sellingSlider" Title="Best Selling"/>
+        </div>
     </div>
 </div>
 

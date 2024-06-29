@@ -1,3 +1,14 @@
+/* CUSTOM COLORS */
+/* ------------------------------------------------------------------------------------------*/
+:root {
+    --primary: rgb(0, 113, 133);
+    --orange: #de7921;
+    --bg-cyan-dark-1: #032830;
+    --bg-cyan-dark-2: #055160;
+    --white: #ffffff;
+    --yellow: #ffcd39;
+}
+
 /* BASE ELEMENTS */
 /* ------------------------------------------------------------------------------------------*/
 html, body {
@@ -6,16 +17,15 @@ html, body {
 }
 
 body {
-    /*background-color: #e2d9f3;*/
-    background-color: rgb(245, 245, 245);
+    background-color: var(--white);
 }
 
 /* Style for form input */
 input,
 textarea {
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); /* Inset shadow */
-    /*outline: none;  Remove outline */
-    transition: border-color 0.3s, box-shadow 0.3s; /* Transition for smooth effect */
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
 }
 
 /* Style for when input is focused */
@@ -38,6 +48,18 @@ hr {
     border-bottom: 1px solid dimgrey;
 }
 
+a {
+    color: var(--primary);
+}
+
+a:hover {
+    color: var(--orange) !important;
+}
+
+.text-primary {
+    color: var(--primary) !important;
+}
+
 /*.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }*/
@@ -46,48 +68,40 @@ hr {
     outline: 1px solid #26b050;
 }*/
 
-/* CUSTOM COLORS */
+/* BUTTONS */
 /* ------------------------------------------------------------------------------------------*/
-.c-primary {
-    color: #6a10f3;
+.btn-submit {
+    width: 100%;
+    padding: 15px;
+    font-weight: bold;
+    color: white;
+    text-align: left;
 }
 
-.c-secondary {
-    color: #616160;
+.btn-submit:hover {
+    color: white;
+    background-color: #1669c9;
 }
 
-.c-success {
-    color: #169191;
+.btn-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
 }
 
-.c-alert {
-    color: #e8c031;
+.btn-primary {
+    background-color: var(--primary) !important;
+    border-color: var(--primary) !important;
 }
 
-.c-danger {
-    color: #a31234;
+.btn-link {
+    color: var(--primary) !important;
 }
 
-.b-primary {
-    /*background: linear-gradient(to bottom right, #8e13fd, #6a10f3);*/
-    background: linear-gradient(to bottom right, #8c68cd, #8540f5);
-    /*background-color: #8c68cd;*/
-}
-
-.b-secondary {
-    background: linear-gradient(to bottom right, #b0b0b0, #616160);
-}
-
-.b-success {
-    background: linear-gradient(to bottom right, #3fe3e1, #169191);
-}
-
-.b-alert {
-    background: linear-gradient(to bottom right, #f3e089, #e8c031);
-}
-
-.b-danger {
-    background: linear-gradient(to bottom right, #e4486b, #a31234);
+.btn-outline-primary {
+    color: var(--primary) !important;
+    border-color: var(--primary) !important;
 }
 
 /* CONTENT CONTAINER */
@@ -143,36 +157,6 @@ hr {
     margin-top: 20px; /* Space above the message */
     font-size: 1.2em; /* Larger font size */
     color: #333; /* Dark grey text color */
-}
-
-/* BUTTONS */
-/* ------------------------------------------------------------------------------------------*/
-.btn-submit {
-    width: 100%;
-    padding: 15px;
-    font-weight: bold;
-    color: white;
-    text-align: left;
-}
-.btn-submit:hover {
-    color: white;
-    background-color: #1669c9;    
-}
-.btn-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: nowrap;
-}
-
-/* RATING STARS */
-/* ------------------------------------------------------------------------------------------*/
-.rating-star-full {
-    color: #f5ba18;
-}
-
-.rating-star-empty {
-    color: #848484;
 }
 
 /* BLAZOR */

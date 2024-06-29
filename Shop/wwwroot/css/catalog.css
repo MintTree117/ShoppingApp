@@ -1,3 +1,126 @@
+/* SHARED */
+.product-title {
+    margin-bottom: auto;
+    text-decoration: none;
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow: hidden;
+    text-wrap: normal;
+    max-width: 100%;
+    text-overflow: clip;
+    text-align: start;
+}
+
+.product-title:hover {
+    text-decoration: underline;
+}
+
+.product-title h3 {
+    font-size: 16px;
+    line-height: 20px;
+    font-weight: 400;
+}
+
+.product-divider {
+    margin-top: 0;
+    margin-bottom: 8px;
+}
+
+/* RATING/BRAND */
+.rating-brand {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* RATING  */
+.rating {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+    gap: 0;
+}
+
+.rating-star {
+    color: #de7921;
+}
+
+.rating-count {
+    display: block;
+    justify-self: end;
+    margin-left: 8px;
+    font-size: 12px;
+}
+
+/* BRAND */
+.brand {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: end;
+    flex-wrap: nowrap;
+}
+
+.brand span {
+    color: #858585;
+    font-size: 12px;
+    margin-right: 4px;
+}
+
+.brand a {
+    font-size: 14px;
+    width: calc(60%);
+    min-width: calc(60%);
+    max-width: calc(60%);
+    white-space: nowrap;
+    overflow: hidden;
+    display: inline-block;
+    text-overflow: ellipsis;
+}
+
+/* SHIPPING/PRICING */
+.shipping-pricing {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+
+.shipping small {
+    display: block;
+    font-size: x-small;
+    text-align: right;
+}
+
+/* PRICING */
+.pricing {
+    display: flex;
+    flex-direction: row;
+    align-items: end;
+}
+
+.pricing span {
+    display: block;
+}
+
+.price {
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1;
+    margin-right: 8px;
+}
+
+.sale-price {
+    font-size: 12px;
+    text-decoration: line-through;
+}
+
 /* SLIDER */
 /* ------------------------------------------------------------------------------------------*/
 /* ------------------------------------------------------------------------------------------*/
@@ -11,7 +134,7 @@
     min-width: 100%;
     max-width: 100%;
     padding: 16px;
-    background-color: #e9ecef;
+    background-color: var(--white);
 }
 
 .product-slider-button {
@@ -109,21 +232,6 @@
     border-bottom: 1px solid darkgray;
 }
 
-.product-slider-rating {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: start;
-    gap: 0;
-}
-
-.product-slider-rating-count {
-    display: block;
-    justify-self: end;
-    margin-left: 8px;
-}
-
 .product-slider-price {
     font-size: medium;
     font-weight: bold;
@@ -162,6 +270,7 @@
     width: 100vw;
     border-bottom: 1px solid lightgray;
     margin-bottom: 0;
+    background-color: var(--white);
 }
 
 .search-header {
@@ -231,6 +340,7 @@
 .search-body {
     display: flex;
     flex-direction: column;
+    background-color: var(--white);
 }
 
 @media only screen and (min-width: 992px) {
@@ -292,7 +402,7 @@
     flex-direction: column;
     padding: 24px;
     text-align: left;
-    background-color: rgb(245, 245, 245);
+    background-color: var(--white);
 }
 
 /* TOP */
@@ -388,6 +498,8 @@
         min-height: 400px;
         max-height: 800px;
         padding-left: 0;
+        background-color: transparent;
+        border-bottom: 1px solid lightgray;
     }
 
     .search-filters-close {
@@ -467,72 +579,6 @@
 .search-item-title:hover {
     text-decoration: underline;
     color: #0d6efd;
-}
-
-/* RATING/BRAND */
-.search-item-rating-brand {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    padding-top: 8px;
-    border-top: 1px solid lightgray;
-}
-
-/* RATING */
-.search-item-rating {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: start;
-    gap: 0;
-}
-
-/* BRAND */
-.search-item-brand {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: start;
-    font-size: small;
-}
-
-.search-item-brand .btn {
-    padding: 0;
-}
-
-/* SHIPPING/PRICING */
-.search-item-shipping-pricing {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-}
-
-/* SHIPPING */
-.search-item-shipping {
-    display: flex;
-    flex-direction: row;
-    align-items: start;
-    justify-content: start;
-}
-
-.search-item-shipping small {
-    display: block;
-    font-size: x-small;
-    text-align: right;
-}
-
-/* PRICING */
-.search-item-pricing {
-    display: flex;
-    flex-direction: row;
-}
-
-.search-item-price {
-    font-size: x-large;
-    font-weight: bold;
-    line-height: 1;
 }
 
 /* CART */
@@ -640,18 +686,11 @@
 }
 
 /* TITLE */
-.product-title {
+.product-top-main .product-title {
     margin-bottom: 16px;
     padding-bottom: 16px;
     padding-left: 8px;
     padding-right: 8px;
-    word-wrap: break-word;
-    word-break: break-word;
-    overflow: hidden;
-    text-wrap: normal;
-    max-width: 100%;
-    text-overflow: clip;
-    text-align: start;
     font-size: medium;
     border-bottom: 1px solid lightgray;
 }
@@ -671,61 +710,13 @@
     flex-direction: column;
 }
 
-/* RATING-BRAND */
-.product-rating-brand {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    flex-wrap: wrap;
-    justify-content: space-between;
+/* RATING BRAND */
+.product-summary .rating-brand span {
+    font-size: 14px;
 }
 
-/* RATING */
-.product-rating {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: start;
-    gap: 0;
-}
-
-/* BRAND */
-.product-brand {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: end;
-    font-size: small;
-}
-
-.product-brand button {
-    padding: 0;
-    background-color: transparent;
-    color: #0a58ca;
-    text-decoration: underline;
-}
-
-/* PRICING-SHIPPING */
-.product-pricing-shipping {
-    display: flex;
-    flex-direction: row;
-    align-items: end;
-    justify-content: space-between;
-    margin-bottom: 16px;
-}
-
-/* PRICING */
-.product-pricing {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: end;
-}
-
-.product-price {
-    font-size: x-large;
-    font-weight: bold;
-    line-height: 1;
+.product-summary .rating-brand a {
+    font-size: 16px;
 }
 
 /* SHIPPING */
@@ -742,12 +733,6 @@
     margin: 0;
     font-size: small;
     text-decoration: none;
-}
-
-.product-shipping small {
-    display: block;
-    font-size: x-small;
-    text-align: right;
 }
 
 .product-shipping-button {

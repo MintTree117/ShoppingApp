@@ -7,7 +7,7 @@
 
 <!-- CONTAINER -->
 <div class="search-list">
-    @foreach ( Infrastructure.Catalog.Products.Models.ProductDetails p in _searchItems )
+    @foreach ( ProductDetails p in _searchItems )
     {
         <!-- ITEM -->
         <div class="search-item">
@@ -20,52 +20,49 @@
             </div>
             
             <!-- TITLE -->
-            <a class="btn search-item-title" href="@GetDetailsUrl( p )">
+            <a class="product-title" href="@GetDetailsUrl( p )">
                 <h3>@p.Name</h3>
             </a>
             
+            <!-- DIVIDER -->
+            <hr class="product-divider"/>
+            
             <!-- RATING/BRAND -->
-            <div class="search-item-rating-brand">
+            <div class="rating-brand mb-2">
                 <!-- RATING -->
-                <div class="search-item-rating">
+                <div class="rating">
                     @for ( int i = 1; i <= 5; i++ )
                     {
                         <div>
-                            <i class="fa fa-star fa-xs @GetRatingCss( p, i )"></i>
+                            <i class="@Utils.GetRatingCss( p.Rating, i )"></i>
                         </div>
                     }
-                    <small class="d-block ms-1 text-muted">
+                    <a class="rating-count" href="@Consts.GetProductDetailsUrlRatings( p.Id )">
                         @p.NumberRatings
-                    </small>
+                    </a>
                 </div>
 
                 <!-- BRAND -->
-                <div class="search-item-brand">
-                    <span class="d-block text-muted">
+                <div class="brand">
+                    <span>
                         Brand:&nbsp;
                     </span>
-                    <a class="d-block btn btn-link" href="@GetBrandUrl( p.Brand )">
+                    <a class="brand-link" href="@GetBrandUrl( p.Brand )">
                         @p.Brand.Name
                     </a>
                 </div>
             </div>
             
             <!-- SHIPPING/PRICING -->
-            <div class="search-item-shipping-pricing">
-                <!-- SHIPPING -->
-                <div class="search-item-shipping mb-1">
-                    <small class="@GetDeliveryEstimateColor( p )">
-                        @GetDeliveryEstimateText( p )
-                    </small>
-                </div>
+            <div class="shipping-pricing mb-2">
                 <!-- PRICING -->
-                <div class="search-item-pricing mb-3">
+                <div class="pricing">
                     @if (p.SalePrice > 0)
                     {
-                        <span class="search-item-price">
+                        <span class="price">
                             $@p.SalePrice
                         </span>
-                        <span class="ms-2 text-muted text-decoration-line-through">
+                        <span class="sale-price">
                             $@p.Price
                         </span>
                     }
@@ -75,6 +72,12 @@
                             $@p.Price
                         </span>
                     }
+                </div>
+                <!-- SHIPPING -->
+                <div class="shipping">
+                    <small class="@GetDeliveryEstimateColor( p )">
+                        @GetDeliveryEstimateText( p )
+                    </small>
                 </div>
             </div>
             
@@ -108,14 +111,14 @@
 {
     [Inject] public CartManager CartManager { get; init; } = default!;
     CartItems _cartItems = CartItems.Empty();
-    List<Infrastructure.Catalog.Products.Models.ProductDetails> _searchItems = [];
+    List<ProductDetails> _searchItems = [];
     
     public event Action<bool,string?>? OnItemAddedToCart;
     public void SetLocation( int? x, int? y )
     {
         StateHasChanged();
     }
-    public void ChangeSearchResults( List<Infrastructure.Catalog.Products.Models.ProductDetails> items )
+    public void ChangeSearchResults( List<ProductDetails> items )
     {
         _searchItems = items;
         StateHasChanged();
@@ -125,8 +128,9 @@
         StateHasChanged();
     }
     
-    async Task AddToCart( Infrastructure.Catalog.Products.Models.ProductDetails p )
+    async Task AddToCart( ProductDetails p )
     {
+        if (p == null) throw new ArgumentNullException( nameof( p ) );
         var cartReply = await CartManager.Add( p );
         if (!cartReply)
         {
@@ -145,7 +149,7 @@
         OnItemAddedToCart?.Invoke( true, null );
         StateHasChanged();
     }
-    bool IsProductInCart( Infrastructure.Catalog.Products.Models.ProductDetails p, out int count )
+    bool IsProductInCart( ProductDetails p, out int count )
     {
         bool isInCart = _cartItems.Contains( p.Id, out count );
         return isInCart;
@@ -153,15 +157,13 @@
     
     string GetBrandUrl( Brand brand ) =>
         Consts.GetProductSearchUrl( $"?BrandIds={brand.Id}&" );
-    string GetDetailsUrl( Infrastructure.Catalog.Products.Models.ProductDetails p ) => 
+    string GetDetailsUrl( ProductDetails p ) => 
         Consts.GetProductDetailsUrl( p.Id );
     
-    static string GetDeliveryEstimateText( Infrastructure.Catalog.Products.Models.ProductDetails item ) =>
+    static string GetDeliveryEstimateText( ProductDetails item ) =>
         item.IsInStock ? $"Get within {item.ShippingDays} days." : "Out of stock.";
-    static string GetDeliveryEstimateColor( Infrastructure.Catalog.Products.Models.ProductDetails item ) =>
+    static string GetDeliveryEstimateColor( ProductDetails item ) =>
         item.IsInStock ? "text-success" : "text-danger";
-    static string GetRatingCss( Infrastructure.Catalog.Products.Models.ProductDetails item, int level ) =>
-        item.Rating >= level ? "rating-star-full" : "rating-star-empty";
-    static string GetShippingText( Infrastructure.Catalog.Products.Models.ProductDetails item ) =>
+    static string GetShippingText( ProductDetails item ) =>
         item.IsInStock ? $"Get within {item.ShippingDays} days." : "Out of stock.";
 }

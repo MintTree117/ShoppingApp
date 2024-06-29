@@ -15,10 +15,13 @@
             <button class="btn logo" @onclick="@GoHome">
                 <img class="top-nav-item" src="/images/logo.svg" alt="Blazor">
             </button>
+            <!-- ICONS -->
             <div class="top-nav-mobile-right">
+                <!-- ACCOUNT -->
                 <button class="btn btn-icon" @onclick="@OnClickAccountButton">
                     <i class="fa fa-user fa-lg"></i>
                 </button>
+                <!-- CART -->
                 <button class="btn btn-icon position-relative" @onclick="@GoToCart">
                     <i class="fa fa-cart-shopping fa-lg"></i>
                     @if (_cartCount > 0)
@@ -26,6 +29,7 @@
                         <div class="top-nav-cart-count" style="top: -5px; right: -1px">@_cartCount</div>
                     }
                 </button>
+                <!-- SIDEBAR -->
                 <button class="btn btn-icon pe-0" @onclick="@OpenSide">
                     <i class="fa fa-bars fa-lg"></i>
                 </button>
@@ -56,7 +60,7 @@ else {
                 <div class="position-relative" @onmouseenter="@ShowAccountDropdown" @onmouseleave="@HideAccountDropdown">
                     <button class="btn top-nav-button" @onclick="OnClickAccountButton">
                         <div class="top-nav-upper-right-label">
-                            <span class="d-block fw-bold"><small>@_username</small></span>
+                            <span class="d-block"><small>@_username</small></span>
                         </div>
                         <div class="btn btn-icon">
                             <i class="fa fa-user"></i>
@@ -74,7 +78,7 @@ else {
                 <!-- CART -->
                 <button class="btn top-nav-button pe-0 me-0" @onclick="GoToCart">
                     <div class="top-nav-upper-right-label">
-                        <span class="d-block fw-bold">$@_cartPrice</span>
+                        <span class="d-block">$@_cartPrice</span>
                     </div>
                     <div class="btn top-nav-button position-relative pe-0 me-0">
                         <i class="fa-solid fa-cart-shopping"></i>
@@ -96,7 +100,7 @@ else {
             </a>
             <!-- CATEGORIES -->
             <div class="btn position-relative mx-2 top-nav-categories-button" @onmouseenter="ShowDesktopCategories" @onmouseleave="HideDesktopCategories">
-                <strong>Shop By Category</strong> &nbsp; &#9662
+                <strong>Shop By Category</strong> &nbsp; <i class="fa fa-caret-down"></i>
                 @if (_showDesktopCategories) 
                 {
                     <div class="top-nav-categories-wrapper position-absolute shadow">

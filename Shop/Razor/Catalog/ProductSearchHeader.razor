@@ -126,7 +126,7 @@
     }
 
     string GetInfoText() =>
-        $"Viewing {PageSizeOptions[_selectedPageSizeIndex]} on page {_currentPage} of {_totalResults} matches";
+        $"Viewing {Math.Min(PageSizeOptions[_selectedPageSizeIndex], _totalResults)} on page {_currentPage} of {_totalResults} matches";
     string GetActiveBreadcrumbCss( string breadcrumb ) =>
         breadcrumb == _breadcrumbStrings.Last() ? "active" : string.Empty;
     void OnClickBreadCrumb( string breadcrumb )
