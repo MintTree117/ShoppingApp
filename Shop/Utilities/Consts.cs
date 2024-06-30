@@ -82,7 +82,7 @@ internal static class Consts
     internal const string PageEmailConfirm = "/confirmEmail";
     internal const string PageEmailConfirmResend = "/resendEmailConfirmation";
     internal const string PageLoginOrRegister = "/loginOrRegister";
-    internal const string PageLoginRecovery = "/loginRecovery";
+    internal const string RecoveryLogin = "/loginRecovery";
     internal const string PageLogout = "/logout";
     internal const string PageForgotPassword = "/forgotPassword";
     internal const string PageResetPassword = "/resetPassword";

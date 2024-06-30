@@ -7,16 +7,11 @@
 
 <div class="auth-result-wrapper">
     <!-- TITLE -->
-    <i class="fa-solid fa-triangle-exclamation fa-4x auth-result-icon c-alert"></i>
     <h3>Your session has expired. Please login again.</h3>
+    <i class="fa-solid fa-triangle-exclamation fa-4x text-warning"></i>
     <!-- LOGIN -->
-    <button class="btn btn-submit btn-icon b-primary" @onclick="GoToLogin">
+    <a class="btn btn-full btn-primary" ahref="@Consts.PageLoginOrRegister">
         <i class="fa fa-sign-in me-2"></i>
         Login
-    </button>
+    </a>
 </div>
-
-@code {
-    void GoToLogin() =>
-        Navigate( Consts.PageLoginOrRegister );
-}

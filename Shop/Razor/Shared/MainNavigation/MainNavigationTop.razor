@@ -19,15 +19,17 @@
             <div class="top-nav-mobile-right">
                 <!-- ACCOUNT -->
                 <button class="btn btn-icon" @onclick="@OnClickAccountButton">
-                    <i class="fa fa-user fa-lg"></i>
+                    <i class="fa fa-user fa-lg d-block position-relative">
+                         @if (_authenticated)
+                        {
+                            <div class="top-nav-signed-in" style="top: -12px; right: -5px"></div>
+                        }
+                    </i>
                 </button>
-                <!-- CART -->
-                <button class="btn btn-icon position-relative" @onclick="@GoToCart">
-                    <i class="fa fa-cart-shopping fa-lg"></i>
-                    @if (_cartCount > 0)
-                    {
-                        <div class="top-nav-cart-count" style="top: -5px; right: -1px">@_cartCount</div>
-                    }
+                <button class="btn btn-icon" @onclick="GoToCart">
+                    <i class="fa-solid fa-cart-shopping d-block position-relative">
+                        <div class="top-nav-cart-count" style="top: -12px; right: -12px">@_cartCount</div>
+                    </i>
                 </button>
                 <!-- SIDEBAR -->
                 <button class="btn btn-icon pe-0" @onclick="@OpenSide">
@@ -58,12 +60,17 @@ else {
             <div class="top-nav-upper-right">
                 <!-- ACCOUNT -->
                 <div class="position-relative" @onmouseenter="@ShowAccountDropdown" @onmouseleave="@HideAccountDropdown">
-                    <button class="btn top-nav-button" @onclick="OnClickAccountButton">
+                    <button class="btn top-nav-button btn-link-light" @onclick="OnClickAccountButton">
                         <div class="top-nav-upper-right-label">
                             <span class="d-block"><small>@_username</small></span>
                         </div>
                         <div class="btn btn-icon">
-                            <i class="fa fa-user"></i>
+                            <i class="fa fa-user position-relative">
+                                @if (_authenticated)
+                                {
+                                    <div class="top-nav-signed-in" style="top: 0; right: 17px"></div>
+                                }
+                            </i>
                         </div>
                     </button>
 
@@ -76,17 +83,10 @@ else {
                     }
                 </div>
                 <!-- CART -->
-                <button class="btn top-nav-button pe-0 me-0" @onclick="GoToCart">
-                    <div class="top-nav-upper-right-label">
-                        <span class="d-block">$@_cartPrice</span>
-                    </div>
-                    <div class="btn top-nav-button position-relative pe-0 me-0">
-                        <i class="fa-solid fa-cart-shopping"></i>
-                        @if (_cartCount > 0)
-                        {
-                            <div class="top-nav-cart-count" style="top: -5px; right: -1px">@_cartCount</div>
-                        }
-                    </div>
+                <button class="btn top-nav-button btn-link-light pe-0 me-0 position-relative" @onclick="GoToCart">
+                    <i class="fa-solid fa-cart-shopping position-relative">
+                        <div class="top-nav-cart-count" style="top: -7px; right: 16px">@_cartCount</div>
+                    </i>
                 </button>
             </div>
         </div>
@@ -100,7 +100,7 @@ else {
             </a>
             <!-- CATEGORIES -->
             <div class="btn position-relative mx-2 top-nav-categories-button" @onmouseenter="ShowDesktopCategories" @onmouseleave="HideDesktopCategories">
-                <strong>Shop By Category</strong> &nbsp; <i class="fa fa-caret-down"></i>
+                <strong class="btn-link-light">Shop By Category &nbsp; <i class="fa fa-caret-down"></i></strong>
                 @if (_showDesktopCategories) 
                 {
                     <div class="top-nav-categories-wrapper position-absolute shadow">
@@ -116,10 +116,11 @@ else {
     </div>
 }
 
-@code {
+@code 
+{
     [CascadingParameter( Name = "layout" )]
     public MainLayout Layout { get; init; } = default!;
-    
+
     [Inject] public NavigationManager Navigation { get; set; } = default!;
     [Inject] public AuthenticationStateManager AuthenticationStateManager { get; set; } = default!;
     MainNavigationSide? _sidebar;
@@ -128,7 +129,7 @@ else {
     const string DefaultUserText = "Login/Register";
     int _screenWidth;
     int _screenHeight;
-    
+
     bool _mobileView = false;
     bool _showDesktopCategories = false;
     bool _showUserOptions = false;
@@ -136,7 +137,7 @@ else {
     string _username = DefaultUserText;
     decimal _cartPrice = decimal.Zero;
     int _cartCount = 0;
-    
+
     public void Dispose()
     {
         _dotNetRef.Dispose();

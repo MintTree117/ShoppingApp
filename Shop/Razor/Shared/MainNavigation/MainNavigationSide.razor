@@ -10,7 +10,7 @@
     <!-- CONTAINER -->
     <div class="nav-sidebar">
         <!-- HEADER -->
-        <div class="p-3 bg-dark d-flex align-items-center justify-content-between">
+        <div class="nav-sidebar-header">
             <div>
                 <AuthorizeView>
                     <Authorized>
@@ -27,22 +27,22 @@
                     </NotAuthorized>
                 </AuthorizeView>
             </div>
-            <button class="btn btn-close-white" @onclick="Close">
-                <i class="fa-solid fa-x"></i>
+            <button class="btn btn-link-light" @onclick="Close">
+                <i class="fa fa-x"></i>
             </button>
         </div>
 
         <!-- NAV -->
         <nav>
-            @if (_viewingCategories) {
+            @if (_viewingCategories) 
+            {
                 <MainNavigationCategories OnExitCallback="ExitCategories" ShowExitButton="@(true)"/>
             }
-            else {
-                <!-- SHOP -->
-                <h4 class="nav-sidebar-header">Shop Products</h4>
+            else 
+            {
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <button class="btn btn-link nav-link" @onclick="@OnClickCategories">
+                        <button class="btn btn-link-dark nav-link w-100" @onclick="@OnClickCategories">
                             <i class="fa-solid fa-list nav-icon"></i><strong>Categories</strong>
                         </button>
                     </li>
@@ -61,10 +61,6 @@
                             <i class="fa-solid fa-shop nav-icon"></i><strong>All Products</strong>
                         </a>
                     </li>
-                </ul>
-                <!-- ACCOUNT -->
-                <h4 class="nav-sidebar-header">Account</h4>
-                <ul class="nav flex-column">
                     <AuthorizeView>
                         <Authorized>
                             <AccountMenuOptions/>

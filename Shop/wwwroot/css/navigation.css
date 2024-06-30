@@ -36,6 +36,14 @@
     border-top: 1px solid #e6e6e6;
 }
 
+.top-nav-category-arrow {
+    color: var(--primary);
+}
+
+.top-nav-category-arrow:hover {
+    color: var(--orange);
+}
+
 /* SEARCH *******************************************************************************************************/
 .top-nav-search-button-text {
     display: none;
@@ -60,12 +68,24 @@
 /* CART *******************************************************************************************************/
 .top-nav-cart-count {
     position: absolute;
-    top: -5px;
-    right: -20px;
-    background-color: #c9002c;
-    color: white;
+    background-color: transparent;
+    color: var(--white);
     width: 22px;
     height: 22px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+    font-weight: bold;
+    z-index: 100;
+}
+
+.top-nav-signed-in {
+    position: absolute;
+    background-color: #68e81e;
+    width: 5px;
+    height: 5px;
     border-radius: 50%;
     display: flex;
     justify-content: center;
@@ -109,7 +129,7 @@
     padding-bottom: 5px;
     border-bottom: 1px solid lightgray;
     color: var(--white);
-    background-color: var(--bg-cyan-dark-1);;
+    background-color: var(--cyan-dark-1);;
 }
 
 .top-nav-mobile-top {
@@ -123,6 +143,14 @@
     flex-wrap: nowrap;
     align-items: center;
     justify-content: flex-end;
+}
+
+.top-nav-mobile-x {
+    color: var(--white);
+}
+
+.top-nav-mobile-x:hover {
+    color: var(--white);
 }
 
 .top-nav-mobile-right i {
@@ -144,10 +172,12 @@
 }
 
 .nav-sidebar-header {
-    padding: 0.75rem 15px;
-    background-color: #f5f5f5;
-    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     margin: 0;
+    padding: 0.75rem 15px;
+    background-color: var(--cyan-dark-1);
     border-top: 1px solid #e6e6e6;
 }
 
@@ -171,8 +201,8 @@
 .top-nav-upper {
     padding-top: 5px;
     padding-bottom: 5px;
-    border-bottom: 1px solid lightgray;
-    background-color: var(--bg-cyan-dark-1);
+    border-bottom: 1px solid #6c757d;
+    background-color: var(--cyan-dark-2);
 }
 
 .top-nav-upper * {
@@ -184,7 +214,7 @@
     padding-bottom: 15px;
     border-bottom: 1px solid lightgray;
     color: var(--white);
-    background-color: var(--bg-cyan-dark-1);
+    background-color: var(--cyan-dark-1);
 }
 
 .top-nav-upper-left {
@@ -246,6 +276,15 @@
     background-color: white;
     border: 1px solid lightgray;
 }
+
+.top-nav-user-options * {
+    color: black;
+}
+
+.top-nav-user-options *:hover {
+    color: var(--orange);
+}
+
 
 .top-nav-user-options ul {
     display: flex;

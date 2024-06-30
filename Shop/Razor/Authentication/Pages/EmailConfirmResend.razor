@@ -9,11 +9,11 @@
 @if (_isSuccess) {
     <div class="auth-result-wrapper">
         <!-- MESSAGE -->
-        <i class="fa-solid fa-circle-check fa-4x auth-result-icon c-primary"></i>
         <h3>Email confirm link sent!</h3>
+        <i class="fa-solid fa-circle-check fa-4x text-success"></i>
         <p>Please click the link sent to your email to activate your account.</p>
         <!-- RESEND -->
-        <button class="btn btn-submit btn-icon c-primary" @onclick="GoToResend">
+        <button class="btn btn-full btn-primary" @onclick="GoToResend">
             <i class="fa fa-repeat me-2"></i>Retry
         </button>
     </div>
@@ -33,7 +33,7 @@ else {
             <ValidationMessage For="@(() => Request.Email)" class="text-danger"/>
         </div>
         <!-- SUBMIT -->
-        <button type="submit" class="btn btn-submit btn-icon b-primary">
+        <button type="submit" class="btn btn-full btn-primary">
             <i class="fa fa-envelope me-2"></i>Send Email
         </button>
     </EditForm>

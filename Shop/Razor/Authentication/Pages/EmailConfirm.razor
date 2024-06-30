@@ -9,12 +9,12 @@
 @if (_confirmFailed) {
     <div class="auth-result-wrapper">
         <!-- MESSAGE -->
-        <i class="fa-solid fa-circle-exclamation fa-4x auth-result-icon c-danger"></i>
         <h3>Email Confirmation Failed!</h3>
+        <i class="fa-solid fa-circle-exclamation fa-4x text-warning"></i>
         <p>Error Details: @_apiReply.GetMessage()</p>
         <p class="text-muted">Please try again or contact support.</p>
         <!-- RESEND -->
-        <button class="btn btn-submit btn-icon c-primary" @onclick="GoToResend">
+        <button class="btn btn-full btn-primary" @onclick="GoToResend">
             <i class="fa fa-repeat me-2"></i>Retry
         </button>
     </div>
@@ -22,11 +22,11 @@
 else if (_emailConfirmed) {
     <div class="auth-result-wrapper">
         <!-- MESSAGE -->
-        <i class="fa-solid fa-circle-check fa-4x auth-result-icon c-success"></i>
         <h3>Email Confirmed!</h3>
+        <i class="fa-solid fa-circle-check fa-4x text-success"></i>
         <p class="text-muted">Your account has been verified and you can now login normally.</p>
         <!-- LOGIN -->
-        <button class="btn btn-submit btn-icon b-primary" @onclick="GoToLogin">
+        <button class="btn btn-full btn-primary" @onclick="GoToLogin">
             <i class="fa fa-user me-2"></i>Login
         </button>
     </div>

@@ -11,19 +11,19 @@
     <!-- PENDING 2FA -->
     <div class="auth-result-wrapper">
         <!-- MESSAGE -->
-        <i class="fa-solid fa-circle-check fa-4x auth-result-icon c-success"></i>
         <h1>Registration Success!</h1>
+        <i class="fa-solid fa-circle-check fa-4x text-success mb-3"></i>
         <p class="text-secondary">Your account has been created and is awaiting confirmation. A link has been emailed to your email. Please verify your email before logging in.</p>
         <!-- LOGIN -->
-        <button class="btn btn-submit btn-icon b-primary" @onclick="GoToLogin"><i class="fa fa-user me-2"></i>Login</button>
+        <button class="btn btn-full btn-success mb-2" @onclick="GoToLogin"><i class="fa fa-user me-2"></i>Login</button>
     </div>
 }
 else if (_pendingTwoFactor) {
     <!-- PENDING 2FA -->
     <div class="auth-result-wrapper">
         <!-- MESSAGE -->
-        <i class="fa-solid fa-circle-check fa-4x auth-result-icon c-primary"></i>
         <h2>Two-factor authentication</h2>
+        <i class="fa-solid fa-circle-check fa-4x text-primary mb-3"></i>
         <p class="mb-3">Your login is protected by a two-step verification process. Enter your verification code below.</p>
         <!-- FORM -->
         <EditForm Model="@_twoFactorRequest" FormName="login-with-2fa" OnValidSubmit="OnValidTwoFactorSubmitAsync" method="post">
@@ -35,7 +35,7 @@ else if (_pendingTwoFactor) {
                 <ValidationMessage For="@(() => _twoFactorRequest.Code)" class="text-danger"/>
             </div>
             <!-- SUBMIT -->
-            <button class="btn btn-submit btn-icon b-primary" type="submit">
+            <button class="btn btn-full btn-primary mb-2" type="submit">
                 <i class="fa fa-key me-2"></i>Authenticate
             </button>
         </EditForm>
@@ -58,14 +58,14 @@ else {
             <label for="password">Password</label>
         </div>
         <!-- SUBMIT -->
-        <button class="btn btn-submit btn-icon mb-2 b-primary" type="submit">
+        <button class="btn btn-full btn-primary mb-2" type="submit">
             <i class="fa fa-sign-in me-2"></i>Login
         </button>
     </EditForm>
 
     <!-- LOGIN ALTERNATIVES -->
-    <button class="btn btn-link w-100 text-start" @onclick="GoToForgot">Forgot Password</button>
-    <button class="btn btn-link w-100 text-start" @onclick="GoToRecovery">Recovery Login</button>
+    <a class="w-100 text-start" href="@Consts.PageForgotPassword">Forgot Password</a>
+    <a class="w-100 text-start" href="@Consts.RecoveryLogin">Recovery Login</a>
 
     <!-- REGISTER TITLE -->
     <hr class="my-3"/>
@@ -105,22 +105,22 @@ else {
             <label for="2faEmail">2Fa Login Email *</label>
         </div>
         <!-- SUBMIT -->
-        <button class="btn btn-submit btn-icon mb-2 b-primary" type="submit">
+        <button class="btn btn-full btn-primary mb-2" type="submit">
             <i class="fa fa-user-plus me-2"></i>Register
         </button>
     </EditForm>
     
     // RESEND EMAIL CONFIRM LINK
-    <button class="btn btn-link w-100 text-start" @onclick="GoToResend">Resend Confirmation Email</button>
+    <a class="w-100 text-start" href="@Consts.ApiResendConfirm">Resend Confirmation Email</a>
 
     <!-- TESTING -->
     <hr class="my-3"/>
     <h2>Testing</h2>
-    <div class="w-100">
-        <button class="btn-submit btn-icon mb-2 b-primary" onclick="@( async () => await TestRegister() )">
+    <div class="w-100 d-flex flex-column gap-2">
+        <button class="btn btn-full btn-primary" onclick="@( async () => await TestRegister() )">
             <i class="fa fa-user-plus me-2"></i>Test Register
         </button>
-        <button class="btn-submit btn-icon mb-2 b-primary" onclick="@( async () => await TestLogin() )">
+        <button class="btn btn-full btn-primary" onclick="@( async () => await TestLogin() )">
             <i class="fa fa-sign-in me-2"></i>Test Login
         </button>
     </div>
@@ -156,7 +156,7 @@ else {
     async Task OnValidLoginSubmitAsync()
     {
         StartLoading( "Logging In..." );
-        
+
         Reply<LoginReply> loginResult = await TryLogin();
 
         if (!loginResult)
@@ -167,7 +167,7 @@ else {
             return;
         }
 
-        if (loginResult.Data.IsPending2Fa) 
+        if (loginResult.Data.IsPending2Fa)
         {
             _pendingTwoFactor = true;
             _twoFactorRequest.EmailOrUsername = _loginRequest.EmailOrUsername;
@@ -175,28 +175,29 @@ else {
             StopLoading();
             return;
         }
-        
+
         var updateResult = await Authentication.CreateNewSession( loginResult.Data.AccessToken ?? string.Empty );
-        
-        if (!updateResult) 
+
+        if (!updateResult)
         {
             PushError( updateResult, "Failed to save login." );
             StopLoading();
             return;
         }
-        
+
         StartLoading( "Login Success! Redirecting..." );
         GoHome();
     }
     async Task OnValidTwoFactorSubmitAsync()
     {
         StartLoading( "Verifying Two Factor..." );
-        
+
         _twoFactorRequest.EmailOrUsername = _loginRequest.EmailOrUsername;
 
         Reply<TwoFactorReply> result = await TryTwoFactorLogin();
 
-        if (!result) {
+        if (!result)
+        {
             PushError( result, "Two factor authorization failed!" );
             StopLoading();
             return;
@@ -204,22 +205,24 @@ else {
 
         Reply<bool> updateResult = await Authentication.CreateNewSession( result.Data.AccessToken );
 
-        if (!updateResult) {
+        if (!updateResult)
+        {
             PushError( result, "Two factor authorization succeeded on the server, but failed to save locally!" );
             StopLoading();
             return;
         }
-        
+
         StartLoading( "Two Factor Success! Redirecting..." );
         GoHome();
     }
     async Task OnValidRegisterSubmitAsync()
     {
         StartLoading( "Registering..." );
-        
+
         Reply<bool> reply = await TryRegister();
 
-        if (!reply) {
+        if (!reply)
+        {
             PushError( reply, "Failed to register account." );
             Console.WriteLine( reply.GetMessage() );
             StopLoading();
@@ -230,20 +233,20 @@ else {
         StateHasChanged();
         StopLoading();
     }
-    
-    async Task<Reply<LoginReply>> TryLogin() => 
+
+    async Task<Reply<LoginReply>> TryLogin() =>
         await Http.PostAsync<LoginReply>( Consts.ApiLogin, _loginRequest );
-    async Task<Reply<TwoFactorReply>> TryTwoFactorLogin() => 
+    async Task<Reply<TwoFactorReply>> TryTwoFactorLogin() =>
         await Http.PostAsync<TwoFactorReply>( Consts.ApiTwoFactor, _twoFactorRequest );
-    async Task<Reply<bool>> TryRegister() => 
+    async Task<Reply<bool>> TryRegister() =>
         await Http.PutAsync<bool>( Consts.ApiRegister, _registerRequest );
-    
+
     // TODO: IMPLEMENT RECOVERY CODES
-    void GoToRecovery() => 
-        Navigate( Consts.PageLoginRecovery );
-    void GoToResend() => 
+    void GoToRecovery() =>
+        Navigate( Consts.RecoveryLogin );
+    void GoToResend() =>
         Navigate( Consts.PageEmailConfirmResend );
-    void GoToForgot() => 
+    void GoToForgot() =>
         Navigate( Consts.PageForgotPassword );
     void GoToLogin() =>
         Navigate( Consts.PageLoginOrRegister, true );
@@ -260,19 +263,19 @@ else {
     {
         [Required( ErrorMessage = "Email or Username is required." )]
         public string EmailOrUsername { get; set; } = string.Empty;
-        
+
         [Required, DataType( DataType.Text ), Display( Name = "Authenticator code" ), StringLength( 40, ErrorMessage = "The two factor code must be at least 6 and at max 40 characters long.", MinimumLength = 6 )]
         public string Code { get; set; } = string.Empty;
     }
     sealed class RegisterRequest
     {
-        [Required( ErrorMessage = "Email is required." ), EmailAddress( ErrorMessage = "Invalid email address." )] 
+        [Required( ErrorMessage = "Email is required." ), EmailAddress( ErrorMessage = "Invalid email address." )]
         public string Email { get; set; } = string.Empty;
 
         [Required( ErrorMessage = "Username is required." )]
         public string Username { get; set; } = string.Empty;
 
-        [Required( ErrorMessage = "Password is required." ), MinLength( 8, ErrorMessage = "Password must be at least 8 characters." )] 
+        [Required( ErrorMessage = "Password is required." ), MinLength( 8, ErrorMessage = "Password must be at least 8 characters." )]
         public string Password { get; set; } = string.Empty;
 
         [Compare( "Password", ErrorMessage = "Passwords do not match." )]
@@ -281,7 +284,7 @@ else {
         [EmailAddress( ErrorMessage = "Invalid email address." )]
         public string? TwoFactorEmail { get; set; } = string.Empty;
     }
-    
+
     sealed record LoginReply(
         string? AccessToken,
         bool IsPending2Fa );

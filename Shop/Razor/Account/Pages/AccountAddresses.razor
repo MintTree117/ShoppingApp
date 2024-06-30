@@ -47,8 +47,8 @@
                 <ValidationMessage For="@(() => _editAddress.WorldGridPosY)" class="text-danger"/>
             </div>
             <!-- SUBMIT -->
-            <button class="btn btn-submit btn-icon b-primary">
-                <i class="fa fa-paper-plane ms-2"></i>
+            <button class="btn btn-full btn-primary">
+                <i class="fa fa-paper-plane me-2"></i>
                 @GetSubmitText()
             </button>
         </EditForm>
@@ -67,7 +67,7 @@ else {
                 <!-- ROWS DROPDOWN -->
                 <div class="dropdown me-3 h-100">
                     <!-- DROPDOWN TOGGLE -->
-                    <button class="btn btn-icon dropdown-toggle h-100 b-secondary" type="button" id="RowsPerPage" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button class="btn btn-icon btn-outline-secondary dropdown-toggle h-100" type="button" id="RowsPerPage" data-bs-toggle="dropdown" aria-expanded="false">
                         @_pageSize
                     </button>
                     <!-- DROPDOWN LIST -->
@@ -83,7 +83,7 @@ else {
                     </ul>
                 </div>
                 <!-- ADD ADDRESS -->
-                <button class="btn btn-icon b-primary" @onclick="@OnClickNew">
+                <button class="btn btn-primary btn-icon" @onclick="@OnClickNew">
                     <i class="fa fa-plus"></i>
                 </button>
             </div>
@@ -125,11 +125,11 @@ else {
                             <td>
                                 <div class="d-flex flex-row align-items-stretch justify-content-end">
                                     <!-- Edit Address -->
-                                    <button class="btn btn-sm btn-icon p-2 me-3 b-primary" @onclick="() => OnClickEdit( address )">
+                                    <button class="btn btn-sm btn-icon p-2 me-3 btn-primary" @onclick="() => OnClickEdit( address )">
                                         <i class="fa fa-edit"></i>
                                     </button>
                                     <!-- Delete Address -->
-                                    <button class="btn btn-sm p-2 btn-icon b-danger" @onclick="@(async () => await OnClickDelete( address ))">
+                                    <button class="btn btn-sm p-2 btn-icon btn-warning" @onclick="@(async () => await OnClickDelete( address ))">
                                         <i class="fa fa-trash"></i>
                                     </button>
                                 </div>
@@ -149,7 +149,7 @@ else {
         <div class="mx-auto">
             <hr/>
             <h4>Development</h4>
-            <button class="btn mx-auto text-center b-alert" @onclick="@(async () => await OnClickTestGenerate())">Test Generate</button>
+            <button class="btn btn-full btn-primary" @onclick="@(async () => await OnClickTestGenerate())">Test Generate</button>
         </div>
     </div>
 }

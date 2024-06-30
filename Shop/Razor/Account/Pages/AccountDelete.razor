@@ -17,12 +17,12 @@
             <p><strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong></p>
             <hr/>
             <!-- YES -->
-            <button class="btn btn-submit btn-icon mx-auto b-danger" @onclick="@(async () => await OnConfirmSubmit())">
+            <button class="btn btn-full btn-danger" @onclick="@(async () => await OnConfirmSubmit())">
                 <i class="fa fa-trash me-2"></i>Delete
             </button>
             <hr/>
             <!-- NO -->
-            <button class="btn btn-submit btn-icon mx-auto b-primary" @onclick="Cancel">
+            <button class="btn btn-full btn-primary" @onclick="Cancel">
                 <i class="fa-solid fa-x me-2"></i>Cancel
             </button>
         </div>
@@ -41,7 +41,9 @@
                 <ValidationMessage For="@(() => _request.Password)" class="text-danger"/>
             </div>
             <!-- SUBMIT -->
-             <button class="btn btn-submit btn-warning btn-icon"><i class="fa fa-trash me-2"></i>Delete Data</button>
+            <button class="btn btn-full btn-warning">
+                <i class="fa fa-trash me-2"></i>Delete Data
+            </button>
         </EditForm>
     }
 </div>

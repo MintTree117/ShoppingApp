@@ -8,13 +8,13 @@
     @if ( _currentParentId.HasValue )
     {
         <button class="btn btn-link nav-link me-2 border-end" @onclick="PreviousCategory">
-            <i class="fa fa-caret-left text-primary me-1"></i> Back
+            <i class="fa fa-caret-left me-1"></i> Back
         </button>
     }
     else if (ShowExitButton) 
     {
         <button class="btn btn-link nav-link me-2 border-end" @onclick="Exit">
-            <i class="fa fa-caret-left text-primary me-1"></i> Back
+            <i class="fa fa-caret-left me-1"></i> Back
         </button>
     }
     <h4 class="nav-link fw-bold mb-0 w-100" style="color: black">Categories</h4>
@@ -28,8 +28,8 @@
             </a>
             @if ( c.Children.Any() )
             {
-                <button class="btn" @onclick="@(() => NextCategory( c ))">
-                    <i class="fa fa-caret-right text-primary"></i>
+                <button class="btn btn-link" @onclick="@(() => NextCategory( c ))">
+                    <i class="fa fa-caret-right"></i>
                 </button>
             }
         </li>
