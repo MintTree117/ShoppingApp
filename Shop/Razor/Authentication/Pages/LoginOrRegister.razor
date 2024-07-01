@@ -1,6 +1,6 @@
 @page "/loginOrRegister"
 @using System.ComponentModel.DataAnnotations
-@using Shop.Infrastructure.Common.ReplyTypes
+@using Shop.Types.Common.ReplyTypes
 @using Shop.Utilities
 @inherits AuthenticationPageBase
 @layout AuthenticationLayout
@@ -111,7 +111,7 @@ else {
     </EditForm>
     
     // RESEND EMAIL CONFIRM LINK
-    <a class="w-100 text-start" href="@Consts.ApiResendConfirm">Resend Confirmation Email</a>
+    <a class="w-100 text-start" href="@Consts.PageEmailConfirmResend">Resend Confirmation Email</a>
 
     <!-- TESTING -->
     <hr class="my-3"/>

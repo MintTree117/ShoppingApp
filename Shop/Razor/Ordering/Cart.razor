@@ -1,22 +1,32 @@
 @page "/cart"
-@using Shop.Infrastructure.Ordering.Types
 @using Shop.Utilities
-@using Shop.Infrastructure.Ordering
-@using Shop.Infrastructure.Catalog.Products.Dtos
+@using Shop.Types.Cart
+@using Shop.Infrastructure
+@using Shop.Types.Products
+@using Shop.Types.Products.Dtos
 @inherits Shop.Razor.Shared.ShopPage
 
-<div class="cart-container">
+<!-- CONTAINER -->
+<div class="content-container cart-container">
+    
+    <!-- ITEMS -->
     <div class="cart-items">
         @foreach ( CartProduct i in _products.Items )
         {
-            <div class="cart-item">
+            <!-- ITEMS CONTAINER -->
+            <div class="cart-item row-between">
+                
+                <!-- IMAGE -->
                 <a class="cart-item-image">
                     <img src="@i.ProductImage" alt="@i.ProductName"/>
                 </a>
+                
+                <!-- INFO -->
                 <div class="cart-item-info">
-                    <a class="cart-item-title" href="">
+                    <a class="product-title" href="@Consts.GetProductDetailsUrl( i.ProductId )">
                         <h3>@i.ProductName</h3>
                     </a>
+                    
                     @if (!i.IsInStock)
                     {
                         <div class="cart-item-out">
@@ -55,7 +65,7 @@
                         {
                             <!-- SMALL QUANTITY DROPDOWN -->
                             <div class="form-group w-50">
-                                <select id="quantitySelect" class="btn btn-outline-secondary btn-icon form-select h-100 w-100" @onchange="@(async ()=>await OnChangeQuantitySmall(i))" value="@i.Quantity">
+                                <select id="quantitySelect" class="btn btn-outline-secondary btn-icon form-select h-100 w-100" @onchange="@(async () => await OnChangeQuantitySmall( i ))" value="@i.Quantity">
                                     @foreach ( int quantity in ItemQuantityOptions )
                                     {
                                         <option value="@quantity" selected="@( @i.Quantity == quantity )">Qty: @quantity</option>
@@ -67,18 +77,18 @@
                         {
                             <!-- LARGE QUANTITY INPUT -->
                             <div class="cart-large-quantity">
-                                <input class="form-control" type="number" @onchange="@((e)=> OnChangeQuantityLarge(i, e))"/>
+                                <input class="form-control" type="number" @onchange="@(( e ) => OnChangeQuantityLarge( i, e ))"/>
                             </div>
                             <!-- SAVE CHANGES -->
                             if (_changed.Contains( i ))
                             {
                                 <button class="btn btn-primary" @onchange="@(async () => await SaveChanges())">
                                     Save Changes
-                                </button>   
+                                </button>
                             }
                         }
                         <!-- REMOVE -->
-                        <button class="btn btn-link btn-icon text-decoration-none" @onchange="@(async () => await OnClickDelete(i))">
+                        <button class="btn btn-link btn-icon text-decoration-none" @onchange="@(async () => await OnClickDelete( i ))">
                             <i class="fa fa-trash"></i>
                         </button>
                     </div>
@@ -100,6 +110,7 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+        
         var cartReply = await CartManager.Get();
         if (!cartReply)
         {
@@ -108,46 +119,47 @@
         }
 
         var summary = cartReply.Data;
-        var productIds = new Dictionary<string, object>() { { "ProductIds", summary.GetIds() } };
-        var productsReply = await Http.GetAsync<List<ProductDetailsDto>>( Consts.ApiGetProductsByIds, productIds );
+        var url = $"{Consts.ApiGetProductsByIds}?ProductIds={summary.GetIds().FirstOrDefault()}";
+        var productsReply = await Http.GetAsync<List<ProductSummaryDto>>( url );
         if (!productsReply)
         {
             _products = CartProducts.FromItems( summary );
-            StateHasChanged();
             PushWarning( "Failed to fetch product details. Showing basic information only." );
             return;
         }
-
-        List<CartProduct> items = [];
-        List<ProductDetailsDto> products = productsReply.Data;
-        foreach ( var s in summary.Items )
+        
+        List<ProductSummaryDto> dtos = productsReply.Data;
+        List<CartProduct> products = [];
+        
+        foreach ( CartItem s in summary.Items )
         {
-            var contains = products.Any( p => p.Id == s.ProductId );
+            CartItem s1 = s;
+            var contains = dtos.Any( p => p.Id == s1.ProductId );
             if (!contains)
             {
-                items.Add( CartProduct.FromItem( s ) );
+                products.Add( CartProduct.FromItem( s ) );
                 continue;
             }
 
-            var product = products.FirstOrDefault( p => p.Id == s.ProductId );
-            items.Add( CartProduct.FromProduct( product, s.Quantity ) );
+            var product = dtos.FirstOrDefault( p => p.Id == s.ProductId );
+            var p = CartProduct.FromSummary( product, s.Quantity );
+            products.Add( p );
         }
 
-        _products = CartProducts.With( items );
-        StateHasChanged();
+        _products = CartProducts.With( products );
     }
     
     void OnChangeQuantityLarge( CartProduct product, ChangeEventArgs args )
     {
-        if (args.Value is null )
+        /*if (args.Value is null )
             return;
         int quantity = (int) args.Value;
         product.Quantity = quantity;
-        _changed.Add( product );
+        _changed.Add( product );*/
     }
     async Task OnChangeQuantitySmall( CartProduct product )
     {
-        var cartReply = await CartManager.Update( product );
+        /*var cartReply = await CartManager.Update( product );
         if (!cartReply)
         {
             PushError( $"Failed to update quantity. {cartReply.GetMessage()}" );
@@ -155,7 +167,7 @@
         }
         
         StateHasChanged();
-        PushSuccess( "Quantity updated." );
+        PushSuccess( "Quantity updated." );*/
     }
     async Task SaveChanges()
     {

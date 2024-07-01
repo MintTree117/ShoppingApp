@@ -2,6 +2,7 @@
 /* ------------------------------------------------------------------------------------------*/
 :root {
     --primary: rgb(0, 113, 133);
+    --primary-light: rgb(0, 150, 150);
     --orange: #de7921;
     --cyan-dark-1: #032830;
     --cyan-dark-2: #022026;
@@ -9,13 +10,18 @@
     --yellow: #ffcd39;
     --green1: #479f76;
     --green2: #198754;
+    --dark-grey: #212529;
+}
+
+* {
+    box-sizing: border-box;
 }
 
 /* BASE ELEMENTS */
 /* ------------------------------------------------------------------------------------------*/
 html, body {
     font-family: Arial, sans-serif;
-    color: #212121;
+    color: var(--dark-grey);
 }
 
 body {
@@ -41,8 +47,8 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: 16px;
 }
 
-h1:focus, h2:focus, h3:focus, h4:focus, h5:focus, h6:focus {
-    outline: none;
+h1:focus, h2:focus, h3:focus, h4:focus, h5:focus, h6:focus, p:focus *:focus {
+    outline: none !important;
 }
 
 hr {
@@ -55,12 +61,12 @@ a {
 }
 
 a:hover {
-    color: var(--orange) !important;
+    color: var(--primary-light) !important;
 }
 
-/*.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}*/
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb !important;
+}
 
 /*.valid.modified:not([type=checkbox]) {
     outline: 1px solid #26b050;
@@ -80,13 +86,15 @@ a:hover {
 }
 
 .btn-primary:hover {
-    background-color: var(--orange) !important;
-    border-color: var(--orange) !important;
+    color: var(--white);
+    background-color: var(--primary-light) !important;
+    border-color: var(--primary-light) !important;
 }
 
 .btn-outline-primary:hover  {
-    color: var(--primary) !important;
-    border-color: var(--primary) !important;
+    color: var(--white) !important;
+    background-color: var(--primary-light) !important;
+    border-color: var(--primary-light) !important;
 }
 
 .btn-success {
@@ -109,20 +117,20 @@ a:hover {
     border-color: var(--green2) !important;
 }
 
-.btn-link {
+.btn-link, .btn-link * {
     color: var(--primary) !important;
 }
 
-.btn-link:hover {
-    color: var(--orange) !important;
+.btn-link:hover, .btn-link *:hover {
+    color: var(--primary-light) !important;
 }
 
 .btn-link-dark {
-    color: black !important;
+    color: var(--dark-grey) !important;
 }
 
 .btn-link-dark:hover, .btn-link-dark:hover * {
-    color: var(--orange) !important;
+    color: var(--primary-light) !important;
 }
 
 .btn-link-light {
@@ -130,7 +138,7 @@ a:hover {
 }
 
 .btn-link-light:hover, .btn-link-light:hover * {
-    color: var(--orange) !important;
+    color: var(--primary-light) !important;
 }
 
 .text-primary {
@@ -141,10 +149,19 @@ a:hover {
     color: var(--green1) !important;
 }
 
+.link-dark {
+    color: var(--dark-grey) !important;
+}
+
+.link-dark:hover {
+    color: var(--primary) !important;
+}
+
 /* CONTENT CONTAINER */
 /* ------------------------------------------------------------------------------------------*/
 
 .content-container {
+    min-width: 1600px;
     max-width: 1600px;
     margin: 0 auto;
     padding-top: 0;
@@ -175,6 +192,14 @@ a:hover {
     justify-content: center;
     flex-wrap: nowrap;
     border-radius: 5px;
+}
+
+.td-empty {
+    background-color: #124b84;
+}
+
+.td-full {
+    background-color: #e9ecef;
 }
 
 /* LOADER */
@@ -218,6 +243,13 @@ a:hover {
     margin-top: 20px; /* Space above the message */
     font-size: 1.2em; /* Larger font size */
     color: #333; /* Dark grey text color */
+}
+
+.row-between {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
 }
 
 /* BLAZOR */

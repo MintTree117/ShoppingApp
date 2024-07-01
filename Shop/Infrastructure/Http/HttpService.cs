@@ -3,7 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Web;
 using Shop.Infrastructure.Authentication;
-using Shop.Infrastructure.Common.ReplyTypes;
+using Shop.Types.Common.ReplyTypes;
 using Shop.Utilities;
 
 namespace Shop.Infrastructure.Http;

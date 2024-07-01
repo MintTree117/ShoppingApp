@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
-using Shop.Infrastructure.Loading;
+using Shop.Types.Common.ValueTypes;
 
 namespace Shop.Razor.Shared.Components;
 

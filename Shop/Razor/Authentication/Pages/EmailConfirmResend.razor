@@ -1,6 +1,6 @@
 @page "/resendEmailConfirmation"
 @using Shop.Utilities
-@using Shop.Infrastructure.Common.ReplyTypes
+@using Shop.Types.Common.ReplyTypes
 @inherits AuthenticationPageBase
 @layout  AuthenticationLayout
 
@@ -39,7 +39,8 @@ else {
     </EditForm>
 }
 
-@code {
+@code 
+{
     [SupplyParameterFromForm]
     ResendConfirmationRequest Request { get; set; } = new();
     
@@ -49,7 +50,7 @@ else {
     {
         StartLoading( "Sending reset link..." );
 
-        Reply<bool> result = await TrySendEmail();
+        Reply<bool> result = await Http.PutAsync<bool>( Consts.ApiResendConfirm, Request.Email );
 
         if (!result) {
             PushError( result, "Failed to send reset link." );
@@ -62,8 +63,6 @@ else {
         StateHasChanged();
         StopLoading();
     }
-    async Task<Reply<bool>> TrySendEmail() => 
-        await Http.PutAsync<bool>( Consts.ApiResendConfirm, Request );
         
     sealed class ResendConfirmationRequest
     {

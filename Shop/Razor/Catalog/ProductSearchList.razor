@@ -1,109 +1,16 @@
 @using Shop.Utilities
-@using Shop.Infrastructure.Catalog.Products.Models
-@using Shop.Infrastructure.Catalog.Brands.Types
-@using Shop.Infrastructure.Ordering;
-@using Shop.Infrastructure.Ordering.Types
 @using Shop.Infrastructure.Authentication
+@using Shop.Types.Cart
+@using Shop.Infrastructure
+@using Shop.Types.Products
+@using Shop.Types.Products.Dtos
 
 <!-- CONTAINER -->
 <div class="search-list">
-    @foreach ( ProductDetails p in _searchItems )
+    @foreach ( ProductModel p in _products )
     {
-        <!-- ITEM -->
-        <div class="search-item">
-            
-            <!-- IMAGE -->
-            <div class="search-item-img">
-                <a class="btn" href="@GetDetailsUrl( p )">
-                    <img src="@p.Image" alt="@p.Name"/>
-                </a>
-            </div>
-            
-            <!-- TITLE -->
-            <a class="product-title" href="@GetDetailsUrl( p )">
-                <h3>@p.Name</h3>
-            </a>
-            
-            <!-- DIVIDER -->
-            <hr class="product-divider"/>
-            
-            <!-- RATING/BRAND -->
-            <div class="rating-brand mb-2">
-                <!-- RATING -->
-                <div class="rating">
-                    @for ( int i = 1; i <= 5; i++ )
-                    {
-                        <div>
-                            <i class="@Utils.GetRatingCss( p.Rating, i )"></i>
-                        </div>
-                    }
-                    <a class="rating-count" href="@Consts.GetProductDetailsUrlRatings( p.Id )">
-                        @p.NumberRatings
-                    </a>
-                </div>
-
-                <!-- BRAND -->
-                <div class="brand">
-                    <span>
-                        Brand:&nbsp;
-                    </span>
-                    <a class="brand-link" href="@GetBrandUrl( p.Brand )">
-                        @p.Brand.Name
-                    </a>
-                </div>
-            </div>
-            
-            <!-- SHIPPING/PRICING -->
-            <div class="shipping-pricing mb-2">
-                <!-- PRICING -->
-                <div class="pricing">
-                    @if (p.SalePrice > 0)
-                    {
-                        <span class="price">
-                            $@p.SalePrice
-                        </span>
-                        <span class="sale-price">
-                            $@p.Price
-                        </span>
-                    }
-                    else
-                    {
-                        <span class="search-item-price">
-                            $@p.Price
-                        </span>
-                    }
-                </div>
-                <!-- SHIPPING -->
-                <div class="shipping">
-                    <small class="@GetDeliveryEstimateColor( p )">
-                        @GetDeliveryEstimateText( p )
-                    </small>
-                </div>
-            </div>
-            
-            <!-- CART -->
-            @if (IsProductInCart( p, out int count ))
-            {
-                <a class="btn btn-info btn-icon search-item-cart-button" href="@Consts.PageCart">
-                    <i class="fa-solid fa-circle-check fa-xs"></i>
-                    <small>View In Cart (@count)</small>
-                </a>
-            }
-            else if (p.IsInStock)
-            {
-                <button class="btn btn-outline-primary btn-icon search-item-cart-button" @onclick="@(async ()=> await AddToCart(p))">
-                    <i class="fa-solid fa-shopping-cart fa-xs"></i>
-                    <small>Add To Cart</small>
-                </button>
-            }
-            else
-            {
-                <button disabled class="btn btn-secondary btn-icon search-item-cart-button">
-                    <i class="fa-solid fa-circle-xmark fa-xs"></i>
-                    <small>Out of Stock</small>
-                </button>
-            }
-        </div>
+        <!-- PRODUCT -->
+        <ProductCard Product="@p"/>
     }
 </div>
 
@@ -111,16 +18,16 @@
 {
     [Inject] public CartManager CartManager { get; init; } = default!;
     CartItems _cartItems = CartItems.Empty();
-    List<ProductDetails> _searchItems = [];
+    List<ProductModel> _products = [];
     
     public event Action<bool,string?>? OnItemAddedToCart;
     public void SetLocation( int? x, int? y )
     {
         StateHasChanged();
     }
-    public void ChangeSearchResults( List<ProductDetails> items )
+    public void ChangeSearchResults( List<ProductModel> products )
     {
-        _searchItems = items;
+        _products = products;
         StateHasChanged();
     }
     public void RefreshState()
@@ -128,10 +35,10 @@
         StateHasChanged();
     }
     
-    async Task AddToCart( ProductDetails p )
+    async Task AddToCart( ProductModel p )
     {
-        if (p == null) throw new ArgumentNullException( nameof( p ) );
-        var cartReply = await CartManager.Add( p );
+        ArgumentNullException.ThrowIfNull( p );
+        var cartReply = await CartManager.Add( p.Id );
         if (!cartReply)
         {
             OnItemAddedToCart?.Invoke( false, cartReply.GetMessage() );
@@ -149,21 +56,16 @@
         OnItemAddedToCart?.Invoke( true, null );
         StateHasChanged();
     }
-    bool IsProductInCart( ProductDetails p, out int count )
+    bool IsProductInCart( ProductModel p, out int count )
     {
         bool isInCart = _cartItems.Contains( p.Id, out count );
         return isInCart;
     }
     
-    string GetBrandUrl( Brand brand ) =>
-        Consts.GetProductSearchUrl( $"?BrandIds={brand.Id}&" );
-    string GetDetailsUrl( ProductDetails p ) => 
-        Consts.GetProductDetailsUrl( p.Id );
-    
-    static string GetDeliveryEstimateText( ProductDetails item ) =>
-        item.IsInStock ? $"Get within {item.ShippingDays} days." : "Out of stock.";
-    static string GetDeliveryEstimateColor( ProductDetails item ) =>
-        item.IsInStock ? "text-success" : "text-danger";
-    static string GetShippingText( ProductDetails item ) =>
-        item.IsInStock ? $"Get within {item.ShippingDays} days." : "Out of stock.";
+    static string GetDeliveryEstimateText( ProductModel p ) =>
+        p.IsInStock ? $"Get within {p.ShippingDays} days." : "Out of stock.";
+    static string GetDeliveryEstimateColor( ProductModel p ) =>
+        p.IsInStock ? "text-success" : "text-danger";
+    static string GetShippingText( ProductModel p ) =>
+        p.IsInStock ? $"Get within {p.ShippingDays} days." : "Out of stock.";
 }

@@ -1,9 +1,10 @@
-@using Shop.Infrastructure.Catalog.Products.Dtos
 @using System.Timers
+@using Shop.Types.Products
+@using Shop.Types.Products.Dtos
 @using Shop.Utilities
 
 <!-- CONTAINER -->
-<div class="product-slider-container shadow-sm">
+<div class="product-slider-container shadow">
     
     <!-- LEFT BUTTON -->
     <button class="btn btn-outline-secondary product-slider-button" @onclick="OnClickPrevious">❮</button>
@@ -16,63 +17,11 @@
             @Title
         </h6>
 
-        <!-- ITEMS -->
+        <!-- PRODUCTS -->
         <div class="product-slider-list">
-            @foreach ( ProductSummaryDto dto in _showProducts )
+            @foreach ( ProductModel p in _showProducts )
             {
-                <!-- ITEM -->
-                <div class="product-slider-item">
-
-                    <!-- TOP -->
-                    <div class="product-slider-item-top">
-                        <!-- IMAGE -->
-                        <a class="product-slider-image" href="@GetDetailsUrl( dto )">
-                            <img src="@dto.Image" alt="@dto.Name"/>
-                        </a>
-
-                        <!-- TITLE -->
-                        <a class="product-slider-title" href="@GetDetailsUrl( dto )">
-                            @dto.Name
-                        </a>
-                        <hr class="product-slider-divider"/>
-                    </div>
-
-                    <!-- BOTTOM -->
-                    <div class="product-slider-item-bottom">
-                        <!-- RATING -->
-                        <div class="rating">
-                            @for ( int i = 1; i <= 5; i++ )
-                            {
-                                <div>
-                                    <i class="@Utils.GetRatingCss( dto.Rating, i )"></i>
-                                </div>
-                            }
-                            
-                            <a class="rating-count" href="@Consts.GetProductDetailsUrlRatings( dto.Id )">
-                                @dto.NumberRatings
-                            </a>
-                        </div>
-
-                        <!-- PRICING -->
-                        <div class="product-slider-pricing">
-                            @if (dto.SalePrice > 0)
-                            {
-                                <span class="product-slider-price">
-                                    $@dto.SalePrice
-                                </span>
-                                <span class="text-muted product-slider-sale-price">
-                                    $@dto.Price
-                                </span>
-                            }
-                            else
-                            {
-                                <span class="product-slider-price">
-                                    $@dto.Price
-                                </span>
-                            }
-                        </div>
-                    </div>
-                </div>
+                <ProductCard Product="@p"/>
             }
         </div>
     </div>
@@ -84,8 +33,8 @@
 @code
 {
     [Parameter] public string Title { get; set; } = string.Empty;
-    List<ProductSummaryDto> _products = [];
-    List<ProductSummaryDto> _showProducts = [];
+    List<ProductModel> _products = [];
+    List<ProductModel> _showProducts = [];
     Timer _timer = default!;
     int _currentIndex = 0;
     int? _posX;
@@ -97,7 +46,7 @@
         _posY = y;
         StateHasChanged();
     }
-    public void SetProducts( List<ProductSummaryDto> products )
+    public void SetProducts( List<ProductModel> products )
     {
         _products = products;
         _currentIndex = 0;
@@ -106,7 +55,7 @@
     }
     void UpdateVisibleProducts()
     {
-        List<ProductSummaryDto> newProducts = [];
+        List<ProductModel> newProducts = [];
 
         for ( int i = _currentIndex; i < _products.Count; i++ )
             newProducts.Add( _products[i] );

@@ -72,6 +72,8 @@ internal static class Consts
         $"{PageProductDetails}?ProductId={productId}";
     internal static string GetProductDetailsUrlRatings( Guid productId ) =>
         $"{PageProductDetails}?ProductId={productId}&ShowRatings";
+    internal static string GetBrandSearchUrl( Guid brandId ) =>
+        GetProductSearchUrl( $"?BrandIds={brandId}&" );
 
 
     // PAGES

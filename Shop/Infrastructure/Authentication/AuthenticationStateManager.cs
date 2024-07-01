@@ -1,9 +1,9 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Components.Authorization;
-using Shop.Infrastructure.Common.ReplyTypes;
 using Shop.Infrastructure.Http;
 using Shop.Infrastructure.Storage;
+using Shop.Types.Common.ReplyTypes;
 using Shop.Utilities;
 
 namespace Shop.Infrastructure.Authentication;

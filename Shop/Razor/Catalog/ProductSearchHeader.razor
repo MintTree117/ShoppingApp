@@ -1,5 +1,6 @@
-@using Shop.Infrastructure.Catalog.Categories.Types
-@using Shop.Infrastructure.Catalog.Products.Models
+@using Shop.Types.Categories
+@using Shop.Types.Products
+@using Shop.Types.Products.Dtos
 
 <!-- WRAPPER -->
 <div class="search-header-wrapper">
@@ -90,16 +91,16 @@
     public event Func<int, Task>? OnPageSortChanged;
     public event Action? OnToggleMobileFilters;
     
-    public void SetNavigation( Category? newCategory, IReadOnlyDictionary<Guid, Category>? categoriesById, SearchParameters parameters, int count )
+    public void SetNavigation( Category? newCategory, IReadOnlyDictionary<Guid, Category>? categoriesById, SearchParametersDto parametersDto, int count )
     {
         _breadcrumbStrings.Clear();
         _breadcrumbStrings.Add( BaseBreadcrumbString );
         _categoryChain.Clear();
 
-        _selectedPageSizeIndex = PageSizeOptions.IndexOf( parameters.PageSize );
+        _selectedPageSizeIndex = PageSizeOptions.IndexOf( parametersDto.PageSize );
         _selectedPageSizeIndex = Math.Max( 0, _selectedPageSizeIndex );
-        _selectedPageSortIndex = parameters.SortBy < PageSortOptions.Length && parameters.SortBy >= 0 ? parameters.SortBy : 0;
-        _currentPage = Math.Max( 1, parameters.Page );
+        _selectedPageSortIndex = parametersDto.SortBy < PageSortOptions.Length && parametersDto.SortBy >= 0 ? parametersDto.SortBy : 0;
+        _currentPage = Math.Max( 1, parametersDto.Page );
         _totalResults = count;
         
         if (newCategory is null) {

@@ -1,4 +1,4 @@
-using Shop.Infrastructure.Common.ReplyTypes;
+using Shop.Types.Common.ReplyTypes;
 
 namespace Shop.Utilities;
 

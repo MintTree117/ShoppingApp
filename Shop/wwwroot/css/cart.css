@@ -1,0 +1,19 @@
+.cart-item-image {
+    width: 100%;
+    height: auto;
+}
+
+.cart-item-image img {
+    min-width: 100%;
+    max-width: 100%;
+    height: auto;
+}
+
+/* @ 992px */
+@media only screen and (min-width: 992px) {
+    .cart-item-image img {
+        width: 225px;
+        min-width: 225px;
+        max-width: 225px;
+    }
+}

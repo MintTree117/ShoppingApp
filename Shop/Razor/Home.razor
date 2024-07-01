@@ -1,7 +1,8 @@
 ﻿@page "/"
-@using Shop.Infrastructure.Catalog.Products.Dtos
 @using Shop.Razor.Catalog
 @using Shop.Razor.Shared.Components
+@using Shop.Types.Products
+@using Shop.Types.Products.Dtos
 @using Shop.Utilities
 @inherits Shop.Razor.Shared.ShopPage
 
@@ -42,9 +43,9 @@
             return;
         }
         _specials = reply.Data;
-        _featuredSlider.SetProducts( _specials.TopFeatured );
-        _salesSlider.SetProducts( _specials.TopSales );
-        _sellingSlider.SetProducts( _specials.TopSelling );
+        _featuredSlider.SetProducts( ProductModel.From( _specials.TopFeatured ) );
+        _salesSlider.SetProducts( ProductModel.From( _specials.TopSales ) );
+        _sellingSlider.SetProducts( ProductModel.From( _specials.TopSelling ) );
         _loadingPanel.ToggleLoading( false );
         StateHasChanged();
     }

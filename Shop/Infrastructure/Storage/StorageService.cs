@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Microsoft.JSInterop;
-using Shop.Infrastructure.Common.ReplyTypes;
+using Shop.Types.Common.ReplyTypes;
 using Shop.Utilities;
 
 namespace Shop.Infrastructure.Storage;
@@ -81,7 +81,9 @@ public sealed class StorageService( IJSRuntime jsRuntime )
     {
         try
         {
+            Console.WriteLine( $"mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm {value}" );
             string json = JsonSerializer.Serialize( value );
+            Console.WriteLine($"mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm {json}");
             await _jsRuntime.InvokeVoidAsync( LocalMethod( ActionType.Set ), key, json );
             return IReply.Success();
         }

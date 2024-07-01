@@ -1,10 +1,8 @@
-@using Shop.Infrastructure.Catalog.Categories
-@using Shop.Infrastructure.Catalog.Brands
-@using Shop.Infrastructure.Catalog
-@using Shop.Infrastructure.Catalog.Brands.Types
-@using Shop.Infrastructure.Catalog.Categories.Types
-@using Shop.Infrastructure.Catalog.Products.Models
-@using Shop.Infrastructure.Locations
+@using Shop.Infrastructure
+@using Shop.Types.Brands
+@using Shop.Types.Categories
+@using Shop.Types.Products
+@using Shop.Types.Products.Dtos
 @inject LocationManager LocationManager
 
 <!-- CONTAINER -->
@@ -148,7 +146,7 @@
     
     bool _altered = false;
     bool _shouldShow = true;
-    SearchParameters _filters = SearchParameters.Empty();
+    SearchParametersDto _filters = SearchParametersDto.Empty();
     Dictionary<Brand, bool> _selectedBrands = [];
 
     bool _initToggleStock = false;
@@ -174,7 +172,7 @@
         _selectedBrands.Clear();
         _altered = false;
     }
-    public void SetData( Category? parentCategory, CategoriesCollection categories, IEnumerable<Brand> brands, SearchParameters filters )
+    public void SetData( Category? parentCategory, CategoriesCollection categories, IEnumerable<Brand> brands, SearchParametersDto filters )
     {
         Clear();
         _filters = filters;

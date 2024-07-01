@@ -1,25 +1,23 @@
-@using Shop.Infrastructure.Catalog
-@using Shop.Infrastructure.Catalog.Categories
-@using Shop.Infrastructure.Catalog.Categories.Types
-@using Shop.Infrastructure.Common.ReplyTypes
+@using Shop.Types.Categories
 @using Shop.Utilities
+@using Shop.Infrastructure
 
-<div class="d-flex align-items-center justify-content-start py-2">
+<div class="main-nav-categories d-flex align-items-center justify-content-start py-2">
     @if ( _currentParentId.HasValue )
     {
-        <button class="btn btn-link nav-link me-2 border-end" @onclick="PreviousCategory">
+        <button class="btn btn-link nav-link me-2" @onclick="PreviousCategory">
             <i class="fa fa-caret-left me-1"></i> Back
         </button>
     }
     else if (ShowExitButton) 
     {
-        <button class="btn btn-link nav-link me-2 border-end" @onclick="Exit">
+        <button class="btn btn-link nav-link me-2" @onclick="Exit">
             <i class="fa fa-caret-left me-1"></i> Back
         </button>
     }
-    <h4 class="nav-link fw-bold mb-0 w-100" style="color: black">Categories</h4>
+    <h4 class="main-nav-categories-title">Categories</h4>
 </div>
-<ul class="nav flex-column">
+<ul class="nav flex-column mt-0 pt-0">
     @foreach ( Category c in GetCurrentCategories() )
     {
         <li class="nav-item d-flex align-items-center text-start">
