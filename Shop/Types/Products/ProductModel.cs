@@ -4,38 +4,60 @@ using Shop.Types.Products.Dtos;
 
 namespace Shop.Types.Products;
 
-public sealed class ProductModel(
-    Guid id,
-    Guid brandId,
-    string name,
-    string brandName,
-    string image,
-    bool isFeatured,
-    bool isInStock,
-    decimal price,
-    decimal salePrice,
-    float rating,
-    int numberRatings,
-    int shippingDays,
-    List<Category>? categories,
-    string? description,
-    string? xml )
+public sealed class ProductModel
 {
-    public Guid Id { get; set; } = id;
-    public Guid BrandId { get; set; } = brandId;
-    public string BrandName { get; set; } = name; // de-normalized
-    public string Name { get; set; } = name;
-    public string Image { get; set; } = image;
-    public bool IsFeatured { get; set; } = isFeatured;
-    public bool IsInStock { get; set; } = isInStock;
-    public decimal Price { get; set; } = price;
-    public decimal SalePrice { get; set; } = salePrice;
-    public float Rating { get; set; } = rating;
-    public int NumberRatings { get; set; } = numberRatings;
-    public int ShippingDays { get; set; } = shippingDays;
-    public List<Category>? Categories { get; set; } = categories;
-    public string? Description { get; set; } = description;
-    public string? Xml { get; set; } = xml;
+    // ReSharper disable once UnusedMember.Global
+    public ProductModel() { }
+    
+    public ProductModel(
+        Guid id,
+        Guid brandId,
+        string name,
+        string brandName,
+        string image,
+        bool isFeatured,
+        bool isInStock,
+        decimal price,
+        decimal salePrice,
+        float rating,
+        int numberRatings,
+        int shippingDays,
+        List<Category>? categories,
+        string? description,
+        string? xml)
+    {
+        Id = id;
+        BrandId = brandId;
+        Name = name;
+        BrandName = brandName;
+        Image = image;
+        IsFeatured = isFeatured;
+        IsInStock = isInStock;
+        Price = price;
+        SalePrice = salePrice;
+        Rating = rating;
+        NumberRatings = numberRatings;
+        ShippingDays = shippingDays;
+        Categories = categories;
+        Description = description;
+        Xml = xml;
+    }
+    
+    public Guid Id { get; set; }
+    public Guid BrandId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string BrandName { get; set; } = string.Empty; // de-normalized
+    public string Image { get; set; } = string.Empty;
+    public bool IsFeatured { get; set; }
+    public bool IsInStock { get; set; }
+    public decimal Price { get; set; }
+    public decimal SalePrice { get; set; }
+    public float Rating { get; set; }
+    public int NumberRatings { get; set; }
+    public int ShippingDays { get; set; }
+    public List<Category>? Categories { get; set; }
+    public string? Description { get; set; }
+    public string? Xml { get; set; }
 
     public static List<ProductModel> From( IEnumerable<ProductSummaryDto> dtos )
     {

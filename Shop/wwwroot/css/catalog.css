@@ -9,6 +9,15 @@
     background-color: transparent;
 }
 
+/* PRODUCT INFO */
+.product-info {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    align-items: stretch;
+    background-color: transparent;
+}
+
 /* PRODUCT IMAGE */
 .product-image {
     min-width: 100%;
@@ -76,12 +85,12 @@
 
 /* PRODUCT BRAND */
 .product-brand {
+    min-width: 40%;
     display: flex;
     flex-direction: row;
-    align-items: center;
+    align-items: end;
     justify-content: end;
     flex-wrap: nowrap;
-
     white-space: nowrap;
     overflow: hidden;
     word-break: break-word;
@@ -96,9 +105,6 @@
 
 .product-brand-link {
     font-size: 14px;
-    width: calc(60%);
-    min-width: calc(60%);
-    max-width: calc(60%);
     white-space: nowrap;
     overflow: hidden;
     word-break: break-word;
@@ -110,10 +116,9 @@
 .product-shipping-pricing {
     width: 100%;
     display: flex;
-    flex-direction: row;
-    align-items: end;
-    justify-content: space-between;
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: start;
+    justify-content: start;
 }
 
 .shipping small {
@@ -175,8 +180,9 @@
 .product-slider-heading {
     margin-bottom: 16px;
     text-align: left;
-    font-weight: bold;
-    font-size: x-large;
+    font-weight: 400;
+    font-size: xx-large;
+    text-decoration: underline;
 }
 
 .product-slider-list {
@@ -191,8 +197,8 @@
 
 .product-slider-list > .product-card {
     flex: 0 0 0;
-    min-width: 125px;
-    max-width: 125px;
+    min-width: 200px;
+    max-width: 200px;
     min-height: 100%;
     max-height: 100%;
     margin-bottom: 16px;
@@ -200,6 +206,7 @@
     border-radius: 5px;
     background-color: var(--white);
     transition: transform 0.5s ease-in-out;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
 }
 
 .product-slider-list * .product-title {
@@ -546,114 +553,58 @@
 
 /* PRODUCT DETAILS */
 /* ------------------------------------------------------------------------------------------*/
-
-/* CONTAINER */
-.product-container {
+.product-details {
     margin-left: auto;
     margin-right: auto;
     max-width: 800px;
     padding: 24px;
 }
 
-/* TOP */
-.product-top {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    padding-bottom: 24px;
+.product-details .product-card {
+    padding: 0;
     border-bottom: 1px solid lightgray;
 }
 
 /* IMAGE */
-.product-top-image {
-    max-width: 500px;
+.product-details .product-image, .product-details .product-image:hover {
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, 0.1)
+}
+
+.product-details .product-image img {
+    max-width: 100%;
     width: 100%;
     height: auto;
-    padding: 8px;
 }
 
-.product-top-image img {
+.product-image {
+    min-width: 100%;
     max-width: 100%;
-    height: 100%;
-    border-radius: 0;
-}
-
-/* MAIN */
-.product-top-main {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
+    height: auto;
+    margin-bottom: 16px;
 }
 
 /* TITLE */
-.product-top-main .product-title {
+.product-details .product-card .product-title * {
+    margin-top: 16px;
+    line-height: 1.5;
+    font-size: large;
+    text-align: justify;
+}
+
+.product-details .product-title-divider {
     margin-bottom: 16px;
-    padding-bottom: 16px;
-    padding-left: 8px;
-    padding-right: 8px;
-    font-size: medium;
-    border-bottom: 1px solid lightgray;
 }
 
-.product-top-main-content {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
+/* SHIPPING/PRICING */
+.product-details .product-shipping-pricing {
     width: 100%;
-    padding-left: 8px;
-    padding-right: 8px;
-}
-
-/* SUMMARY */
-.product-summary {
     display: flex;
-    flex-direction: column;
-}
-
-/* RATING BRAND */
-.product-summary .rating-brand span {
-    font-size: 14px;
-}
-
-.product-summary .rating-brand a {
-    font-size: 16px;
-}
-
-/* SHIPPING */
-.product-shipping {
-    display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: end;
-    justify-content: center;
-    text-align: right;
-}
-
-.product-shipping .btn {
-    padding: 0;
-    margin: 0;
-    font-size: small;
-    text-decoration: none;
-}
-
-.product-shipping-button {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between;
     flex-wrap: wrap;
-    text-align: right;
 }
 
-.product-shipping-button:hover {
-    font-weight: bold;
-}
-
-/* LOCATION */
-.product-location-fields {
-    display: flex;
-    flex-direction: row;
-}
 
 /* ADDRESS FORM */
 .product-address-form {
@@ -671,26 +622,8 @@
     justify-content: stretch;
 }
 
-/* CART */
-.product-cart {
-    display: flex;
-    flex-direction: row;
-    align-items: stretch;
-    justify-content: stretch;
-    gap: 16px;
-}
-
-.product-cart button {
-    width: 50%;
-    height: 50px;
-}
-
-.product-cart i {
-    margin-right: 8px;
-}
-
 /* DESCRIPTION */
-.product-description {
+.product-description, .product-categories-container {
     padding: 24px 8px;
     text-align: justify;
     border-bottom: 1px solid lightgray;
@@ -698,10 +631,6 @@
 
 .product-description p {
     font-size: smaller;
-}
-
-.product-top-main-spacer {
-    display: none;
 }
 
 /* XML */
@@ -748,41 +677,33 @@
 }
 
 /* @ 992px */
-@media only screen and (min-width: 992px) {
-    .product-container {
-        padding: 0;
-        margin-top: 24px;
-    }
-    .product-top {
-        flex-direction: row;
-        align-items: stretch;
-        justify-content: space-between;
-        padding-left: 8px;
-        padding-right: 8px;
-    }
-    .product-top-image {
-        min-width: 450px;
-        max-width: 450px;
-        padding: 0;
-    }
-
-    .product-top-main {
-        min-height: 450px;
-        max-height: 450px;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .product-top-main-content {
-        display: flex;
-        flex-direction: column;
-        flex-grow: 1;
-        flex-shrink: 0;
+@media only screen and (min-width: 480px) {
+    .product-details .product-rating-count, .product-details .product-brand-label {
+        font-size: medium;
     }
     
-    .product-top-main-spacer {
-        display: flex;
-        flex-grow: 1;
-        flex-shrink: 0;
+    .product-details .product-rating i, .product-details .product-brand-link, .product-details .product-sale-price, .product-details .product-shipping {
+        font-size: large;
+    }
+    
+    .product-details .product-price, .product-details .product-card .product-title * {
+        font-size: x-large;
+    }
+    
+    .product-details .product-cart * {
+        font-size: x-large;
+    }
+    
+    .product-details .product-title-divider {
+        margin-bottom: 24px;
+    }
+    
+    .product-details .product-cart {
+        padding-bottom: 24px;
+    }
+    
+    .product-details .product-title, .product-details .product-rating-brand, .product-details .product-shipping-pricing, .product-details .product-cart {
+        padding-left: 8px;
+        padding-right: 8px;
     }
 }

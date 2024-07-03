@@ -36,16 +36,19 @@
                 @Product.NumberRatings
             </a>
         </div>
-
-        <!-- BRAND -->
-        <div class="product-brand">
-            <span>
-                Brand:&nbsp;
-            </span>
-            <a class="product-brand-link" href="@Consts.GetBrandSearchUrl( Product.BrandId )">
-                @Product.BrandName
-            </a>
-        </div>
+        
+        @if (CardType is Type.Details or Type.Normal or Type.Cart)
+        {
+            <!-- BRAND -->
+            <div class="product-brand">
+                <span class="product-brand-label">
+                    Brand:&nbsp;
+                </span>
+                <a class="product-brand-link" href="@Consts.GetBrandSearchUrl( Product.BrandId )">
+                    @Product.BrandName
+                </a>
+            </div>   
+        }
     </div>
     
     <!-- SHIPPING/PRICING -->
@@ -77,47 +80,87 @@
     </div>
     
     <!-- CART -->
-    @if (IsDetails)
+    @switch ( CardType )
     {
-        
-    }
-    else if (IsCart)
-    {
-        
-    }
-    else
-    {
-        if (IsProductInCart( Product, out int count ))
+        case Type.Details:
         {
-            <a class="btn btn-primary btn-icon search-item-cart-button" href="@Consts.PageCart">
-                <i class="fa-solid fa-circle-check fa-xs me-1"></i>
-                <small>View In Cart (@count)</small>
-            </a>
+            @:<!-- CART -->
+            <div class="product-cart w-100 d-flex flex-row align-items-stretch justify-content-between gap-3">
+                @if (IsProductInCart( Product, out int count ))
+                {
+                    @:<!-- CART BUTTON -->
+                    <a class="btn btn-primary btn-icon w-100">
+                        <i class="fa fa-shopping-cart fa-sm me-2"></i>
+                        <small>View In Cart (@count)</small>
+                    </a>
+                }
+                else {if (!Product.IsInStock)
+                    {
+                        @:<!-- DISABLED BUTTON -->
+                        <button disabled class="btn btn-secondary btn-icon w-100">
+                            <i class="fa-solid fa-circle-xmark fa-sm"></i>
+                            <small>Out of Stock</small>
+                        </button>
+                    }
+                    else
+                    {
+                        @:<!-- DROPDOWN LIST -->
+                        <div class="form-group w-50">
+                            <select id="quantitySelect" class="btn btn-outline-secondary btn-icon form-select h-100 w-100" @onchange="OnQuantityChange" value="@_selectedQuantity">
+                                @foreach ( int quantity in Quantities )
+                                {
+                                    <option value="@quantity" selected="@(_selectedQuantity == quantity)">Qty: @quantity</option>
+                                }
+                            </select>
+                        </div>
+                        @:<!-- ADD BUTTON -->
+                        <button class="btn btn-outline-primary btn-icon w-50" @onclick="@(async () => await AddToCart( Product ))">
+                            <i class="fa-solid fa-shopping-cart fa-sm me-2"></i>
+                            <small>Add To Cart</small>
+                        </button>
+                    } }
+            </div>
+            break;
         }
-        else if (Product.IsInStock)
+        case Type.Cart:
+            break;
+        default:
         {
-            <button class="btn btn-outline-primary btn-icon search-item-cart-button shadow-sm" @onclick="@(async () => await AddToCart( Product ))">
-                <i class="fa-solid fa-shopping-cart fa-xs me-1"></i>
-                <small>Add To Cart</small>
-            </button>
-        }
-        else
-        {
-            <button disabled class="btn btn-secondary btn-icon search-item-cart-button shadow-sm">
-                <i class="fa-solid fa-circle-xmark fa-xs me-1"></i>
-                <small>Out of Stock</small>
-            </button>
+            if (IsProductInCart( Product, out int count ))
+            {
+                <a class="btn btn-primary btn-icon search-item-cart-button" href="@Consts.PageCart">
+                    <i class="fa-solid fa-circle-check fa-xs me-1"></i>
+                    <small>View In Cart (@count)</small>
+                </a>
+            }
+            else {if (Product.IsInStock)
+                {
+                    <button class="btn btn-outline-primary btn-icon search-item-cart-button shadow-sm" @onclick="@(async () => await AddToCart( Product ))">
+                        <i class="fa-solid fa-shopping-cart fa-xs me-1"></i>
+                        <small>Add To Cart</small>
+                    </button>
+                }
+                else
+                {
+                    <button disabled class="btn btn-secondary btn-icon search-item-cart-button shadow-sm">
+                        <i class="fa-solid fa-circle-xmark fa-xs me-1"></i>
+                        <small>Out of Stock</small>
+                    </button>
+                } }
+            break;
         }
     }
 </div>
 
 @code 
 {
-    [Parameter] public bool IsDetails { get; set; }
-    [Parameter] public bool IsCart { get; set; }
+    [Parameter] public Type CardType { get; set; }
     [Parameter] public ProductModel Product { get; init; } = default!;
     [Inject] public CartManager CartManager { get; init; } = default!;
     CartItems _cartItems = CartItems.Empty();
+
+    readonly int[] Quantities = [1, 2, 3, 5, 10];
+    int _selectedQuantity = 1;
 
     public event Action<bool, string?>? OnItemAddedToCart;
 
@@ -147,8 +190,20 @@
         OnItemAddedToCart?.Invoke( true, null );
         StateHasChanged();
     }
+    void OnQuantityChange( ChangeEventArgs e )
+    {
+        _selectedQuantity = int.Parse( e.Value?.ToString() ?? string.Empty );
+    }
     static string GetDeliveryEstimateText( ProductModel item ) =>
         item.IsInStock ? $"Get within {item.ShippingDays} days." : "Out of stock.";
     static string GetDeliveryEstimateColor( ProductModel item ) =>
         item.IsInStock ? "text-success" : "text-danger";
+
+    public enum Type
+    {
+        Slider,
+        Normal,
+        Details,
+        Cart
+    }
 }

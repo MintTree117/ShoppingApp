@@ -15,10 +15,10 @@
 @if (_productLoaded)
 {
     <!-- CONTAINER -->
-    <div class="product-container">
+    <div class="product-details">
         <!-- TOP -->
         <div class="product-top">
-            <ProductCard Product="@_productModel" IsDetails="true"/>
+            <ProductCard Product="@_productModel" CardType="@ProductCard.Type.Details"/>
             @if (_showAddressBox)
             {
                 <!-- ADDRESS FORM -->
@@ -33,52 +33,19 @@
                     </button>
                 </div>
             }
-            <!-- CART -->
-            <div class="product-cart">
-                @if (IsProductInCart( _productModel, out int count ))
-                {
-                    <!-- CART BUTTON -->
-                    <a class="btn btn-primary btn-icon w-100">
-                        <i class="fa fa-shopping-cart me-2"></i>
-                        <small>View In Cart (@count)</small>
-                    </a>
-                }
-                else if (!_productModel.IsInStock)
-                {
-                    <!-- DISABLED BUTTON -->
-                    <button disabled class="btn btn-secondary btn-icon w-100">
-                        <i class="fa-solid fa-circle-xmark fa-xs"></i>
-                        <small>Out of Stock</small>
-                    </button>
-                }
-                else
-                {
-                    <!-- DROPDOWN LIST -->
-                    <div class="form-group w-50">
-                        <select id="quantitySelect" class="btn btn-outline-secondary btn-icon form-select h-100 w-100" @onchange="OnQuantityChange" value="@_selectedQuantity">
-                            @foreach ( int quantity in Quantities )
-                            {
-                                <option value="@quantity" selected="@( _selectedQuantity == quantity )">Qty: @quantity</option>
-                            }
-                        </select>
-                    </div>
-                    <!-- ADD BUTTON -->
-                    <button class="btn btn-outline-primary btn-icon" @onclick="@(async () => await OnClickAddToCart())">
-                        <i class="fa-solid fa-shopping-cart fa-xs"></i>
-                        <small>Add To Cart</small>
-                    </button>
-                }
-            </div>
         </div>
         
         <!-- CATEGORIES -->
-        <div class="product-categories d-flex flex-row flex-wrap align-items-center justify-content-start gap-2 py-3">
-            @foreach ( Category c in _productModel.Categories ?? [] )
-            {
-                <a class="d-inline-block btn btn-sm btn-outline-secondary mb-1" href="@GetCategoryUrl(c)">
-                    @c.Name
-                </a>
-            }
+        <div class="product-categories-container">
+            <h3>Categories</h3>
+            <div class="product-categories d-flex flex-row flex-wrap align-items-center justify-content-start gap-2 py-3">
+                @foreach ( Category c in _productModel.Categories ?? [] )
+                {
+                    <a class="d-inline-block btn btn-sm btn-outline-secondary mb-1" href="@GetCategoryUrl(c)">
+                        @c.Name
+                    </a>
+                }
+            </div>
         </div>
         
         <!-- DESCRIPTION -->
@@ -123,9 +90,7 @@
 
     CategoriesCollection _categoriesCollection = default!;
     BrandsCollection _brandsCollection = default!;
-
-    readonly int[] Quantities = [1, 2, 3, 5, 10];
-    int _selectedQuantity = 1;
+    
 
     ProductModel _productModel = default!;
     bool _productLoaded = false;
@@ -246,10 +211,6 @@
             _posY = null;
         else
             _posY = result;
-    }
-    void OnQuantityChange( ChangeEventArgs e )
-    {
-        _selectedQuantity = int.Parse( e.Value?.ToString() ?? string.Empty );
     }
     bool IsProductInCart( ProductModel p, out int count )
     {

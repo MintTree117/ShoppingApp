@@ -21,7 +21,7 @@
         <div class="product-slider-list">
             @foreach ( ProductModel p in _showProducts )
             {
-                <ProductCard Product="@p"/>
+                <ProductCard Product="@p" CardType="@ProductCard.Type.Slider"/>
             }
         </div>
     </div>

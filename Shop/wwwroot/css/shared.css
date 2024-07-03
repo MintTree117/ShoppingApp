@@ -151,17 +151,18 @@ a:hover {
 
 .link-dark {
     color: var(--dark-grey) !important;
+    text-decoration: none;
 }
 
 .link-dark:hover {
     color: var(--primary) !important;
+    text-decoration: underline;
 }
 
 /* CONTENT CONTAINER */
 /* ------------------------------------------------------------------------------------------*/
 
 .content-container {
-    min-width: 1600px;
     max-width: 1600px;
     margin: 0 auto;
     padding-top: 0;
