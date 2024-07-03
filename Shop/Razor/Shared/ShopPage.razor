@@ -2,6 +2,7 @@
 @using Shop.Utilities
 @using Shop.Infrastructure.Authentication
 @using Microsoft.AspNetCore.Components.Authorization
+@using Shop.Infrastructure
 @using Shop.Types.Common.ReplyTypes
 @using Shop.Types.Common.ValueTypes
 @inherits ComponentBase
@@ -10,7 +11,8 @@
 @code {
     [CascadingParameter( Name = "layout" )]
     public MainLayout Layout { get; init; } = default!;
-    
+
+    [Inject] protected LoadingService LoadingService { get; init; } = default!;
     [Inject] protected IConfiguration Configuration { get; init; } = default!;
     [Inject] protected AuthenticationStateManager Authentication { get; init; } = default!;
     [Inject] protected HttpService Http { get; init; } = default!;
@@ -27,6 +29,11 @@
     protected virtual void OnDispose()
     {
         
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        LoadingService.StartLoadingPage( "Loading Page." );
     }
     protected override void OnParametersSet()
     {
@@ -58,7 +65,7 @@
 
     protected virtual async void OnAuthenticationStateChange( Task<AuthenticationState> task )
     {
-        StateHasChanged();
+        //StateHasChanged();
     }
     void PushAlert( AlertType type, string message )
     {

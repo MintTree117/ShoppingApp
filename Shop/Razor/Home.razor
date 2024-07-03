@@ -12,9 +12,9 @@
     <div class="content-container position-relative">
         <LoadingPanelComponent @ref="@_loadingPanel"/>
         <div class="d-flex flex-column align-items-stretch justify-content-start px-0 py-3 gap-3">
-            <ProductSlider @ref="_featuredSlider" Title="Featured Products"/>
-            <ProductSlider @ref="_salesSlider" Title="Hot Deals"/>
-            <ProductSlider @ref="_sellingSlider" Title="Best Selling"/>
+            <ProductSlider @ref=" _featuredSlider" Title="Featured Products"/>
+            <ProductSlider @ref=" _salesSlider" Title="Hot Deals"/>
+            <ProductSlider @ref=" _sellingSlider" Title="Best Selling"/>
         </div>
     </div>
 </div>
@@ -26,15 +26,19 @@
     ProductSlider _salesSlider = default!;
     ProductSlider _sellingSlider = default!;
     ProductSpecialsDto _specials = ProductSpecialsDto.Empty();
-    bool _parametersSet = false;
 
     protected override async Task OnAfterRenderAsync( bool firstRender )
     {
         await base.OnAfterRenderAsync( firstRender );
-        if (_parametersSet)
+        if (!firstRender)
             return;
-        _parametersSet = true;
+        _ = LoadSpecialsAsync();
+    }
+
+    async Task LoadSpecialsAsync()
+    {
         _loadingPanel.ToggleLoading( true, "Loading product specials..." );
+        await Utils.Delay();
         var reply = await Http.GetAsync<ProductSpecialsDto>( Consts.ApiGetSpecials );
         if (!reply)
         {
@@ -46,6 +50,7 @@
         _featuredSlider.SetProducts( ProductModel.From( _specials.TopFeatured ) );
         _salesSlider.SetProducts( ProductModel.From( _specials.TopSales ) );
         _sellingSlider.SetProducts( ProductModel.From( _specials.TopSelling ) );
+
         _loadingPanel.ToggleLoading( false );
         StateHasChanged();
     }

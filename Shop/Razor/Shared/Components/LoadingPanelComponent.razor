@@ -1,27 +1,26 @@
-@if (_isLoading)
+@if (IsLoading)
 {
-    <div class="loading-container @_displayCss">
-        <div class="loading-spinner"></div>
-        @if (!string.IsNullOrEmpty( _message ))
-        {
-            <p>@_message</p>
-        }
+    <div class="component-loader-spinner-container d-flex flex-column">
+        <div class="component-loader-spinner"></div>
+        <p class="text-dark">@GetMessage()</p>
     </div>   
 }
 
 @code 
-{ 
-    const string HideCss = "d-none";
-    const string ShowCss = "d-flex";
-    string _displayCss = HideCss;
-    string _message = string.Empty;
-    bool _isLoading = false;
+{
+    [Parameter] public string Message { get; set; } = string.Empty;
+    [Parameter] public bool IsLoading { get; set; } = true;
 
     public void ToggleLoading( bool value, string? message = null )
     {
-        _displayCss = _isLoading ? ShowCss : HideCss;
-        _isLoading = value;
-        _message = message ?? string.Empty;
+        IsLoading = value;
+        Message = message ?? string.Empty;
         StateHasChanged();
     }
+
+    string GetMessage() =>
+        !string.IsNullOrEmpty( Message ) ? Message : "Loading...";
+
+    const string HideCss = "d-none";
+    const string ShowCss = "d-flex";
 }

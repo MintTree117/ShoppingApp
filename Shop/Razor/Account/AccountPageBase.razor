@@ -1,16 +1,19 @@
 @layout AccountLayout 
-@using Shop.Infrastructure
 @inherits Shop.Razor.Shared.ShopPage
 
-@code {
-    [Inject] public LoadingService LoadingService { get; set; } = default!;
-
+@code 
+{
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        StopLoading();
+    }
     protected void StartLoading( string? message )
     {
-        LoadingService.StartLoading( message );
+        LoadingService.StartLoadingPage( message );
     }
     protected void StopLoading()
     {
-        LoadingService.StopLoading();
+        LoadingService.StopLoadingPage();
     }
 }

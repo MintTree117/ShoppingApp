@@ -1,0 +1,203 @@
+@using Microsoft.AspNetCore.Components.Authorization
+@using Shop.Infrastructure
+@using Shop.Infrastructure.Authentication
+@using Shop.Infrastructure.Http
+@using Shop.Types.Products
+@using Shop.Types.Users
+@using Shop.Utilities
+@using Shop.Razor.Shared.Components
+@implements IDisposable
+
+<!-- TOGGLE BUTTON -->
+<button class="btn btn-link d-flex flex-row align-items-center justify-content-start w-100 px-0" @onclick="@(async()=>await OnClickAddressButton())">
+    <i class="fa fa-location-dot me-2"></i>
+    <span>@GetDeliveryToText()</span>
+</button>
+
+<!-- POPUP BOX -->
+@if (_showAddressBox)
+{
+    <!-- ADDRESS FORM CONTAINER -->
+    <div class="address-box-container">
+        <div class="address-box-inner">
+            <div class="address-box-inner-top">
+                <h4 class="m-0">Choose your location</h4>
+                <button class="btn btn-link-dark btn-icon" @onclick="OnClickClose">
+                    <i class="fa fa-x"></i>
+                </button>
+            </div>
+            <div class="address-box-inner-content">
+                <!-- SAVED ADDRESSES -->
+                <AuthorizeView>
+                    <NotAuthorized>
+                        <a href="@Consts.PageLoginOrRegister" class="text-center">
+                            <i class="fa fa-sign-in me-2"></i>
+                            <span>Login to view saved addresses.</span>
+                        </a>
+                    </NotAuthorized>
+                    <Authorized>
+                        <h5>Saved Addresses</h5>
+                        <ul class="list-unstyled">
+                            @foreach ( AddressModel m in _userAddresses )
+                            {
+                                <li class="w-100">
+                                    <button class="btn btn-outline-secondary my-1 w-100" @onclick="@(async()=>await OnClickSaved(m))">
+                                        @GetSavedAddressText( m );
+                                    </button>
+                                </li>
+                            }
+                        </ul>
+                        <PaginationPanel @ref="_paginationPanel"></PaginationPanel>
+                    </Authorized>
+                </AuthorizeView>
+            
+                <hr/>
+            
+                <!-- ADDRESS FORM -->
+                <div class="address-box-form">
+                    <span class="d-block w-100 text-center mb-3">Or enter a custom address:</span>
+                    <div class="product-address-form-inputs mb-3">
+                        <input type="number" min="0" max="100000" step="1" @onchange="OnChangePosX" class="form-control"/>
+                        <input type="number" min="0" max="100000" step="1" @onchange="OnChangePosY" class="form-control"/>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-icon search-filters-btn-main" @onclick="OnClickSubmit">
+                        <i class="fa-solid fa-circle-check me-2"></i>
+                        Update Address
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+    
+@code 
+{
+    [Inject] public AuthenticationStateManager AuthManager { get; init; } = default!;
+    [Inject] public LocationManager AddressManager { get; init; } = default!;
+    [Inject] public HttpService Http { get; init; } = default!;
+
+    public event Action<bool>? ToggleLoading;
+    
+    PaginationPanel? _paginationPanel;
+    const int _pageSize = 5;
+    int _currentPage = 1;
+    int _totalCount = 0;
+    
+    List<AddressModel> _userAddresses = [];
+    AddressModel? _currentAddress;
+    ProductModel _productModel = new();
+    bool _paginationSubscribed = false;
+    bool _showAddressBox = false;
+    bool _authenticated = false;
+
+    public void Dispose()
+    {
+        if (_paginationPanel is not null)
+            _paginationPanel.OnPageChangeAsync -= OnPaginationChange;
+    }
+    public void SetProduct( ProductModel p )
+    {
+        _productModel = p;
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        _currentAddress = await AddressManager.GetCurrentAddress();
+    }
+    protected override async Task OnAfterRenderAsync( bool firstRender )
+    {
+        await base.OnAfterRenderAsync( firstRender );
+        
+        var authState = await AuthManager.GetSessionState();
+        _authenticated = authState.User.Identity is { IsAuthenticated: true };
+        
+        if (_paginationPanel is not null && !_paginationSubscribed)
+        {
+            _paginationPanel.OnPageChangeAsync += OnPaginationChange;
+            _paginationSubscribed = true;
+            ToggleLoading?.Invoke( false );
+        }
+
+        _paginationPanel?.Set( _currentPage, _pageSize, _totalCount );
+    }
+    
+    async Task OnClickAddressButton()
+    {
+        ToggleLoading?.Invoke( true );
+        
+        var address = await AddressManager.GetCurrentAddress();
+        var authState = await AuthManager.GetSessionState();
+
+        _currentAddress = address;
+        _authenticated = authState.User.Identity is { IsAuthenticated: true };
+        
+        if (_authenticated)
+            await GetUserAddresses();
+
+        _showAddressBox = true;
+    }
+    async Task OnClickSaved( AddressModel m )
+    {
+        ToggleLoading?.Invoke( true );
+        _currentAddress = m;
+        await AddressManager.SetCurrentLocation( _currentAddress );
+        ToggleLoading?.Invoke( false );
+        OnClickClose();
+    }
+    async Task OnClickSubmit()
+    {
+        ToggleLoading?.Invoke( true );
+        await AddressManager.SetCurrentLocation( _currentAddress );
+        ToggleLoading?.Invoke( false );
+        OnClickClose();
+    }
+    async Task OnPaginationChange( int page )
+    {
+        ToggleLoading?.Invoke( true );
+        _currentPage = page;
+        await GetUserAddresses();
+        ToggleLoading?.Invoke( false );
+    }
+    async Task GetUserAddresses()
+    {
+        Dictionary<string, object> parameters = [];
+        parameters.Add( "Page", _currentPage );
+        parameters.Add( "PageSize", _pageSize );
+        var addressReply = await Http.GetAsyncAuthenticated<ViewPagedAddressesResponse>( Consts.ApiGetAddresses, parameters );
+        _userAddresses = addressReply
+            ? addressReply.Data.Addresses
+            : [];
+        _totalCount = addressReply
+            ? addressReply.Data.TotalCount
+            : 0;
+        StateHasChanged();
+    }
+
+    void OnClickClose()
+    {
+        _showAddressBox = false;
+        StateHasChanged();
+    }
+    void OnChangePosX( ChangeEventArgs args )
+    {
+        bool parsed = int.TryParse( args.Value?.ToString(), out int result );
+        if (!parsed)
+            return;
+
+        _currentAddress ??= new AddressModel();
+        _currentAddress.PosX = result;
+    }
+    void OnChangePosY( ChangeEventArgs args )
+    {
+        bool parsed = int.TryParse( args.Value?.ToString(), out int result );
+        if (!parsed)
+            return;
+
+        _currentAddress ??= new AddressModel();
+        _currentAddress.PosY = result;
+    }
+    string GetDeliveryToText() =>
+        _currentAddress is null ? "Enter an address to see delivery time estimates." : $"Delivering to: {_currentAddress.Name} ({_currentAddress.PosX} , {_currentAddress.PosY})";
+    string GetSavedAddressText( AddressModel m ) =>
+        $"{m.Name} ({m.PosX}, {m.PosY})";
+}

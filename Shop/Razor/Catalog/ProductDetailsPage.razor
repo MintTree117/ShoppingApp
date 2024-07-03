@@ -7,53 +7,46 @@
 @using Shop.Types.Categories
 @using Shop.Types.Products
 @using Shop.Types.Products.Dtos
+@using Shop.Types.Users
+@using Shop.Razor.Shared.Components
 @inherits Shop.Razor.Shared.ShopPage
-@inject CategoriesCache Categories;
-@inject BrandsCache Brands;
-@inject LocationManager LocationManager;
+
+<LoadingPanelPage @ref="@_loadingPanel"/>
 
 @if (_productLoaded)
 {
     <!-- CONTAINER -->
     <div class="product-details">
+        
         <!-- TOP -->
         <div class="product-top">
             <ProductCard Product="@_productModel" CardType="@ProductCard.Type.Details"/>
-            @if (_showAddressBox)
-            {
-                <!-- ADDRESS FORM -->
-                <div class="product-address-form">
-                    <div class="product-address-form-inputs mb-2">
-                        <input type="number" min="0" max="100000" step="1" value="@_posX" @onchange="OnChangePosX" class="form-control"/>
-                        <input type="number" min="0" max="100000" step="1" value="@_posY" @onchange="OnChangePosY" class="form-control"/>
-                    </div>
-                    <button class="btn btn-primary btn-icon search-filters-btn-main" @onclick="OnClickApplyLocation">
-                        <i class="fa-solid fa-circle-check me-2"></i>
-                        Save Address
-                    </button>
-                </div>
-            }
         </div>
-        
+
+        <!-- ADDRESS -->
+        <div class="product-details-address-box">
+            <AddressBox @ref=" _addressBox"/>
+        </div>
+
         <!-- CATEGORIES -->
         <div class="product-categories-container">
-            <h3>Categories</h3>
-            <div class="product-categories d-flex flex-row flex-wrap align-items-center justify-content-start gap-2 py-3">
+            <h3 class="product-categories-title">Categories</h3>
+            <div class="product-categories">
                 @foreach ( Category c in _productModel.Categories ?? [] )
                 {
-                    <a class="d-inline-block btn btn-sm btn-outline-secondary mb-1" href="@GetCategoryUrl(c)">
+                    <a class="btn btn-sm btn-outline-secondary product-category shadow-sm" href="@GetCategoryUrl( c )">
                         @c.Name
                     </a>
                 }
             </div>
         </div>
-        
+
         <!-- DESCRIPTION -->
         <div class="product-description">
             <h3>Description</h3>
             <p class="mb-0">@_productModel.Description</p>
         </div>
-        
+
         <!-- XML -->
         <div class="product-xml">
             <h3>Specifications</h3>
@@ -71,44 +64,55 @@
                 </table>
             </div>
         </div>
-        
+
         <!-- SLIDERS -->
         <div class="product-details-sliders">
             <!-- SIMILAR PRODUCTS -->
-            <ProductSlider @ref="_similarSlider" Title="Similar Products"/>
+            <ProductSlider @ref=" _similarSlider" Title="Similar Products"/>
         </div>
     </div>
 }
 
 @code 
 {
+    // SERVICES
+    [Inject] public LocationManager LocationManager { get; set; } = default!;
+    [Inject] public BrandsCache Brands { get; set; } = default!;
+    [Inject] public CategoriesCache Categories { get; set; } = default!;
+    [Inject] public CartManager CartManager { get; init; } = default!;
+    
+    // PARAMETERS
     [SupplyParameterFromQuery]
     public Guid ProductId { get; set; }
-
-    [Inject] public CartManager CartManager { get; init; } = default!;
+    Guid PreviousProductId = Guid.Empty;
+    
+    // COMPONENTS
+    AddressBox _addressBox = default!;
+    ProductSlider _similarSlider = default!;
+    LoadingPanelPage _loadingPanel = default!;
+    
+    // DATA
     CartItems _cartItems = CartItems.Empty();
-
     CategoriesCollection _categoriesCollection = default!;
     BrandsCollection _brandsCollection = default!;
-    
-
-    ProductModel _productModel = default!;
-    bool _productLoaded = false;
-    bool _showAddressBox = false;
+    ProductModel? _productModel;
     Dictionary<string, string> _productSpecs = [];
+    AddressModel? _address;
+    bool _productLoaded = false;
+    bool _set = false;
+    bool _addressSubscribed = false;
     
-    int? _posX;
-    int? _posY;
-
-    ProductSlider _similarSlider = default!;
-    
-    protected override async Task OnParametersSetAsync()
+    // LIFECYCLES
+    protected override void OnDispose()
     {
-        await base.OnParametersSetAsync();
+        base.OnDispose();
+        LocationManager.OnLocationChanged -= OnAddressChanged;
+        _addressBox.ToggleLoading += ToggleLoading;
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
 
-        if (ProductId == Guid.Empty)
-            return;
-        
         var cats = Categories.GetCategories();
         var brands = Brands.GetBrands();
         await Task.WhenAll( cats, brands );
@@ -119,10 +123,42 @@
         }
         _categoriesCollection = cats.Result.Data;
         _brandsCollection = brands.Result.Data;
+        _address = await LocationManager.GetCurrentAddress();
+    }
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        if (!_set)
+        {
+            LocationManager.OnLocationChanged += OnAddressChanged;
+        }
+        _set = true;
+
+        if (PreviousProductId == ProductId)
+            return;
+
+        PreviousProductId = ProductId;
+        if (ProductId == Guid.Empty)
+            return;
         
         await LoadDetails();
     }
+    protected override async Task OnAfterRenderAsync( bool firstRender )
+    {
+        await base.OnAfterRenderAsync( firstRender );
+        if (_productModel is not null && _addressBox is not null)
+        {
+            _addressBox.SetProduct( _productModel );
+        }
 
+        if (!_addressSubscribed && _addressBox is not null)
+        {
+            _addressBox.ToggleLoading += ToggleLoading;
+            _addressSubscribed = true;
+        }
+    }
+
+    // HELPERS
     async Task LoadDetails()
     {
         var reply = await Http.GetAsync<ProductDetailsDto>( Consts.ApiGetDetails, GetUrlParamsDetails() );
@@ -135,6 +171,8 @@
         _productModel = ProductModel.From( reply.Data, _categoriesCollection, _brandsCollection );
         _productSpecs = ParseXmlToDictionary( _productModel.Xml );
         _productLoaded = true;
+
+        _loadingPanel.ToggleLoading( false );
 
         /*var cartReply = await CartManager.Get();
         if (cartReply)
@@ -178,39 +216,25 @@
         }
         _similarSlider.SetProducts( ProductModel.From( reply.Data ) );
     }
-    async Task OnClickApplyLocation()
+    async Task OnAddressChanged( AddressModel? address )
     {
-        await LocationManager.SetLocation( _posX, _posY );
+        _address = address;
+        if (_productModel is null)
+        {
+            PushError( "Product model is null." );
+            return;
+        }
+        
         var reply = await Http.GetAsync<List<int>>( Consts.ApiGetEstimates, GetUrlParamsEstimate() );
         if (!reply)
         {
             PushError( reply, "Failed to update delivery estimate." );
             return;
         }
-
+        
         _productModel.ShippingDays = reply.Data.FirstOrDefault();
         PushSuccess( "Updated delivery estimate." );
         StateHasChanged();
-    }
-    
-    void OnClickAddress()
-    {
-        _showAddressBox = !_showAddressBox;
-        StateHasChanged();
-    }
-    void OnChangePosX( ChangeEventArgs args )
-    {
-        if (!int.TryParse( args.Value?.ToString(), out int result ))
-            _posX = null;
-        else
-            _posX = result;
-    }
-    void OnChangePosY( ChangeEventArgs args )
-    {
-        if (!int.TryParse( args.Value?.ToString(), out int result ))
-            _posY = null;
-        else
-            _posY = result;
     }
     bool IsProductInCart( ProductModel p, out int count )
     {
@@ -222,10 +246,10 @@
         Dictionary<string, object> parameters = new() {
             { "ProductId", ProductId }
         };
-        if (_posX is null || _posY is null)
+        if (_address is null)
             return parameters;
-        parameters.Add( "PosX", _posX.Value );
-        parameters.Add( "PosY", _posY.Value );
+        parameters.Add( "PosX", _address.PosX );
+        parameters.Add( "PosY", _address.PosY );
         return parameters;
     }
     Dictionary<string, object> GetUrlParamsEstimate()
@@ -233,10 +257,10 @@
         Dictionary<string, object> parameters = new() {
             { "ProductIds", new List<Guid>() { ProductId } }
         };
-        if (_posX is null || _posY is null)
+        if (_address is null)
             return parameters;
-        parameters.Add( "PosX", _posX.Value );
-        parameters.Add( "PosY", _posY.Value );
+        parameters.Add( "PosX", _address.PosX );
+        parameters.Add( "PosY", _address.PosY );
         return parameters;
     }
     static Dictionary<string, string> ParseXmlToDictionary( string? xmlString )
@@ -254,18 +278,12 @@
 
         return xmlDictionary;
     }
-    string GetDeliveryToText() =>
-        _posX is null || _posY is null ? "(0 , 0)" : $"({_posX} , {_posY})";
-    string GetDeliveryToIcon() =>
-        _showAddressBox ? "fa-angle-up" : "fa-angle-down";
-    static string GetBrandUrl( Guid brandId ) =>
-        Consts.GetProductSearchUrl( $"?BrandIds={brandId}&" );
     static string GetCategoryUrl( Category c ) =>
         Consts.GetProductSearchUrl( $"?CategoryId={c.Id}&" );
     static string GetDeliveryEstimateText( ProductModel item )
     {
         if (item.ShippingDays <= 0)
-            return "Enter an address";
+            return "Out of stock";
 
         return item.IsInStock
             ? $"Get within {item.ShippingDays} days"
@@ -277,5 +295,13 @@
         string.IsNullOrWhiteSpace( value )
             ? " td-empty"
             : " td-full";
-
+    void ToggleLoading( bool value )
+    {
+        Console.WriteLine("toggled in details");
+        
+        if (value) _loadingPanel.ToggleLoading( true );
+        else _loadingPanel.ToggleLoading( false );
+        
+        StateHasChanged();
+    }
 }

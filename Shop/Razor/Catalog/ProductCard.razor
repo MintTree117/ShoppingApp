@@ -71,6 +71,7 @@
                 </span>
             }
         </div>
+        
         <!-- SHIPPING -->
         <div class="product-shipping">
             <small class="@GetDeliveryEstimateColor( Product )">
@@ -84,41 +85,41 @@
     {
         case Type.Details:
         {
-            @:<!-- CART -->
+            <!-- CART -->
             <div class="product-cart w-100 d-flex flex-row align-items-stretch justify-content-between gap-3">
                 @if (IsProductInCart( Product, out int count ))
                 {
-                    @:<!-- CART BUTTON -->
+                    <!-- CART BUTTON -->
                     <a class="btn btn-primary btn-icon w-100">
                         <i class="fa fa-shopping-cart fa-sm me-2"></i>
                         <small>View In Cart (@count)</small>
                     </a>
                 }
-                else {if (!Product.IsInStock)
-                    {
-                        @:<!-- DISABLED BUTTON -->
-                        <button disabled class="btn btn-secondary btn-icon w-100">
-                            <i class="fa-solid fa-circle-xmark fa-sm"></i>
-                            <small>Out of Stock</small>
-                        </button>
-                    }
-                    else
-                    {
-                        @:<!-- DROPDOWN LIST -->
-                        <div class="form-group w-50">
-                            <select id="quantitySelect" class="btn btn-outline-secondary btn-icon form-select h-100 w-100" @onchange="OnQuantityChange" value="@_selectedQuantity">
-                                @foreach ( int quantity in Quantities )
-                                {
-                                    <option value="@quantity" selected="@(_selectedQuantity == quantity)">Qty: @quantity</option>
-                                }
-                            </select>
-                        </div>
-                        @:<!-- ADD BUTTON -->
-                        <button class="btn btn-outline-primary btn-icon w-50" @onclick="@(async () => await AddToCart( Product ))">
-                            <i class="fa-solid fa-shopping-cart fa-sm me-2"></i>
-                            <small>Add To Cart</small>
-                        </button>
-                    } }
+                else if( !Product.IsInStock )
+                {
+                    <!-- DISABLED BUTTON -->
+                    <button disabled class="btn btn-secondary btn-icon w-100">
+                        <i class="fa-solid fa-circle-xmark fa-sm"></i>
+                        <small>Out of Stock</small>
+                    </button>
+                }
+                else
+                {
+                    <!-- DROPDOWN LIST -->
+                    <div class="form-group w-50">
+                        <select id="quantitySelect" class="btn btn-outline-secondary btn-icon form-select h-100 w-100" @onchange="OnQuantityChange" value="@_selectedQuantity">
+                            @foreach ( int quantity in Quantities )
+                            {
+                                <option value="@quantity" selected="@(_selectedQuantity == quantity)">Qty: @quantity</option>
+                            }
+                        </select>
+                    </div>
+                    <!-- ADD BUTTON -->
+                    <button class="btn btn-outline-primary btn-icon w-50" @onclick="@(async () => await AddToCart( Product ))">
+                        <i class="fa-solid fa-shopping-cart fa-sm me-2"></i>
+                        <small>Add To Cart</small>
+                    </button>
+                } 
             </div>
             break;
         }
@@ -133,7 +134,9 @@
                     <small>View In Cart (@count)</small>
                 </a>
             }
-            else {if (Product.IsInStock)
+            else 
+            {
+                if (Product.IsInStock)
                 {
                     <button class="btn btn-outline-primary btn-icon search-item-cart-button shadow-sm" @onclick="@(async () => await AddToCart( Product ))">
                         <i class="fa-solid fa-shopping-cart fa-xs me-1"></i>
@@ -146,7 +149,8 @@
                         <i class="fa-solid fa-circle-xmark fa-xs me-1"></i>
                         <small>Out of Stock</small>
                     </button>
-                } }
+                } 
+            }
             break;
         }
     }

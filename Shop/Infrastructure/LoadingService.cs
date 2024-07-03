@@ -2,19 +2,19 @@ namespace Shop.Infrastructure;
 
 public sealed class LoadingService
 {
-    public event Action? OnChange;
-    bool _isLoading;
+    public event Action? OnChangePage;
+    bool _isLoadingPage;
     string? _message;
 
-    internal bool IsLoading
+    internal bool IsLoadingPage
     {
-        get => _isLoading;
+        get => _isLoadingPage;
         private set
         {
-            if (_isLoading == value) 
+            if (_isLoadingPage == value) 
                 return;
-            _isLoading = value;
-            NotifyStateChanged();
+            _isLoadingPage = value;
+            NotifyStateChangedPage();
         }
     }
     internal string? Message
@@ -25,20 +25,19 @@ public sealed class LoadingService
             if (_message == value) 
                 return;
             _message = value;
-            NotifyStateChanged();
+            NotifyStateChangedPage();
         }
     }
-    internal void StartLoading( string? message = null )
+    internal void StartLoadingPage( string? message = null )
     {
         Message = message;
-        IsLoading = true;
+        IsLoadingPage = true;
     }
-    internal void StopLoading()
+    internal void StopLoadingPage()
     {
-        IsLoading = false;
+        IsLoadingPage = false;
         Message = null;
     }
-
-    void NotifyStateChanged() => 
-        OnChange?.Invoke();
+    void NotifyStateChangedPage() => 
+        OnChangePage?.Invoke();
 }

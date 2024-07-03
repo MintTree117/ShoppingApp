@@ -3,11 +3,13 @@
 @using System.Web
 @using Shop.Infrastructure
 @using Shop.Razor.Shared.Components
+@using Shop.Types
 @using Shop.Types.Brands
 @using Shop.Types.Categories
 @using Shop.Types.Common.ValueTypes
 @using Shop.Types.Products
 @using Shop.Types.Products.Dtos
+@using Shop.Types.Users
 @using Shop.Utilities
 @inherits Shop.Razor.Shared.ShopPage
 @inject CategoriesCache CategoriesCache
@@ -15,20 +17,24 @@
 @inject LocationManager LocationManager;
 
 <!-- MARKUP -->
-<ProductSearchHeader @ref="_headerRazor"/>
-<div class="content-container search-body">
-    <ProductSearchFilters @ref="_filtersRazor"/>
-    <div class="search-body-main">
-        <ProductSearchList @ref="_searchList"/>
-        <div class="d-flex align-items-center mx-auto mt-3">
-            <PaginationPanel @ref="_paginationRazor"/>
+<div class="position-relative">
+    <LoadingPanelComponent @ref="@_loader"/>
+    <ProductSearchHeader @ref="@_headerRazor"/>
+    <div class="content-container search-body">
+        <ProductSearchFilters @ref="@_filtersRazor"/>
+        <div class="search-body-main">
+            <ProductSearchList @ref="@_searchList"/>
+            <div class="d-flex align-items-center mx-auto mt-3">
+                <PaginationPanel @ref="@_paginationRazor"/>
+            </div>
         </div>
     </div>
 </div>
 <!-- MARKUP -->
 
-@code 
+@code
 {
+    LoadingPanelComponent _loader = default!;
     ProductSearchHeader _headerRazor = default!;
     ProductSearchFilters _filtersRazor = default!;
     ProductSearchList _searchList = default!;
@@ -72,9 +78,13 @@
     protected override async Task OnParametersSetAsync()
     {
         await base.OnParametersSetAsync();
+        Console.WriteLine("TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT");
+        _loader.ToggleLoading( true, "Loading..." );
         ParseQueryString();
         await GetLocation();
         await SearchProducts();
+        await Utils.Delay();
+        _loader.ToggleLoading( false );
     }
     protected override async Task OnAfterRenderAsync( bool firstRender )
     {
@@ -97,7 +107,7 @@
 
             LocationManager.OnLocationChanged += OnChangeLocation;
 
-            await Reload();
+            Reload();
         }
     }
     
@@ -228,10 +238,9 @@
         return urlString.ToString();
     }
     
-    async Task Reload()
+    void Reload()
     {
         Navigation.NavigateTo( BuildSearchQueryString( Consts.PageProductSearch, false ), false, true );
-        //await SearchProducts();
     }
     async Task SearchProducts()
     {
@@ -252,7 +261,7 @@
     }
     async Task GetLocation()
     {
-        var reply = await LocationManager.GetLocation();
+        AddressModel? reply = await LocationManager.GetCurrentAddress();
         if (reply is null)
         {
             _parametersDto.PosX = null;
@@ -264,14 +273,32 @@
             _parametersDto.PosY = reply.PosY;
         }
     }
-    async Task OnChangeLocation( Location? location )
+    async Task OnChangeLocation( AddressModel? location )
     {
+        _loader.ToggleLoading( true, "Loading Location..." );
+        await Utils.Delay();
+
+        if (location is null)
+        {
+            _parametersDto.PosX = null;
+            _parametersDto.PosY = null;
+        }
+        else
+        {
+            _parametersDto.PosX = location.PosX;
+            _parametersDto.PosY = location.PosY;
+        }
+        
         var estimatesReply = await Http.GetAsync<List<int>>(
             BuildEstimatesQueryString() );
 
         if (!estimatesReply)
+        {
             PushWarning( "Failed to get estimates." );
-
+            _loader.ToggleLoading( false );
+            return;
+        }
+        
         try
         {
             for ( int i = 0; i < estimatesReply.Data.Count; i++ )
@@ -290,51 +317,48 @@
         {
             PushWarning( "There was a miscount in the delivery time estimates. The displayed timings may not reflect the products they represent." );
             Console.Error.WriteLine( e );
+            _loader.ToggleLoading( false );
         }
-
-
+        
         _searchList.RefreshState();
+        _loader.ToggleLoading( false );
     }
-    async Task OnBreadcrumbSelected( Category? category )
+    void OnBreadcrumbSelected( Category? category )
     {
         _parametersDto = SearchParametersDto.Empty();
         _parametersDto.CategoryId = category?.Id ?? null;
         
-        await Reload();
+        Reload();
     }
-    async Task OnPageChanged( int newPage )
+    void OnPageChanged( int newPage )
     {
         _parametersDto.Page = newPage;
-        await Reload();
+        Reload();
     }
-    async Task OnPageSizeChanged( int newPageSize )
+    void OnPageSizeChanged( int newPageSize )
     {
         _parametersDto.Page = 0;
         _parametersDto.PageSize = newPageSize;
-        await Reload();
+        Reload();
     }
-    async Task OnPageSortChanged( int newPageSortIndex )
+    void OnPageSortChanged( int newPageSortIndex )
     {
         _parametersDto.Page = 0;
         _parametersDto.SortBy = newPageSortIndex;
-        await Reload();
+        Reload();
     }
-    async Task OnSearchFiltersRazorChanged()
+    void OnSearchFiltersRazorChanged()
     {
         if (_parametersDto.CategoryId != _currentCategory?.Id)
-        {  
+        {
+            Console.WriteLine( "NO EQUAL CATEGORIES" );
             if (_parametersDto.CategoryId is not null)
-            _categoryCollection.Categories.TryGetValue( _parametersDto.CategoryId.Value, out _currentCategory );
-            Console.WriteLine("Not equal!!!!!!!!!!!!1");
+                _categoryCollection.Categories.TryGetValue( _parametersDto.CategoryId.Value, out _currentCategory );
             _parametersDto = SearchParametersDto.Empty();
             _parametersDto.CategoryId = _currentCategory?.Id;
         }
-        else
-        {
-            Console.WriteLine("EQUAL");
-        }
 
-        await Reload();
+        Reload();
     }
     void OnToggleMobileFilters()
     {

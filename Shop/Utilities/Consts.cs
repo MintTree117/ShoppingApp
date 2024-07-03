@@ -2,6 +2,8 @@ namespace Shop.Utilities;
 
 internal static class Consts
 {
+    internal const int DelayTime = 250;
+    
     // API
     // ----------------------------------------------------------------------------------------------------------------
     // BASE

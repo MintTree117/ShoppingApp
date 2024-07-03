@@ -26,8 +26,9 @@
     int _totalPages = 1;
     int _startPage = 0;
     int _endPage = 0;
-
-    public event Func<int, Task>? OnPageChange;
+    
+    public event Action<int>? OnPageChange;
+    public event Func<int, Task>? OnPageChangeAsync;
 
     internal void Set( int page, int pageSize, int totalResults )
     {
@@ -47,6 +48,7 @@
 
         _currentPage = page;
         OnPageChange?.Invoke( _currentPage );
+        OnPageChangeAsync?.Invoke( _currentPage );
     }
     
     void UpdateStartAndEndPages()

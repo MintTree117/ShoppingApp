@@ -86,9 +86,9 @@
     int _currentPage = 1;
     int _totalResults = 0;
     
-    public event Func<Category?, Task>? OnBreadcrumbSelected;
-    public event Func<int, Task>? OnPageSizeChanged;
-    public event Func<int, Task>? OnPageSortChanged;
+    public event Action<Category?>? OnBreadcrumbSelected;
+    public event Action<int>? OnPageSizeChanged;
+    public event Action<int>? OnPageSortChanged;
     public event Action? OnToggleMobileFilters;
     
     public void SetNavigation( Category? newCategory, IReadOnlyDictionary<Guid, Category>? categoriesById, SearchParametersDto parametersDto, int count )

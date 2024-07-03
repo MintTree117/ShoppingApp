@@ -11,9 +11,11 @@ public abstract class MemoryCache<T> // singleton that handles both storage and 
     
     MemoryCacheEntry<T>? _inMemory;
 
-    protected async Task<Reply<bool>> SetCache( T newData )
+    protected async Task<Reply<bool>> SetCache( T? newData )
     {
-        _inMemory = MemoryCacheEntry<T>.New( newData );
+        _inMemory = newData is not null
+            ? MemoryCacheEntry<T>.New( newData )
+            : null;
         return await _storage.SetLocalStorage( _storageKey, _inMemory );
     }
     protected async Task<Reply<T>> GetCache()

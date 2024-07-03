@@ -1,28 +1,35 @@
 using Shop.Infrastructure.Storage;
-using Shop.Types.Common.ValueTypes;
+using Shop.Types.Common.ReplyTypes;
+using Shop.Types.Users;
 
 namespace Shop.Infrastructure;
 
 public sealed class LocationManager( StorageService storage )
-    : MemoryCache<Location?>( "Location", storage, TimeSpan.FromDays( 1 ) )
+    : MemoryCache<AddressModel>( "Location", storage, TimeSpan.FromDays( 1 ) )
 {
-    public event Func<Location?, Task>? OnLocationChanged; 
+    public event Func<AddressModel?, Task>? OnLocationChanged; 
     
-    public async Task<Location?> GetLocation()
+    public async Task<AddressModel?> GetCurrentAddress()
     {
-        var reply = await GetCache();
+        Reply<AddressModel> reply = await GetCache();
         return reply
             ? reply.Data
             : null;
     }
-    public async Task<bool> SetLocation( int? posX, int? posY )
+    public async Task<bool> SetCurrentLocation( AddressModel? address )
     {
-        Location? l = posX is not null && posY is not null
-            ? Location.With( posX.Value, posY.Value )
+        var reply = await SetCache( address );
+        OnLocationChanged?.Invoke( address );
+        return reply;
+    }
+    public async Task<bool> SetCurrentLocation( int? posX, int? posY )
+    {
+        AddressModel? address = posX.HasValue && posY.HasValue
+            ? new AddressModel( Guid.Empty, "Custom Address", posX.Value, posY.Value )
             : null;
         
-        var reply = await SetCache( l );
-        OnLocationChanged?.Invoke( l );
+        var reply = await SetCache( address );
+        OnLocationChanged?.Invoke( address );
         return reply;
     }
 }

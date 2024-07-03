@@ -2,6 +2,11 @@ namespace Shop.Utilities;
 
 public static class Utils
 {
+    public static async Task Delay()
+    {
+        await Task.Delay( Consts.DelayTime );
+    }
+    
     public static string GetRatingCss( float rating, int level )
     {
         float compare = level;

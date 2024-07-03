@@ -562,6 +562,12 @@
 
 .product-details .product-card {
     padding: 0;
+    border-bottom: 0;
+}
+
+.product-details .product-address-button {
+    padding-top: 16px;
+    padding-bottom: 16px;
     border-bottom: 1px solid lightgray;
 }
 
@@ -605,25 +611,47 @@
     flex-wrap: wrap;
 }
 
-
-/* ADDRESS FORM */
-.product-address-form {
-    display: flex;
-    flex-direction: column;
-    padding-left: 16px;
-    padding-right: 16px;
-    margin-bottom: 16px;
+/* CART */
+.product-details .product-cart {
+    padding-bottom: 0;
 }
 
-.product-address-form-inputs {
+/* ADDRESS */
+.product-details-address-box {
+    width: 100%;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid lightgray;
+}
+
+/* CATEGORIES */
+.product-categories-container {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    padding: 24px 8px;
+    text-align: justify;
+    border-bottom: 1px solid lightgray;
+}
+
+.product-categories {
     display: flex;
     flex-direction: row;
-    align-items: stretch;
-    justify-content: stretch;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: start;
+    gap: 8px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+}
+
+.product-category {
+    display: inline-block;
+    margin-bottom: 4px;
 }
 
 /* DESCRIPTION */
-.product-description, .product-categories-container {
+.product-description {
     padding: 24px 8px;
     text-align: justify;
     border-bottom: 1px solid lightgray;
@@ -698,12 +726,31 @@
         margin-bottom: 24px;
     }
     
-    .product-details .product-cart {
-        padding-bottom: 24px;
-    }
-    
-    .product-details .product-title, .product-details .product-rating-brand, .product-details .product-shipping-pricing, .product-details .product-cart {
+    .product-details .product-title, .product-details .product-rating-brand, .product-details .product-shipping-pricing, .product-details .product-cart, .product-details-address-box {
         padding-left: 8px;
         padding-right: 8px;
+    }
+
+    .product-categories-container {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .product-categories-title {
+        margin-bottom: 0;
+    }
+    
+    .product-categories {
+        overflow-x: scroll;
+        flex-wrap: nowrap;
+        min-width: 70%;
+        max-width: 70%;
+    }
+
+    .product-category {
+        flex-wrap: nowrap;
+        white-space: nowrap;
+        margin-bottom: 0;
     }
 }

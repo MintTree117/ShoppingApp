@@ -165,7 +165,7 @@
         { SectionBrands, true }
     };
 
-    public event Func<Task>? OnChangeFilters;
+    public event Action? OnChangeFilters;
     public void Clear()
     {
         _parentCategory = null;
@@ -251,8 +251,7 @@
     }
     async Task OnClickApplyLocation()
     {
-        await LocationManager.SetLocation( _posX, _posY );
-        //OnChangeLocation?.Invoke();
+        await LocationManager.SetCurrentLocation( _filters.PosX, _filters.PosY );
     }
     void OnChangeIsInStock( ChangeEventArgs args )
     {

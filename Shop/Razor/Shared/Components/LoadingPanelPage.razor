@@ -3,87 +3,45 @@
 @using Shop.Infrastructure
 @implements IDisposable
 
-@switch ( _state ) {
-    case LoadingState.Loading:
-        <div class="loading-spinner @_displayCss">
-            <div class="loading-circle"></div>
-            @if (!string.IsNullOrEmpty( _message )) 
-            {
-                <p>@_message</p>   
-            }
-        </div>
-        break;
-    case LoadingState.Redirecting:
-        <div class="loading-spinner @_displayCss">
-            <div class="loading-circle"></div>
-            <p>Redirecting...</p>
-            @if (!string.IsNullOrEmpty( _message )) 
-            {
-                <p>@_message</p>   
-            }
-        </div>
-        break;
-    case LoadingState.Ready:
-        break;
-    default:
-        throw new ArgumentOutOfRangeException();
+@if (IsLoading)
+{
+    <div class="page-loader-spinner-container d-flex flex-column">
+        <div class="page-loader-spinner"></div>
+        <p class="text-dark">@GetMessage()</p>
+    </div>
 }
 
 @code
 {
-    [Inject] public LoadingService LoadingService { get; set; } = default!;
+    [Parameter] public string Message { get; set; } = string.Empty;
+    [Parameter] public bool IsLoading { get; set; } = true;
+    [Inject] public LoadingService PageLoadingService { get; set; } = default!;
 
     public void Dispose()
     {
-        LoadingService.OnChange -= OnLoadingStateChanged;
+        PageLoadingService.OnChangePage -= OnPageLoadingStateChanged;
     }
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        LoadingService.OnChange += OnLoadingStateChanged;
+        PageLoadingService.OnChangePage += OnPageLoadingStateChanged;
     }
 
-    void OnLoadingStateChanged()
+    public void ToggleLoading( bool value, string? message = null )
     {
-        if (!LoadingService.IsLoading) {
-            StopLoading();
-            return;
-        }
-        
-        StartLoading( LoadingService.Message );
+        IsLoading = value;
+        Message = message ?? string.Empty;
+        StateHasChanged();
     }
 
-    void StartRedirecting( int seconds, string? m = null )
+    void OnPageLoadingStateChanged()
     {
-        _redirectSeconds = seconds;
-        this._message = m ?? string.Empty;
-        _displayCss = ShowCss;
-        StateHasChanged();
-    } 
-    void TickRedirect()
-    {
-        _state = LoadingState.Redirecting;
-        _redirectSeconds--;
+        IsLoading = PageLoadingService.IsLoadingPage;
+        Message = PageLoadingService.Message ?? "Loading...";         
         StateHasChanged();
     }
-    void StartLoading( string? m = null )
-    {
-        this._message = m ?? string.Empty;
-        _state = LoadingState.Loading;
-        _displayCss = ShowCss;
-        StateHasChanged();
-    }
-    void StopLoading()
-    {
-        _state = LoadingState.Ready;
-        _displayCss = HideCss;
-        StateHasChanged();
-    }
-    
-    LoadingState _state = LoadingState.Loading;
-    string _message = string.Empty;
-    int _redirectSeconds = 0;
-    string _displayCss = HideCss;
+    string GetMessage() =>
+        !string.IsNullOrEmpty( Message ) ? Message : "Loading...";
 
     const string HideCss = "d-none";
     const string ShowCss = "d-flex";
