@@ -78,7 +78,7 @@
     protected override async Task OnParametersSetAsync()
     {
         await base.OnParametersSetAsync();
-        Console.WriteLine("TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT");
+        Console.WriteLine( "Product Search: OnParametersSetAsync()" );
         _loader.ToggleLoading( true, "Loading..." );
         ParseQueryString();
         await GetLocation();
@@ -351,7 +351,6 @@
     {
         if (_parametersDto.CategoryId != _currentCategory?.Id)
         {
-            Console.WriteLine( "NO EQUAL CATEGORIES" );
             if (_parametersDto.CategoryId is not null)
                 _categoryCollection.Categories.TryGetValue( _parametersDto.CategoryId.Value, out _currentCategory );
             _parametersDto = SearchParametersDto.Empty();

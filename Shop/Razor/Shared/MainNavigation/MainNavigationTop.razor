@@ -159,7 +159,6 @@ else {
 
     void OnAuthStateChanged( Task<AuthenticationState> state )
     {
-        Logger.Log( "Top Nav OnAuthStateChanged." );
         HandleNewSession( state.Result );
     }
     void HandleNewSession( AuthenticationState state )
@@ -181,7 +180,6 @@ else {
     }
     void ShowAccountDropdown()
     {
-        Logger.Log( "ON HOVER" + _showUserOptions );
         _showUserOptions = _authenticated;
         StateHasChanged();
     }
