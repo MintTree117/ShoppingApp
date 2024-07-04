@@ -67,6 +67,8 @@
 
         <!-- SLIDERS -->
         <div class="product-details-sliders">
+            <!-- SIMILAR BRANDS -->
+            <ProductSlider @ref="_brandsSlider" Title="@GetBrandsSliderTitle()"/>
             <!-- SIMILAR PRODUCTS -->
             <ProductSlider @ref=" _similarSlider" Title="Similar Products"/>
         </div>
@@ -88,6 +90,7 @@
     
     // COMPONENTS
     AddressBox _addressBox = default!;
+    ProductSlider _brandsSlider = default!;
     ProductSlider _similarSlider = default!;
     LoadingPanelPage _loadingPanel = default!;
     
@@ -207,14 +210,24 @@
     }
     async Task FetchSimilarProducts()
     {
-        var param = new Dictionary<string, object>() { { "productId", ProductId } };
-        var reply = await Http.GetAsync<List<ProductSummaryDto>>( Consts.ApiGetSimilarProducts, param );
+        if (_productModel is null)
+        {
+            PushError( "Product is null." );
+            return;
+        }
+        
+        var param = new Dictionary<string, object>() {
+            { "productId", ProductId },
+            { "brandId", _productModel.BrandId}
+        };
+        var reply = await Http.GetAsync<ProductsSimilarDto>( Consts.ApiGetSimilarProducts, param );
         if (!reply)
         {
             PushWarning( $"Failed to find similar products. {reply.GetMessage()}" );
             return;
         }
-        _similarSlider.SetProducts( ProductModel.From( reply.Data ) );
+        _brandsSlider.SetProducts( ProductModel.From( reply.Data.SimilarToBrand ) );
+        _similarSlider.SetProducts( ProductModel.From( reply.Data.SimilarToProduct ) );
     }
     async Task OnAddressChanged( AddressModel? address )
     {
@@ -236,11 +249,21 @@
         PushSuccess( "Updated delivery estimate." );
         StateHasChanged();
     }
+    
+    void ToggleLoading( bool value )
+    {
+        if (value) _loadingPanel.ToggleLoading( true );
+        else _loadingPanel.ToggleLoading( false );
+
+        StateHasChanged();
+    }
     bool IsProductInCart( ProductModel p, out int count )
     {
         var isInCart = _cartItems.Contains( p.Id, out count );
         return isInCart;
     }
+    string GetBrandsSliderTitle() =>
+        $"Similar To {_productModel?.BrandName}";
     Dictionary<string, object> GetUrlParamsDetails()
     {
         Dictionary<string, object> parameters = new() {
@@ -280,26 +303,8 @@
     }
     static string GetCategoryUrl( Category c ) =>
         Consts.GetProductSearchUrl( $"?CategoryId={c.Id}&" );
-    static string GetDeliveryEstimateText( ProductModel item )
-    {
-        if (item.ShippingDays <= 0)
-            return "Out of stock";
-
-        return item.IsInStock
-            ? $"Get within {item.ShippingDays} days"
-            : "Out of stock";
-    }
-    static string GetDeliveryEstimateColor( ProductModel item ) =>
-        item.IsInStock ? "text-success" : "text-danger";
     static string GetTdBgCss( string value ) =>
         string.IsNullOrWhiteSpace( value )
             ? " td-empty"
             : " td-full";
-    void ToggleLoading( bool value )
-    {
-        if (value) _loadingPanel.ToggleLoading( true );
-        else _loadingPanel.ToggleLoading( false );
-        
-        StateHasChanged();
-    }
 }
