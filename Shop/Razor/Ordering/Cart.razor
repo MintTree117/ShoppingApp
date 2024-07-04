@@ -8,26 +8,33 @@
 @using Shop.Razor.Shared.Components
 @inherits Shop.Razor.Shared.ShopPage
 
-<LoadingPanelPage @ref="_loadingPanel"/>
+<LoadingPanelPage/>
 
 <!-- CONTAINER -->
 <div class="content-container cart-container">
     <!-- ITEMS -->
     <div class="cart-items">
-        @foreach ( var kvp in _itemsAndSummaries )
+        <div class="cart-items-header">
+            <h3 class="mb-0">Shopping Cart</h3>
+            <button class="btn btn-outline-primary btn-icon">
+                <i class="fa fa-trash me-2"></i>
+                Empty Cart
+            </button>
+        </div>
+        @foreach ( var item in _itemsAndSummaries.Keys )
         {
-            <ProductCard Product="@ProductModel.From( kvp.Value )" CardType="@ProductCard.Type.Cart"/>
+            <ProductCard Product="@ProductModel.From( _itemsAndSummaries[item] )" CardType="@ProductCard.Type.Cart"/>
             <!-- BUTTONS -->
             <div class="cart-item-buttons">
                 <!-- QUANTITY -->
-                @if (kvp.Key.Quantity < 10)
+                @if (item.Quantity < 10)
                 {
                     <!-- SMALL QUANTITY DROPDOWN -->
-                    <div class="form-group w-50">
-                        <select id="quantitySelect" class="btn btn-outline-secondary btn-icon form-select h-100 w-100" @onchange="@(async () => await OnChangeQuantitySmall( kvp.Key ))" value="@kvp.Key.Quantity">
+                    <div class="form-group">
+                        <select id="quantitySelect" type="number" class="btn btn-outline-secondary btn-icon form-select h-100 w-100" @onchange="@(async ( e ) => await OnChangeQuantitySmall( item, e ))" value="@item.Quantity">
                             @foreach ( int quantity in ItemQuantityOptions )
                             {
-                                <option value="@quantity" selected="@( kvp.Key.Quantity == quantity )">Qty: @quantity</option>
+                                <option value="@quantity" selected="@( item.Quantity == quantity )">Qty: @quantity</option>
                             }
                         </select>
                     </div>
@@ -36,10 +43,10 @@
                 {
                     <!-- LARGE QUANTITY INPUT -->
                     <div class="cart-large-quantity">
-                        <input class="form-control" type="number" @onchange="@(( e ) => OnChangeQuantityLarge( kvp.Key, e ))"/>
+                        <input class="form-control" type="number" @onchange="@(( e ) => OnChangeQuantityLarge( item, e ))"/>
                     </div>
                     <!-- SAVE CHANGES -->
-                    if (_changedItems.Contains( kvp.Key ))
+                    if (_changedItems.Contains( item ))
                     {
                         <button class="btn btn-primary" @onchange="@(async () => await SaveChanges())">
                             Save Changes
@@ -47,22 +54,44 @@
                     }
                 }
                 <!-- REMOVE -->
-                <button class="btn btn-link btn-icon text-decoration-none" @onchange="@(async () => await OnClickDelete( kvp.Key ))">
-                    <i class="fa fa-trash"></i>
+                <button class="btn btn-outline-primary btn-icon cart-delete-button" @onclick="@(async () => await OnClickDelete( item ))">
+                    <i class="fa fa-trash me-2"></i>
+                    <span>Remove</span>
                 </button>
             </div>
         }
     </div>
 
     <div class="cart-checkout">
-        <p>HI</p>
+        <div class="cart-checkout-title">
+            <h3 class="mb-0">Summary</h3>
+        </div>
+        <div class="cart-checkout-section">
+            <span>Items:</span>
+            <span>$0</span>
+        </div>
+        <div class="cart-checkout-section">
+            <span>Shipping:</span>
+            <span>$0</span>
+        </div>
+        <div class="cart-checkout-section">
+            <span>Tax:</span>
+            <span>$0</span>
+        </div>
+        <hr/>
+        <div class="cart-checkout-section">
+            <span>Total:</span>
+            <span>$0</span>
+        </div>
+        <a class="btn btn-outline-primary btn-icon mt-2" href="@Consts.PageCheckout">
+            Checkout
+        </a>
     </div>
 </div>
 
 @code
 {
     [Inject] public CartManager CartManager { get; init; } = default!;
-    LoadingPanelPage _loadingPanel = default!;
 
     static readonly int[] ItemQuantityOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     Dictionary<CartItem, ProductSummaryDto> _itemsAndSummaries = [];
@@ -76,52 +105,80 @@
     
     void OnChangeQuantityLarge( CartItem item, ChangeEventArgs args )
     {
-        /*if (args.Value is null )
-            return;
-        int quantity = (int) args.Value;
-        product.Quantity = quantity;
-        _changed.Add( product );*/
-    }
-    async Task OnChangeQuantitySmall( CartItem item ) 
-    {
-        /*var cartReply = await CartManager.Update( product );
-        if (!cartReply)
+        if (!int.TryParse( args.Value?.ToString(), out int quantity ))
         {
-            PushError( $"Failed to update quantity. {cartReply.GetMessage()}" );
+            PushError( $"Failed to update quantity. Invalid quantity arguments." );
             return;
         }
         
-        StateHasChanged();
-        PushSuccess( "Quantity updated." );*/
+        item.Quantity = quantity;
+        _changedItems.Add( item );
+    }
+    async Task OnChangeQuantitySmall( CartItem item, ChangeEventArgs args )
+    {
+        if (!int.TryParse( args.Value?.ToString(), out int quantity ))
+        {
+            PushError( $"Failed to update quantity. Invalid quantity arguments." );
+            return;
+        }
+        
+        Loader.StartLoadingPage( "Updating cart..." );
+        
+        item.Quantity = quantity;
+        
+        var cartReply = await CartManager.Update( item );
+        if (!cartReply)
+        {
+            Loader.StopLoadingPage();
+            PushError( $"Failed to update quantity. {cartReply.GetMessage()}" );
+            return;
+        }
+
+        Loader.StopLoadingPage();
+        PushSuccess( "Quantity updated." );
+        await GetCart();
     }
     async Task SaveChanges()
     {
+        Loader.StartLoadingPage( "Saving changes..." );
+        
         var cartReply = await CartManager.UpdateBulk( _changedItems.ToList() );
         if (!cartReply)
         {
+            Loader.StopLoadingPage();
             PushError( $"Failed to save changes. {cartReply.GetMessage()}" );
             return;
         }
 
-        StateHasChanged();
+        Loader.StopLoadingPage();
         PushSuccess( "Changes saved." );
     }
     async Task OnClickDelete( CartItem item )
     {
+        Loader.StartLoadingPage( "Removing item..." );
+        
         var cartReply = await CartManager.Delete( item );
         if (!cartReply)
         {
+            Loader.StopLoadingPage();
             PushError( $"Failed to remove item from cart. {cartReply.GetMessage()}" );
             return;
         }
 
-        StateHasChanged();
+        Loader.StopLoadingPage();
         PushSuccess( "Item removed." );
+
+        await GetCart();
     }
     async Task OnClickClear()
     {
+        Loader.StartLoadingPage( "Clearing cart..." );
+        
         var cartReply = await CartManager.Clear();
-        if (cartReply) PushSuccess( "Emptied cart." );
+
+        Loader.StopLoadingPage();
+        
+        if (cartReply) PushSuccess( "Cart cleared." );
         else PushError( $"Failed to clear cart. {cartReply.GetMessage()}" );
     }
     async Task OnClickChangeLocation()
