@@ -24,7 +24,8 @@
     max-width: 100%;
     height: auto;
     margin-bottom: 16px;
-    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, 0.15)
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, 0.15);
+    border-radius: 5px;
 }
 
 .product-image:hover {
@@ -35,6 +36,7 @@
     max-width: 100%;
     height: 100%;
     object-fit: fill;
+    border-radius: 5px;
 }
 
 /* PRODUCT TITLE */
@@ -312,6 +314,10 @@
 /* ------------------------------------------------------------------------------------------*/
 /* ------------------------------------------------------------------------------------------*/
 /* ------------------------------------------------------------------------------------------*/
+
+.search-filters {
+    display: none;
+}
 
 /* SHARED */
 .search-filters .btn {
@@ -714,7 +720,7 @@
     flex-direction: row;
     gap: 16px;
     width: 100%;
-    padding-top: 24px;
+    padding-top: 8px;
     padding-bottom: 24px;
     overflow-x: auto;
     scroll-behavior: smooth;
@@ -760,9 +766,9 @@
     }
     .product-slider-button {
         display: block;
-        font-size: 1rem;
-        padding: 5px 10px;
-        margin: 8px;
+        font-size: 2rem;
+        padding: 10px 10px;
+        margin: 0;
     }
 
     .product-slider-list {

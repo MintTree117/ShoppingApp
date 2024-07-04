@@ -3,50 +3,28 @@
 @using Shop.Types.Categories
 @using Shop.Types.Products
 @using Shop.Types.Products.Dtos
-@inject LocationManager LocationManager
 
 <!-- CONTAINER -->
-<div class="search-filters @GetDisplayCss()">
+<div class="search-filters" style="@(_shouldShow ? "display:flex;" : "")">
     <!-- HEADER -->
     <div class="search-filters-top">
         <!-- TITLE AND CLOSE -->
         <div class="search-filters-top-title">
             <h3 class="search-filters-title">Filters</h3>
-            <button class="btn btn-icon search-filters-close" @onclick="() => ToggleView( false )">
+            <button class="btn btn-icon search-filters-close" @onclick="@(() => ToggleView( false ))">
                 <i class="fa-solid fa-x"></i>
             </button>
         </div>
-        @if (_altered)
-        {
-            <!-- CLEAR ALL -->
-            <button class="btn btn-outline-secondary btn-icon search-filters-btn-main search-filters-clear" @onclick="Clear">
-                <i class="fa-solid fa-eraser me-2"></i>
-                Clear All
-            </button>   
-        }
-    </div>
-    
-    <!-- LOCATION -->
-    <div class="search-filters-section">
-        <button class="btn search-filters-header" type="button" @onclick="() => ToggleSectionCollapse( SectionLocation )">
-            <span>Location</span>
-            <i class="fa @GetCollapseIconCss( SectionLocation )"></i>
+        <!-- CLEAR ALL -->
+        <button class="btn btn-outline-primary btn-icon search-filters-btn-main search-filters-clear" @onclick="Clear">
+            <i class="fa-solid fa-eraser me-2"></i>
+            Clear All
         </button>
-        <div class="search-filters-body @GetCollapseDisplayCss( SectionLocation )">
-            <div class="d-flex justify-content-between gap-1 mb-2">
-                <input type="number" min="0" max="100000" step="1" value="@_posX" @onchange="OnChangeLocationX" class="form-control"/>
-                <input type="number" min="0" max="100000" step="1" value="@_posY" @onchange="OnChangeLocationY" class="form-control"/>
-            </div>
-            <button class="btn btn-outline-secondary btn-icon search-filters-btn-main" @onclick="@(async () => await OnClickApplyLocation())">
-                <i class="fa-solid fa-circle-check me-2"></i>
-                Apply
-            </button>
-        </div>
     </div>
     
     <!-- TRENDS -->
     <div class="search-filters-section">
-        <button class="btn search-filters-header" type="button" @onclick="() => ToggleSectionCollapse( SectionTrends )">
+        <button class="btn search-filters-header" type="button" @onclick="@(() => ToggleSectionCollapse( SectionTrends ))">
             <span>Trends</span>
             <i class="fa @GetCollapseIconCss( SectionTrends )"></i>
         </button>
@@ -63,9 +41,27 @@
         </div>
     </div>
     
+    <!-- LOCATION -->
+    <div class="search-filters-section">
+        <button class="btn search-filters-header" type="button" @onclick="@(() => ToggleSectionCollapse( SectionLocation ))">
+            <span>Location</span>
+            <i class="fa @GetCollapseIconCss( SectionLocation )"></i>
+        </button>
+        <div class="search-filters-body @GetCollapseDisplayCss( SectionLocation )">
+            <div class="d-flex justify-content-between gap-1 mb-2">
+                <input type="number" min="0" max="100000" step="1" value="@_posX" @onchange="OnChangeLocationX" class="form-control"/>
+                <input type="number" min="0" max="100000" step="1" value="@_posY" @onchange="OnChangeLocationY" class="form-control"/>
+            </div>
+            <button class="btn btn-icon search-filters-btn-main @GetLocationButtonCss()" @onclick="@(async () => await OnClickApplyLocation())">
+                <i class="fa-solid fa-circle-check me-2"></i>
+                Apply
+            </button>
+        </div>
+    </div>
+    
     <!-- PRICE RANGE -->
     <div class="search-filters-section">
-        <button class="btn search-filters-header" type="button" @onclick="() => ToggleSectionCollapse( SectionPricing )">
+        <button class="btn search-filters-header" type="button" @onclick="@(() => ToggleSectionCollapse( SectionPricing ))">
             <span>Pricing</span>
             <i class="fa @GetCollapseIconCss( SectionPricing )"></i>
         </button>
@@ -74,7 +70,7 @@
                 <input type="number" min="0" max="10000" step="1" value="@_minPrice" @onchange="OnChangeMinPrice" class="form-control"/>
                 <input type="number" min="0" max="10000" step="1" value="@_maxPrice" @onchange="OnChangeMaxPrice" class="form-control"/>
             </div>
-            <button class="btn btn-outline-secondary btn-icon search-filters-btn-main" @onclick="OnClickApplyPricing">
+            <button class="btn btn-icon search-filters-btn-main @GetPricingButtonCss()" @onclick="OnClickApplyPricing">
                 <i class="fa-solid fa-circle-check me-2"></i>
                 Apply
             </button>
@@ -85,7 +81,7 @@
     {
         <!-- CATEGORIES -->
         <div class="search-filters-section">
-            <button class="btn search-filters-header" type="button" @onclick="() => ToggleSectionCollapse( SectionCategories )">
+            <button class="btn search-filters-header" type="button" @onclick="@(() => ToggleSectionCollapse( SectionCategories ))">
                 <span>@GetCategoriesTitle()</span>
                 <i class="fa @GetCollapseIconCss( SectionCategories )"></i>
             </button>
@@ -104,7 +100,7 @@
 
     <!-- BRANDS -->
     <div class="search-filters-section">
-        <button class="btn search-filters-header" type="button" @onclick="() => ToggleSectionCollapse( SectionBrands )">
+        <button class="btn search-filters-header" type="button" @onclick="@(() => ToggleSectionCollapse( SectionBrands ))">
             <span>Brands</span>
             <i class="fa @GetCollapseIconCss( SectionBrands )"></i>
         </button>
@@ -116,12 +112,12 @@
                         <label>
                             @if (GetCheckedBrand( b ))
                             {
-                                <input type="checkbox" checked @onclick="() => OnClickBrand( b )"/>
+                                <input type="checkbox" checked @onclick="@(() => OnClickBrand( b ))"/>
                                 @b.Name
                             }
                             else
                             {
-                                <input type="checkbox" @onclick="()=>OnClickBrand(b)"/>
+                                <input type="checkbox" @onclick="@(()=>OnClickBrand(b))"/>
                                 @b.Name
                             }
                         </label>
@@ -134,6 +130,8 @@
 
 @code
 {
+    [Inject] public LocationManager LocationManager { get; init; } = default!;
+    
     const string SectionLocation = "Location";
     const string SectionTrends = "Trends";
     const string SectionPricing = "Pricing";
@@ -144,8 +142,9 @@
     List<Category> _categories = [];
     Category? _parentCategory = null;
     
-    bool _altered = false;
-    bool _shouldShow = true;
+    bool _locationAltered = false;
+    bool _pricingAltered = false;
+    bool _shouldShow = false;
     SearchParametersDto _filters = SearchParametersDto.Empty();
     Dictionary<Brand, bool> _selectedBrands = [];
 
@@ -165,16 +164,15 @@
         { SectionBrands, true }
     };
 
-    public event Action? OnChangeFilters;
-    public void Clear()
+
+    protected override async Task OnInitializedAsync()
     {
-        _parentCategory = null;
-        _selectedBrands.Clear();
-        _altered = false;
+        await base.OnInitializedAsync();
     }
+
+    public event Action? OnChangeFilters;
     public void SetData( Category? parentCategory, CategoriesCollection categories, IEnumerable<Brand> brands, SearchParametersDto filters )
     {
-        Clear();
         _filters = filters;
         _categories = parentCategory is null 
             ? categories.PrimaryCategories 
@@ -194,6 +192,7 @@
         _initToggleSale = filters.IsOnSale is true;
         _minPrice = filters.MinPrice;
         _maxPrice = filters.MaxPrice;
+        
         StateHasChanged();
     }
     public void ToggleView( bool? shouldShow = null )
@@ -205,6 +204,11 @@
         StateHasChanged();
     }
 
+    async Task OnClickApplyLocation()
+    {
+        await LocationManager.SetCurrentLocation( _filters.PosX, _filters.PosY );
+    }
+
     bool ShouldShowCategories() =>
         _parentCategory is null || _parentCategory.Children.Any();
     bool GetCheckedBrand( Brand b )
@@ -213,16 +217,31 @@
     }
     
     string GetDisplayCss() =>
-        _shouldShow ? "d-flex" : "d-none";
+        _shouldShow ? "style=\"display: flex;\"" : "";
     string GetCollapseIconCss( string sectionName ) => 
         _collapsedSections[sectionName] ? "fa-plus" : "fa-minus";
     string GetCollapseDisplayCss( string sectionName ) =>
         _collapsedSections[sectionName] ? "d-none" : "d-flex";
-    string GetClearAllCss() =>
-        _altered ? "d-block" : "d-none";
     string GetCategoriesTitle() =>
         _parentCategory?.ParentId is null ? "Categories" : "Sub-Categories";
-    
+    string GetLocationButtonCss() =>
+        _locationAltered ? "btn-outline-primary" : "d-none";
+    string GetPricingButtonCss() =>
+        _pricingAltered ? "btn-outline-primary" : "d-none";
+
+    async Task Clear()
+    {
+        _parentCategory = null;
+        _selectedBrands.Clear();
+        _posX = null;
+        _posY = null;
+        _minPrice = null;
+        _maxPrice = null;
+        _locationAltered = false;
+        _pricingAltered = false;
+
+        await LocationManager.SetCurrentLocation( null );
+    }
     void ToggleSectionCollapse( string sectionName )
     {
         if (!_collapsedSections.TryGetValue( sectionName, out bool value ))
@@ -235,7 +254,7 @@
     }
     void OnChangeLocationX( ChangeEventArgs args )
     {
-        _altered = true;
+        _locationAltered = true;
         if (!int.TryParse( args.Value?.ToString(), out int result ))
             _filters.PosX = null;
         else
@@ -243,46 +262,33 @@
     }
     void OnChangeLocationY( ChangeEventArgs args )
     {
-        _altered = true;
+        _locationAltered = true;
         if (!int.TryParse( args.Value?.ToString(), out int result ))
             _filters.PosY = null;
         else
             _filters.PosY = result;
     }
-    async Task OnClickApplyLocation()
-    {
-        await LocationManager.SetCurrentLocation( _filters.PosX, _filters.PosY );
-    }
     void OnChangeIsInStock( ChangeEventArgs args )
     {
-        if (_altered)
-            return;
-        _altered = true;
         bool value = (bool) (args.Value ?? false);
         _filters.IsInStock = value ? true : null;
         OnChangeFilters?.Invoke();
     }
     void OnChangeIsFeatured( ChangeEventArgs args )
     {
-        if (_altered)
-            return;
-        _altered = true;
         bool value = (bool) (args.Value ?? false);
         _filters.IsFeatured = value ? true : null;
         OnChangeFilters?.Invoke();
     }
     void OnChangeIsOnSale( ChangeEventArgs args )
     {
-        if (_altered)
-            return;
-        _altered = true;
         bool value = (bool) (args.Value ?? false);
         _filters.IsOnSale = value ? true : null;
         OnChangeFilters?.Invoke();
     }
     void OnChangeMinPrice( ChangeEventArgs args )
     {
-        _altered = true;
+        _pricingAltered = true;
         if (!int.TryParse( args.Value?.ToString(), out int result ))
             _filters.MinPrice = null;
         else
@@ -290,7 +296,7 @@
     }
     void OnChangeMaxPrice( ChangeEventArgs args )
     {
-        _altered = true;
+        _pricingAltered = true;
         if (!int.TryParse( args.Value?.ToString(), out int result ))
             _filters.MaxPrice = null;
         else
@@ -302,17 +308,11 @@
     }
     void OnClickCategory( Category category )
     {
-        if (_altered)
-            return;
-        _altered = true;
         _filters.CategoryId = category.Id;
         OnChangeFilters?.Invoke();
     }
     void OnClickBrand( Brand b )
     {
-        if (_altered)
-            return;
-        _altered = true;
         _filters.BrandIds ??= [];
 
         if (!_filters.BrandIds.Add( b.Id ))
