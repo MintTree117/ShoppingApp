@@ -34,6 +34,8 @@ public sealed class CartItems(
     }
     public List<Guid> GetIds() =>
         Items.Select( static i => i.ProductId ).ToList();
+    public int Count() =>
+        Items.Count;
     public int Quantity( Guid productId )
     {
         var item = Items.FirstOrDefault( c => c.ProductId == productId );

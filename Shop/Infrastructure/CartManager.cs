@@ -15,27 +15,44 @@ public sealed class CartManager( StorageService storage, HttpService http, Authe
     readonly HttpService _http = http;
     readonly AuthenticationStateManager _auth = auth;
     readonly object _lock = new();
+
+    public event Action<int>? OnCartCountChanged; 
     
     bool _isBusy;
     CartItems? _summaryInMemory;
     
     public async Task<Reply<CartItems>> Get()
     {
+        SetBusy( true );
+
         if (await AlreadyUpdating() && _summaryInMemory is not null)
+        {
+            SetBusy( false );
             return Reply<CartItems>.Success( _summaryInMemory );
+        }
         
         var storageReply = await _storage.GetLocalStorage<CartItems>( SummaryStorageKey );
         if (!await IsAuthenticated())
+        {
+            _summaryInMemory = storageReply.Data;
+            SetBusy( false );
             return storageReply;
+        }
         
         var serverReply = await _http.PostAsyncAuthenticated<List<CartItem>>( 
             Consts.ApiPostGetCart, storageReply ? storageReply.Data : null );
         if (!serverReply)
+        {
+            SetBusy( false );
+            InvokeCountChange();
             return Reply<CartItems>.Fail( serverReply );
+        }
 
-        var summary = CartItems.With( serverReply.Data );
-        await _storage.SetLocalStorage( SummaryStorageKey, summary );
-        return Reply<CartItems>.Success( summary );
+        _summaryInMemory = CartItems.With( serverReply.Data );
+        await _storage.SetLocalStorage( SummaryStorageKey, _summaryInMemory );
+        SetBusy( false );
+        InvokeCountChange();
+        return Reply<CartItems>.Success( _summaryInMemory );
     }
     public async Task<Reply<bool>> Add( Guid productId )
     {
@@ -45,9 +62,13 @@ public sealed class CartManager( StorageService storage, HttpService http, Authe
         CartItems items = cartReply
             ? cartReply.Data
             : CartItems.Empty();
+        
         if (items.Contains( productId ))
+        {
+            SetBusy( false );
             return IReply.Conflict( "Item already in cart." );
-
+        }
+        
         var item = new CartItem( productId, 1 );
         items?.Add( item );
         
@@ -60,6 +81,7 @@ public sealed class CartManager( StorageService storage, HttpService http, Authe
         
         _summaryInMemory = items;
         SetBusy( false );
+        InvokeCountChange();
 
         return !storageTask.Result && (httpTask is not null && !httpTask.Result )
             ? IReply.Fail( $"Failed to update cart in storage or server. {storageTask.Result.GetMessage()} {httpTask.Result.GetMessage()}" )
@@ -73,9 +95,13 @@ public sealed class CartManager( StorageService storage, HttpService http, Authe
         CartItems? items = cartReply
             ? cartReply.Data
             : null;
-        
+
         if (items is not null && !items.Contains( product.ProductId ))
+        {
+            SetBusy( false );
             return IReply.Conflict( "Cart does not contain this item." );
+        }
+
         
         items?.Set( CartItem.FromCartProduct( product ) );
         
@@ -83,11 +109,13 @@ public sealed class CartManager( StorageService storage, HttpService http, Authe
         var httpTask = await IsAuthenticated() ?
             _http.PutAsyncAuthenticated<bool>( Consts.ApiUpdateCart, CartItem.FromCartProduct( product ) ) 
             : null;
+        
         if (httpTask is null) await storageTask;
         else await Task.WhenAll( storageTask, httpTask );
         
         _summaryInMemory = items;
         SetBusy( false );
+        InvokeCountChange();
 
         return !storageTask.Result && httpTask is not null && !httpTask.Result 
             ? IReply.Fail( $"Failed to update cart in storage or server. {storageTask.Result.GetMessage()} {httpTask.Result.GetMessage()}" )
@@ -119,6 +147,7 @@ public sealed class CartManager( StorageService storage, HttpService http, Authe
         else await Task.WhenAll( storageTask, httpTask );
         _summaryInMemory = CartItems.With( items?.Items ?? [] );
         SetBusy( false );
+        InvokeCountChange();
 
         return !storageTask.Result && httpTask is not null && !httpTask.Result
             ? IReply.Fail( $"Failed to update cart in storage or server. {storageTask.Result.GetMessage()} {httpTask.Result.GetMessage()}" )
@@ -132,10 +161,14 @@ public sealed class CartManager( StorageService storage, HttpService http, Authe
         CartItems items = cartReply
             ? cartReply.Data
             : CartItems.Empty();
-        
+
         if (!items.Contains( product.ProductId ))
+        {
+            SetBusy( false );
             return IReply.Conflict( "Cart does not contain this item." );
-        items?.Delete( product.ProductId );
+        }
+
+        items.Delete( product.ProductId );
 
         var storageTask = _storage.SetLocalStorage( SummaryStorageKey, items );
         var httpTask = await IsAuthenticated()
@@ -148,6 +181,7 @@ public sealed class CartManager( StorageService storage, HttpService http, Authe
         
         _summaryInMemory = items;
         SetBusy( false );
+        InvokeCountChange();
 
         return !storageTask.Result && httpTask is not null && !httpTask.Result 
             ? IReply.Fail( $"Failed to update cart in storage or server. {storageTask.Result.GetMessage()} {httpTask.Result.GetMessage()}" )
@@ -156,11 +190,14 @@ public sealed class CartManager( StorageService storage, HttpService http, Authe
     public async Task<Reply<bool>> Clear()
     {
         SetBusy( true );
+        
         _summaryInMemory = null;
         var storageTask = _storage.RemoveLocalStorage( SummaryStorageKey );
         var httpTask = await IsAuthenticated()
             ? _http.DeleteAsyncAuthenticated<bool>( Consts.ApiClearCart )
             : null;
+        
+        InvokeCountChange();
         SetBusy( false );
 
         return !storageTask.Result && httpTask is not null && !httpTask.Result
@@ -190,5 +227,10 @@ public sealed class CartManager( StorageService storage, HttpService http, Authe
     {
         lock ( _lock )
             _isBusy = value;
+    }
+
+    void InvokeCountChange()
+    {
+        OnCartCountChanged?.Invoke( _summaryInMemory?.Count() ?? 0 );
     }
 }

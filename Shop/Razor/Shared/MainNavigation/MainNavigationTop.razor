@@ -3,6 +3,7 @@
 @using Shop.Infrastructure.Authentication
 @using Shop.Razor.Shared.Components
 @using System.Security.Claims
+@using Shop.Infrastructure
 @implements IDisposable
 @inject IJSRuntime JsRuntime
 
@@ -121,8 +122,10 @@ else {
     [CascadingParameter( Name = "layout" )]
     public MainLayout Layout { get; init; } = default!;
 
-    [Inject] public NavigationManager Navigation { get; set; } = default!;
-    [Inject] public AuthenticationStateManager AuthenticationStateManager { get; set; } = default!;
+    [Inject] public NavigationManager Navigation { get; init; } = default!;
+    [Inject] public AuthenticationStateManager AuthenticationStateManager { get; init; } = default!;
+    [Inject] public CartManager Cart { get; init; } = default!;
+    
     MainNavigationSide? _sidebar;
     DotNetObjectReference<MainNavigationTop> _dotNetRef = default!;
 
@@ -135,18 +138,23 @@ else {
     bool _showUserOptions = false;
     bool _authenticated = false;
     string _username = DefaultUserText;
-    decimal _cartPrice = decimal.Zero;
     int _cartCount = 0;
 
     public void Dispose()
     {
         _dotNetRef.Dispose();
         AuthenticationStateManager.OnStateChanged -= OnAuthStateChanged;
+        Cart.OnCartCountChanged -= OnCartCountChanged;
     }
     protected override async Task OnInitializedAsync()
     {
         _dotNetRef = DotNetObjectReference.Create( this );
         AuthenticationStateManager.OnStateChanged += OnAuthStateChanged;
+        Cart.OnCartCountChanged += OnCartCountChanged;
+        var cartItems = await Cart.Get();
+        _cartCount = cartItems
+            ? cartItems.Data.Count()
+            : 0;
         await JsRuntime.InvokeVoidAsync( "resizeObserverInterop.initialize", _dotNetRef );
     }
     [JSInvokable] public void OnResize( int width, int height )
@@ -155,6 +163,11 @@ else {
         _screenHeight = height;
         _mobileView = _screenWidth < 900;
         StateHasChanged();
+    }
+
+    void OnCartCountChanged( int newCount )
+    {
+        _cartCount = newCount;
     }
 
     void OnAuthStateChanged( Task<AuthenticationState> state )

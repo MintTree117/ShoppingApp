@@ -3,7 +3,6 @@
 @using System.Xml.Linq
 @using Shop.Infrastructure
 @using Shop.Types.Brands
-@using Shop.Types.Cart
 @using Shop.Types.Categories
 @using Shop.Types.Products
 @using Shop.Types.Products.Dtos
@@ -20,12 +19,12 @@
         
         <!-- TOP -->
         <div class="product-top">
-            <ProductCard Product="@_productModel" CardType="@ProductCard.Type.Details"/>
+            <ProductCard @ref="_productCard" Product="@_productModel" CardType="@ProductCard.Type.Details"/>
         </div>
 
         <!-- ADDRESS -->
         <div class="product-details-address-box">
-            <AddressBox @ref=" _addressBox"/>
+            <AddressBox @ref="_addressBox"/>
         </div>
 
         <!-- CATEGORIES -->
@@ -89,13 +88,13 @@
     Guid PreviousProductId = Guid.Empty;
     
     // COMPONENTS
+    ProductCard _productCard = default!;
     AddressBox _addressBox = default!;
     ProductSlider _brandsSlider = default!;
     ProductSlider _similarSlider = default!;
     LoadingPanelPage _loadingPanel = default!;
     
     // DATA
-    CartItems _cartItems = CartItems.Empty();
     CategoriesCollection _categoriesCollection = default!;
     BrandsCollection _brandsCollection = default!;
     ProductModel? _productModel;
@@ -104,13 +103,16 @@
     bool _productLoaded = false;
     bool _set = false;
     bool _addressSubscribed = false;
+    bool _cardSubscribed = false;
     
     // LIFECYCLES
     protected override void OnDispose()
     {
         base.OnDispose();
         LocationManager.OnLocationChanged -= OnAddressChanged;
-        _addressBox.ToggleLoading += ToggleLoading;
+        _productCard.ToggleLoading -= ToggleLoading;
+        _productCard.OnItemAddedToCart -= OnItemAddedToCart;
+        _addressBox.ToggleLoading -= ToggleLoading;
     }
     protected override async Task OnInitializedAsync()
     {
@@ -149,6 +151,7 @@
     protected override async Task OnAfterRenderAsync( bool firstRender )
     {
         await base.OnAfterRenderAsync( firstRender );
+        
         if (_productModel is not null && _addressBox is not null)
         {
             _addressBox.SetProduct( _productModel );
@@ -158,6 +161,13 @@
         {
             _addressBox.ToggleLoading += ToggleLoading;
             _addressSubscribed = true;
+        }
+
+        if (!_cardSubscribed && _productCard is not null)
+        {
+            _productCard.ToggleLoading += ToggleLoading;
+            _productCard.OnItemAddedToCart += OnItemAddedToCart;
+            _cardSubscribed = true;
         }
     }
 
@@ -188,25 +198,6 @@
         {
             await FetchSimilarProducts();
         }
-    }
-    async Task OnClickAddToCart()
-    {
-        var cartReply = await CartManager.Add( _productModel.Id );
-        if (!cartReply)
-        {
-            PushError( $"Failed to add item to cart. {cartReply.GetMessage()}" );
-            return;
-        }
-
-        var newSummary = await CartManager.Get();
-        if (!newSummary)
-        {
-            PushError( $"An error occured while getting updated cart information. {newSummary.GetMessage()}" );
-            return;
-        }
-
-        _cartItems = newSummary.Data;
-        StateHasChanged();
     }
     async Task FetchSimilarProducts()
     {
@@ -249,18 +240,18 @@
         PushSuccess( "Updated delivery estimate." );
         StateHasChanged();
     }
-    
+
+    void OnItemAddedToCart( bool succeeded, string? message )
+    {
+        if (succeeded) PushSuccess( "Item added to cart." );
+        else PushError( $"Failed to add to cart. {message}" );
+    }
     void ToggleLoading( bool value )
     {
         if (value) _loadingPanel.ToggleLoading( true );
         else _loadingPanel.ToggleLoading( false );
 
         StateHasChanged();
-    }
-    bool IsProductInCart( ProductModel p, out int count )
-    {
-        var isInCart = _cartItems.Contains( p.Id, out count );
-        return isInCart;
     }
     string GetBrandsSliderTitle() =>
         $"Similar To {_productModel?.BrandName}";
