@@ -15,7 +15,7 @@
 @inject LocationManager LocationManager;
 
 <!-- MARKUP -->
-<LoadingPanelPage @ref="@_loader"/>
+<LoadingPanelPage/>
 <div class="position-relative">
     <ProductSearchHeader @ref="@_headerRazor"/>
     <div class="content-container search-body">
@@ -32,7 +32,6 @@
 
 @code
 {
-    LoadingPanelPage _loader = default!;
     ProductSearchHeader _headerRazor = default!;
     ProductSearchFilters _filtersRazor = default!;
     ProductSearchList _searchList = default!;
@@ -44,6 +43,8 @@
     Category? _currentCategory;
     SearchParametersDto _parametersDto = SearchParametersDto.Empty();
     SearchResultsModel _searchResultsDto = SearchResultsModel.Empty();
+
+    bool _isFetching = false;
     
     protected override void OnDispose()
     {
@@ -76,13 +77,20 @@
     protected override async Task OnParametersSetAsync()
     {
         await base.OnParametersSetAsync();
-        Console.WriteLine( "Product Search: OnParametersSetAsync()" );
-        _loader.ToggleLoading( true, "Loading..." );
+        if (_isFetching)
+            return;
+
+        _isFetching = true;
+        
+        Console.WriteLine( "Product Search: OnParametersSetAsync()----------------------------------------------" );
+        Loader.StartLoadingPage( "Loading products..." );
         ParseQueryString();
         await GetLocation();
         await SearchProducts();
         await Utils.Delay();
-        _loader.ToggleLoading( false );
+
+        _isFetching = false;
+        Loader.StopLoadingPage();
     }
     protected override async Task OnAfterRenderAsync( bool firstRender )
     {
@@ -271,7 +279,7 @@
     }
     async Task OnChangeLocation( AddressModel? location )
     {
-        _loader.ToggleLoading( true, "Loading Location..." );
+        Loader.StartLoadingPage( "Loading location..." );
         await Utils.Delay();
 
         if (location is null)
@@ -291,7 +299,7 @@
         if (!estimatesReply)
         {
             PushWarning( "Failed to get estimates." );
-            _loader.ToggleLoading( false );
+            Loader.StopLoadingPage();
             return;
         }
         
@@ -313,11 +321,11 @@
         {
             PushWarning( "There was a miscount in the delivery time estimates. The displayed timings may not reflect the products they represent." );
             Console.Error.WriteLine( e );
-            _loader.ToggleLoading( false );
+            Loader.StopLoadingPage();
         }
         
         _searchList.RefreshState();
-        _loader.ToggleLoading( false );
+        Loader.StopLoadingPage();
     }
     void OnBreadcrumbSelected( Category? category )
     {
