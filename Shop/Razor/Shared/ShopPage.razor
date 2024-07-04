@@ -12,9 +12,9 @@
     [CascadingParameter( Name = "layout" )]
     public MainLayout Layout { get; init; } = default!;
 
-    [Inject] protected LoadingService LoadingService { get; init; } = default!;
-    [Inject] protected IConfiguration Configuration { get; init; } = default!;
-    [Inject] protected AuthenticationStateManager Authentication { get; init; } = default!;
+    [Inject] protected LoadingService Loader { get; init; } = default!;
+    [Inject] protected IConfiguration Config { get; init; } = default!;
+    [Inject] protected AuthenticationStateManager Auth { get; init; } = default!;
     [Inject] protected HttpService Http { get; init; } = default!;
     [Inject] protected NavigationManager Navigation { get; init; } = default!;
     
@@ -23,7 +23,7 @@
     
     public void Dispose()
     {
-        Authentication.OnStateChanged -= OnAuthenticationStateChange;
+        Auth.OnStateChanged -= OnAuthStateChange;
         OnDispose();
     }
     protected virtual void OnDispose()
@@ -33,14 +33,14 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        LoadingService.StartLoadingPage( "Loading Page." );
+        Loader.StartLoadingPage( "Loading Page." );
     }
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
         if (_isInitialized)
             return;
-        Authentication.OnStateChanged += OnAuthenticationStateChange;
+        Auth.OnStateChanged += OnAuthStateChange;
     }
     protected override async Task OnParametersSetAsync()
     {
@@ -63,7 +63,7 @@
     protected void PushError( IReply reply, string message ) => PushAlert( AlertType.Danger, $"{message} : {reply.GetMessage()}" );
     protected void PushError( IReply reply ) => PushAlert( AlertType.Danger, reply.GetMessage() );
 
-    protected virtual async void OnAuthenticationStateChange( Task<AuthenticationState> task )
+    protected virtual async void OnAuthStateChange( Task<AuthenticationState> task )
     {
         //StateHasChanged();
     }

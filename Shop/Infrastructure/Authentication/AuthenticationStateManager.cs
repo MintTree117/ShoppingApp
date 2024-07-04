@@ -25,6 +25,7 @@ public sealed class AuthenticationStateManager
     internal string AccessToken => _token ?? string.Empty;
     string? _token = null;
     DateTime _nextExpiryUtc = DateTime.UtcNow - TimeSpan.FromDays( 9 );
+    DateTime _lastUpdate = DateTime.UtcNow - TimeSpan.FromDays( 1000 ); // ensure initial fetch
     AuthenticationState _authenticationState = EmptyAuthenticationState();
     
     // CONSTRUCTOR
@@ -64,7 +65,10 @@ public sealed class AuthenticationStateManager
             InvokeNotify();
             return await Task.FromResult( _authenticationState );
         }
-        
+
+        if (DateTime.UtcNow - _lastUpdate < TimeSpan.FromMinutes( 1 ))
+            return _authenticationState;
+        _lastUpdate = DateTime.UtcNow;
         // STORAGE OR SERVER
         await GetTokenFromBrowserStorage();
         if (!IsSessionValid()) // TODO: Test if we need to clear memory here

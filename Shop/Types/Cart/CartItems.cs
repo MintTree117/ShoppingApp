@@ -4,14 +4,7 @@ public sealed class CartItems(
     List<CartItem> items )
 {
     public List<CartItem> Items { get; private set; } = items;
-
-    public static CartItems FromCartProducts( List<CartProduct> products )
-    {
-        List<CartItem> items = [];
-        foreach ( CartProduct p in products )
-            items.Add( CartItem.FromCartProduct( p ) );
-        return CartItems.With( items );
-    }
+    
     public static CartItems With( List<CartItem> dtos ) =>
         new( dtos );
     public static CartItems Empty() =>

@@ -161,7 +161,7 @@ else {
 
         if (!loginResult)
         {
-            await Authentication.ClearSession();
+            await Auth.ClearSession();
             PushError( loginResult, "Failed to login." );
             StopLoading();
             return;
@@ -176,7 +176,7 @@ else {
             return;
         }
 
-        var updateResult = await Authentication.CreateNewSession( loginResult.Data.AccessToken ?? string.Empty );
+        var updateResult = await Auth.CreateNewSession( loginResult.Data.AccessToken ?? string.Empty );
 
         if (!updateResult)
         {
@@ -203,7 +203,7 @@ else {
             return;
         }
 
-        Reply<bool> updateResult = await Authentication.CreateNewSession( result.Data.AccessToken );
+        Reply<bool> updateResult = await Auth.CreateNewSession( result.Data.AccessToken );
 
         if (!updateResult)
         {

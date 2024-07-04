@@ -8,8 +8,8 @@ public abstract class MemoryCache<T> // singleton that handles both storage and 
     readonly string _storageKey = storageKey;
     readonly StorageService _storage = storage;
     readonly TimeSpan _cacheLife = cacheLife;
-    
-    MemoryCacheEntry<T>? _inMemory;
+
+    MemoryCacheEntry<T>? _inMemory = null;
 
     protected async Task<Reply<bool>> SetCache( T? newData )
     {

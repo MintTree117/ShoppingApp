@@ -20,7 +20,25 @@ public sealed class CartManager( StorageService storage, HttpService http, Authe
     
     bool _isBusy;
     CartItems? _summaryInMemory;
-    
+
+    public async Task<Reply<CartItems>> GetLocal()
+    {
+        SetBusy( true );
+
+        if (await AlreadyUpdating() && _summaryInMemory is not null)
+        {
+            SetBusy( false );
+            return Reply<CartItems>.Success( _summaryInMemory );
+        }
+
+        var storageReply = await _storage.GetLocalStorage<CartItems>( SummaryStorageKey );
+        _summaryInMemory = storageReply
+            ? storageReply.Data
+            : null;
+        SetBusy( false );
+        InvokeCountChange();
+        return storageReply;
+    }
     public async Task<Reply<CartItems>> Get()
     {
         SetBusy( true );
@@ -34,8 +52,11 @@ public sealed class CartManager( StorageService storage, HttpService http, Authe
         var storageReply = await _storage.GetLocalStorage<CartItems>( SummaryStorageKey );
         if (!await IsAuthenticated())
         {
-            _summaryInMemory = storageReply.Data;
+            _summaryInMemory = storageReply
+                ? storageReply.Data
+                : null;
             SetBusy( false );
+            InvokeCountChange();
             return storageReply;
         }
         
@@ -87,7 +108,7 @@ public sealed class CartManager( StorageService storage, HttpService http, Authe
             ? IReply.Fail( $"Failed to update cart in storage or server. {storageTask.Result.GetMessage()} {httpTask.Result.GetMessage()}" )
             : IReply.Success();
     }
-    public async Task<Reply<bool>> Update( CartProduct product )
+    public async Task<Reply<bool>> Update( CartItem product )
     {
         SetBusy( true );
         
@@ -103,11 +124,11 @@ public sealed class CartManager( StorageService storage, HttpService http, Authe
         }
 
         
-        items?.Set( CartItem.FromCartProduct( product ) );
+        items?.Set( product );
         
         var storageTask = _storage.SetLocalStorage( SummaryStorageKey, items );
         var httpTask = await IsAuthenticated() ?
-            _http.PutAsyncAuthenticated<bool>( Consts.ApiUpdateCart, CartItem.FromCartProduct( product ) ) 
+            _http.PutAsyncAuthenticated<bool>( Consts.ApiUpdateCart, product ) 
             : null;
         
         if (httpTask is null) await storageTask;
@@ -121,7 +142,7 @@ public sealed class CartManager( StorageService storage, HttpService http, Authe
             ? IReply.Fail( $"Failed to update cart in storage or server. {storageTask.Result.GetMessage()} {httpTask.Result.GetMessage()}" )
             : IReply.Success();
     }
-    public async Task<Reply<bool>> UpdateBulk( List<CartProduct> products )
+    public async Task<Reply<bool>> UpdateBulk( List<CartItem> products )
     {
         SetBusy( true );
 
@@ -130,7 +151,7 @@ public sealed class CartManager( StorageService storage, HttpService http, Authe
             ? cartReply.Data
             : null;
 
-        foreach ( CartProduct p in products )
+        foreach ( CartItem p in products )
         {
             var item = items?.Items.FirstOrDefault( i => i.ProductId == p.ProductId );
             if (item is null)
@@ -153,7 +174,7 @@ public sealed class CartManager( StorageService storage, HttpService http, Authe
             ? IReply.Fail( $"Failed to update cart in storage or server. {storageTask.Result.GetMessage()} {httpTask.Result.GetMessage()}" )
             : IReply.Success();
     }
-    public async Task<Reply<bool>> Delete( CartProduct product )
+    public async Task<Reply<bool>> Delete( CartItem product )
     {
         SetBusy( true );
 

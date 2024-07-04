@@ -39,13 +39,13 @@
         
         if (!reply)
         {
-            await Authentication.ClearSession();
+            await Auth.ClearSession();
             PushError( reply, "Failed to login." );
             StopLoading();
             return;
         }
         
-        var updateResult = await Authentication.CreateNewSession( reply.Data );
+        var updateResult = await Auth.CreateNewSession( reply.Data );
         if (!updateResult)
         {
             PushError( updateResult, "Failed to save login." );

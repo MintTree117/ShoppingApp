@@ -72,7 +72,7 @@
             return;
         }
 
-        await Authentication.ClearSession();
+        await Auth.ClearSession();
         StopLoading();
         Navigate( Consts.PageAccountDeleted );
     }

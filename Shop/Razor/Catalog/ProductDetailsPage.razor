@@ -110,7 +110,7 @@
     {
         base.OnDispose();
         LocationManager.OnLocationChanged -= OnAddressChanged;
-        _productCard.ToggleLoading -= ToggleLoading;
+        //_productCard.ToggleLoading -= ToggleLoading;
         _productCard.OnItemAddedToCart -= OnItemAddedToCart;
         _addressBox.ToggleLoading -= ToggleLoading;
     }
@@ -165,7 +165,7 @@
 
         if (!_cardSubscribed && _productCard is not null)
         {
-            _productCard.ToggleLoading += ToggleLoading;
+            //_productCard.ToggleLoading += ToggleLoading;
             _productCard.OnItemAddedToCart += OnItemAddedToCart;
             _cardSubscribed = true;
         }

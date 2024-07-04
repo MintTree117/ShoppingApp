@@ -3,152 +3,78 @@
 @using Shop.Types.Cart
 @using Shop.Infrastructure
 @using Shop.Types.Products.Dtos
+@using Shop.Razor.Catalog
+@using Shop.Types.Products
+@using Shop.Razor.Shared.Components
 @inherits Shop.Razor.Shared.ShopPage
+
+<LoadingPanelPage @ref="_loadingPanel"/>
 
 <!-- CONTAINER -->
 <div class="content-container cart-container">
-    
     <!-- ITEMS -->
     <div class="cart-items">
-        @foreach ( CartProduct i in _products.Items )
+        @foreach ( var kvp in _itemsAndSummaries )
         {
-            <!-- ITEMS CONTAINER -->
-            <div class="cart-item row-between">
-                
-                <!-- IMAGE -->
-                <a class="cart-item-image">
-                    <img src="@i.ProductImage" alt="@i.ProductName"/>
-                </a>
-                
-                <!-- INFO -->
-                <div class="cart-item-info">
-                    <a class="product-title" href="@Consts.GetProductDetailsUrl( i.ProductId )">
-                        <h3>@i.ProductName</h3>
-                    </a>
-                    
-                    @if (!i.IsInStock)
-                    {
-                        <div class="cart-item-out">
-                            <i class="fa fa-circle-x"></i>
-                            <span>Out of stock</span>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="cart-item-estimate">
-                            
-                        </div>
-                    }
-                    <!-- PRICING -->
-                    <div class="search-item-pricing">
-                        @if (i.SalePrice > 0)
-                        {
-                            <span class="search-item-price">
-                                $@i.SalePrice
-                            </span>
-                            <span class="ms-2 text-muted text-decoration-line-through">
-                                $@i.Price
-                            </span>
-                        }
-                        else
-                        {
-                            <span class="search-item-price">
-                                $@i.Price
-                            </span>
-                        }
-                    </div>
-                    <!-- BOTTOM -->
-                    <div class="cart-item-buttons">
-                        <!-- QUANTITY -->
-                        @if (i.Quantity < 10)
-                        {
-                            <!-- SMALL QUANTITY DROPDOWN -->
-                            <div class="form-group w-50">
-                                <select id="quantitySelect" class="btn btn-outline-secondary btn-icon form-select h-100 w-100" @onchange="@(async () => await OnChangeQuantitySmall( i ))" value="@i.Quantity">
-                                    @foreach ( int quantity in ItemQuantityOptions )
-                                    {
-                                        <option value="@quantity" selected="@( @i.Quantity == quantity )">Qty: @quantity</option>
-                                    }
-                                </select>
-                            </div>
-                        }
-                        else
-                        {
-                            <!-- LARGE QUANTITY INPUT -->
-                            <div class="cart-large-quantity">
-                                <input class="form-control" type="number" @onchange="@(( e ) => OnChangeQuantityLarge( i, e ))"/>
-                            </div>
-                            <!-- SAVE CHANGES -->
-                            if (_changed.Contains( i ))
+            <ProductCard Product="@ProductModel.From( kvp.Value )" CardType="@ProductCard.Type.Cart"/>
+            <!-- BUTTONS -->
+            <div class="cart-item-buttons">
+                <!-- QUANTITY -->
+                @if (kvp.Key.Quantity < 10)
+                {
+                    <!-- SMALL QUANTITY DROPDOWN -->
+                    <div class="form-group w-50">
+                        <select id="quantitySelect" class="btn btn-outline-secondary btn-icon form-select h-100 w-100" @onchange="@(async () => await OnChangeQuantitySmall( kvp.Key ))" value="@kvp.Key.Quantity">
+                            @foreach ( int quantity in ItemQuantityOptions )
                             {
-                                <button class="btn btn-primary" @onchange="@(async () => await SaveChanges())">
-                                    Save Changes
-                                </button>
+                                <option value="@quantity" selected="@( kvp.Key.Quantity == quantity )">Qty: @quantity</option>
                             }
-                        }
-                        <!-- REMOVE -->
-                        <button class="btn btn-link btn-icon text-decoration-none" @onchange="@(async () => await OnClickDelete( i ))">
-                            <i class="fa fa-trash"></i>
-                        </button>
+                        </select>
                     </div>
-                </div>
+                }
+                else
+                {
+                    <!-- LARGE QUANTITY INPUT -->
+                    <div class="cart-large-quantity">
+                        <input class="form-control" type="number" @onchange="@(( e ) => OnChangeQuantityLarge( kvp.Key, e ))"/>
+                    </div>
+                    <!-- SAVE CHANGES -->
+                    if (_changedItems.Contains( kvp.Key ))
+                    {
+                        <button class="btn btn-primary" @onchange="@(async () => await SaveChanges())">
+                            Save Changes
+                        </button>
+                    }
+                }
+                <!-- REMOVE -->
+                <button class="btn btn-link btn-icon text-decoration-none" @onchange="@(async () => await OnClickDelete( kvp.Key ))">
+                    <i class="fa fa-trash"></i>
+                </button>
             </div>
         }
     </div>
-    <div class="cart-summary">
+
+    <div class="cart-checkout">
+        <p>HI</p>
     </div>
 </div>
 
 @code
 {
     [Inject] public CartManager CartManager { get; init; } = default!;
-    static readonly int[] ItemQuantityOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    CartProducts _products = CartProducts.Empty();
-    HashSet<CartProduct> _changed = []; 
+    LoadingPanelPage _loadingPanel = default!;
 
+    static readonly int[] ItemQuantityOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    Dictionary<CartItem, ProductSummaryDto> _itemsAndSummaries = [];
+    HashSet<CartItem> _changedItems = [];
+    
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        
-        var cartReply = await CartManager.Get();
-        if (!cartReply)
-        {
-            PushError( $"An error occured while getting cart. {cartReply.GetMessage()}" );
-            return;
-        }
-
-        var summary = cartReply.Data;
-        var url = $"{Consts.ApiGetProductsByIds}?ProductIds={summary.GetIds().FirstOrDefault()}";
-        var productsReply = await Http.GetAsync<List<ProductSummaryDto>>( url );
-        if (!productsReply)
-        {
-            _products = CartProducts.FromItems( summary );
-            PushWarning( "Failed to fetch product details. Showing basic information only." );
-            return;
-        }
-        
-        List<ProductSummaryDto> dtos = productsReply.Data;
-        List<CartProduct> products = [];
-        
-        foreach ( CartItem s in summary.Items )
-        {
-            CartItem s1 = s;
-            var contains = dtos.Any( p => p.Id == s1.ProductId );
-            if (!contains)
-            {
-                products.Add( CartProduct.FromItem( s ) );
-                continue;
-            }
-
-            var product = dtos.FirstOrDefault( p => p.Id == s.ProductId );
-            var p = CartProduct.FromSummary( product, s.Quantity );
-            products.Add( p );
-        }
-
-        _products = CartProducts.With( products );
+        await GetCart();
     }
     
-    void OnChangeQuantityLarge( CartProduct product, ChangeEventArgs args )
+    void OnChangeQuantityLarge( CartItem item, ChangeEventArgs args )
     {
         /*if (args.Value is null )
             return;
@@ -156,7 +82,7 @@
         product.Quantity = quantity;
         _changed.Add( product );*/
     }
-    async Task OnChangeQuantitySmall( CartProduct product )
+    async Task OnChangeQuantitySmall( CartItem item ) 
     {
         /*var cartReply = await CartManager.Update( product );
         if (!cartReply)
@@ -170,7 +96,7 @@
     }
     async Task SaveChanges()
     {
-        var cartReply = await CartManager.UpdateBulk( _products.Items );
+        var cartReply = await CartManager.UpdateBulk( _changedItems.ToList() );
         if (!cartReply)
         {
             PushError( $"Failed to save changes. {cartReply.GetMessage()}" );
@@ -180,9 +106,9 @@
         StateHasChanged();
         PushSuccess( "Changes saved." );
     }
-    async Task OnClickDelete( CartProduct product )
+    async Task OnClickDelete( CartItem item )
     {
-        var cartReply = await CartManager.Delete( product );
+        var cartReply = await CartManager.Delete( item );
         if (!cartReply)
         {
             PushError( $"Failed to remove item from cart. {cartReply.GetMessage()}" );
@@ -201,5 +127,45 @@
     async Task OnClickChangeLocation()
     {
         // await get estimates
+    }
+
+    async Task GetCart()
+    {
+        Loader.StartLoadingPage( "Loading cart..." );
+        
+        // clear
+        _itemsAndSummaries = [];
+        _changedItems = [];
+        
+        // get cart
+        var cartReply = await CartManager.Get();
+        if (!cartReply)
+        {
+            Loader.StopLoadingPage();
+            PushError( $"An error occured while getting cart. {cartReply.GetMessage()}" );
+            return;
+        }
+        
+        // get products
+        var summary = cartReply.Data;
+        var url = $"{Consts.ApiGetProductsByIds}?ProductIds={string.Join( ",", summary.GetIds() )}";
+        var productsReply = await Http.GetAsync<List<ProductSummaryDto>>( url );
+        if (!productsReply)
+        {
+
+            Loader.StopLoadingPage();
+            PushWarning( $"Failed to fetch product details. {productsReply.GetMessage()}" );
+            return;
+        }
+        
+        // merge data
+        List<ProductSummaryDto> dtos = productsReply.Data;
+        foreach ( CartItem c in summary.Items )
+        {
+            var dto = dtos.FirstOrDefault( d => d.Id == c.ProductId );
+            _itemsAndSummaries.TryAdd( c, dto );
+        }
+        
+        Loader.StopLoadingPage();
     }
 }

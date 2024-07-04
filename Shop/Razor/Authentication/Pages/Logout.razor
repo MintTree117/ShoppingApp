@@ -10,7 +10,7 @@
         
         StartLoading( "Logging Out..." );
         
-        await Authentication.ClearSession();
+        await Auth.ClearSession();
         var serverReply = await Http.PutAsyncAuthenticated<bool>( Consts.ApiLogout );
         Logger.Log( serverReply.GetMessage() );
         Navigation.NavigateTo( Consts.PageHome, true );

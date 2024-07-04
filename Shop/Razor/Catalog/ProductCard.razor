@@ -14,155 +14,160 @@
         </a>
     </div>
     
-    <!-- TITLE -->
-    <a class="product-title link-dark" href="@Consts.GetProductDetailsUrl( Product.Id )">
-        <h3 class="link-dark">@Product.Name</h3>
-    </a>
-    
-    <!-- DIVIDER -->
-    <hr class="product-title-divider"/>
-    
-    <!-- RATING/BRAND -->
-    <div class="product-rating-brand row-between mb-2">
-        <!-- RATING -->
-        <div class="product-rating">
-            @for ( int i = 1; i <= 5; i++ )
-            {
-                <div>
-                    <i class="@Utils.GetRatingCss( Product.Rating, i )"></i>
-                </div>
-            }
-            <a class="product-rating-count" href="@Consts.GetProductDetailsUrlRatings( Product.Id )">
-                @Product.NumberRatings
-            </a>
-        </div>
+    <!-- IMAGE-EXCLUSION-CONTAINER -->
+    <div class="d-flex flex-column">
+        <!-- TITLE -->
+        <a class="product-title link-dark" href="@Consts.GetProductDetailsUrl( Product.Id )">
+            <h3 class="link-dark">@Product.Name</h3>
+        </a>
         
-        @if (CardType is Type.Details or Type.Normal or Type.Cart)
-        {
-            <!-- BRAND -->
-            <div class="product-brand">
-                <span class="product-brand-label">
-                    Brand:&nbsp;
-                </span>
-                <a class="product-brand-link" href="@Consts.GetBrandSearchUrl( Product.BrandId )">
-                    @Product.BrandName
-                </a>
-            </div>   
-        }
-    </div>
-    
-    <!-- SHIPPING/PRICING -->
-    <div class="product-shipping-pricing mb-2">
-        <!-- PRICING -->
-        <div class="product-pricing">
-            @if (Product.SalePrice > 0)
-            {
-                <span class="product-price">
-                    $@Product.SalePrice
-                </span>
-                <span class="product-sale-price">
-                    $@Product.Price
-                </span>
-            }
-            else
-            {
-                <span class="product-price">
-                    $@Product.Price
-                </span>
-            }
-        </div>
+        <!-- DIVIDER -->
+        <hr class="product-title-divider"/>
         
-        <!-- SHIPPING -->
-        <div class="product-shipping">
-            <small class="@GetDeliveryEstimateColor( Product )">
-                @GetDeliveryEstimateText( Product )
-            </small>
-        </div>
-    </div>
-    
-    <!-- CART -->
-    @switch ( CardType )
-    {
-        case Type.Details:
-        {
-            <!-- CART -->
-            <div class="product-cart w-100 d-flex flex-row align-items-stretch justify-content-between gap-3">
-                @if (IsProductInCart( Product, out int count ))
+        <!-- RATING/BRAND -->
+        <div class="product-rating-brand row-between mb-2">
+            <!-- RATING -->
+            <div class="product-rating">
+                @for ( int i = 1; i <= 5; i++ )
                 {
-                    <!-- CART BUTTON -->
-                    <a class="btn btn-primary btn-icon w-100" href="@Consts.PageCart">
-                        <i class="fa fa-shopping-cart fa-sm me-2"></i>
+                    <div>
+                        <i class="@Utils.GetRatingCss( Product.Rating, i )"></i>
+                    </div>
+                }
+                <a class="product-rating-count" href="@Consts.GetProductDetailsUrlRatings( Product.Id )">
+                    @Product.NumberRatings
+                </a>
+            </div>
+            
+            @if (CardType is Type.Details or Type.Normal or Type.Cart)
+            {
+                <!-- BRAND -->
+                <div class="product-brand">
+                    <span class="product-brand-label">
+                        Brand:&nbsp;
+                    </span>
+                    <a class="product-brand-link" href="@Consts.GetBrandSearchUrl( Product.BrandId )">
+                        @Product.BrandName
+                    </a>
+                </div>   
+            }
+        </div>
+        
+        <!-- SHIPPING/PRICING -->
+        <div class="product-shipping-pricing mb-2">
+            <!-- PRICING -->
+            <div class="product-pricing">
+                @if (Product.SalePrice > 0)
+                {
+                    <span class="product-price">
+                        $@Product.SalePrice
+                    </span>
+                    <span class="product-sale-price">
+                        $@Product.Price
+                    </span>
+                }
+                else
+                {
+                    <span class="product-price">
+                        $@Product.Price
+                    </span>
+                }
+            </div>
+            
+            <!-- SHIPPING -->
+            <div class="product-shipping">
+                <small class="@GetDeliveryEstimateColor( Product )">
+                    @GetDeliveryEstimateText( Product )
+                </small>
+            </div>
+        </div>
+        
+        <!-- CART -->
+        @switch ( CardType )
+        {
+            case Type.Details:
+            {
+                <!-- CART -->
+                <div class="product-cart w-100 d-flex flex-row align-items-stretch justify-content-between gap-3">
+                    @if (IsProductInCart( Product, out int count ))
+                    {
+                        <!-- CART BUTTON -->
+                        <a class="btn btn-primary btn-icon w-100" href="@Consts.PageCart">
+                            <i class="fa fa-shopping-cart fa-sm me-2"></i>
+                            <small>View In Cart (@count)</small>
+                        </a>
+                    }
+                    else if( !Product.IsInStock )
+                    {
+                        <!-- DISABLED BUTTON -->
+                        <button disabled class="btn btn-secondary btn-icon w-100">
+                            <i class="fa-solid fa-circle-xmark fa-sm"></i>
+                            <small>Out of Stock</small>
+                        </button>
+                    }
+                    else
+                    {
+                        <!-- DROPDOWN LIST -->
+                        <div class="form-group w-50">
+                            <select id="quantitySelect" class="btn btn-outline-secondary btn-icon form-select h-100 w-100" @onchange="OnQuantityChange" value="@_selectedQuantity">
+                                @foreach ( int quantity in Quantities )
+                                {
+                                    <option value="@quantity" selected="@(_selectedQuantity == quantity)">Qty: @quantity</option>
+                                }
+                            </select>
+                        </div>
+                        <!-- ADD BUTTON -->
+                        <button class="btn btn-outline-primary btn-icon w-50" @onclick="@(async () => await AddToCart( Product ))">
+                            <i class="fa-solid fa-shopping-cart fa-sm me-2"></i>
+                            <small>Add To Cart</small>
+                        </button>
+                    } 
+                </div>
+                break;
+            }
+            case Type.Cart:
+                break;
+            default:
+            {
+                if (IsProductInCart( Product, out int count ))
+                {
+                    <a class="btn btn-primary btn-icon search-item-cart-button" href="@Consts.PageCart">
+                        <i class="fa-solid fa-circle-check fa-xs me-1"></i>
                         <small>View In Cart (@count)</small>
                     </a>
                 }
-                else if( !Product.IsInStock )
+                else 
                 {
-                    <!-- DISABLED BUTTON -->
-                    <button disabled class="btn btn-secondary btn-icon w-100">
-                        <i class="fa-solid fa-circle-xmark fa-sm"></i>
-                        <small>Out of Stock</small>
-                    </button>
+                    if (Product.IsInStock)
+                    {
+                        <button class="btn btn-outline-primary btn-icon search-item-cart-button shadow-sm" @onclick="@(async () => await AddToCart( Product ))">
+                            <i class="fa-solid fa-shopping-cart fa-xs me-1"></i>
+                            <small>Add To Cart</small>
+                        </button>
+                    }
+                    else
+                    {
+                        <button disabled class="btn btn-secondary btn-icon search-item-cart-button shadow-sm">
+                            <i class="fa-solid fa-circle-xmark fa-xs me-1"></i>
+                            <small>Out of Stock</small>
+                        </button>
+                    } 
                 }
-                else
-                {
-                    <!-- DROPDOWN LIST -->
-                    <div class="form-group w-50">
-                        <select id="quantitySelect" class="btn btn-outline-secondary btn-icon form-select h-100 w-100" @onchange="OnQuantityChange" value="@_selectedQuantity">
-                            @foreach ( int quantity in Quantities )
-                            {
-                                <option value="@quantity" selected="@(_selectedQuantity == quantity)">Qty: @quantity</option>
-                            }
-                        </select>
-                    </div>
-                    <!-- ADD BUTTON -->
-                    <button class="btn btn-outline-primary btn-icon w-50" @onclick="@(async () => await AddToCart( Product ))">
-                        <i class="fa-solid fa-shopping-cart fa-sm me-2"></i>
-                        <small>Add To Cart</small>
-                    </button>
-                } 
-            </div>
-            break;
-        }
-        case Type.Cart:
-            break;
-        default:
-        {
-            if (IsProductInCart( Product, out int count ))
-            {
-                <a class="btn btn-primary btn-icon search-item-cart-button" href="@Consts.PageCart">
-                    <i class="fa-solid fa-circle-check fa-xs me-1"></i>
-                    <small>View In Cart (@count)</small>
-                </a>
+                break;
             }
-            else 
-            {
-                if (Product.IsInStock)
-                {
-                    <button class="btn btn-outline-primary btn-icon search-item-cart-button shadow-sm" @onclick="@(async () => await AddToCart( Product ))">
-                        <i class="fa-solid fa-shopping-cart fa-xs me-1"></i>
-                        <small>Add To Cart</small>
-                    </button>
-                }
-                else
-                {
-                    <button disabled class="btn btn-secondary btn-icon search-item-cart-button shadow-sm">
-                        <i class="fa-solid fa-circle-xmark fa-xs me-1"></i>
-                        <small>Out of Stock</small>
-                    </button>
-                } 
-            }
-            break;
         }
-    }
+    </div>
+
 </div>
 
 @code 
 {
-    public event Action<bool>? ToggleLoading;
+    //public event Action<bool>? ToggleLoading;
     
     [Parameter] public Type CardType { get; set; }
     [Parameter] public ProductModel Product { get; init; } = default!;
-    
+
+    [Inject] public LoadingService Loader { get; set; } = default!;
     [Inject] public CartManager CartManager { get; init; } = default!;
     
     CartItems _cartItems = CartItems.Empty();
@@ -174,7 +179,7 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        var reply = await CartManager.Get();
+        var reply = await CartManager.GetLocal();
         _cartItems = reply
             ? reply.Data
             : CartItems.Empty();
@@ -188,25 +193,29 @@
     async Task AddToCart( ProductModel p )
     {
         ArgumentNullException.ThrowIfNull( p );
-        ToggleLoading?.Invoke( true );
+        //ToggleLoading?.Invoke( true );
+        Loader.StartLoadingPage( "Adding to cart..." );
         var cartReply = await CartManager.Add( p.Id );
         if (!cartReply)
         {
-            ToggleLoading?.Invoke( false );
+            //ToggleLoading?.Invoke( false );
+            Loader.StopLoadingPage();
             OnItemAddedToCart?.Invoke( false, cartReply.GetMessage() );
             return;
         }
 
-        var newSummary = await CartManager.Get();
+        var newSummary = await CartManager.GetLocal();
         if (!newSummary)
         {
-            ToggleLoading?.Invoke( false );
+            //ToggleLoading?.Invoke( false );
+            Loader.StopLoadingPage();
             OnItemAddedToCart?.Invoke( false, cartReply.GetMessage() );
             return;
         }
 
         _cartItems = newSummary.Data;
-        ToggleLoading?.Invoke( false );
+        //ToggleLoading?.Invoke( false );
+        Loader.StopLoadingPage();
         OnItemAddedToCart?.Invoke( true, null );
     }
     void OnQuantityChange( ChangeEventArgs e )

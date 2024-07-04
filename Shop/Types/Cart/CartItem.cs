@@ -11,6 +11,4 @@ public sealed class CartItem(
     
     public static CartItem FromProduct( ProductModel p ) =>
         new( p.Id, 1 );
-    public static CartItem FromCartProduct( CartProduct p ) =>
-        new( p.ProductId, p.Quantity );
 }

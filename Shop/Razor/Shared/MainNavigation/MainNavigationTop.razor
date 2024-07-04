@@ -23,13 +23,13 @@
                     <i class="fa fa-user fa-lg d-block position-relative">
                          @if (_authenticated)
                         {
-                            <div class="top-nav-signed-in" style="top: -12px; right: -5px"></div>
+                            <div class="top-nav-signed-in" style="top: -12px; right: -5px;"></div>
                         }
                     </i>
                 </button>
                 <button class="btn btn-icon" @onclick="GoToCart">
                     <i class="fa-solid fa-cart-shopping d-block position-relative">
-                        <div class="top-nav-cart-count" style="top: -12px; right: -12px">@_cartCount</div>
+                        <div class="top-nav-cart-count" style="top: -12px; right: -12px; color: var(--orange);">@_cartCount</div>
                     </i>
                 </button>
                 <!-- SIDEBAR -->
@@ -69,7 +69,7 @@ else {
                             <i class="fa fa-user position-relative">
                                 @if (_authenticated)
                                 {
-                                    <div class="top-nav-signed-in" style="top: 0; right: 17px"></div>
+                                    <div class="top-nav-signed-in" style="top: 0; right: 17px;"></div>
                                 }
                             </i>
                         </div>
@@ -86,7 +86,7 @@ else {
                 <!-- CART -->
                 <button class="btn top-nav-button btn-link-light pe-0 me-0 position-relative" @onclick="GoToCart">
                     <i class="fa-solid fa-cart-shopping position-relative">
-                        <div class="top-nav-cart-count" style="top: -7px; right: 16px">@_cartCount</div>
+                        <div class="top-nav-cart-count" style="top: -7px; right: 16px; color: var(--orange);">@_cartCount</div>
                     </i>
                 </button>
             </div>
@@ -149,13 +149,13 @@ else {
     protected override async Task OnInitializedAsync()
     {
         _dotNetRef = DotNetObjectReference.Create( this );
+        await JsRuntime.InvokeVoidAsync( "resizeObserverInterop.initialize", _dotNetRef );
         AuthenticationStateManager.OnStateChanged += OnAuthStateChanged;
         Cart.OnCartCountChanged += OnCartCountChanged;
         var cartItems = await Cart.Get();
         _cartCount = cartItems
             ? cartItems.Data.Count()
             : 0;
-        await JsRuntime.InvokeVoidAsync( "resizeObserverInterop.initialize", _dotNetRef );
     }
     [JSInvokable] public void OnResize( int width, int height )
     {
@@ -168,6 +168,7 @@ else {
     void OnCartCountChanged( int newCount )
     {
         _cartCount = newCount;
+        StateHasChanged();
     }
 
     void OnAuthStateChanged( Task<AuthenticationState> state )
