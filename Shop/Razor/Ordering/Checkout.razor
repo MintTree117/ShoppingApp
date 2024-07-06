@@ -1,8 +1,149 @@
 @page "/checkout"
+@using Shop.Types.Cart
+@using Shop.Utilities
+@using Shop.Infrastructure
+@using Shop.Types.Products.Dtos
+@using Shop.Types.Users
+@inherits Shop.Razor.Shared.ShopPage
 
-<h3>Checkout</h3>
+<!-- CONTAINER -->
+<div class="content-container checkout-container">
+    
+    <!-- CHECKOUT FORMS -->
+    <div class="checkout-forms-container">
+        
+        <!-- BILLING ADDRESS -->
+        <h4>Billing Address</h4>
+        <EditForm Model="@_billingAddress">
+            <DataAnnotationsValidator/>
+            <ValidationSummary class="text-danger" role="alert"/>
+            
+            <!-- NAME -->
+            <div class="form-floating mb-2">
+                <InputText type="name" class="form-control" id="billingAddressName" @bind-Value="@_billingAddress.Name"></InputText>
+                <ValidationMessage For="@(() => _billingAddress.Name)"/>
+                <label for="billingAddressName">Address Name *</label>
+            </div>
+            
+            <!-- POSITION -->
+            <div class="d-flex flex-row align-items-center justify-content-between">
+                <!-- POS X -->
+                <div class="form-floating mb-2">
+                    <InputNumber type="name" class="form-control" id="billingPosX" @bind-Value="@_billingAddress.PosX"></InputNumber>
+                    <ValidationMessage For="@(() => _billingAddress.PosX)"/>
+                    <label for="billingPosX">Position X *</label>
+                </div>
+                <!-- POS Y -->
+                <div class="form-floating mb-2">
+                    <InputNumber type="name" class="form-control" id="billingPosY" @bind-Value="@_billingAddress.PosY"></InputNumber>
+                    <ValidationMessage For="@(() => _billingAddress.PosY)"/>
+                    <label for="billingPosY">Position Y *</label>
+                </div>
+            </div>
+
+        </EditForm>
+        
+        <!-- SHIPPING ADDRESS -->
+        <h4>Shipping Address</h4>
+        <EditForm Model="@_shippingAddress">
+            <DataAnnotationsValidator/>
+            <ValidationSummary class="text-danger" role="alert"/>
+            
+            <!-- NAME -->
+            <div class="form-floating mb-2">
+                <InputText type="name" class="form-control" id="shippingAddressName" @bind-Value="@_shippingAddress.Name"></InputText>
+                <ValidationMessage For="@(() => _billingAddress.Name)"/>
+                <label for="shippingAddressName">Address Name *</label>
+            </div>
+            
+            <!-- POSITION -->
+            <div class="d-flex flex-row align-items-center justify-content-between">
+                <!-- POS X -->
+                <div class="form-floating mb-2">
+                    <InputNumber type="name" class="form-control" id="shippingPosX" @bind-Value="@_shippingAddress.PosX"></InputNumber>
+                    <ValidationMessage For="@(() => _billingAddress.PosX)"/>
+                    <label for="shippingPosX">Position X *</label>
+                </div>
+                <!-- POS Y -->
+                <div class="form-floating mb-2">
+                    <InputNumber type="name" class="form-control" id="shippingPosY" @bind-Value="@_shippingAddress.PosY"></InputNumber>
+                    <ValidationMessage For="@(() => _billingAddress.PosY)"/>
+                    <label for="shippingPosY">Position Y *</label>
+                </div>
+            </div>
+        </EditForm>
+        
+    </div>
+    
+    <!-- CHECKOUT CART -->
+    <div class="cart-checkout">
+        <div class="cart-checkout-title">
+            <h3 class="mb-0">Summary</h3>
+        </div>
+        <div class="cart-checkout-section">
+            <span>Items:</span>
+            <span>$@_itemsAndSummaries.Price()</span>
+        </div>
+        <div class="cart-checkout-section">
+            <span>Shipping:</span>
+            <span>$@_itemsAndSummaries.Shipping()</span>
+        </div>
+        <div class="cart-checkout-section">
+            <span>Estimated Tax:</span>
+            <span>$@_itemsAndSummaries.EstimatedTax()</span>
+        </div>
+        <hr/>
+        <div class="cart-checkout-section">
+            <span>Estimated Total:</span>
+            <span>$@_itemsAndSummaries.EstimatedTotal()</span>
+        </div>
+        <a class="btn btn-outline-primary btn-icon mt-2" href="@Consts.PageCheckout">
+            Checkout
+        </a>
+    </div>
+</div>
 
 @code 
 {
-    
+    [Inject] public CartManager CartManager { get; init; } = default!;
+    CartItemsAndSummaries _itemsAndSummaries = CartItemsAndSummaries.Empty();
+
+    AddressModel _billingAddress = new();
+    AddressModel _shippingAddress = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await GetCart();
+    }
+    async Task GetCart()
+    {
+        Loader.StartLoadingPage( "Loading cart..." );
+
+        // get cart
+        var cartReply = await CartManager.GetFull();
+        if (!cartReply)
+        {
+            Loader.StopLoadingPage();
+            PushError( $"An error occured while getting cart. {cartReply.GetMessage()}" );
+            return;
+        }
+
+        // get products
+        var url = $"{Consts.ApiGetProductsByIds}?ProductIds={string.Join( ",", cartReply.Data.GetIds() )}";
+        var productsReply = await Http.GetAsync<List<ProductSummaryDto>>( url );
+        if (!productsReply)
+        {
+
+            Loader.StopLoadingPage();
+            PushWarning( $"Failed to fetch product details. {productsReply.GetMessage()}" );
+            return;
+        }
+
+        // merge data
+        _itemsAndSummaries = CartItemsAndSummaries.From(
+            cartReply.Data.Items, productsReply.Data );
+
+        Loader.StopLoadingPage();
+    }
 }

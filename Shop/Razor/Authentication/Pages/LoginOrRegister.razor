@@ -7,7 +7,8 @@
 
 <PageTitle>Login Or Register</PageTitle>
 
-@if (_registered) {
+@if (_registered) 
+{
     <!-- PENDING 2FA -->
     <div class="auth-result-wrapper">
         <!-- MESSAGE -->
@@ -18,7 +19,8 @@
         <button class="btn btn-full btn-success mb-2" @onclick="GoToLogin"><i class="fa fa-user me-2"></i>Login</button>
     </div>
 }
-else if (_pendingTwoFactor) {
+else if (_pendingTwoFactor) 
+{
     <!-- PENDING 2FA -->
     <div class="auth-result-wrapper">
         <!-- MESSAGE -->
@@ -41,7 +43,8 @@ else if (_pendingTwoFactor) {
         </EditForm>
     </div>
 }
-else {
+else 
+{
     <!-- LOGIN TITLE -->
     <h2>Login</h2>
     <!-- LOGIN FORM -->
@@ -134,7 +137,7 @@ else {
         _registerRequest.Username = "MintTree117";
         _registerRequest.Password = "Password1?";
         _registerRequest.PasswordConfirm = "Password1?";
-        _registerRequest.TwoFactorEmail = "martygrof@hotmail.com";
+        //_registerRequest.TwoFactorEmail = "martygrof@hotmail.com";
 
         await OnValidRegisterSubmitAsync();
     }

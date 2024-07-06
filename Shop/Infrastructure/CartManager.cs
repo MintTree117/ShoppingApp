@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Components.Authorization;
 using Shop.Infrastructure.Authentication;
 using Shop.Infrastructure.Http;
 using Shop.Infrastructure.Storage;
@@ -7,218 +8,145 @@ using Shop.Utilities;
 
 namespace Shop.Infrastructure;
 
-public sealed class CartManager( StorageService storage, HttpService http, AuthenticationStateManager auth ) // Singleton
+public sealed class CartManager : IDisposable // Singleton
 {
     const string SummaryStorageKey = "CartSummary";
     
-    readonly StorageService _storage = storage;
-    readonly HttpService _http = http;
-    readonly AuthenticationStateManager _auth = auth;
+    readonly StorageService _storage;
+    readonly HttpService _http;
+    readonly AuthenticationStateManager _auth;
     readonly object _lock = new();
 
-    public event Action<int>? OnCartCountChanged; 
-    
-    bool _isBusy;
+    public event Action<CartItems?>? OnCartChanged;
+
+    bool _isAuthenticated = false;
+    bool _isBusy = false;
     CartItems? _summaryInMemory;
-
-    public async Task<Reply<CartItems>> GetLocal()
+    
+    public CartManager( StorageService storage, HttpService http, AuthenticationStateManager auth )
     {
-        SetBusy( true );
+        _storage = storage;
+        _http = http;
+        _auth = auth;
+        _auth.OnStateChanged += OnAuthenticationStateChange;
+        
+        GetInitialAuthState();
 
-        if (await AlreadyUpdating() && _summaryInMemory is not null)
+        async void GetInitialAuthState()
         {
-            SetBusy( false );
-            return Reply<CartItems>.Success( _summaryInMemory );
+            var state = await _auth.GetSessionState();
+            _isAuthenticated =
+                state.User.Identity is not null &&
+                state.User.Identity.IsAuthenticated;
         }
-
-        var storageReply = await _storage.GetLocalStorage<CartItems>( SummaryStorageKey );
-        _summaryInMemory = storageReply
-            ? storageReply.Data
-            : null;
-        SetBusy( false );
-        InvokeCountChange();
-        return storageReply;
     }
-    public async Task<Reply<CartItems>> Get()
+    public void Dispose()
     {
-        SetBusy( true );
+        _auth.OnStateChanged -= OnAuthenticationStateChange;
+    }
 
+    void OnAuthenticationStateChange( Task<AuthenticationState> task )
+    {
+        _isAuthenticated =
+            task.Result.User.Identity is not null &&
+            task.Result.User.Identity.IsAuthenticated;
+    }
+
+    public async Task<Reply<CartItems>> GetInMemory()
+    {
+        await Task.Delay( 500 );
+        await AlreadyUpdating();
+        return _summaryInMemory is not null
+            ? Reply<CartItems>.Success( _summaryInMemory )
+            : Reply<CartItems>.NotFound();
+    }
+    public async Task<Reply<CartItems>> GetFull()
+    {
+        await Task.Delay( 500 );
         if (await AlreadyUpdating() && _summaryInMemory is not null)
-        {
-            SetBusy( false );
             return Reply<CartItems>.Success( _summaryInMemory );
-        }
+        
+        SetBusy( true );
         
         var storageReply = await _storage.GetLocalStorage<CartItems>( SummaryStorageKey );
-        if (!await IsAuthenticated())
+        if (!_isAuthenticated)
         {
             _summaryInMemory = storageReply
                 ? storageReply.Data
                 : null;
             SetBusy( false );
-            InvokeCountChange();
+            InvokeCartChange();
             return storageReply;
         }
         
-        var serverReply = await _http.PostAsyncAuthenticated<List<CartItem>>( 
-            Consts.ApiPostGetCart, storageReply ? storageReply.Data : null );
+        var serverReply = await _http.PostAsyncAuthenticated<List<CartItemDto>>( 
+            Consts.ApiPostGetCart, storageReply ? storageReply.Data.Items : [] );
         if (!serverReply)
         {
             SetBusy( false );
-            InvokeCountChange();
+            InvokeCartChange();
             return Reply<CartItems>.Fail( serverReply );
         }
 
         _summaryInMemory = CartItems.With( serverReply.Data );
         await _storage.SetLocalStorage( SummaryStorageKey, _summaryInMemory );
         SetBusy( false );
-        InvokeCountChange();
+        InvokeCartChange();
         return Reply<CartItems>.Success( _summaryInMemory );
     }
-    public async Task<Reply<bool>> Add( Guid productId )
+    public async Task<Reply<bool>> Add( Guid id )
     {
         SetBusy( true );
-        
-        var cartReply = await Get();
-        CartItems items = cartReply
-            ? cartReply.Data
+        await Task.Delay( 500 );
+        Reply<CartItems> items = await _storage.GetLocalStorage<CartItems>( SummaryStorageKey );
+        _summaryInMemory = items
+            ? items.Data
             : CartItems.Empty();
-        
-        if (items.Contains( productId ))
-        {
-            SetBusy( false );
-            return IReply.Conflict( "Item already in cart." );
-        }
-        
-        var item = new CartItem( productId, 1 );
-        items?.Add( item );
-        
-        var storageTask = _storage.SetLocalStorage( SummaryStorageKey, items );
-        var httpTask = await IsAuthenticated()
-            ? _http.PutAsyncAuthenticated<bool>( Consts.ApiAddToCart, item.ProductId )
-            : null;
-        if (httpTask is null) await storageTask;
-        else await Task.WhenAll( storageTask, httpTask );
-        
-        _summaryInMemory = items;
-        SetBusy( false );
-        InvokeCountChange();
+        _summaryInMemory.Add( new CartItemDto( id, 1 ) );
 
-        return !storageTask.Result && (httpTask is not null && !httpTask.Result )
-            ? IReply.Fail( $"Failed to update cart in storage or server. {storageTask.Result.GetMessage()} {httpTask.Result.GetMessage()}" )
-            : IReply.Success();
+        return await Update( _summaryInMemory.Items );
     }
-    public async Task<Reply<bool>> Update( CartItem product )
+    public async Task<Reply<bool>> Update( List<CartItemDto> items )
     {
         SetBusy( true );
-        
-        var cartReply = await Get();
-        CartItems? items = cartReply
-            ? cartReply.Data
-            : null;
+        await Task.Delay( 500 );
+        _summaryInMemory = new CartItems( items );
 
-        if (items is not null && !items.Contains( product.ProductId ))
-        {
-            SetBusy( false );
-            return IReply.Conflict( "Cart does not contain this item." );
-        }
-
-        
-        items?.Set( product );
-        
-        var storageTask = _storage.SetLocalStorage( SummaryStorageKey, items );
-        var httpTask = await IsAuthenticated() ?
-            _http.PutAsyncAuthenticated<bool>( Consts.ApiUpdateCart, product ) 
-            : null;
-        
-        if (httpTask is null) await storageTask;
-        else await Task.WhenAll( storageTask, httpTask );
-        
-        _summaryInMemory = items;
-        SetBusy( false );
-        InvokeCountChange();
-
-        return !storageTask.Result && httpTask is not null && !httpTask.Result 
-            ? IReply.Fail( $"Failed to update cart in storage or server. {storageTask.Result.GetMessage()} {httpTask.Result.GetMessage()}" )
-            : IReply.Success();
-    }
-    public async Task<Reply<bool>> UpdateBulk( List<CartItem> products )
-    {
-        SetBusy( true );
-
-        var cartReply = await Get();
-        CartItems? items = cartReply
-            ? cartReply.Data
-            : null;
-
-        foreach ( CartItem p in products )
-        {
-            var item = items?.Items.FirstOrDefault( i => i.ProductId == p.ProductId );
-            if (item is null)
-                continue;
-            item.Quantity = p.Quantity;
-        }
-
-        var storageTask = _storage.SetLocalStorage( SummaryStorageKey, items );
-        var httpTask = await IsAuthenticated()
-            ? _http.PutAsyncAuthenticated<bool>( Consts.ApiUpdateCartBulk, items )
+        var storageTask = _storage.SetLocalStorage( SummaryStorageKey, _summaryInMemory );
+        var httpTask = _isAuthenticated
+            ? _http.PostAsyncAuthenticated<List<CartItemDto>>( Consts.ApiPostGetCart, _summaryInMemory )
             : null;
 
         if (httpTask is null) await storageTask;
         else await Task.WhenAll( storageTask, httpTask );
-        _summaryInMemory = CartItems.With( items?.Items ?? [] );
-        SetBusy( false );
-        InvokeCountChange();
 
-        return !storageTask.Result && httpTask is not null && !httpTask.Result
-            ? IReply.Fail( $"Failed to update cart in storage or server. {storageTask.Result.GetMessage()} {httpTask.Result.GetMessage()}" )
-            : IReply.Success();
-    }
-    public async Task<Reply<bool>> Delete( CartItem product )
-    {
-        SetBusy( true );
-
-        var cartReply = await Get();
-        CartItems items = cartReply
-            ? cartReply.Data
-            : CartItems.Empty();
-
-        if (!items.Contains( product.ProductId ))
+        if (httpTask is not null && httpTask.Result)
         {
-            SetBusy( false );
-            return IReply.Conflict( "Cart does not contain this item." );
+            _summaryInMemory = new CartItems( httpTask.Result.Data );
+            await _storage.SetLocalStorage( SummaryStorageKey, _summaryInMemory );
         }
 
-        items.Delete( product.ProductId );
-
-        var storageTask = _storage.SetLocalStorage( SummaryStorageKey, items );
-        var httpTask = await IsAuthenticated()
-            ? _http.DeleteAsyncAuthenticated<bool>( Consts.ApiDeleteFromCart,
-                new Dictionary<string, object>() { { "ProductId", product.ProductId } } )
-            : null;
-        
-        if (httpTask is null) await storageTask;
-        else await Task.WhenAll( storageTask, httpTask );
-        
-        _summaryInMemory = items;
         SetBusy( false );
-        InvokeCountChange();
+        InvokeCartChange();
 
-        return !storageTask.Result && httpTask is not null && !httpTask.Result 
+        return !storageTask.Result && (httpTask is not null && !httpTask.Result)
             ? IReply.Fail( $"Failed to update cart in storage or server. {storageTask.Result.GetMessage()} {httpTask.Result.GetMessage()}" )
             : IReply.Success();
     }
     public async Task<Reply<bool>> Clear()
     {
         SetBusy( true );
-        
+        await Task.Delay( 500 );
         _summaryInMemory = null;
         var storageTask = _storage.RemoveLocalStorage( SummaryStorageKey );
-        var httpTask = await IsAuthenticated()
+        var httpTask = _isAuthenticated
             ? _http.DeleteAsyncAuthenticated<bool>( Consts.ApiClearCart )
             : null;
+
+        if (httpTask is null) await storageTask;
+        else await Task.WhenAll( storageTask, httpTask );
         
-        InvokeCountChange();
+        InvokeCartChange();
         SetBusy( false );
 
         return !storageTask.Result && httpTask is not null && !httpTask.Result
@@ -238,20 +166,19 @@ public sealed class CartManager( StorageService storage, HttpService http, Authe
         }
         return wasBusy;
     }
-    async Task<bool> IsAuthenticated()
+    /*async Task<bool> IsAuthenticated()
     {
         var authState = await _auth.GetSessionState();
         var authenticated = authState.User.Identity is { IsAuthenticated: true };
         return authenticated;
-    }
+    }*/
     void SetBusy( bool value )
     {
         lock ( _lock )
             _isBusy = value;
     }
-
-    void InvokeCountChange()
+    void InvokeCartChange()
     {
-        OnCartCountChanged?.Invoke( _summaryInMemory?.Count() ?? 0 );
+        OnCartChanged?.Invoke( _summaryInMemory );
     }
 }

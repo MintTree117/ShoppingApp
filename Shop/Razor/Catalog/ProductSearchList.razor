@@ -45,7 +45,7 @@
             return;
         }
 
-        var newSummary = await CartManager.Get();
+        var newSummary = await CartManager.GetFull();
         if (!newSummary)
         {
             OnItemAddedToCart?.Invoke( false, cartReply.GetMessage() );

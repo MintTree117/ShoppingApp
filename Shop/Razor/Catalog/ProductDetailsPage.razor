@@ -111,7 +111,6 @@
         base.OnDispose();
         LocationManager.OnLocationChanged -= OnAddressChanged;
         //_productCard.ToggleLoading -= ToggleLoading;
-        _productCard.OnItemAddedToCart -= OnItemAddedToCart;
         _addressBox.ToggleLoading -= ToggleLoading;
     }
     protected override async Task OnInitializedAsync()
@@ -166,7 +165,6 @@
         if (!_cardSubscribed && _productCard is not null)
         {
             //_productCard.ToggleLoading += ToggleLoading;
-            _productCard.OnItemAddedToCart += OnItemAddedToCart;
             _cardSubscribed = true;
         }
     }

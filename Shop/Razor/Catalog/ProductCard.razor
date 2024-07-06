@@ -162,8 +162,6 @@
 
 @code 
 {
-    //public event Action<bool>? ToggleLoading;
-    
     [Parameter] public Type CardType { get; set; }
     [Parameter] public ProductModel Product { get; init; } = default!;
 
@@ -174,12 +172,10 @@
     readonly int[] Quantities = [1, 2, 3, 5, 10];
     int _selectedQuantity = 1;
 
-    public event Action<bool, string?>? OnItemAddedToCart;
-
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        var reply = await CartManager.GetLocal();
+        var reply = await CartManager.GetInMemory();
         _cartItems = reply
             ? reply.Data
             : CartItems.Empty();
@@ -193,30 +189,23 @@
     async Task AddToCart( ProductModel p )
     {
         ArgumentNullException.ThrowIfNull( p );
-        //ToggleLoading?.Invoke( true );
         Loader.StartLoadingPage( "Adding to cart..." );
         var cartReply = await CartManager.Add( p.Id );
         if (!cartReply)
         {
-            //ToggleLoading?.Invoke( false );
             Loader.StopLoadingPage();
-            OnItemAddedToCart?.Invoke( false, cartReply.GetMessage() );
             return;
         }
 
-        var newSummary = await CartManager.GetLocal();
+        var newSummary = await CartManager.GetInMemory();
         if (!newSummary)
         {
-            //ToggleLoading?.Invoke( false );
             Loader.StopLoadingPage();
-            OnItemAddedToCart?.Invoke( false, cartReply.GetMessage() );
             return;
         }
 
         _cartItems = newSummary.Data;
-        //ToggleLoading?.Invoke( false );
         Loader.StopLoadingPage();
-        OnItemAddedToCart?.Invoke( true, null );
     }
     void OnQuantityChange( ChangeEventArgs e )
     {

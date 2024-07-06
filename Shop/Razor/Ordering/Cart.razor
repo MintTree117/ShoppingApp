@@ -15,15 +15,15 @@
     <!-- ITEMS -->
     <div class="cart-items">
         <div class="cart-items-header">
-            <h3 class="mb-0">Shopping Cart</h3>
-            <button class="btn btn-outline-primary btn-icon">
+            <h3 class="mb-0">Shopping Cart (@_itemsAndSummaries.Count())</h3>
+            <button class="btn btn-outline-primary btn-icon btn-sm" @onclick="@(async()=>await OnClickClear())">
                 <i class="fa fa-trash me-2"></i>
                 Empty Cart
             </button>
         </div>
-        @foreach ( var item in _itemsAndSummaries.Keys )
+        @foreach ( var item in _itemsAndSummaries.Items() )
         {
-            <ProductCard Product="@ProductModel.From( _itemsAndSummaries[item] )" CardType="@ProductCard.Type.Cart"/>
+            <ProductCard Product="@ProductModel.From( _itemsAndSummaries.Dto( item ) )" CardType="@ProductCard.Type.Cart"/>
             <!-- BUTTONS -->
             <div class="cart-item-buttons">
                 <!-- QUANTITY -->
@@ -68,20 +68,20 @@
         </div>
         <div class="cart-checkout-section">
             <span>Items:</span>
-            <span>$0</span>
+            <span>$@_itemsAndSummaries.Price()</span>
         </div>
         <div class="cart-checkout-section">
             <span>Shipping:</span>
-            <span>$0</span>
+            <span>$@_itemsAndSummaries.Shipping()</span>
         </div>
         <div class="cart-checkout-section">
-            <span>Tax:</span>
-            <span>$0</span>
+            <span>Estimated Tax:</span>
+            <span>$@_itemsAndSummaries.EstimatedTax()</span>
         </div>
         <hr/>
         <div class="cart-checkout-section">
-            <span>Total:</span>
-            <span>$0</span>
+            <span>Estimated Total:</span>
+            <span>$@_itemsAndSummaries.EstimatedTotal()</span>
         </div>
         <a class="btn btn-outline-primary btn-icon mt-2" href="@Consts.PageCheckout">
             Checkout
@@ -94,16 +94,51 @@
     [Inject] public CartManager CartManager { get; init; } = default!;
 
     static readonly int[] ItemQuantityOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    Dictionary<CartItem, ProductSummaryDto> _itemsAndSummaries = [];
-    HashSet<CartItem> _changedItems = [];
+    CartItemsAndSummaries _itemsAndSummaries = CartItemsAndSummaries.Empty();
+    HashSet<CartItemDto> _changedItems = [];
     
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
         await GetCart();
     }
+
+    async Task GetCart()
+    {
+        Loader.StartLoadingPage( "Loading cart..." );
+
+        // clear
+        _itemsAndSummaries = CartItemsAndSummaries.Empty();
+        _changedItems = [];
+
+        // get cart
+        var cartReply = await CartManager.GetFull();
+        if (!cartReply)
+        {
+            Loader.StopLoadingPage();
+            PushError( $"An error occured while getting cart. {cartReply.GetMessage()}" );
+            return;
+        }
+        
+        // get products
+        var url = $"{Consts.ApiGetProductsByIds}?ProductIds={string.Join( ",", cartReply.Data.GetIds() )}";
+        var productsReply = await Http.GetAsync<List<ProductSummaryDto>>( url );
+        if (!productsReply)
+        {
+
+            Loader.StopLoadingPage();
+            PushWarning( $"Failed to fetch product details. {productsReply.GetMessage()}" );
+            return;
+        }
+
+        // merge data
+        _itemsAndSummaries = CartItemsAndSummaries.From( 
+            cartReply.Data.Items, productsReply.Data );
+
+        Loader.StopLoadingPage();
+    }
     
-    void OnChangeQuantityLarge( CartItem item, ChangeEventArgs args )
+    void OnChangeQuantityLarge( CartItemDto itemDto, ChangeEventArgs args )
     {
         if (!int.TryParse( args.Value?.ToString(), out int quantity ))
         {
@@ -111,10 +146,10 @@
             return;
         }
         
-        item.Quantity = quantity;
-        _changedItems.Add( item );
+        itemDto.Quantity = quantity;
+        _changedItems.Add( itemDto );
     }
-    async Task OnChangeQuantitySmall( CartItem item, ChangeEventArgs args )
+    async Task OnChangeQuantitySmall( CartItemDto itemDto, ChangeEventArgs args )
     {
         if (!int.TryParse( args.Value?.ToString(), out int quantity ))
         {
@@ -123,41 +158,24 @@
         }
         
         Loader.StartLoadingPage( "Updating cart..." );
-        
-        item.Quantity = quantity;
-        
-        var cartReply = await CartManager.Update( item );
-        if (!cartReply)
-        {
-            Loader.StopLoadingPage();
-            PushError( $"Failed to update quantity. {cartReply.GetMessage()}" );
-            return;
-        }
-
-        Loader.StopLoadingPage();
-        PushSuccess( "Quantity updated." );
-        await GetCart();
+        itemDto.Quantity = quantity;
+        await Update( _itemsAndSummaries.Items().ToList() );
     }
     async Task SaveChanges()
     {
         Loader.StartLoadingPage( "Saving changes..." );
-        
-        var cartReply = await CartManager.UpdateBulk( _changedItems.ToList() );
-        if (!cartReply)
-        {
-            Loader.StopLoadingPage();
-            PushError( $"Failed to save changes. {cartReply.GetMessage()}" );
-            return;
-        }
-
-        Loader.StopLoadingPage();
-        PushSuccess( "Changes saved." );
+        await Update( _itemsAndSummaries.Items().ToList() );
     }
-    async Task OnClickDelete( CartItem item )
+    async Task OnClickDelete( CartItemDto itemDto )
     {
         Loader.StartLoadingPage( "Removing item..." );
-        
-        var cartReply = await CartManager.Delete( item );
+        var items = _itemsAndSummaries.Items().ToList();
+        items.Remove( itemDto );
+        await Update( items );
+    }
+    async Task Update( List<CartItemDto> items )
+    {
+        var cartReply = await CartManager.Update( items );
         if (!cartReply)
         {
             Loader.StopLoadingPage();
@@ -167,9 +185,8 @@
 
         Loader.StopLoadingPage();
         PushSuccess( "Item removed." );
-
-        await GetCart();
     }
+    
     async Task OnClickClear()
     {
         Loader.StartLoadingPage( "Clearing cart..." );
@@ -180,49 +197,10 @@
         
         if (cartReply) PushSuccess( "Cart cleared." );
         else PushError( $"Failed to clear cart. {cartReply.GetMessage()}" );
+        await GetCart();
     }
     async Task OnClickChangeLocation()
     {
         // await get estimates
-    }
-
-    async Task GetCart()
-    {
-        Loader.StartLoadingPage( "Loading cart..." );
-        
-        // clear
-        _itemsAndSummaries = [];
-        _changedItems = [];
-        
-        // get cart
-        var cartReply = await CartManager.Get();
-        if (!cartReply)
-        {
-            Loader.StopLoadingPage();
-            PushError( $"An error occured while getting cart. {cartReply.GetMessage()}" );
-            return;
-        }
-        
-        // get products
-        var summary = cartReply.Data;
-        var url = $"{Consts.ApiGetProductsByIds}?ProductIds={string.Join( ",", summary.GetIds() )}";
-        var productsReply = await Http.GetAsync<List<ProductSummaryDto>>( url );
-        if (!productsReply)
-        {
-
-            Loader.StopLoadingPage();
-            PushWarning( $"Failed to fetch product details. {productsReply.GetMessage()}" );
-            return;
-        }
-        
-        // merge data
-        List<ProductSummaryDto> dtos = productsReply.Data;
-        foreach ( CartItem c in summary.Items )
-        {
-            var dto = dtos.FirstOrDefault( d => d.Id == c.ProductId );
-            _itemsAndSummaries.TryAdd( c, dto );
-        }
-        
-        Loader.StopLoadingPage();
     }
 }

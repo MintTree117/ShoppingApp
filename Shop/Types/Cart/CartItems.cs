@@ -1,11 +1,11 @@
 namespace Shop.Types.Cart;
 
 public sealed class CartItems(
-    List<CartItem> items )
+    List<CartItemDto> items )
 {
-    public List<CartItem> Items { get; private set; } = items;
+    public List<CartItemDto> Items { get; private set; } = items;
     
-    public static CartItems With( List<CartItem> dtos ) =>
+    public static CartItems With( List<CartItemDto> dtos ) =>
         new( dtos );
     public static CartItems Empty() =>
         new( [] );
@@ -34,13 +34,13 @@ public sealed class CartItems(
         var item = Items.FirstOrDefault( c => c.ProductId == productId );
         return item?.Quantity ?? 0;
     }
-    public void Add( CartItem dto )
+    public void Add( CartItemDto dto )
     {
         Items.Add( dto );
     }
-    public void Set( CartItem dto )
+    public void Set( CartItemDto dto )
     {
-        foreach ( CartItem d in Items.Where( d => d.ProductId == dto.ProductId ) )
+        foreach ( CartItemDto d in Items.Where( d => d.ProductId == dto.ProductId ) )
             d.Quantity = dto.Quantity;
     }
     public void Delete( Guid productId )

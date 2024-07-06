@@ -4,6 +4,7 @@
 @using Shop.Razor.Shared.Components
 @using System.Security.Claims
 @using Shop.Infrastructure
+@using Shop.Types.Cart
 @implements IDisposable
 @inject IJSRuntime JsRuntime
 
@@ -144,15 +145,16 @@ else {
     {
         _dotNetRef.Dispose();
         AuthenticationStateManager.OnStateChanged -= OnAuthStateChanged;
-        Cart.OnCartCountChanged -= OnCartCountChanged;
+        Cart.OnCartChanged -= OnCartChanged;
     }
     protected override async Task OnInitializedAsync()
     {
         _dotNetRef = DotNetObjectReference.Create( this );
         await JsRuntime.InvokeVoidAsync( "resizeObserverInterop.initialize", _dotNetRef );
         AuthenticationStateManager.OnStateChanged += OnAuthStateChanged;
-        Cart.OnCartCountChanged += OnCartCountChanged;
-        var cartItems = await Cart.Get();
+        Cart.OnCartChanged += OnCartChanged;
+        HandleNewSession( await AuthenticationStateManager.GetSessionState() );
+        var cartItems = await Cart.GetFull();
         _cartCount = cartItems
             ? cartItems.Data.Count()
             : 0;
@@ -165,9 +167,11 @@ else {
         StateHasChanged();
     }
 
-    void OnCartCountChanged( int newCount )
+    void OnCartChanged( CartItems? items )
     {
-        _cartCount = newCount;
+        _cartCount = items is not null 
+            ? items.Count() 
+            : 0;
         StateHasChanged();
     }
 
