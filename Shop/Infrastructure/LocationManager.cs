@@ -7,8 +7,14 @@ namespace Shop.Infrastructure;
 public sealed class LocationManager( StorageService storage )
     : MemoryCache<AddressModel>( "Location", storage, TimeSpan.FromDays( 1 ) )
 {
-    public event Func<AddressModel?, Task>? OnLocationChanged; 
-    
+    public event Func<AddressModel?, Task>? OnLocationChangedAsync;
+    public event Action<AddressModel?>? OnLocationChanged;
+    public event Func<Task>? OnOpenAddressBox;
+
+    public void OpenAddressBox()
+    {
+        OnOpenAddressBox?.Invoke();
+    }
     public async Task<AddressModel?> GetCurrentAddress()
     {
         Reply<AddressModel> reply = await GetCache();
@@ -19,7 +25,8 @@ public sealed class LocationManager( StorageService storage )
     public async Task<bool> SetCurrentLocation( AddressModel? address )
     {
         var reply = await SetCache( address );
-        OnLocationChanged?.Invoke( address );
+        OnLocationChanged?.Invoke(address);
+        OnLocationChangedAsync?.Invoke( address );
         return reply;
     }
     public async Task<bool> SetCurrentLocation( int? posX, int? posY )
@@ -30,6 +37,7 @@ public sealed class LocationManager( StorageService storage )
         
         var reply = await SetCache( address );
         OnLocationChanged?.Invoke( address );
+        OnLocationChangedAsync?.Invoke( address );
         return reply;
     }
 }

@@ -56,7 +56,7 @@
         _searchList.OnItemAddedToCart -= OnItemAddedToCart;
         _paginationRazor.OnPageChange -= OnPageChanged;
 
-        LocationManager.OnLocationChanged -= OnChangeLocation;
+        LocationManager.OnLocationChangedAsync -= OnChangeLocation;
     }
     protected override async Task OnInitializedAsync()
     {
@@ -82,7 +82,6 @@
 
         _isFetching = true;
         
-        Console.WriteLine( "Product Search: OnParametersSetAsync()----------------------------------------------" );
         Loader.StartLoadingPage( "Loading products..." );
         ParseQueryString();
         await GetLocation();
@@ -111,7 +110,7 @@
             _searchList.OnItemAddedToCart += OnItemAddedToCart;
             _paginationRazor.OnPageChange += OnPageChanged;
 
-            LocationManager.OnLocationChanged += OnChangeLocation;
+            LocationManager.OnLocationChangedAsync += OnChangeLocation;
         }
     }
     
@@ -280,7 +279,7 @@
     async Task OnChangeLocation( AddressModel? location )
     {
         Loader.StartLoadingPage( "Loading location..." );
-        await Utils.Delay();
+        await Task.Delay( 500 );
 
         if (location is null)
         {

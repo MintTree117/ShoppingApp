@@ -41,24 +41,6 @@
         </div>
     </div>
     
-    <!-- LOCATION -->
-    <div class="search-filters-section">
-        <button class="btn search-filters-header" type="button" @onclick="@(() => ToggleSectionCollapse( SectionLocation ))">
-            <span>Location</span>
-            <i class="fa @GetCollapseIconCss( SectionLocation )"></i>
-        </button>
-        <div class="search-filters-body @GetCollapseDisplayCss( SectionLocation )">
-            <div class="d-flex justify-content-between gap-1 mb-2">
-                <input type="number" min="0" max="100000" step="1" value="@_posX" @onchange="OnChangeLocationX" class="form-control"/>
-                <input type="number" min="0" max="100000" step="1" value="@_posY" @onchange="OnChangeLocationY" class="form-control"/>
-            </div>
-            <button class="btn btn-icon search-filters-btn-main @GetLocationButtonCss()" @onclick="@(async () => await OnClickApplyLocation())">
-                <i class="fa-solid fa-circle-check me-2"></i>
-                Apply
-            </button>
-        </div>
-    </div>
-    
     <!-- PRICE RANGE -->
     <div class="search-filters-section">
         <button class="btn search-filters-header" type="button" @onclick="@(() => ToggleSectionCollapse( SectionPricing ))">
@@ -204,11 +186,6 @@
         StateHasChanged();
     }
 
-    async Task OnClickApplyLocation()
-    {
-        await LocationManager.SetCurrentLocation( _filters.PosX, _filters.PosY );
-    }
-
     bool ShouldShowCategories() =>
         _parentCategory is null || _parentCategory.Children.Any();
     bool GetCheckedBrand( Brand b )
@@ -251,22 +228,6 @@
         }
         bool newValue = !value;
         _collapsedSections[sectionName] = newValue;
-    }
-    void OnChangeLocationX( ChangeEventArgs args )
-    {
-        _locationAltered = true;
-        if (!int.TryParse( args.Value?.ToString(), out int result ))
-            _filters.PosX = null;
-        else
-            _filters.PosX = result;
-    }
-    void OnChangeLocationY( ChangeEventArgs args )
-    {
-        _locationAltered = true;
-        if (!int.TryParse( args.Value?.ToString(), out int result ))
-            _filters.PosY = null;
-        else
-            _filters.PosY = result;
     }
     void OnChangeIsInStock( ChangeEventArgs args )
     {

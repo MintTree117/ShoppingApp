@@ -8,12 +8,6 @@
 @using Shop.Razor.Shared.Components
 @implements IDisposable
 
-<!-- TOGGLE BUTTON -->
-<button class="btn btn-link d-flex flex-row align-items-center justify-content-start w-100 px-0" @onclick="@(async()=>await OnClickAddressButton())">
-    <i class="fa fa-location-dot me-2"></i>
-    <span class="d-block text-start">@GetDeliveryToText()</span>
-</button>
-
 <!-- POPUP BOX -->
 @if (_showAddressBox)
 {
@@ -74,9 +68,8 @@
 {
     [Inject] public AuthenticationStateManager AuthManager { get; init; } = default!;
     [Inject] public LocationManager AddressManager { get; init; } = default!;
+    [Inject] public LoadingService Loader { get; init; } = default!;
     [Inject] public HttpService Http { get; init; } = default!;
-
-    public event Action<bool>? ToggleLoading;
     
     PaginationPanel? _paginationPanel;
     const int _pageSize = 5;
@@ -85,7 +78,6 @@
     
     List<AddressModel> _userAddresses = [];
     AddressModel? _currentAddress;
-    ProductModel _productModel = new();
     bool _paginationSubscribed = false;
     bool _showAddressBox = false;
     bool _authenticated = false;
@@ -94,28 +86,21 @@
     {
         if (_paginationPanel is not null)
             _paginationPanel.OnPageChangeAsync -= OnPaginationChange;
-    }
-    public void SetProduct( ProductModel p )
-    {
-        _productModel = p;
+        AddressManager.OnOpenAddressBox -= Open;
     }
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        _currentAddress = await AddressManager.GetCurrentAddress();
+        AddressManager.OnOpenAddressBox += Open;
     }
     protected override async Task OnAfterRenderAsync( bool firstRender )
     {
         await base.OnAfterRenderAsync( firstRender );
         
-        var authState = await AuthManager.GetSessionState();
-        _authenticated = authState.User.Identity is { IsAuthenticated: true };
-        
         if (_paginationPanel is not null && !_paginationSubscribed)
         {
             _paginationPanel.OnPageChangeAsync += OnPaginationChange;
             _paginationSubscribed = true;
-            ToggleLoading?.Invoke( false );
         }
 
         _paginationPanel?.Set( _currentPage, _pageSize, _totalCount );
@@ -123,7 +108,7 @@
     
     async Task OnClickAddressButton()
     {
-        ToggleLoading?.Invoke( true );
+        Loader.StartLoadingPage( "Loading..." );
         
         var address = await AddressManager.GetCurrentAddress();
         var authState = await AuthManager.GetSessionState();
@@ -135,28 +120,29 @@
             await GetUserAddresses();
 
         _showAddressBox = true;
+        Loader.StopLoadingPage();
     }
     async Task OnClickSaved( AddressModel m )
     {
-        ToggleLoading?.Invoke( true );
+        Loader.StartLoadingPage( "Loading..." );
         _currentAddress = m;
         await AddressManager.SetCurrentLocation( _currentAddress );
-        ToggleLoading?.Invoke( false );
+        Loader.StopLoadingPage();
         OnClickClose();
     }
     async Task OnClickSubmit()
     {
-        ToggleLoading?.Invoke( true );
+        Loader.StartLoadingPage( "Loading..." );
         await AddressManager.SetCurrentLocation( _currentAddress );
-        ToggleLoading?.Invoke( false );
+        Loader.StopLoadingPage();
         OnClickClose();
     }
     async Task OnPaginationChange( int page )
     {
-        ToggleLoading?.Invoke( true );
+        Loader.StartLoadingPage( "Loading..." );
         _currentPage = page;
         await GetUserAddresses();
-        ToggleLoading?.Invoke( false );
+        Loader.StopLoadingPage();
     }
     async Task GetUserAddresses()
     {
@@ -173,6 +159,17 @@
         StateHasChanged();
     }
 
+    async Task Open()
+    {
+        Loader.StartLoadingPage( "Loading Addresses..." );
+        
+        var authState = await AuthManager.GetSessionState();
+        _authenticated = authState.User.Identity is { IsAuthenticated: true };
+        Loader.StopLoadingPage();
+        
+        _showAddressBox = true;
+        StateHasChanged();
+    }
     void OnClickClose()
     {
         _showAddressBox = false;

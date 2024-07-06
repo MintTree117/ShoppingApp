@@ -5,45 +5,65 @@
 @using System.Security.Claims
 @using Shop.Infrastructure
 @using Shop.Types.Cart
+@using Shop.Types.Users
 @implements IDisposable
 @inject IJSRuntime JsRuntime
 
 @if (_mobileView) {
     <!-- MOBILE -->
     <div class="top-nav-mobile">
+        
         <!-- TOP ROW -->
         <div class="top-nav-content content-container top-nav-mobile-top">
+            
             <!-- LOGO -->
             <button class="btn logo" @onclick="@GoHome">
                 <img class="top-nav-item" src="/images/logo.svg" alt="Blazor">
             </button>
+            
             <!-- ICONS -->
             <div class="top-nav-mobile-right">
-                <!-- ACCOUNT -->
-                <button class="btn btn-icon" @onclick="@OnClickAccountButton">
-                    <i class="fa fa-user fa-lg d-block position-relative">
-                         @if (_authenticated)
+                
+                <!-- LOCATION -->
+                <button class="btn btn-icon" @onclick="@OnClickLocationButton">
+                    <i class="fa fa-location fa-lg d-block position-relative">
+                        @if (_address is not null)
                         {
                             <div class="top-nav-signed-in" style="top: -12px; right: -5px;"></div>
                         }
                     </i>
                 </button>
+
+                <!-- ACCOUNT -->
+                <button class="btn btn-icon" @onclick="@OnClickAccountButton">
+                    <i class="fa fa-user fa-lg d-block position-relative">
+                        @if (_authenticated)
+                        {
+                            <div class="top-nav-signed-in" style="top: -12px; right: -5px;"></div>
+                        }
+                    </i>
+                </button>
+
+                <!-- CART -->
                 <button class="btn btn-icon" @onclick="GoToCart">
                     <i class="fa-solid fa-cart-shopping d-block position-relative">
                         <div class="top-nav-cart-count" style="top: -12px; right: -12px; color: var(--orange);">@_cartCount</div>
                     </i>
                 </button>
+
                 <!-- SIDEBAR -->
                 <button class="btn btn-icon pe-0" @onclick="@OpenSide">
                     <i class="fa fa-bars fa-lg"></i>
                 </button>
             </div>
         </div>
+        
         <!-- BOTTOM ROW -->
         <div class="top-nav-content content-container pb-2">
             <MainNavigationSearchBar/>
         </div>
     </div>
+    
     <!-- SIDEBAR -->
     <MainNavigationSide @ref="_sidebar" TopMenu="@this"/>
 }
@@ -60,6 +80,18 @@ else {
             </nav>
             <!-- TOP RIGHT -->
             <div class="top-nav-upper-right">
+                
+                <!-- LOCATION -->
+                <button class="btn top-nav-button btn-link-light" @onclick="@OnClickLocationButton">
+                    <small>@GetAddressText()</small>
+                    <i class="fa fa-location-dot fa-lg d-block position-relative ms-2">
+                        @if (_address is not null)
+                        {
+                            <div class="top-nav-signed-in" style="top: -12px; right: -5px;"></div>
+                        }
+                    </i>
+                </button>
+                
                 <!-- ACCOUNT -->
                 <div class="position-relative" @onmouseenter="@ShowAccountDropdown" @onmouseleave="@HideAccountDropdown">
                     <button class="btn top-nav-button btn-link-light" @onclick="OnClickAccountButton">
@@ -76,7 +108,8 @@ else {
                         </div>
                     </button>
 
-                    @if (_showUserOptions) {
+                    @if (_showUserOptions)
+                    {
                         <nav class="top-nav-user-options position-absolute shadow">
                             <ul class="nav justify-content-center w-100">
                                 <AccountMenuOptions/>
@@ -122,8 +155,9 @@ else {
 {
     [CascadingParameter( Name = "layout" )]
     public MainLayout Layout { get; init; } = default!;
-
+    
     [Inject] public NavigationManager Navigation { get; init; } = default!;
+    [Inject] public LocationManager LocationService { get; init; } = default!;
     [Inject] public AuthenticationStateManager AuthenticationStateManager { get; init; } = default!;
     [Inject] public CartManager Cart { get; init; } = default!;
     
@@ -141,9 +175,12 @@ else {
     string _username = DefaultUserText;
     int _cartCount = 0;
 
+    AddressModel? _address;
+
     public void Dispose()
     {
         _dotNetRef.Dispose();
+        LocationService.OnLocationChanged -= OnLocationChangedAsync;
         AuthenticationStateManager.OnStateChanged -= OnAuthStateChanged;
         Cart.OnCartChanged -= OnCartChanged;
     }
@@ -151,8 +188,11 @@ else {
     {
         _dotNetRef = DotNetObjectReference.Create( this );
         await JsRuntime.InvokeVoidAsync( "resizeObserverInterop.initialize", _dotNetRef );
+        LocationService.OnLocationChanged += OnLocationChangedAsync;
         AuthenticationStateManager.OnStateChanged += OnAuthStateChanged;
         Cart.OnCartChanged += OnCartChanged;
+
+        _address = await LocationService.GetCurrentAddress();
         HandleNewSession( await AuthenticationStateManager.GetSessionState() );
         var cartItems = await Cart.GetFull();
         _cartCount = cartItems
@@ -167,17 +207,26 @@ else {
         StateHasChanged();
     }
 
-    void OnCartChanged( CartItems? items )
+    string GetAddressText() =>
+        _address is not null
+            ? $"{_address.Name} ({_address.PosX},{_address.PosY})"
+            : "Enter an Address";
+
+    void OnLocationChangedAsync( AddressModel? address )
     {
-        _cartCount = items is not null 
-            ? items.Count() 
-            : 0;
+        _address = address;
         StateHasChanged();
     }
-
     void OnAuthStateChanged( Task<AuthenticationState> state )
     {
         HandleNewSession( state.Result );
+    }
+    void OnCartChanged( CartItems? items )
+    {
+        _cartCount = items is not null
+            ? items.Count()
+            : 0;
+        StateHasChanged();
     }
     void HandleNewSession( AuthenticationState state )
     {
@@ -205,6 +254,10 @@ else {
     {
         _showUserOptions = false;
         StateHasChanged();
+    }
+    void OnClickLocationButton()
+    {
+        LocationService.OpenAddressBox();
     }
     void OnClickAccountButton()
     {

@@ -19,7 +19,7 @@
         
         <!-- TOP -->
         <div class="product-top">
-            <ProductCard @ref="_productCard" Product="@_productModel" CardType="@ProductCard.Type.Details"/>
+            <ProductCard Product="@_productModel" CardType="@ProductCard.Type.Details"/>
         </div>
 
         <!-- ADDRESS -->
@@ -88,7 +88,6 @@
     Guid PreviousProductId = Guid.Empty;
     
     // COMPONENTS
-    ProductCard _productCard = default!;
     AddressBox _addressBox = default!;
     ProductSlider _brandsSlider = default!;
     ProductSlider _similarSlider = default!;
@@ -103,15 +102,12 @@
     bool _productLoaded = false;
     bool _set = false;
     bool _addressSubscribed = false;
-    bool _cardSubscribed = false;
     
     // LIFECYCLES
     protected override void OnDispose()
     {
         base.OnDispose();
-        LocationManager.OnLocationChanged -= OnAddressChanged;
-        //_productCard.ToggleLoading -= ToggleLoading;
-        _addressBox.ToggleLoading -= ToggleLoading;
+        LocationManager.OnLocationChangedAsync -= OnAddressChangedAsync;
     }
     protected override async Task OnInitializedAsync()
     {
@@ -134,7 +130,7 @@
         await base.OnParametersSetAsync();
         if (!_set)
         {
-            LocationManager.OnLocationChanged += OnAddressChanged;
+            LocationManager.OnLocationChangedAsync += OnAddressChangedAsync;
         }
         _set = true;
 
@@ -151,21 +147,9 @@
     {
         await base.OnAfterRenderAsync( firstRender );
         
-        if (_productModel is not null && _addressBox is not null)
-        {
-            _addressBox.SetProduct( _productModel );
-        }
-
         if (!_addressSubscribed && _addressBox is not null)
         {
-            _addressBox.ToggleLoading += ToggleLoading;
             _addressSubscribed = true;
-        }
-
-        if (!_cardSubscribed && _productCard is not null)
-        {
-            //_productCard.ToggleLoading += ToggleLoading;
-            _cardSubscribed = true;
         }
     }
 
@@ -218,7 +202,7 @@
         _brandsSlider.SetProducts( ProductModel.From( reply.Data.SimilarToBrand ) );
         _similarSlider.SetProducts( ProductModel.From( reply.Data.SimilarToProduct ) );
     }
-    async Task OnAddressChanged( AddressModel? address )
+    async Task OnAddressChangedAsync( AddressModel? address )
     {
         _address = address;
         if (_productModel is null)
