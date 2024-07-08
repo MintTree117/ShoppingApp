@@ -264,7 +264,7 @@
     }
     async Task GetLocation()
     {
-        AddressModel? reply = await LocationManager.GetCurrentAddress();
+        Address? reply = await LocationManager.GetCurrentAddress();
         if (reply is null)
         {
             _parametersDto.PosX = null;
@@ -276,7 +276,7 @@
             _parametersDto.PosY = reply.PosY;
         }
     }
-    async Task OnChangeLocation( AddressModel? location )
+    async Task OnChangeLocation( Address? location )
     {
         Loader.StartLoadingPage( "Loading location..." );
         await Task.Delay( 500 );

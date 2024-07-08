@@ -48,6 +48,11 @@ internal static class Consts
     internal const string ApiPostGetCart = ApiCartBase + "/postGet";
     internal const string ApiClearCart = ApiCartBase + "/clear";
     
+    // ORDERS
+    internal const string ApiPlaceOrder = OrderingApiBase + "/orders/place";
+    internal const string ApiViewOrdersAll = OrderingApiBase + "/orders/viewAll";
+    internal const string ApiViewOrderSingle = OrderingApiBase + "/orders/viewSingle";
+    
     // CATALOG
     internal const string CatalogApiBase = "https://localhost:7123/api";
     internal const string ApiGetCategories = CatalogApiBase + "/categories";

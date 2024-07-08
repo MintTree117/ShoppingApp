@@ -2,6 +2,7 @@
 @using Shop.Types.Cart
 @using Shop.Utilities
 @using Shop.Infrastructure
+@using Shop.Types.Orders
 @using Shop.Types.Products.Dtos
 @using Shop.Types.Users
 @inherits Shop.Razor.Shared.ShopPage
@@ -13,7 +14,7 @@
     <div class="checkout-forms-container">
         
         <!-- BILLING ADDRESS -->
-        <h4>Billing Address</h4>
+        <h3 class="cart-checkout-title">Billing Address</h3>
         <EditForm Model="@_billingAddress">
             <DataAnnotationsValidator/>
             <ValidationSummary class="text-danger" role="alert"/>
@@ -26,15 +27,15 @@
             </div>
             
             <!-- POSITION -->
-            <div class="d-flex flex-row align-items-center justify-content-between">
+            <div class="d-flex flex-row align-items-center justify-content-between gap-3">
                 <!-- POS X -->
-                <div class="form-floating mb-2">
+                <div class="form-floating mb-2 w-100">
                     <InputNumber type="name" class="form-control" id="billingPosX" @bind-Value="@_billingAddress.PosX"></InputNumber>
                     <ValidationMessage For="@(() => _billingAddress.PosX)"/>
                     <label for="billingPosX">Position X *</label>
                 </div>
                 <!-- POS Y -->
-                <div class="form-floating mb-2">
+                <div class="form-floating mb-2 w-100">
                     <InputNumber type="name" class="form-control" id="billingPosY" @bind-Value="@_billingAddress.PosY"></InputNumber>
                     <ValidationMessage For="@(() => _billingAddress.PosY)"/>
                     <label for="billingPosY">Position Y *</label>
@@ -44,7 +45,7 @@
         </EditForm>
         
         <!-- SHIPPING ADDRESS -->
-        <h4>Shipping Address</h4>
+        <h3 class="cart-checkout-title">Shipping Address</h3>
         <EditForm Model="@_shippingAddress">
             <DataAnnotationsValidator/>
             <ValidationSummary class="text-danger" role="alert"/>
@@ -57,15 +58,15 @@
             </div>
             
             <!-- POSITION -->
-            <div class="d-flex flex-row align-items-center justify-content-between">
+            <div class="d-flex flex-row align-items-center justify-content-ss gap-3">
                 <!-- POS X -->
-                <div class="form-floating mb-2">
+                <div class="form-floating mb-2 w-100">
                     <InputNumber type="name" class="form-control" id="shippingPosX" @bind-Value="@_shippingAddress.PosX"></InputNumber>
                     <ValidationMessage For="@(() => _billingAddress.PosX)"/>
                     <label for="shippingPosX">Position X *</label>
                 </div>
                 <!-- POS Y -->
-                <div class="form-floating mb-2">
+                <div class="form-floating mb-2 w-100">
                     <InputNumber type="name" class="form-control" id="shippingPosY" @bind-Value="@_shippingAddress.PosY"></InputNumber>
                     <ValidationMessage For="@(() => _billingAddress.PosY)"/>
                     <label for="shippingPosY">Position Y *</label>
@@ -73,53 +74,124 @@
             </div>
         </EditForm>
         
+        <!-- SHARE ADDRESS -->
+        <div class="form-check my-3">
+          <input class="form-check-input" @onchange="OnToggleShareAddress" type="checkbox" value="" id="flexCheckDefault">
+          <label class="form-check-label" for="flexCheckDefault">
+              Use Billing Address For Shipping
+          </label>
+        </div>
+        
+        <!-- SELECT ADDRESS BUTTON -->
+        <button class="btn btn-link btn-icon ps-0">
+            <i class="fa fa-location-dot me-2"></i>
+            <span>Select a saved address.</span>
+        </button>
     </div>
     
     <!-- CHECKOUT CART -->
-    <div class="cart-checkout">
+    <div class="cart-checkout checkout-summary w-100">
+        
+        <!-- CHECKOUT CART TITLE -->
         <div class="cart-checkout-title">
             <h3 class="mb-0">Summary</h3>
         </div>
+        
+        <!-- CART CHECKOUT ITEMS -->
+        <div class="cart-checkout-items">
+            <ul class="list-unstyled">
+                @foreach ( var item in _itemsAndSummaries.Items() )
+                {
+                    <li class="d-flex flex-row align-items-center justify-content-between">
+                        <div class="d-flex flex-row">
+                            <strong class="d-inline-block me-1">@item.Quantity x</strong>
+                            <span class="d-inline-block">@_itemsAndSummaries.Dto( item ).Name</span>
+                        </div>
+                        <div class="d-flex flex-row align-items-center justify-content-end">
+                            @if (_itemsAndSummaries.Dto( item ).SalePrice > 0)
+                            {
+                                <span class="me-1">@_itemsAndSummaries.Dto( item ).SalePrice</span>
+                                <small class="text-muted text-decoration-line-through">@_itemsAndSummaries.Dto( item ).Price</small>
+                            }
+                            else
+                            {
+                                <span>@_itemsAndSummaries.Dto( item ).Price</span>
+                            }
+                        </div>
+                    </li>
+                }
+            </ul>
+        </div>
+        
+        <!-- CART PRICE -->
         <div class="cart-checkout-section">
             <span>Items:</span>
             <span>$@_itemsAndSummaries.Price()</span>
         </div>
+        <!-- CART PRICE -->
         <div class="cart-checkout-section">
             <span>Shipping:</span>
             <span>$@_itemsAndSummaries.Shipping()</span>
         </div>
+        <!-- CART TAX -->
         <div class="cart-checkout-section">
             <span>Estimated Tax:</span>
             <span>$@_itemsAndSummaries.EstimatedTax()</span>
         </div>
         <hr/>
+        <!-- CART TOTAL -->
         <div class="cart-checkout-section">
             <span>Estimated Total:</span>
             <span>$@_itemsAndSummaries.EstimatedTotal()</span>
         </div>
-        <a class="btn btn-outline-primary btn-icon mt-2" href="@Consts.PageCheckout">
-            Checkout
-        </a>
+        <!-- PLACE ORDER -->
+        <button class="btn btn-outline-primary btn-icon mt-2" @onclick="@(async () => await PlaceOrder())">
+            Place Order
+        </button>
+        
     </div>
 </div>
 
 @code 
 {
+    [Inject] public LocationManager LocationService { get; init; } = default!;
     [Inject] public CartManager CartManager { get; init; } = default!;
     CartItemsAndSummaries _itemsAndSummaries = CartItemsAndSummaries.Empty();
 
-    AddressModel _billingAddress = new();
-    AddressModel _shippingAddress = new();
+    Address _billingAddress = new();
+    Address _shippingAddress = new();
 
+    bool _shareAddress = false;
+
+    protected override void OnDispose()
+    {
+        base.OnDispose();
+        LocationService.OnLocationChanged -= OnLocationChanged;
+    }
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+        Loader.StartLoadingPage( "Loading cart..." );
+        LocationService.OnLocationChanged += OnLocationChanged;
+        await GetInitialLocation();
+        await GetAuthentication();
         await GetCart();
+        Loader.StopLoadingPage();
+    }
+    async Task GetInitialLocation()
+    {
+        var location = await LocationService.GetCurrentAddress();
+        if (location is not null)
+            _billingAddress = location;
+    }
+    async Task GetAuthentication()
+    {
+        var auth = await Auth.GetSessionState();
+        if (auth.User.Identity is null || !auth.User.Identity.IsAuthenticated)
+            PushError( "You must be a verified user to place orders." );
     }
     async Task GetCart()
     {
-        Loader.StartLoadingPage( "Loading cart..." );
-
         // get cart
         var cartReply = await CartManager.GetFull();
         if (!cartReply)
@@ -143,7 +215,41 @@
         // merge data
         _itemsAndSummaries = CartItemsAndSummaries.From(
             cartReply.Data.Items, productsReply.Data );
+    }
+    async Task PlaceOrder()
+    {
+        Loader.StartLoadingPage( "Placing Order..." );
+        await Task.Delay( 500 );
+        
+        OrderPlacementRequest orderPlacement = new OrderPlacementRequest {
+            BillingAddress = _billingAddress,
+            ShippingAddress = _shippingAddress,
+            Items = _itemsAndSummaries.Items().ToList()
+        };
+        
+        var reply = await Http.PostAsyncAuthenticated<bool>( Consts.ApiPlaceOrder, orderPlacement );
+        if (!reply)
+        {
+            PushError( $"Failed to place order. {reply.GetMessage()}" );
+            Loader.StopLoadingPage();
+            return;
+        }
 
-        Loader.StopLoadingPage();
+        await CartManager.Clear();
+        Navigation.NavigateTo( Consts.PageOrderPlaced, true );
+    }
+
+    void OnToggleShareAddress()
+    {
+        _shareAddress = !_shareAddress;
+        _shippingAddress = _shareAddress
+            ? _billingAddress
+            : new Address();
+    }
+    void OnLocationChanged( Address? address )
+    {
+        _billingAddress = address ?? new Address();
+        if (_shareAddress)
+            _shippingAddress = address ?? new Address();
     }
 }

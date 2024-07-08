@@ -61,3 +61,62 @@
     text-align: center;
     margin-bottom: 16px;
 }
+
+.user-table-top {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.user-table-top-right {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* VIEW ORDERS */
+/* ------------------------------------------------------------------------------------------*/
+
+.view-order-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.view-orders-table-row:hover {
+    cursor: pointer;
+}
+
+.view-order-container-column-left, .view-order-container-column-right {
+    display: flex;
+    flex-direction: column;
+}
+
+.view-order-container-column-left > *, .view-order-container-column-right > * {
+    display: block;
+    width: 100%;
+}
+
+.view-order-container-column-left > * {
+    text-align: left;
+}
+
+.view-order-container-column-right > * {
+    text-align: right;
+}
+
+.view-order-line-items {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.view-order-line-items * {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 50px;
+    display: inline-block;
+}

@@ -175,7 +175,7 @@ else {
     string _username = DefaultUserText;
     int _cartCount = 0;
 
-    AddressModel? _address;
+    Address? _address;
 
     public void Dispose()
     {
@@ -212,7 +212,7 @@ else {
             ? $"{_address.Name} ({_address.PosX},{_address.PosY})"
             : "Enter an Address";
 
-    void OnLocationChangedAsync( AddressModel? address )
+    void OnLocationChangedAsync( Address? address )
     {
         _address = address;
         StateHasChanged();

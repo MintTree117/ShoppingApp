@@ -98,7 +98,7 @@
     BrandsCollection _brandsCollection = default!;
     ProductModel? _productModel;
     Dictionary<string, string> _productSpecs = [];
-    AddressModel? _address;
+    Address? _address;
     bool _productLoaded = false;
     bool _set = false;
     bool _addressSubscribed = false;
@@ -202,7 +202,7 @@
         _brandsSlider.SetProducts( ProductModel.From( reply.Data.SimilarToBrand ) );
         _similarSlider.SetProducts( ProductModel.From( reply.Data.SimilarToProduct ) );
     }
-    async Task OnAddressChangedAsync( AddressModel? address )
+    async Task OnAddressChangedAsync( Address? address )
     {
         _address = address;
         if (_productModel is null)

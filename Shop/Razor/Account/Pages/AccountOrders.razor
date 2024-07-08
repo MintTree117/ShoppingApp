@@ -1,0 +1,238 @@
+@page "/account/orders"
+@using Shop.Types.Orders.Dtos
+@using Shop.Razor.Shared.Components
+@using Shop.Types.Common.ReplyTypes
+@using Shop.Utilities
+@inherits AccountPageBase
+@layout AccountLayout
+
+@if (!_viewingDetails)
+{
+    <!-- WRAPPER -->
+    <div class="user-container-large">
+        <!-- VIEW TOP-->
+        <div class="user-table-top">
+            <!-- TOP LEFT -->
+            <h3 class="d-block mb-0">View Orders</h3>
+            <!-- TOP RIGHT -->
+            <div class="user-table-top-right">
+                <!-- ROWS DROPDOWN -->
+                <div class="dropdown me-3 h-100">
+                    <!-- DROPDOWN TOGGLE -->
+                    <button class="btn btn-icon btn-outline-secondary dropdown-toggle h-100" type="button" id="RowsPerPage" data-bs-toggle="dropdown" aria-expanded="false">
+                        @_pageSize
+                    </button>
+                    <!-- DROPDOWN LIST -->
+                    <ul class="dropdown-menu" aria-labelledby="RowsPerPage">
+                        @foreach ( int pageSize in _pageSizes )
+                        {
+                            <li>
+                                <button class="dropdown-item" type="button" @onclick="async () => await OnPageSizeChanged( pageSize )">
+                                    @pageSize
+                                </button>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- VIEW BOTTOM -->
+            @if (_orderSummaries.TotalCount > 0)
+            {
+                <!-- VIEW TABLE -->
+                <div class="table-responsive">
+                    <table class="table align-middle table-striped table-hover">
+                        <!-- TABLE HEADER -->
+                        <thead>
+                        <tr class="text-start">
+                            <th>Id</th>
+                            <th>Placed</th>
+                            <th>Updated</th>
+                            <th>Items</th>
+                            <th>Price</th>
+                            <th class="text-end">Status</th>
+                        </tr>
+                        </thead>
+                        <!-- TABLE BODY -->
+                        <tbody>
+                        @foreach ( var order in _orderSummaries.Summaries )
+                        {
+                            <tr class="text-start view-orders-table-row" @onclick="@(async()=>await OnClickView(order.OrderId))">
+                                <td class="ps-3">@order.OrderId</td>
+                                <td class="ps-3">@order.DatePlaced</td>
+                                <td class="ps-3">@order.LastUpdate</td>
+                                <td class="ps-3">@order.TotalItems</td>
+                                <td class="ps-3">@order.TotalPrice</td>
+                                <td class="ps-3">@order.OrderStatus</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            <!-- PAGINATION -->
+            <div class="mx-auto">
+                <PaginationPanel @ref="@_paginationPanel"/>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="user-container-small">
+        
+        <div class="d-flex flex-row align-items-center justify-content-between">
+            <h3 class="mb-0">View Order</h3>
+            <button class="btn btn-link btn-icon" @onclick="@(async () => await OnClickBack())">
+                <i class="fa fa-arrow-left"></i>
+                <span>Back</span>
+            </button>
+        </div>
+        
+        <div class="view-order-container">
+            <div class="view-order-container-column-left">
+                <span>Order ID:</span>
+                <span>Date Placed:</span>
+                <span>Last Update:</span>
+                <span>Item Count:</span>
+                <span>Total Price:</span>
+                <span>Order Status :</span>
+            </div>
+            <div class="view-order-container-column-right">
+                <span>@_currentOrder.Summary.OrderId</span>
+                <span>@_currentOrder.Summary.DatePlaced</span>
+                <span>@_currentOrder.Summary.LastUpdate</span>
+                <span>@_currentOrder.Summary.TotalItems</span>
+                <span>@_currentOrder.Summary.TotalPrice</span>
+                <span>@_currentOrder.Summary.OrderStatus</span>
+            </div>
+        </div>
+
+        <h3>Order Lines</h3>
+        @foreach ( OrderLineDto line in _currentOrder.OrderLines )
+        {
+            <h6>Summary</h6>
+            <div class="view-order-container">
+                <div class="view-order-container-column-left">
+                    <span>Line Id:</span>
+                    <span>Last Update:</span>
+                    <span>Status:</span>
+
+                </div>
+                <div class="view-order-container-column-right">
+                    <span>@line.Id</span>
+                    <span>@line.LastUpdate</span>
+                    <span>@line.Status</span>
+                </div>
+            </div>
+
+            <h6>Items</h6>
+            foreach ( var item in line.Items )
+            {
+                <div class="view-order-container view-order-line-items">
+                    <span>Id: @item.ProductId</span>
+                    <span>Qty: @item.Quantity</span>
+                </div>
+            }
+        }
+    </div>
+}
+
+@code 
+{
+    PaginatedOrderSummaries _orderSummaries = PaginatedOrderSummaries.Empty();
+    OrderFullDto _currentOrder = new();
+    bool _viewingDetails = false;
+    
+    readonly int[] _pageSizes = [5, 10, 20];
+    int _pageSize = 5;
+    int _currentPage = 1;
+    bool _paginationSubscribed = false;
+    PaginationPanel _paginationPanel = default!;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (FirstLoad)
+        {
+            FirstLoad = false;
+            await base.OnParametersSetAsync();
+            await GetPagedAddresses( 0 );
+        }
+    }
+    protected override async Task OnAfterRenderAsync( bool firstRender )
+    {
+        await base.OnAfterRenderAsync( firstRender );
+        if (!_paginationSubscribed)
+            _paginationPanel.OnPageChangeAsync += OnPaginationChange;
+        _paginationSubscribed = true;
+    }
+    protected override void OnDispose()
+    {
+        base.OnDispose();
+        _paginationPanel.OnPageChangeAsync -= OnPaginationChange;
+    }
+    
+    async Task GetPagedAddresses( int page )
+    {
+        StartLoading( "Loading Addresses..." );
+
+        Dictionary<string, object> parameters = [];
+        parameters.Add( "Page", _currentPage );
+        parameters.Add( "PageSize", _pageSize );
+        
+        var reply = await Http.GetAsyncAuthenticated<PaginatedOrderSummaries>( Consts.ApiViewOrdersAll, parameters );
+        if (!reply)
+        {
+            PushError( reply, "An error occured while fetching addresses." );
+            StopLoading();
+            return;
+        }
+
+        UpdateLocalState( reply, page );
+        StopLoading();
+    }
+    async Task OnPageSizeChanged( int pageSize )
+    {
+        _pageSize = pageSize;
+        await GetPagedAddresses( 0 );
+    }
+    async Task OnPaginationChange( int page )
+    {
+        _currentPage = page;
+        await GetPagedAddresses( page );
+    }
+
+    async Task OnClickView( Guid orderId )
+    {
+        StartLoading( "Loading order details..." );
+
+        var parameter = new Dictionary<string, object>() { { "OrderId", orderId } };
+        var details = await Http.GetAsyncAuthenticated<OrderFullDto>( Consts.ApiViewOrderSingle, parameter );
+
+        if (!details)
+        {
+            PushError( $"Failed to get order details. {details.GetMessage()}" );
+            StopLoading();
+        }
+
+        _currentOrder = details.Data;
+        _viewingDetails = true;
+        StopLoading();
+        StateHasChanged();
+    }
+    async Task OnClickBack()
+    {
+        _viewingDetails = false;
+        await GetPagedAddresses( _currentPage );
+    }
+    
+    void UpdateLocalState( Reply<PaginatedOrderSummaries> result, int page )
+    {
+        _orderSummaries = result.Data;
+
+        int count = result ? result.Data.TotalCount : 0;
+        _paginationPanel.Set( page, _pageSize, count );
+
+        StateHasChanged();
+    }
+}

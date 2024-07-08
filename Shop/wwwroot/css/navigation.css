@@ -80,15 +80,25 @@
     display: none;
 }
 
+.top-nav-search {
+    height: 50px;
+    min-height: 50px;
+    max-height: 50px;
+}
+
 .top-nav-search-control {
-    height: 40px;
-    max-height: 40px;
+    height: 50px;
+    min-height: 50px;
+    max-height: 50px;
     background-color: var(--white);
 }
 
 .top-nav-search-button {
-    height: 40px;
-    max-height: 40px;
+    height: 50px;
+    min-height: 50px;
+    max-height: 50px;
+    padding-left: 16px;
+    padding-right: 16px;
     border-bottom-left-radius: 0;
     border-top-left-radius: 0;
     border: 1px solid var(--white);

@@ -113,7 +113,7 @@
         var address = await AddressManager.GetCurrentAddress();
         var authState = await AuthManager.GetSessionState();
 
-        _currentAddress = address;
+        _currentAddress = address?.ToModel();
         _authenticated = authState.User.Identity is { IsAuthenticated: true };
         
         if (_authenticated)
@@ -126,14 +126,14 @@
     {
         Loader.StartLoadingPage( "Loading..." );
         _currentAddress = m;
-        await AddressManager.SetCurrentLocation( _currentAddress );
+        await AddressManager.SetCurrentLocation( Address.FromModel( _currentAddress ) );
         Loader.StopLoadingPage();
         OnClickClose();
     }
     async Task OnClickSubmit()
     {
         Loader.StartLoadingPage( "Loading..." );
-        await AddressManager.SetCurrentLocation( _currentAddress );
+        await AddressManager.SetCurrentLocation( Address.FromModel( _currentAddress ) );
         Loader.StopLoadingPage();
         OnClickClose();
     }

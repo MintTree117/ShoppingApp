@@ -60,11 +60,11 @@ else {
     <!-- WRAPPER -->
     <div class="user-container-large">
         <!-- VIEW TOP-->
-        <div class="d-flex flex-row align-items-center justify-content-between">
+        <div class="user-table-top">
             <!-- TOP LEFT -->
-            <h3 class="d-block mb-0 text-start fw-normal">Manage Addresses</h3>
+            <h3 class="d-block mb-0">Manage Addresses</h3>
             <!-- TOP RIGHT -->
-            <div class="d-flex flex-row align-items-stretch justify-content-between">
+            <div class="user-table-top-right">
                 <!-- ROWS DROPDOWN -->
                 <div class="dropdown me-3 h-100">
                     <!-- DROPDOWN TOGGLE -->
@@ -209,15 +209,15 @@ else {
         Dictionary<string, object> parameters = [];
         parameters.Add( "Page", _currentPage );
         parameters.Add( "PageSize", _pageSize );
-        Reply<ViewPagedAddressesResponse> result = await Http.GetAsyncAuthenticated<ViewPagedAddressesResponse>( Consts.ApiGetAddresses, parameters );
-
-        if (!result) {
-            PushError( result, "An error occured while fetching addresses." );
+        
+        var reply = await Http.GetAsyncAuthenticated<ViewPagedAddressesResponse>( Consts.ApiGetAddresses, parameters );
+        if (!reply) {
+            PushError( reply, "An error occured while fetching addresses." );
             StopLoading();
             return;
         }
         
-        UpdateLocalState( result, page );
+        UpdateLocalState( reply, page );
         StopLoading();
     }
     async Task OnClickSave()
