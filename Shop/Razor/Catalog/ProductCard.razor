@@ -14,16 +14,27 @@
         </a>
     </div>
     
-    <!-- TITLE -->
-    <a class="product-card-line product-title link-dark" href="@Consts.GetProductDetailsUrl( Product.Id )">
-        <h3 class="link-dark">@Product.Name</h3>
-    </a>
+    @if (CardType != Type.Cart)
+    {
+        <!-- TITLE -->
+        <a class="product-card-line product-title link-dark" href="@Consts.GetProductDetailsUrl( Product.Id )">
+            <h3 class="link-dark">@Product.Name</h3>
+        </a>
+    }
     
     <!-- DIVIDER -->
     <hr class="product-title-divider"/>
     
     <!-- INNER -->
     <div class="product-card-inner d-flex flex-column flex-grow-1">
+        
+        @if (CardType == Type.Cart)
+        {
+            <!-- TITLE -->
+            <a class="product-card-line product-title link-dark" href="@Consts.GetProductDetailsUrl( Product.Id )">
+                <h3 class="link-dark">@Product.Name</h3>
+            </a>
+        }
         
         <div class="product-card-inner-div-container">
             <div class="product-card-inner-div product-card-inner-div-right">
@@ -76,15 +87,12 @@
                     }
                 </div>
                 
-                @if (CardType is Type.Details or Type.Normal or Type.Cart)
+                <!-- PRICING WARNING -->
+                @if (Product.IsSaleEndDateNear( out int days ))
                 {
-                    <!-- PRICING WARNING -->
-                    if (Product.IsSaleEndDateNear( out int days ))
-                    {
-                        <div class="product-card-line product-pricing-warning">
-                            <span class="text-danger">Sale ends in @days days!</span>
-                        </div>
-                    }
+                    <div class="product-card-line product-pricing-warning">
+                        <span>Sale ends in @days days!</span>
+                    </div>
                 }
     
                 <!-- SHIPPING PRICE -->
@@ -98,13 +106,17 @@
                         <span>$@Product.ShippingPrice <small>shipping</small></span>
                     }
                 </div>
-    
+                
                 <!-- SHIPPING ESTIMATE -->
-                <div class="product-card-line">
-                    <small class="@GetDeliveryEstimateColor( Product )">
-                        @GetDeliveryEstimateText( Product )
-                    </small>
-                </div>
+                @if (CardType != Type.Slider)
+                {
+                    <!-- SHIPPING ESTIMATE -->
+                    <div class="product-card-line">
+                        <small class="@GetDeliveryEstimateColor( Product )">
+                            @GetDeliveryEstimateText( Product )
+                        </small>
+                    </div>   
+                }
             </div>    
         </div>
     </div>

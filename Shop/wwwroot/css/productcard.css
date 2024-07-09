@@ -221,15 +221,19 @@
 
 /* PRODUCT DETAILS */
 /* ------------------------------------------------------------------------------------------*/
-.product-details .product-address-button {
+.product-top .product-address-button {
     padding-top: 16px;
     padding-bottom: 16px;
     border-bottom: 1px solid lightgray;
 }
 
-.product-details .product-card-line {
+.product-top .product-card-line {
     padding-left: 8px;
     padding-right: 8px;
+}
+
+.product-top .product-card {
+    padding: 0;
 }
 
 /* IMAGE */
@@ -253,8 +257,6 @@
 /* TITLE */
 .product-top .product-card .product-title * {
     margin-top: 16px;
-    padding-left: 8px;
-    padding-right: 8px;
     line-height: 1.5;
     font-size: large;
     text-align: justify;
@@ -262,16 +264,6 @@
 
 .product-top .product-title-divider {
     margin-bottom: 16px;
-}
-
-.product-top .product-rating-brand {
-    padding-left: 8px;
-    padding-right: 8px;
-}
-
-.product-top .product-shipping-pricing {
-    padding-left: 8px;
-    padding-right: 8px;
 }
 
 /* SHIPPING/PRICING */
@@ -290,35 +282,26 @@
 
 /* CART */
 .product-top .product-cart {
-    padding-bottom: 0;
-    padding-left: 8px;
-    padding-right: 8px;
-}
-
-/* ADDRESS */
-.product-details-address-box {
-    width: 100%;
-    padding: 16px 8px;
-    border-bottom: 1px solid lightgray;
+    padding: 0 8px;
 }
 
 /* @ 480 */
 @media only screen and (min-width: 480px) {
-    .product-details .product-card-inner-div-container {
+    .product-top .product-card-inner-div-container {
         flex-direction: row-reverse;
         align-items: stretch;
         justify-content: space-between;
     }
 
-    .product-details .product-title-divider {
+    .product-top .product-title-divider {
         margin-bottom: 16px;
     }
 
-    .product-details .product-card-inner-div-right {
+    .product-top .product-card-inner-div-right {
         justify-content: start;
     }
 
-    .product-details .product-card-inner-div-right .product-card-line, .product-details .product-card-inner-div-right .product-card-line * {
+    .product-top .product-card-inner-div-right .product-card-line, .product-top .product-card-inner-div-right .product-card-line * {
         justify-content: end;
         text-align: right;
     }
@@ -339,7 +322,7 @@
         font-size: x-large;
     }
 
-    .product-details .product-price {
+    .product-top .product-price {
         font-size: 36px;
     }
 }
@@ -360,11 +343,11 @@
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
 }
 
-.product-slider-list * .product-title {
+.product-slider-list * .product-title * {
     min-height: 75px;
     max-height: 75px;
     margin-bottom: 8px;
-    font-size: small !important;
+    font-size: medium !important;
 }
 
 .product-slider-list * .product-price {
@@ -376,9 +359,62 @@
     font-size: x-small;
 }
 
+.product-pricing-warning * {
+    font-size: 12px;
+    font-weight: bold;
+    color: red;
+}
+
 @media (min-width: 992px) {
     .product-slider-list > .product-card {
         min-width: 200px;
         max-width: 200px;
+    }
+}
+
+/* CART */
+/* ------------------------------------------------------------------------------------------*/
+@media only screen and (min-width: 480px) {
+    .cart-items .product-card {
+        flex-direction: row;
+    }
+
+    .cart-items .product-card .product-title * {
+        max-height: 75px;
+        overflow: hidden;
+        word-break: break-word;
+        text-overflow: clip;
+        font-size: 16px;
+        margin-bottom: 0;
+        padding-left: 0;
+        padding-right: 0;
+        line-height: 1.5em;
+        font-weight: 400;
+    }
+
+    .cart-items .product-card-inner {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .cart-items .product-image, .cart-items .product-image img {
+        min-width: var(--cart-image-size-lg);
+        max-width: var(--cart-image-size-lg);
+        min-height: var(--cart-image-size-lg);
+        max-height: var(--cart-image-size-lg);
+    }
+
+    .cart-items .product-shipping-pricing, .cart-items .product-rating-brand {
+        min-width: 300px;
+        max-width: 300px;
+    }
+
+    .cart-items .product-shipping-pricing {
+        flex-direction: row;
+    }
+
+    .cart-items .product-shipping {
+        width: 100%;
+        text-align: end;
     }
 }

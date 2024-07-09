@@ -21,6 +21,12 @@
                 Empty Cart
             </button>
         </div>
+        
+        @if (_itemsAndSummaries.Count() <= 0)
+        {
+            <p class="my-3">Empty</p>
+        }
+        
         @foreach ( var item in _itemsAndSummaries.Items() )
         {
             <ProductCard Product="@ProductModel.From( _itemsAndSummaries.Dto( item ) )" CardType="@ProductCard.Type.Cart"/>
@@ -124,6 +130,12 @@
             PushError( $"An error occured while getting cart. {cartReply.GetMessage()}" );
             return;
         }
+
+        if (_itemsAndSummaries.Count() <= 0)
+        {
+            Loader.StopLoadingPage();
+            return;
+        }
         
         // get products
         var url = $"{Consts.ApiGetProductsByIds}?ProductIds={string.Join( ",", cartReply.Data.GetIds() )}";
@@ -147,7 +159,7 @@
     {
         if (!int.TryParse( args.Value?.ToString(), out int quantity ))
         {
-            PushError( $"Failed to update quantity. Invalid quantity arguments." );
+            PushError( "Failed to update quantity. Invalid quantity arguments." );
             return;
         }
         
@@ -158,7 +170,7 @@
     {
         if (!int.TryParse( args.Value?.ToString(), out int quantity ))
         {
-            PushError( $"Failed to update quantity. Invalid quantity arguments." );
+            PushError( "Failed to update quantity. Invalid quantity arguments." );
             return;
         }
         
@@ -189,7 +201,7 @@
         }
 
         Loader.StopLoadingPage();
-        PushSuccess( "Item removed." );
+        PushSuccess( "Cart updated." );
     }
     
     async Task OnClickClear()

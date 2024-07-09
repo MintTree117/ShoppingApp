@@ -57,38 +57,6 @@
     max-width: 50%;
 }
 
-@media only screen and (min-width: 480px) {
-    .cart-items .product-card {
-        flex-direction: row;
-    }
-    
-    .cart-items .product-card-inner {
-        padding-left: 16px;
-        padding-right: 16px;
-    }
-    
-    .cart-items .product-image, .cart-items .product-image img {
-        min-width: var(--cart-image-size-lg);
-        max-width: var(--cart-image-size-lg);
-        min-height: var(--cart-image-size-lg);
-        max-height: var(--cart-image-size-lg);
-    }
-
-    .cart-items .product-shipping-pricing, .cart-items .product-rating-brand {
-        min-width: 300px;
-        max-width: 300px;
-    }
-    
-    .cart-items .product-shipping-pricing {
-        flex-direction: row;
-    }
-
-    .cart-items .product-shipping {
-        width: 100%;
-        text-align: end;
-    }
-}
-
 /* CART-CHECKOUT */
 .cart-checkout {
     display: flex;

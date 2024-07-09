@@ -54,7 +54,7 @@ public sealed class CartManager : IDisposable // Singleton
 
     public async Task<Reply<CartItems>> GetInMemory()
     {
-        await Task.Delay( 500 );
+        await Task.Delay( 200 );
         await AlreadyUpdating();
         return _summaryInMemory is not null
             ? Reply<CartItems>.Success( _summaryInMemory )
@@ -62,7 +62,7 @@ public sealed class CartManager : IDisposable // Singleton
     }
     public async Task<Reply<CartItems>> GetFull()
     {
-        await Task.Delay( 500 );
+        await Task.Delay( 200 );
         if (await AlreadyUpdating() && _summaryInMemory is not null)
             return Reply<CartItems>.Success( _summaryInMemory );
         
@@ -76,7 +76,7 @@ public sealed class CartManager : IDisposable // Singleton
                 : null;
             SetBusy( false );
             InvokeCartChange();
-            return storageReply;
+            return Reply<CartItems>.Success( _summaryInMemory ?? CartItems.Empty() );
         }
         
         var serverReply = await _http.PostAsyncAuthenticated<List<CartItemDto>>( 
@@ -97,7 +97,7 @@ public sealed class CartManager : IDisposable // Singleton
     public async Task<Reply<bool>> Add( Guid id )
     {
         SetBusy( true );
-        await Task.Delay( 500 );
+        await Task.Delay( 200 );
         Reply<CartItems> items = await _storage.GetLocalStorage<CartItems>( SummaryStorageKey );
         _summaryInMemory = items
             ? items.Data
@@ -109,7 +109,7 @@ public sealed class CartManager : IDisposable // Singleton
     public async Task<Reply<bool>> Update( List<CartItemDto> items )
     {
         SetBusy( true );
-        await Task.Delay( 500 );
+        await Task.Delay( 200 );
         _summaryInMemory = new CartItems( items );
 
         var storageTask = _storage.SetLocalStorage( SummaryStorageKey, _summaryInMemory );
@@ -160,18 +160,12 @@ public sealed class CartManager : IDisposable // Singleton
         int iterations = 0;
         while ( _isBusy && iterations < 3 )
         {
-            await Task.Delay( 300 );
+            await Task.Delay( 200 );
             iterations++;
             wasBusy = true;
         }
         return wasBusy;
     }
-    /*async Task<bool> IsAuthenticated()
-    {
-        var authState = await _auth.GetSessionState();
-        var authenticated = authState.User.Identity is { IsAuthenticated: true };
-        return authenticated;
-    }*/
     void SetBusy( bool value )
     {
         lock ( _lock )
