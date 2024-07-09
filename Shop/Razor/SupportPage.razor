@@ -1,0 +1,54 @@
+@page "/support"
+@inherits Shop.Razor.Shared.ShopPage
+
+<div class="content-container mt-3" style="max-width: 900px">
+    <h3>Contact or Support</h3>
+    <p class="text-muted">Please fill out the form below and one of our team members will contact you shortly.</p>
+    <hr/>
+    <EditForm Model="@_request" OnValidSubmit="@(async () => await OnValidLoginSubmitAsync())">
+        <!-- NAME -->
+        <div class="form-floating mb-2">
+            <InputText type="name" class="form-control" id="name" @bind-Value="@_request.Name">></InputText>
+            <label for="name">Name</label>
+        </div>
+        <!-- EMAIL -->
+        <div class="form-floating mb-2">
+            <InputText type="name" class="form-control" id="email" @bind-Value="@_request.Email">></InputText>
+            <label for="email">Email</label>
+        </div>
+        <!-- PHONE -->
+        <div class="form-floating mb-2">
+            <InputText type="name" class="form-control" id="phone" @bind-Value="@_request.Phone">></InputText>
+            <label for="phone">Phone (optional)</label>
+        </div>
+        <!-- MESSAGE -->
+        <div class="form-floating mb-2">
+            <InputText type="name" class="form-control" id="message" @bind-Value="@_request.Message">></InputText>
+            <label for="message">Message</label>
+        </div>
+        <!-- SUBMIT -->
+        <button class="btn btn-full btn-primary mb-2" type="submit">
+            <i class="fa fa-sign-in me-2"></i>Submit
+        </button>
+    </EditForm>
+</div>
+
+@code 
+{
+    SupportRequestModel _request = new();
+
+    async Task OnValidLoginSubmitAsync()
+    {
+        await Task.Delay( 1000 );
+        PushSuccess( "Your support request has been sent." );
+        _request = new SupportRequestModel();
+    }
+    
+    sealed class SupportRequestModel
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string? Phone { get; set; }
+        public string Message { get; set; } = string.Empty;
+    }
+}
