@@ -37,7 +37,7 @@
             </div>
             
             <!-- VIEW BOTTOM -->
-            @if (_orderSummaries.TotalCount > 0)
+            @if (_orderSummaries.Orders.Count > 0)
             {
                 <!-- VIEW TABLE -->
                 <div class="table-responsive">
@@ -47,23 +47,21 @@
                         <tr class="text-start">
                             <th>Id</th>
                             <th>Placed</th>
-                            <th>Updated</th>
+                            <th>Status</th>
                             <th>Items</th>
                             <th>Price</th>
-                            <th class="text-end">Status</th>
                         </tr>
                         </thead>
                         <!-- TABLE BODY -->
                         <tbody>
-                        @foreach ( var order in _orderSummaries.Summaries )
+                        @foreach ( AccountOrderViewDto dto in _orderSummaries.Orders )
                         {
-                            <tr class="text-start view-orders-table-row" @onclick="@(async()=>await OnClickView(order.OrderId))">
-                                <td class="ps-3">@order.OrderId</td>
-                                <td class="ps-3">@order.DatePlaced</td>
-                                <td class="ps-3">@order.LastUpdate</td>
-                                <td class="ps-3">@order.TotalItems</td>
-                                <td class="ps-3">@order.TotalPrice</td>
-                                <td class="ps-3">@order.OrderStatus</td>
+                            <tr class="text-start view-orders-table-row" @onclick="@(async()=>await OnClickView(dto.OrderId))">
+                                <td class="ps-3">@dto.OrderId</td>
+                                <td class="ps-3">@dto.OrderDate</td>
+                                <td class="ps-3">@dto.State</td>
+                                <td class="ps-3">@dto.TotalQuantity</td>
+                                <td class="ps-3">@dto.TotalPrice</td>
                             </tr>
                         }
                         </tbody>
@@ -94,44 +92,46 @@ else
                 <span>Order ID:</span>
                 <span>Date Placed:</span>
                 <span>Last Update:</span>
+                <span>Order Status :</span>
                 <span>Item Count:</span>
                 <span>Total Price:</span>
-                <span>Order Status :</span>
             </div>
             <div class="view-order-container-column-right">
-                <span>@_currentOrder.Summary.OrderId</span>
-                <span>@_currentOrder.Summary.DatePlaced</span>
-                <span>@_currentOrder.Summary.LastUpdate</span>
-                <span>@_currentOrder.Summary.TotalItems</span>
-                <span>@_currentOrder.Summary.TotalPrice</span>
-                <span>@_currentOrder.Summary.OrderStatus</span>
+                <span>@_currentOrder.Id</span>
+                <span>@_currentOrder.DatePlaced</span>
+                <span>@_currentOrder.LastUpdate</span>
+                <span>@_currentOrder.State</span>
+                <span>@_currentOrder.TotalQuantity</span>
+                <span>@_currentOrder.TotalPrice</span>
             </div>
         </div>
 
-        <h3>Order Lines</h3>
-        @foreach ( OrderLineDto line in _currentOrder.OrderLines )
+        <h3>Order Groups</h3>
+        @foreach (OrderGroup group in _currentOrder.OrderGroups )
         {
             <h6>Summary</h6>
             <div class="view-order-container">
                 <div class="view-order-container-column-left">
-                    <span>Line Id:</span>
+                    <span>Group Id:</span>
                     <span>Last Update:</span>
                     <span>Status:</span>
 
                 </div>
                 <div class="view-order-container-column-right">
-                    <span>@line.Id</span>
-                    <span>@line.LastUpdate</span>
-                    <span>@line.Status</span>
+                    <span>@group.Id</span>
+                    <span>@group.LastUpdated</span>
+                    <span>@group.State</span>
                 </div>
             </div>
 
             <h6>Items</h6>
-            foreach ( var item in line.Items )
+            foreach ( OrderLine line in group.OrderLines )
             {
                 <div class="view-order-container view-order-line-items">
-                    <span>Id: @item.ProductId</span>
-                    <span>Qty: @item.Quantity</span>
+                    <span>Price: @line.UnitPrice</span>
+                    <span>Discount: @line.Discount</span>
+                    <span>Tax: @line.Tax</span>
+                    <span>Quantity: @line.Quantity</span>
                 </div>
             }
         }
@@ -140,8 +140,8 @@ else
 
 @code 
 {
-    PaginatedOrderSummaries _orderSummaries = PaginatedOrderSummaries.Empty();
-    OrderFullDto _currentOrder = new();
+    AccountOrdersViewDto _orderSummaries;
+    Order _currentOrder = new();
     bool _viewingDetails = false;
     
     readonly int[] _pageSizes = [5, 10, 20];
@@ -180,7 +180,7 @@ else
         parameters.Add( "Page", _currentPage );
         parameters.Add( "PageSize", _pageSize );
         
-        var reply = await Http.GetAsyncAuthenticated<PaginatedOrderSummaries>( Consts.ApiViewOrdersAll, parameters );
+        var reply = await Http.GetAsyncAuthenticated<AccountOrdersViewDto>( Consts.ApiViewOrdersAll, parameters );
         if (!reply)
         {
             PushError( reply, "An error occured while fetching addresses." );
@@ -207,7 +207,7 @@ else
         StartLoading( "Loading order details..." );
 
         var parameter = new Dictionary<string, object>() { { "OrderId", orderId } };
-        var details = await Http.GetAsyncAuthenticated<OrderFullDto>( Consts.ApiViewOrderSingle, parameter );
+        var details = await Http.GetAsyncAuthenticated<Order>( Consts.ApiViewOrderSingle, parameter );
 
         if (!details)
         {
@@ -226,7 +226,7 @@ else
         await GetPagedAddresses( _currentPage );
     }
     
-    void UpdateLocalState( Reply<PaginatedOrderSummaries> result, int page )
+    void UpdateLocalState( Reply<AccountOrdersViewDto> result, int page )
     {
         _orderSummaries = result.Data;
 
