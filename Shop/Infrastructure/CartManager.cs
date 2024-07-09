@@ -11,7 +11,8 @@ namespace Shop.Infrastructure;
 public sealed class CartManager : IDisposable // Singleton
 {
     const string SummaryStorageKey = "CartSummary";
-    
+
+    readonly NotificationService _notification;
     readonly StorageService _storage;
     readonly HttpService _http;
     readonly AuthenticationStateManager _auth;
@@ -23,8 +24,9 @@ public sealed class CartManager : IDisposable // Singleton
     bool _isBusy = false;
     CartItems? _summaryInMemory;
     
-    public CartManager( StorageService storage, HttpService http, AuthenticationStateManager auth )
+    public CartManager( NotificationService notification, StorageService storage, HttpService http, AuthenticationStateManager auth )
     {
+        _notification = notification;
         _storage = storage;
         _http = http;
         _auth = auth;
@@ -94,7 +96,7 @@ public sealed class CartManager : IDisposable // Singleton
         InvokeCartChange();
         return Reply<CartItems>.Success( _summaryInMemory );
     }
-    public async Task<Reply<bool>> Add( Guid id )
+    public async Task<Reply<bool>> Add( Guid id, int quantity = 1 )
     {
         SetBusy( true );
         await Task.Delay( 200 );
@@ -102,7 +104,7 @@ public sealed class CartManager : IDisposable // Singleton
         _summaryInMemory = items
             ? items.Data
             : CartItems.Empty();
-        _summaryInMemory.Add( new CartItemDto( id, 1 ) );
+        _summaryInMemory.Add( new CartItemDto( id, quantity ) );
 
         return await Update( _summaryInMemory.Items );
     }
@@ -129,7 +131,10 @@ public sealed class CartManager : IDisposable // Singleton
         SetBusy( false );
         InvokeCartChange();
 
-        return !storageTask.Result && (httpTask is not null && !httpTask.Result)
+        var failed = !storageTask.Result && httpTask is not null && !httpTask.Result;
+        if (failed) _notification.PushError( "Failed to update cart." );
+        else _notification.PushSuccess( "Updated cart." );
+        return failed
             ? IReply.Fail( $"Failed to update cart in storage or server. {storageTask.Result.GetMessage()} {httpTask.Result.GetMessage()}" )
             : IReply.Success();
     }
@@ -149,7 +154,10 @@ public sealed class CartManager : IDisposable // Singleton
         InvokeCartChange();
         SetBusy( false );
 
-        return !storageTask.Result && httpTask is not null && !httpTask.Result
+        var failed = !storageTask.Result && httpTask is not null && !httpTask.Result;
+        if (failed) _notification.PushError( "Failed to clear cart." );
+        else _notification.PushSuccess( "Cleared cart." );
+        return failed
             ? IReply.Fail( $"Failed to update cart in storage or server. {storageTask.Result.GetMessage()} {httpTask.Result.GetMessage()}" )
             : IReply.Success();
     }

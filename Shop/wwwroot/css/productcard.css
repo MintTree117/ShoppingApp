@@ -188,6 +188,10 @@
     border-bottom: 1px solid lightgray;
 }
 
+.search-list > .product-card:hover {
+    background-color: rgb(240, 240, 240);
+}
+
 .search-list .product-title * {
     margin: 0;
     max-height: 100px;
@@ -340,6 +344,10 @@
     background-color: var(--white);
     transition: transform 0.5s ease-in-out;
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+}
+
+.product-slider-list > .product-card:hover {
+    background-color: rgb(240,240,240);
 }
 
 .product-slider-list * .product-title * {

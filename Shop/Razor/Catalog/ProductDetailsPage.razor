@@ -222,19 +222,7 @@
         PushSuccess( "Updated delivery estimate." );
         StateHasChanged();
     }
-
-    void OnItemAddedToCart( bool succeeded, string? message )
-    {
-        if (succeeded) PushSuccess( "Item added to cart." );
-        else PushError( $"Failed to add to cart. {message}" );
-    }
-    void ToggleLoading( bool value )
-    {
-        if (value) _loadingPanel.ToggleLoading( true );
-        else _loadingPanel.ToggleLoading( false );
-
-        StateHasChanged();
-    }
+    
     string GetBrandsSliderTitle() =>
         $"Similar To {_productModel?.BrandName}";
     Dictionary<string, object> GetUrlParamsDetails()

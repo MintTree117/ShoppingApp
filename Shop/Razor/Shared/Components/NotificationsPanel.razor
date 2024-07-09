@@ -1,4 +1,6 @@
 @using Shop.Types.Common.ValueTypes
+@using Shop.Infrastructure
+@implements IDisposable
 
 <div class="fixed-top" style="z-index: 1050; display: @(Alerts.Any() ? "block" : "none")">
     <div class="container" style="max-height: calc(100vh / 3); overflow-y: auto;" @ref="_messageContainer">
@@ -15,7 +17,8 @@
 @code 
 
 {
-    [Inject] protected IJSRuntime JsRuntime { get; set; } = default!;
+    [Inject] public NotificationService NotificationService { get; set; } = default!;
+    [Inject] public IJSRuntime JsRuntime { get; set; } = default!;
     
     List<Alert> Alerts { get; set; } = [];
     ElementReference _messageContainer;
@@ -25,10 +28,31 @@
         Alerts.Add( Alert.With( type, message ) );
         StateHasChanged();
     }
+    public void Dispose()
+    {
+        NotificationService.OnPushSuccess -= OnPushSuccess;
+        NotificationService.OnPushError -= OnPushError;
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        NotificationService.OnPushSuccess += OnPushSuccess;
+        NotificationService.OnPushError += OnPushError;
+    }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        await base.OnAfterRenderAsync( firstRender );
         if (firstRender)
             await ScrollToBottom();
+    }
+
+    void OnPushSuccess( string message )
+    {
+        PushAlert( AlertType.Success, message );
+    }
+    void OnPushError( string message )
+    {
+        PushAlert( AlertType.Danger, message );
     }
 
     async Task ScrollToBottom()

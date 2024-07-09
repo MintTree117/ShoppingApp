@@ -53,7 +53,6 @@
         _headerRazor.OnPageSizeChanged -= OnPageSizeChanged;
         _headerRazor.OnPageSortChanged -= OnPageSortChanged;
         _filtersRazor.OnChangeFilters -= OnSearchFiltersRazorChanged;
-        _searchList.OnItemAddedToCart -= OnItemAddedToCart;
         _paginationRazor.OnPageChange -= OnPageChanged;
 
         LocationManager.OnLocationChangedAsync -= OnChangeLocation;
@@ -107,7 +106,6 @@
             _headerRazor.OnPageSizeChanged += OnPageSizeChanged;
             _headerRazor.OnPageSortChanged += OnPageSortChanged;
             _filtersRazor.OnChangeFilters += OnSearchFiltersRazorChanged;
-            _searchList.OnItemAddedToCart += OnItemAddedToCart;
             _paginationRazor.OnPageChange += OnPageChanged;
 
             LocationManager.OnLocationChangedAsync += OnChangeLocation;
@@ -370,10 +368,5 @@
     void OnToggleMobileFilters()
     {
         _filtersRazor.ToggleView();
-    }
-    void OnItemAddedToCart( bool success, string? failureMessage )
-    {
-        if (success) PushSuccess( "Added item to cart." );
-        else PushError( $"Failed to add item to cart. {failureMessage}" );
     }
 }

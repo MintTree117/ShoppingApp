@@ -211,7 +211,7 @@
 {
     [Parameter] public Type CardType { get; set; }
     [Parameter] public ProductModel Product { get; init; } = default!;
-
+    
     [Inject] public LoadingService Loader { get; set; } = default!;
     [Inject] public CartManager CartManager { get; init; } = default!;
     
@@ -237,7 +237,7 @@
     {
         ArgumentNullException.ThrowIfNull( p );
         Loader.StartLoadingPage( "Adding to cart..." );
-        var cartReply = await CartManager.Add( p.Id );
+        var cartReply = await CartManager.Add( p.Id, _selectedQuantity );
         if (!cartReply)
         {
             Loader.StopLoadingPage();

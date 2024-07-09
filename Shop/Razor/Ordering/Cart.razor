@@ -48,8 +48,8 @@
                 else
                 {
                     <!-- LARGE QUANTITY INPUT -->
-                    <div class="cart-large-quantity">
-                        <input class="form-control" type="number" @onchange="@(( e ) => OnChangeQuantityLarge( item, e ))"/>
+                    <div class="cart-large-quantity h-100">
+                        <input class="form-control h-100" type="number" value="@item.Quantity" @onchange="@(( e ) => OnChangeQuantityLarge( item, e ))"/>
                     </div>
                     <!-- SAVE CHANGES -->
                     if (_changedItems.Contains( item ))
@@ -130,9 +130,10 @@
             PushError( $"An error occured while getting cart. {cartReply.GetMessage()}" );
             return;
         }
-
-        if (_itemsAndSummaries.Count() <= 0)
+        
+        if (cartReply.Data.Items.Count <= 0)
         {
+            _itemsAndSummaries = CartItemsAndSummaries.From( cartReply.Data.Items, [] );
             Loader.StopLoadingPage();
             return;
         }
@@ -144,6 +145,7 @@
         {
 
             Loader.StopLoadingPage();
+            _itemsAndSummaries = CartItemsAndSummaries.From( cartReply.Data.Items, [] );
             PushWarning( $"Failed to fetch product details. {productsReply.GetMessage()}" );
             return;
         }
@@ -177,11 +179,13 @@
         Loader.StartLoadingPage( "Updating cart..." );
         itemDto.Quantity = quantity;
         await Update( _itemsAndSummaries.Items().ToList() );
+        await GetCart();
     }
     async Task SaveChanges()
     {
         Loader.StartLoadingPage( "Saving changes..." );
         await Update( _itemsAndSummaries.Items().ToList() );
+        await GetCart();
     }
     async Task OnClickDelete( CartItemDto itemDto )
     {
@@ -189,6 +193,7 @@
         var items = _itemsAndSummaries.Items().ToList();
         items.Remove( itemDto );
         await Update( items );
+        await GetCart();
     }
     async Task Update( List<CartItemDto> items )
     {
@@ -201,7 +206,6 @@
         }
 
         Loader.StopLoadingPage();
-        PushSuccess( "Cart updated." );
     }
     
     async Task OnClickClear()
@@ -209,11 +213,10 @@
         Loader.StartLoadingPage( "Clearing cart..." );
         
         var cartReply = await CartManager.Clear();
-
-        Loader.StopLoadingPage();
         
-        if (cartReply) PushSuccess( "Cart cleared." );
-        else PushError( $"Failed to clear cart. {cartReply.GetMessage()}" );
+        if (!cartReply) 
+            PushError( $"Failed to clear cart. {cartReply.GetMessage()}" );
+        
         await GetCart();
     }
 }
