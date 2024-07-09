@@ -33,6 +33,10 @@ internal static class Consts
     internal const string ApiGenerateRecoveryCodes = OrderingApiBase + "/account/security/generateRecovery";
     internal const string ApiDisable2Fa = OrderingApiBase + "/account/security/disable2fa";
     internal const string ApiUpdate2Fa = OrderingApiBase + "/account/security/update2fa";
+    
+    // ACCOUNT ORDERS
+    internal const string ApiOrdersView = OrderingApiBase + "/account/orders/view";
+    internal const string ApiOrdersDetails = OrderingApiBase + "/account/orders/details";
 
     // ACCOUNT ADDRESSES
     internal const string ApiGetAddresses = OrderingApiBase + "/account/addresses/view";
@@ -48,10 +52,9 @@ internal static class Consts
     internal const string ApiPostGetCart = ApiCartBase + "/postGet";
     internal const string ApiClearCart = ApiCartBase + "/clear";
     
-    // ORDERS
-    internal const string ApiPlaceOrder = OrderingApiBase + "/orders/place";
-    internal const string ApiViewOrdersAll = OrderingApiBase + "/orders/viewAll";
-    internal const string ApiViewOrderSingle = OrderingApiBase + "/orders/viewSingle";
+    // ORDERING
+    internal const string ApiPlaceOrderGuest = OrderingApiBase + "/orders/place/guest";
+    internal const string ApiPlaceOrderUser = OrderingApiBase + "/orders/place/user";
     
     // CATALOG
     internal const string CatalogApiBase = "https://localhost:7123/api";

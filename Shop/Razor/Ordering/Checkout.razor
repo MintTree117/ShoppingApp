@@ -235,7 +235,7 @@
             Items = _itemsAndSummaries.Items().ToList()
         };
         
-        var reply = await Http.PostAsyncAuthenticated<bool>( Consts.ApiPlaceOrder, orderPlacement );
+        var reply = await Http.PostAsyncAuthenticated<bool>( Consts.ApiPlaceOrderUser, orderPlacement );
         if (!reply)
         {
             PushError( $"Failed to place order. {reply.GetMessage()}" );

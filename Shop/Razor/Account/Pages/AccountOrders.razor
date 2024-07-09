@@ -140,7 +140,7 @@ else
 
 @code 
 {
-    AccountOrdersViewDto _orderSummaries;
+    AccountOrdersViewDto _orderSummaries = AccountOrdersViewDto.Empty();
     Order _currentOrder = new();
     bool _viewingDetails = false;
     
@@ -180,7 +180,7 @@ else
         parameters.Add( "Page", _currentPage );
         parameters.Add( "PageSize", _pageSize );
         
-        var reply = await Http.GetAsyncAuthenticated<AccountOrdersViewDto>( Consts.ApiViewOrdersAll, parameters );
+        var reply = await Http.GetAsyncAuthenticated<AccountOrdersViewDto>( Consts.ApiOrdersView, parameters );
         if (!reply)
         {
             PushError( reply, "An error occured while fetching addresses." );
@@ -207,7 +207,7 @@ else
         StartLoading( "Loading order details..." );
 
         var parameter = new Dictionary<string, object>() { { "OrderId", orderId } };
-        var details = await Http.GetAsyncAuthenticated<Order>( Consts.ApiViewOrderSingle, parameter );
+        var details = await Http.GetAsyncAuthenticated<Order>( Consts.ApiOrdersDetails, parameter );
 
         if (!details)
         {
