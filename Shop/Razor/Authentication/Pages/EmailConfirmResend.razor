@@ -10,8 +10,9 @@
     <div class="auth-result-wrapper">
         <!-- MESSAGE -->
         <h3>Email confirm link sent!</h3>
-        <i class="fa-solid fa-circle-check fa-4x text-success"></i>
-        <p>Please click the link sent to your email to activate your account.</p>
+        <i class="fa-solid fa-circle-check fa-4x text-success mb-3"></i>
+        <p class="text-muted mb-0">Please click the link sent to your email to activate your account.</p>
+        <hr/>
         <!-- RESEND -->
         <button class="btn btn-full btn-primary" @onclick="GoToResend">
             <i class="fa fa-repeat me-2"></i>Retry
@@ -21,7 +22,8 @@
 else {
     <!-- TITLE -->
     <h3>Resend Email Confirmation</h3>
-    <p class="text-secondary">Enter Your Email</p>
+    <p class="text-muted mb-0">Enter your email to send another confirmation link.</p>
+    <hr/>
     <!-- FORM -->
     <EditForm Model="Request" FormName="resend-email-confirmation" OnValidSubmit="SendConfirmationEmail" method="post">
         <DataAnnotationsValidator/>

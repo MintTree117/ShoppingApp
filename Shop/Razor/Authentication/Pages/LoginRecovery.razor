@@ -7,8 +7,8 @@
 
 <!-- TITLE -->
 <h3>Recovery Login</h3>
-<p>Enter one of your generated recovery codes to access your account.</p>
-<p class="text-muted">This will invalidate the code.</p>
+<p class="text-muted mb-0">Enter one of your generated recovery codes to access your account.<span class="text-danger"> This will invalidate the code.</span></p>
+<hr/>
 <!-- FORM -->
 <EditForm Model="@_request" OnValidSubmit="@(async () => await OnValidLoginSubmitAsync())">
     <DataAnnotationsValidator/>

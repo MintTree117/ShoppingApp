@@ -14,7 +14,8 @@
         <!-- MESSAGE -->
         <h1>Registration Success!</h1>
         <i class="fa-solid fa-circle-check fa-4x text-success mb-3"></i>
-        <p class="text-secondary">Your account has been created and is awaiting confirmation. A link has been emailed to your email. Please verify your email before logging in.</p>
+        <p class="text-secondary mb-0">Your account has been created and is awaiting confirmation. A link has been emailed to your email. Please verify your email before logging in.</p>
+        <hr/>
         <!-- LOGIN -->
         <button class="btn btn-full btn-success mb-2" @onclick="GoToLogin"><i class="fa fa-user me-2"></i>Login</button>
     </div>
@@ -26,7 +27,8 @@ else if (_pendingTwoFactor)
         <!-- MESSAGE -->
         <h2>Two-factor authentication</h2>
         <i class="fa-solid fa-circle-check fa-4x text-primary mb-3"></i>
-        <p class="mb-3">Your login is protected by a two-step verification process. Enter your verification code below.</p>
+        <p class="text-secondary mb-0">Your login is protected by a two-step verification process. Enter your verification code below.</p>
+        <hr/>
         <!-- FORM -->
         <EditForm Model="@_twoFactorRequest" FormName="login-with-2fa" OnValidSubmit="OnValidTwoFactorSubmitAsync" method="post">
             <DataAnnotationsValidator/>

@@ -13,8 +13,8 @@
         <!-- CONFIRM DELETE -->
         <div class="alert alert-warning auth-result-wrapper" role="alert">
             <!-- MESSAGE -->
-            <i class="fa-solid fa-triangle-exclamation fa-4x auth-result-icon mx-auto c-alert"></i>
-            <p><strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong></p>
+            <i class="fa-solid fa-triangle-exclamation fa-4x auth-result-icon mx-auto c-alert mb-3"></i>
+            <p class="text-danger mb-0">Deleting this data will permanently remove your account, and this cannot be recovered.</p>
             <hr/>
             <!-- YES -->
             <button class="btn btn-full btn-danger" @onclick="@(async () => await OnConfirmSubmit())">
@@ -30,6 +30,8 @@
     else {
         <!-- TITLE -->
         <h3>Delete Account</h3>
+        <p class="text-muted mb-0">Enter your password below to initiate account deletion.</p>
+        <hr/>
         <!-- FORM -->
         <EditForm Model="@_request" FormName="delete-user" OnValidSubmit="@(async () => await OnValidSubmitAsync())" method="post">
             <DataAnnotationsValidator/>

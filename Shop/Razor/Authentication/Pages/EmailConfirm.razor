@@ -10,9 +10,10 @@
     <div class="auth-result-wrapper">
         <!-- MESSAGE -->
         <h3>Email Confirmation Failed!</h3>
-        <i class="fa-solid fa-circle-exclamation fa-4x text-warning"></i>
-        <p>Error Details: @_apiReply.GetMessage()</p>
-        <p class="text-muted">Please try again or contact support.</p>
+        <i class="fa-solid fa-circle-exclamation fa-4x text-warning mb-3"></i>
+        <p class="text-danger">Error Details: @_apiReply.GetMessage()</p>
+        <p class="text-muted mb-0">Please try again or contact support.</p>
+        <hr/>
         <!-- RESEND -->
         <button class="btn btn-full btn-primary" @onclick="GoToResend">
             <i class="fa fa-repeat me-2"></i>Retry
@@ -24,7 +25,8 @@ else if (_emailConfirmed) {
         <!-- MESSAGE -->
         <h3>Email Confirmed!</h3>
         <i class="fa-solid fa-circle-check fa-4x text-success"></i>
-        <p class="text-muted">Your account has been verified and you can now login normally.</p>
+        <p class="text-muted mb-0">Your account has been verified and you can now login normally.</p>
+        <hr/>
         <!-- LOGIN -->
         <button class="btn btn-full btn-primary" @onclick="GoToLogin">
             <i class="fa fa-user me-2"></i>Login
