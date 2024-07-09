@@ -26,7 +26,7 @@ internal static class Consts
     // ACCOUNT PROFILE
     internal const string ApiGetAccountProfile = OrderingApiBase + "/account/profile/view";
     internal const string ApiUpdateAccountProfile = OrderingApiBase + "/account/profile/update";
-
+    
     // ACCOUNT SECURITY
     internal const string ApiViewSecurity = OrderingApiBase + "/account/security/view";
     internal const string ApiUpdatePassword = OrderingApiBase + "/account/security/updatePassword";
@@ -37,13 +37,17 @@ internal static class Consts
     // ACCOUNT ORDERS
     internal const string ApiOrdersView = OrderingApiBase + "/account/orders/view";
     internal const string ApiOrdersDetails = OrderingApiBase + "/account/orders/details";
-
+    
     // ACCOUNT ADDRESSES
     internal const string ApiGetAddresses = OrderingApiBase + "/account/addresses/view";
     internal const string ApiAddAddress = OrderingApiBase + "/account/addresses/add";
     internal const string ApiUpdateAddress = OrderingApiBase + "/account/addresses/update";
     internal const string ApiDeleteAddress = OrderingApiBase + "/account/addresses/delete";
 
+    // ACCOUNT SESSIONS
+    internal const string ApiGetSessions = OrderingApiBase + "/account/sessions/view";
+    internal const string ApiDeleteSession = OrderingApiBase + "/account/sessions/delete";
+    
     // DELETE ACCOUNT
     internal const string ApiDeleteAccount = OrderingApiBase + "/account/delete";
 
@@ -101,6 +105,7 @@ internal static class Consts
     internal const string PageAccountDelete = PageAccountBase + "/delete";
     internal const string PageAccountDeleted = PageAccountBase + "/deleted";
     internal const string PageAccountOrders = PageAccountBase + "/orders";
+    internal const string PageAccountSessions = PageAccountBase + "/sessions";
     internal const string PageAccountProfile = PageAccountBase + "/profile";
     internal const string PageAccountSecurity = PageAccountBase + "/security";
     // CATALOG

@@ -1,0 +1,164 @@
+@page "/AccountSessions"
+@using Shop.Types.Users
+@using Shop.Razor.Shared.Components
+@using Shop.Utilities
+@inherits AccountPageBase
+@layout AccountLayout
+
+<PageTitle>Manage Sessions</PageTitle>
+
+<!-- VIEW -->
+<!-- WRAPPER -->
+<div class="user-container-large">
+    <!-- VIEW TOP-->
+    <div class="user-table-top">
+        <!-- TOP LEFT -->
+        <h3 class="d-block mb-0">Manage Addresses</h3>
+        <!-- TOP RIGHT -->
+        <div class="user-table-top-right align-items-stretch">
+            <!-- ROWS DROPDOWN -->
+            <div class="dropdown me-3 h-100">
+                <!-- DROPDOWN TOGGLE -->
+                <button class="btn btn-icon btn-outline-secondary dropdown-toggle h-100" type="button" id="RowsPerPage" data-bs-toggle="dropdown" aria-expanded="false">
+                    @_pageSize
+                </button>
+                <!-- DROPDOWN LIST -->
+                <ul class="dropdown-menu" aria-labelledby="RowsPerPage">
+                    @foreach ( int pageSize in _pageSizes )
+                    {
+                        <li>
+                            <button class="dropdown-item" type="button" @onclick="@(async () => await OnPageSizeChanged( pageSize ))">
+                                @pageSize
+                            </button>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- VIEW RESULT INFO -->
+    <hr/>
+    <span class="text-start text-muted">@GetViewHeader()</span>
+    <hr/>
+    
+    <!-- VIEW BOTTOM -->
+    @if (_pagedSessions.Sessions.Count > 0) {
+        <!-- VIEW TABLE -->
+        <div class="table-responsive">
+            <table class="table align-middle table-striped table-hover">
+                <!-- TABLE HEADER -->
+                <thead>
+                <tr class="text-start">
+                    <th>Id</th>
+                    <th>Last Active</th>
+                    <th>Details</th>
+                    <th class="text-end">Terminate</th>
+                </tr>
+                </thead>
+                <!-- TABLE BODY -->
+                <tbody>
+                @foreach ( var session in _pagedSessions.Sessions )
+                {
+                    <tr class="text-start">
+                        <td class="ps-3">@session.SessionId</td>
+                        <td class="ps-3">@session.LastActivityDate</td>
+                        <td class="ps-3">@session.SessionInformation</td>
+                        <td>
+                            <button class="btn btn-sm btn-icon p-2 me-3 btn-outline-primary" @onclick="@(async()=>await OnClickDelete( session ))">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+    <!-- PAGINATION -->
+    <div class="mx-auto">
+        <PaginationPanel @ref="@_paginationPanel"/>
+    </div>
+</div>
+
+@code 
+{
+    UserSessionsDto _pagedSessions;
+    readonly int[] _pageSizes = [5, 10, 20];
+    int _pageSize = 5;
+    int _currentPage = 1;
+    bool _paginationSubscribed = false;
+    PaginationPanel _paginationPanel = default!;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (FirstLoad)
+        {
+            FirstLoad = false;
+            await base.OnParametersSetAsync();
+            _currentPage = 0;
+            await GetPagedAddresses();
+        }
+    }
+    protected override async Task OnAfterRenderAsync( bool firstRender )
+    {
+        await base.OnAfterRenderAsync( firstRender );
+        if (!_paginationSubscribed)
+            _paginationPanel.OnPageChangeAsync += OnPaginationChange;
+        _paginationSubscribed = true;
+    }
+    protected override void OnDispose()
+    {
+        base.OnDispose();
+        _paginationPanel.OnPageChangeAsync -= OnPaginationChange;
+    }
+    
+    async Task GetPagedAddresses()
+    {
+        StartLoading( "Loading Addresses..." );
+
+        Dictionary<string, object> parameters = [];
+        parameters.Add( "Page", _currentPage );
+        parameters.Add( "PageSize", _pageSize );
+
+        var reply = await Http.GetAsyncAuthenticated<UserSessionsDto>( Consts.ApiGetSessions, parameters );
+        if (!reply)
+        {
+            PushError( reply, "An error occured while fetching sessions." );
+            StopLoading();
+            return;
+        }
+
+        _pagedSessions = reply.Data;
+        StopLoading();
+    }
+    async Task OnClickDelete( UserSessionDto dto )
+    {
+        StartLoading( "Loading Sessions..." );
+
+        Dictionary<string, object> parameters = [];
+        parameters.Add( "SessionId", dto.SessionId );
+
+        var reply = await Http.DeleteAsyncAuthenticated<bool>( Consts.ApiDeleteSession, parameters );
+        if (!reply)
+        {
+            PushError( reply, "An error occured while deleting session." );
+            StopLoading();
+            return;
+        }
+
+        await GetPagedAddresses();
+    }
+    async Task OnPageSizeChanged( int pageSize )
+    {
+        _pageSize = pageSize;
+        await GetPagedAddresses();
+    }
+    async Task OnPaginationChange( int page )
+    {
+        _currentPage = page;
+        await GetPagedAddresses();
+    }
+    string GetViewHeader() =>
+        $"Viewing {Math.Min( _pageSize, _pagedSessions.Sessions.Count )} results of {_pagedSessions.Sessions.Count} total.";
+}

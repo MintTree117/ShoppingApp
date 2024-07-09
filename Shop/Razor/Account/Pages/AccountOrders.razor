@@ -35,43 +35,43 @@
                     </ul>
                 </div>
             </div>
-            
-            <!-- VIEW BOTTOM -->
-            @if (_orderSummaries.Orders.Count > 0)
-            {
-                <!-- VIEW TABLE -->
-                <div class="table-responsive">
-                    <table class="table align-middle table-striped table-hover">
-                        <!-- TABLE HEADER -->
-                        <thead>
-                        <tr class="text-start">
-                            <th>Id</th>
-                            <th>Placed</th>
-                            <th>Status</th>
-                            <th>Items</th>
-                            <th>Price</th>
+        </div>
+        
+       <!-- VIEW BOTTOM -->
+        @if (_orderSummaries.Orders.Count > 0)
+        {
+            <!-- VIEW TABLE -->
+            <div class="table-responsive">
+                <table class="table align-middle table-striped table-hover">
+                    <!-- TABLE HEADER -->
+                    <thead>
+                    <tr class="text-start">
+                        <th>Id</th>
+                        <th>Placed</th>
+                        <th>Status</th>
+                        <th>Items</th>
+                        <th>Price</th>
+                    </tr>
+                    </thead>
+                    <!-- TABLE BODY -->
+                    <tbody>
+                    @foreach ( AccountOrderViewDto dto in _orderSummaries.Orders )
+                    {
+                        <tr class="text-start view-orders-table-row" @onclick="@(async()=>await OnClickView(dto.OrderId))">
+                            <td class="ps-3">@dto.OrderId</td>
+                            <td class="ps-3">@dto.OrderDate</td>
+                            <td class="ps-3">@dto.State</td>
+                            <td class="ps-3">@dto.TotalQuantity</td>
+                            <td class="ps-3">@dto.TotalPrice</td>
                         </tr>
-                        </thead>
-                        <!-- TABLE BODY -->
-                        <tbody>
-                        @foreach ( AccountOrderViewDto dto in _orderSummaries.Orders )
-                        {
-                            <tr class="text-start view-orders-table-row" @onclick="@(async()=>await OnClickView(dto.OrderId))">
-                                <td class="ps-3">@dto.OrderId</td>
-                                <td class="ps-3">@dto.OrderDate</td>
-                                <td class="ps-3">@dto.State</td>
-                                <td class="ps-3">@dto.TotalQuantity</td>
-                                <td class="ps-3">@dto.TotalPrice</td>
-                            </tr>
-                        }
-                        </tbody>
-                    </table>
-                </div>
-            }
-            <!-- PAGINATION -->
-            <div class="mx-auto">
-                <PaginationPanel @ref="@_paginationPanel"/>
+                    }
+                    </tbody>
+                </table>
             </div>
+        }
+        <!-- PAGINATION -->
+        <div class="mx-auto">
+            <PaginationPanel @ref="@_paginationPanel"/>
         </div>
     </div>
 }

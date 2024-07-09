@@ -246,13 +246,6 @@ else
     async Task<Reply<bool>> TryRegister() =>
         await Http.PutAsync<bool>( Consts.ApiRegister, _registerRequest );
 
-    // TODO: IMPLEMENT RECOVERY CODES
-    void GoToRecovery() =>
-        Navigate( Consts.RecoveryLogin );
-    void GoToResend() =>
-        Navigate( Consts.PageEmailConfirmResend );
-    void GoToForgot() =>
-        Navigate( Consts.PageForgotPassword );
     void GoToLogin() =>
         Navigate( Consts.PageLoginOrRegister, true );
 

@@ -174,7 +174,6 @@ else {
     readonly int[] _pageSizes = [5, 10, 20];
     int _pageSize = 5;
     int _currentPage = 1;
-    int _totalCount = 0;
     bool _isEditing;
     bool _isNew;
     bool _paginationSubscribed = false;
@@ -266,7 +265,6 @@ else {
     void UpdateLocalState( Reply<ViewPagedAddressesResponse> result, int page )
     {
         _pagedAddresses = result.Data.Addresses;
-        _totalCount = result.Data.TotalCount;
 
         int count = result ? result.Data.TotalCount : 0;
         
@@ -314,7 +312,7 @@ else {
     string GetEditTitle() =>
         _isNew ? "New Address" : "Edit Address";
     string GetViewHeader() =>
-        $"Viewing {Math.Min(_pageSize, _totalCount)} results of {_totalCount} total.";
+        $"Viewing {Math.Min(_pageSize, _pagedAddresses.Count)} results of {_pagedAddresses.Count} total.";
     string GetSubmitText() =>
         _isNew ? "Submit" : "Save Changes";
 }
