@@ -38,6 +38,9 @@
             <label>
                 <input type="checkbox" checked="@_initToggleSale" @onchange="OnChangeIsOnSale"/> On Sale
             </label>
+            <label>
+                <input type="checkbox" checked="@_initToggleShipping" @onchange="OnChangeIsFreeSHipping"/> Free Shipping
+            </label>
         </div>
     </div>
     
@@ -133,6 +136,7 @@
     bool _initToggleStock = false;
     bool _initToggleFeatured = false;
     bool _initToggleSale = false;
+    bool _initToggleShipping = false;
     int? _posX = 0;
     int? _posY = 0;
     int? _minPrice = 0;
@@ -145,7 +149,6 @@
         { SectionCategories, true },
         { SectionBrands, true }
     };
-
 
     protected override async Task OnInitializedAsync()
     {
@@ -245,6 +248,12 @@
     {
         bool value = (bool) (args.Value ?? false);
         _filters.IsOnSale = value ? true : null;
+        OnChangeFilters?.Invoke();
+    }
+    void OnChangeIsFreeSHipping( ChangeEventArgs args )
+    {
+        bool value = (bool) (args.Value ?? false);
+        _filters.IsFreeShipping = value ? true : null;
         OnChangeFilters?.Invoke();
     }
     void OnChangeMinPrice( ChangeEventArgs args )

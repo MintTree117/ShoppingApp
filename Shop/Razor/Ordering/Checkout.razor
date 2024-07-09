@@ -5,7 +5,10 @@
 @using Shop.Types.Orders
 @using Shop.Types.Products.Dtos
 @using Shop.Types.Users
+@using Shop.Razor.Shared.Components
 @inherits Shop.Razor.Shared.ShopPage
+
+<LoadingPanelPage/>
 
 <!-- CONTAINER -->
 <div class="content-container checkout-container">
@@ -127,6 +130,11 @@
         <div class="cart-checkout-section">
             <span>Items:</span>
             <span>$@_itemsAndSummaries.Price()</span>
+        </div>
+        <!-- SAVINGS -->
+        <div class="cart-checkout-section">
+            <span>Savings:</span>
+            <span>$@_itemsAndSummaries.Savings()</span>
         </div>
         <!-- CART PRICE -->
         <div class="cart-checkout-section">

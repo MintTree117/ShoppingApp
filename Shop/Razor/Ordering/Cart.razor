@@ -72,6 +72,10 @@
             <span>$@_itemsAndSummaries.Price()</span>
         </div>
         <div class="cart-checkout-section">
+            <span>Savings:</span>
+            <span>$@_itemsAndSummaries.Savings()</span>
+        </div>
+        <div class="cart-checkout-section">
             <span>Shipping:</span>
             <span>$@_itemsAndSummaries.Shipping()</span>
         </div>
@@ -199,9 +203,5 @@
         if (cartReply) PushSuccess( "Cart cleared." );
         else PushError( $"Failed to clear cart. {cartReply.GetMessage()}" );
         await GetCart();
-    }
-    async Task OnClickChangeLocation()
-    {
-        // await get estimates
     }
 }

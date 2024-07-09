@@ -7,6 +7,7 @@ public sealed class SearchParametersDto(
     bool? isInStock,
     bool? isFeatured,
     bool? isOnSale,
+    bool? isFreeShipping,
     int? minPrice,
     int? maxPrice,
     int page,
@@ -21,6 +22,7 @@ public sealed class SearchParametersDto(
     public bool? IsInStock { get; set; } = isInStock;
     public bool? IsFeatured { get; set; } = isFeatured;
     public bool? IsOnSale { get; set; } = isOnSale;
+    public bool? IsFreeShipping { get; set; } = isFreeShipping;
     public int? MinPrice { get; set; } = minPrice;
     public int? MaxPrice { get; set; } = maxPrice;
     public int Page { get; set; } = page;
@@ -30,5 +32,5 @@ public sealed class SearchParametersDto(
     public int? PosY { get; set; } = posY;
 
     public static SearchParametersDto Empty() =>
-        new( null, null, null, null, null, null, null, null, 1, 5, 0, null, null );
+        new( null, null, null, null, null, null, null, null, null, 1, 5, 0, null, null );
 }

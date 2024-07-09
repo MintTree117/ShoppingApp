@@ -14,7 +14,7 @@
         </a>
     </div>
     
-    <!-- IMAGE-EXCLUSION-CONTAINER -->
+    <!-- INNER -->
     <div class="product-card-inner d-flex flex-column flex-grow-1">
         <!-- TITLE -->
         <a class="product-title link-dark" href="@Consts.GetProductDetailsUrl( Product.Id )">
@@ -24,62 +24,87 @@
         <!-- DIVIDER -->
         <hr class="product-title-divider"/>
         
-        <!-- RATING/BRAND -->
-        <div class="product-rating-brand row-between mb-2">
-            <!-- RATING -->
-            <div class="product-rating">
-                @for ( int i = 1; i <= 5; i++ )
-                {
-                    <div>
-                        <i class="@Utils.GetRatingCss( Product.Rating, i )"></i>
-                    </div>
-                }
-                <a class="product-rating-count" href="@Consts.GetProductDetailsUrlRatings( Product.Id )">
-                    @Product.NumberRatings
-                </a>
-            </div>
-            
-            @if (CardType is Type.Details or Type.Normal or Type.Cart)
-            {
-                <!-- BRAND -->
-                <div class="product-brand">
-                    <span class="product-brand-label">
-                        Brand:&nbsp;
-                    </span>
-                    <a class="product-brand-link" href="@Consts.GetBrandSearchUrl( Product.BrandId )">
-                        @Product.BrandName
+        <div class="product-card-inner-div-container">
+            <div class="product-card-inner-div product-card-inner-div-right">
+                <!-- RATING -->
+                <div class="product-card-inner-line product-rating">
+                    @for ( int i = 1; i <= 5; i++ )
+                    {
+                        <div>
+                            <i class="@Utils.GetRatingCss( Product.Rating, i )"></i>
+                        </div>
+                    }
+                    <a class="product-rating-count" href="@Consts.GetProductDetailsUrlRatings( Product.Id )">
+                        @Product.NumberRatings
                     </a>
-                </div>   
-            }
-        </div>
-        
-        <!-- SHIPPING/PRICING -->
-        <div class="product-shipping-pricing mb-2">
-            <!-- PRICING -->
-            <div class="product-pricing">
-                @if (Product.SalePrice > 0)
+                </div>
+                
+                <!-- BRAND -->
+                @if (CardType is Type.Details or Type.Normal or Type.Cart)
                 {
-                    <span class="product-price">
-                        $@Product.SalePrice
-                    </span>
-                    <span class="product-sale-price">
-                        $@Product.Price
-                    </span>
-                }
-                else
-                {
-                    <span class="product-price">
-                        $@Product.Price
-                    </span>
+                    <!-- BRAND -->
+                    <div class="product-card-inner-line product-brand">
+                        <span class="product-brand-label">
+                            Brand:&nbsp;
+                        </span>
+                        <a class="product-brand-link" href="@Consts.GetBrandSearchUrl( Product.BrandId )">
+                            @Product.BrandName
+                        </a>
+                    </div>   
                 }
             </div>
             
-            <!-- SHIPPING -->
-            <div class="product-shipping">
-                <small class="@GetDeliveryEstimateColor( Product )">
-                    @GetDeliveryEstimateText( Product )
-                </small>
-            </div>
+            <div class="product-card-inner-div product-card-inner-div-left">
+                @if (CardType is Type.Details or Type.Normal or Type.Cart)
+                {
+                    <!-- PRICING WARNING -->
+                    if (Product.IsSaleEndDateNear( out int days ))
+                    {
+                        <div class="product-card-inner-line product-pricing-warning">
+                            <span class="text-danger">Sale ends in @days days!</span>
+                        </div>
+                    }
+                }
+    
+                <!-- PRICING -->
+                <div class="product-card-inner-line product-pricing">
+                    @if (Product.SalePrice is not null)
+                    {
+                        <span class="product-price">
+                            $@Product.SalePrice
+                        </span>
+                        <span class="product-sale-price">
+                            $@Product.Price
+                        </span>
+    
+                    }
+                    else
+                    {
+                        <span class="product-price">
+                            $@Product.Price
+                        </span>
+                    }
+                </div>
+    
+                <!-- SHIPPING PRICE -->
+                <div class="product-card-inner-line product-shipping">
+                    @if (Product.ShippingPrice is null)
+                    {
+                        <span>Free Shipping</span>
+                    }
+                    else
+                    {
+                        <span>Shipping: @Product.ShippingPrice</span>
+                    }
+                </div>
+    
+                <!-- SHIPPING ESTIMATE -->
+                <div class="product-card-inner-line">
+                    <small class="@GetDeliveryEstimateColor( Product )">
+                        @GetDeliveryEstimateText( Product )
+                    </small>
+                </div>
+            </div>    
         </div>
         
         <!-- CART -->
@@ -97,11 +122,11 @@
                             <small>View In Cart (@count)</small>
                         </a>
                     }
-                    else if( !Product.IsInStock )
+                    else if (!Product.IsInStock)
                     {
                         <!-- DISABLED BUTTON -->
                         <button disabled class="btn btn-secondary btn-icon w-100">
-                            <i class="fa-solid fa-circle-xmark fa-sm"></i>
+                            <i class="fa-solid fa-circle-xmark fa-sm me-2"></i>
                             <small>Out of Stock</small>
                         </button>
                     }
@@ -112,7 +137,7 @@
                             <select id="quantitySelect" class="btn btn-outline-secondary btn-icon form-select h-100 w-100" @onchange="OnQuantityChange" value="@_selectedQuantity">
                                 @foreach ( int quantity in Quantities )
                                 {
-                                    <option value="@quantity" selected="@(_selectedQuantity == quantity)">Qty: @quantity</option>
+                                    <option value="@quantity" selected="@( _selectedQuantity == quantity )">Qty: @quantity</option>
                                 }
                             </select>
                         </div>
@@ -121,7 +146,7 @@
                             <i class="fa-solid fa-shopping-cart fa-sm me-2"></i>
                             <small>Add To Cart</small>
                         </button>
-                    } 
+                    }
                 </div>
                 break;
             }
@@ -131,27 +156,27 @@
             {
                 if (IsProductInCart( Product, out int count ))
                 {
-                    <a class="btn btn-primary btn-icon search-item-cart-button" href="@Consts.PageCart">
-                        <i class="fa-solid fa-circle-check fa-xs me-1"></i>
+                    <a class="btn btn-primary btn-icon search-item-cart-button w-100 px-3" href="@Consts.PageCart">
+                        <i class="fa-solid fa-circle-check fa-xs me-2"></i>
                         <small>View In Cart (@count)</small>
                     </a>
                 }
-                else 
+                else
                 {
                     if (Product.IsInStock)
                     {
-                        <button class="btn btn-outline-primary btn-icon search-item-cart-button shadow-sm" @onclick="@(async () => await AddToCart( Product ))">
-                            <i class="fa-solid fa-shopping-cart fa-xs me-1"></i>
+                        <button class="btn btn-outline-primary btn-icon search-item-cart-button shadow-sm w-100 px-3" @onclick="@(async () => await AddToCart( Product ))">
+                            <i class="fa-solid fa-shopping-cart fa-xs me-2"></i>
                             <small>Add To Cart</small>
                         </button>
                     }
                     else
                     {
-                        <button disabled class="btn btn-secondary btn-icon search-item-cart-button shadow-sm">
-                            <i class="fa-solid fa-circle-xmark fa-xs me-1"></i>
+                        <button disabled class="btn btn-secondary btn-icon search-item-cart-button shadow-sm w-100 px-3">
+                            <i class="fa-solid fa-circle-xmark fa-xs me-2"></i>
                             <small>Out of Stock</small>
                         </button>
-                    } 
+                    }
                 }
                 break;
             }

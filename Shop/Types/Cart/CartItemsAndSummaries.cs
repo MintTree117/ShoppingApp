@@ -17,17 +17,35 @@ public sealed class CartItemsAndSummaries
         foreach ( var kvp in _itemsAndSummaries )
         {
             int count = kvp.Key.Quantity;
-            decimal price = kvp.Value.SalePrice > 0
-                ? kvp.Value.SalePrice
-                : kvp.Value.Price;
+            decimal price = kvp.Value.RealPrice();
             totalPrice += count * price;
         }
         return Math.Round( totalPrice, 2 );
     }
+    public decimal Savings()
+    {
+        decimal totalSavings = 0;
+        foreach ( var kvp in _itemsAndSummaries )
+        {
+            if (kvp.Value.SalePrice is null)
+                continue;
+            
+            decimal salePrice = kvp.Value.SalePrice ?? decimal.Zero;
+            decimal price = kvp.Value.Price;
+            decimal difference = price - salePrice;
+            totalSavings += difference;
+        }
+        return Math.Round( totalSavings, 2 );
+    }
     public decimal Shipping()
     {
-        decimal shipping = 0;
-        return Math.Round( shipping, 2 );
+        decimal totalShipping = 0;
+        foreach ( var kvp in _itemsAndSummaries )
+        {
+            decimal shipping = kvp.Value.ShippingPrice ?? decimal.Zero;
+            totalShipping += shipping;
+        }
+        return Math.Round( totalShipping, 2 );
     }
     public decimal EstimatedTax()
     {

@@ -11,9 +11,39 @@
 
 /* PRODUCT CARD INNER */
 .product-card-inner {
+    width: 100%;
     display: flex;
     flex-direction: column;
     flex-grow: 1;
+}
+
+.product-card-inner-div-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    justify-content: start;
+    text-align: left;
+}
+
+.product-card-inner-div {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    justify-content: start;
+    text-align: left;
+}
+
+/* PRODUCT CARD INNER LINE */
+.product-card-inner-line {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+    text-align: left;
+    padding-bottom: 4px;
 }
 
 /* PRODUCT INFO */
@@ -73,11 +103,6 @@
 
 /* PRODUCT RATING */
 .product-rating {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: start;
     gap: 0;
 }
 
@@ -94,11 +119,6 @@
 
 /* PRODUCT BRAND */
 .product-brand {
-    min-width: 40%;
-    display: flex;
-    flex-direction: row;
-    align-items: end;
-    justify-content: end;
     flex-wrap: nowrap;
     white-space: nowrap;
     overflow: hidden;
@@ -121,27 +141,9 @@
     display: inline-block;
 }
 
-/* SHIPPING/PRICING */
-.product-shipping-pricing {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: start;
-    justify-content: start;
-}
-
-.shipping small {
-    display: block;
-    font-size: x-small;
-    text-align: right;
-}
-
 /* PRICING */
 .product-pricing {
-    display: flex;
-    flex-direction: row;
-    align-items: end;
-    margin-bottom: 6px;
+    margin-bottom: 0;
 }
 
 .product-pricing span {
@@ -149,7 +151,7 @@
 }
 
 .product-price {
-    font-size: 24px;
+    font-size: 28px;
     font-weight: 400;
     line-height: 1;
     margin-right: 8px;
@@ -172,30 +174,11 @@
     border-bottom: 1px solid lightgray;
 }
 
-.search-list .product-card {
-    padding: 16px;
-
-}
-
 .search-list .product-title * {
     margin: 0;
     font-size: medium;
     line-height: 1.5em;
     word-break: break-word;
-    text-overflow: clip;
-}
-
-.search-list .product-shipping-pricing {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    align-items: end;
-    justify-content: space-between;
-    flex-wrap: wrap;
-}
-
-.search-list .product-pricing {
-    margin-bottom: 0;
 }
 
 /* @ 480px */
@@ -502,6 +485,11 @@
     border-bottom: 1px solid lightgray;
 }
 
+.product-details .product-card-inner-line {
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
 /* IMAGE */
 .product-top .product-image, .product-top .product-image:hover {
     box-shadow: 0 .5rem 1rem rgba(0, 0, 0, 0.1)
@@ -652,8 +640,27 @@
     padding-right: 8px;
 }
 
-/* @ 992px */
+/* @ 480 */
 @media only screen and (min-width: 480px) {
+    .product-details .product-card-inner-div-container {
+        flex-direction: row-reverse;
+        align-items: stretch;
+        justify-content: space-between;
+    }
+
+    .product-details .product-title-divider {
+        margin-bottom: 16px;
+    }
+
+    .product-details .product-card-inner-div-right {
+        justify-content: start;
+    }
+    
+    .product-details .product-card-inner-div-right .product-card-inner-line, .product-details .product-card-inner-div-right .product-card-inner-line * {
+        justify-content: end;
+        text-align: right;
+    }
+
     .product-top .product-rating-count, .product-top .product-brand-label {
         font-size: medium;
     }
@@ -668,10 +675,6 @@
     
     .product-top .product-cart * {
         font-size: x-large;
-    }
-    
-    .product-top .product-title-divider {
-        margin-bottom: 24px;
     }
 
     .product-categories-container {
@@ -695,6 +698,10 @@
         flex-wrap: nowrap;
         white-space: nowrap;
         margin-bottom: 0;
+    }
+    
+    .product-details .product-price {
+        font-size: 36px;
     }
 }
 
@@ -774,10 +781,6 @@
 
 .product-slider-list * .product-sale-price {
     font-size: x-small;
-}
-
-.product-slider-list * .product-shipping {
-    display: none;
 }
 
 @media (min-width: 992px) {

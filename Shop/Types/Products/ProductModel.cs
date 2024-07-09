@@ -18,9 +18,14 @@ public sealed class ProductModel
         bool isFeatured,
         bool isInStock,
         decimal price,
-        decimal salePrice,
+        decimal? salePrice,
+        decimal? shippingPrice,
+        DateTime? saleEndDate,
+        DateTime releaseDate,
         float rating,
         int numberRatings,
+        decimal weight,
+        string dimensions,
         int shippingDays,
         List<Category>? categories,
         string? description,
@@ -35,8 +40,13 @@ public sealed class ProductModel
         IsInStock = isInStock;
         Price = price;
         SalePrice = salePrice;
+        ShippingPrice = shippingPrice;
+        SaleEndDate = saleEndDate;
+        ReleaseDate = releaseDate;
         Rating = rating;
         NumberRatings = numberRatings;
+        Weight = weight;
+        Dimensions = dimensions;
         ShippingDays = shippingDays;
         Categories = categories;
         Description = description;
@@ -51,9 +61,14 @@ public sealed class ProductModel
     public bool IsFeatured { get; set; }
     public bool IsInStock { get; set; }
     public decimal Price { get; set; }
-    public decimal SalePrice { get; set; }
+    public decimal? SalePrice { get; set; }
+    public decimal? ShippingPrice { get; set; }
+    public DateTime? SaleEndDate { get; set; }
+    public DateTime ReleaseDate { get; set; }
     public float Rating { get; set; }
     public int NumberRatings { get; set; }
+    public decimal Weight { get; set; }
+    public string Dimensions { get; set; } = string.Empty;
     public int ShippingDays { get; set; }
     public List<Category>? Categories { get; set; }
     public string? Description { get; set; }
@@ -65,7 +80,6 @@ public sealed class ProductModel
         models.AddRange( from d in dtos select From( d ) );
         return models;
     }
-    
     public static ProductModel From( ProductSummaryDto summaryDto )
     {
         return new ProductModel(
@@ -78,8 +92,13 @@ public sealed class ProductModel
             summaryDto.IsInStock,
             summaryDto.Price,
             summaryDto.SalePrice,
+            summaryDto.ShippingPrice,
+            summaryDto.SaleEndDate,
+            summaryDto.ReleaseDate,
             summaryDto.Rating,
             summaryDto.NumberRatings,
+            summaryDto.Weight,
+            summaryDto.Dimensions,
             summaryDto.ShippingDays,
             null,
             null,
@@ -106,11 +125,27 @@ public sealed class ProductModel
             detailsDto.IsInStock,
             detailsDto.Price,
             detailsDto.SalePrice,
+            detailsDto.ShippingPrice,
+            detailsDto.SaleEndDate,
+            detailsDto.ReleaseDate,
             detailsDto.Rating,
             detailsDto.NumberRatings,
+            detailsDto.Weight,
+            detailsDto.Dimensions,
             detailsDto.ShippingDays,
             selectedCategories,
             detailsDto.Description,
             detailsDto.Xml );
+    }
+
+    public bool IsSaleEndDateNear( out int days )
+    {
+        days = 0;
+        if (SaleEndDate is null)
+            return false;
+
+        TimeSpan difference = SaleEndDate.Value.Date - DateTime.Today;
+        days = difference.Days;
+        return difference.Days <= 30;
     }
 }

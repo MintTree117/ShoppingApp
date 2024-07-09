@@ -148,6 +148,9 @@
         if (!string.IsNullOrWhiteSpace( query.Get( "IsOnSale" ) ))
             _parametersDto.IsOnSale = true;
 
+        if (!string.IsNullOrWhiteSpace( query.Get( "IsFreeShipping" ) ))
+            _parametersDto.IsFreeShipping = true;
+
         if (int.TryParse( query.Get( "Page" ), out int page ))
             _parametersDto.Page = page;
 
@@ -183,6 +186,8 @@
             queryParams["IsFeatured"] = _parametersDto.IsFeatured.ToString()?.ToLower() ?? string.Empty;
         if (_parametersDto.IsOnSale.HasValue)
             queryParams["IsOnSale"] = _parametersDto.IsOnSale.ToString()?.ToLower() ?? string.Empty;
+        if (_parametersDto.IsFreeShipping.HasValue)
+            queryParams["IsFreeShipping"] = _parametersDto.IsFreeShipping.ToString()?.ToLower() ?? string.Empty;
 
         if (isApi)
         {

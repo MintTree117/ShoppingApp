@@ -9,7 +9,16 @@ public readonly record struct ProductSummaryDto(
     bool IsFeatured,
     bool IsInStock,
     decimal Price,
-    decimal SalePrice,
+    decimal? SalePrice,
+    decimal? ShippingPrice,
+    DateTime? SaleEndDate,
+    DateTime ReleaseDate,
     float Rating,
     int NumberRatings,
-    int ShippingDays );
+    decimal Weight,
+    string Dimensions,
+    int ShippingDays )
+{
+    public decimal RealPrice() =>
+        SalePrice ?? Price;
+}
