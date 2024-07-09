@@ -12,25 +12,25 @@
 else if (!GetCurrentCategories().Any())
 {
     <div class="main-nav-categories d-flex flex-column align-items-center justify-content-start p-0 ">
-        <p class="w-100 mx-auto text-center text-dark">None.</p>
+        <p class="w-100 mx-auto mt-3 text-center text-dark">None.</p>
     </div>
 }
 else
 {
     <div class="main-nav-categories d-flex align-items-center justify-content-start py-2">
+        <h4 class="main-nav-categories-title me-2">Categories</h4>
         @if (_currentParentId.HasValue)
         {
-            <button class="btn btn-link nav-link me-2" @onclick="PreviousCategory">
+            <button class="btn btn-link nav-link px-1 mx-0" @onclick="PreviousCategory">
                 <i class="fa fa-caret-left me-1"></i> Back
             </button>
         }
         else if (ShowExitButton)
         {
-            <button class="btn btn-link nav-link me-2" @onclick="Exit">
+            <button class="btn btn-link nav-link px-1 mx-0" @onclick="Exit">
                 <i class="fa fa-caret-left me-1"></i> Back
             </button>
         }
-        <h4 class="main-nav-categories-title">Categories</h4>
     </div>
     <ul class="nav flex-column mt-0 pt-0 position-relative">
         @foreach ( Category c in GetCurrentCategories() )

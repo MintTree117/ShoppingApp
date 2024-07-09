@@ -126,8 +126,15 @@
         StateHasChanged();
     }
 
-    string GetInfoText() =>
-        $"Viewing {Math.Min(PageSizeOptions[_selectedPageSizeIndex], _totalResults)} on page {_currentPage} of {_totalResults} matches";
+    string GetInfoText()
+    {
+        int pageSize = PageSizeOptions[_selectedPageSizeIndex];
+        int startIndex = (_currentPage - 1) * pageSize + 1;
+        int endIndex = Math.Min( _currentPage * pageSize, _totalResults );
+        int itemsOnCurrentPage = endIndex - startIndex + 1;
+
+        return $"Viewing {itemsOnCurrentPage} on page {_currentPage} of {_totalResults} matches";
+    }
     string GetActiveBreadcrumbCss( string breadcrumb ) =>
         breadcrumb == _breadcrumbStrings.Last() ? "active" : string.Empty;
     void OnClickBreadCrumb( string breadcrumb )

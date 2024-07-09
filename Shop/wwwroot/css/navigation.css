@@ -49,8 +49,10 @@
 @media only screen and (min-width: 992px) {
     .main-nav-categories-title {
         padding-left: 16px;
-        font-weight: normal;
+        font-size: x-large;
+        font-weight: bold;
         text-decoration: underline;
+        color: #212121;
     }
 
     .main-nav-categories-title:hover {

@@ -52,17 +52,26 @@
                 </div>
                 
                 <!-- BRAND -->
-                @if (CardType is Type.Details or Type.Normal or Type.Cart)
+                @if (CardType is Type.Details or Type.Search or Type.Cart)
                 {
                     <!-- BRAND -->
                     <div class="product-card-line product-brand">
-                        <span class="product-brand-label">
+                        <span class="product-brand-label me-1">
                             Brand:&nbsp;
                         </span>
                         <a class="product-brand-link" href="@Consts.GetBrandSearchUrl( Product.BrandId )">
                             @Product.BrandName
                         </a>
                     </div>   
+                }
+                
+                <!-- RELEASE DATE -->
+                @if (CardType is Type.Details or Type.Search)
+                {
+                    <div class="product-card-line product-date">
+                        <small class="text-muted me-1 product-date-label">Released:</small>
+                        <small>@Product.ReleaseDate.ToString("dd/MM/yyyy")</small>
+                    </div>
                 }
             </div>
             
@@ -257,7 +266,7 @@
     public enum Type
     {
         Slider,
-        Normal,
+        Search,
         Details,
         Cart
     }

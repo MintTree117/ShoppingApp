@@ -130,7 +130,6 @@
 .product-brand span {
     color: #858585;
     font-size: 12px;
-    margin-right: 4px;
 }
 
 .product-brand-link {
@@ -140,6 +139,11 @@
     word-break: break-word;
     text-overflow: ellipsis;
     display: inline-block;
+}
+
+/* DATE */
+.product-date-label {
+    font-size: 12px;
 }
 
 /* PRICING */
@@ -221,19 +225,14 @@
 
 /* PRODUCT DETAILS */
 /* ------------------------------------------------------------------------------------------*/
-.product-top .product-address-button {
-    padding-top: 16px;
-    padding-bottom: 16px;
+.product-top .product-card {
     border-bottom: 1px solid lightgray;
+    padding: 0 0 24px;
 }
 
 .product-top .product-card-line {
     padding-left: 8px;
     padding-right: 8px;
-}
-
-.product-top .product-card {
-    padding: 0;
 }
 
 /* IMAGE */
@@ -285,25 +284,25 @@
     padding: 0 8px;
 }
 
+.product-top .product-card-inner-div-container {
+    flex-direction: row-reverse;
+    align-items: stretch;
+    justify-content: space-between;
+}
+
+.product-top .product-card-inner-div-right {
+    justify-content: start;
+}
+
+.product-top .product-card-inner-div-right .product-card-line, .product-top .product-card-inner-div-right .product-card-line * {
+    justify-content: end;
+    text-align: right;
+}
+
 /* @ 480 */
 @media only screen and (min-width: 480px) {
-    .product-top .product-card-inner-div-container {
-        flex-direction: row-reverse;
-        align-items: stretch;
-        justify-content: space-between;
-    }
-
     .product-top .product-title-divider {
         margin-bottom: 16px;
-    }
-
-    .product-top .product-card-inner-div-right {
-        justify-content: start;
-    }
-
-    .product-top .product-card-inner-div-right .product-card-line, .product-top .product-card-inner-div-right .product-card-line * {
-        justify-content: end;
-        text-align: right;
     }
 
     .product-top .product-rating-count, .product-top .product-brand-label {
