@@ -1,11 +1,8 @@
 namespace Shop.Types.Common.ValueTypes;
 
-public readonly record struct Contact( 
-    int Id, 
-    string Phone, 
-    string Email, 
-    string Name )
+public sealed class Contact
 {
-    public static Contact Empty() => 
-        new( -1, string.Empty, string.Empty, string.Empty );
-}
+    public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string? Phone { get; set; }
+} 

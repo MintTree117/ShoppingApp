@@ -210,7 +210,8 @@ else {
         parameters.Add( "PageSize", _pageSize );
         
         var reply = await Http.GetAsyncAuthenticated<ViewPagedAddressesResponse>( Consts.ApiGetAddresses, parameters );
-        if (!reply) {
+        if (!reply) 
+        {
             PushError( reply, "An error occured while fetching addresses." );
             StopLoading();
             return;

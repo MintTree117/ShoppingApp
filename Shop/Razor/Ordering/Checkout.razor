@@ -6,6 +6,7 @@
 @using Shop.Types.Products.Dtos
 @using Shop.Types.Users
 @using Shop.Razor.Shared.Components
+@using Contact = Shop.Types.Common.ValueTypes.Contact
 @inherits Shop.Razor.Shared.ShopPage
 
 <LoadingPanelPage/>
@@ -13,150 +14,186 @@
 <!-- CONTAINER -->
 <div class="content-container checkout-container">
     
-    <!-- CHECKOUT FORMS -->
-    <div class="checkout-forms-container">
-        
-        <!-- BILLING ADDRESS -->
-        <h3 class="cart-checkout-title">Billing Address</h3>
-        <EditForm Model="@_billingAddress">
-            <DataAnnotationsValidator/>
-            <ValidationSummary class="text-danger" role="alert"/>
-            
-            <!-- NAME -->
-            <div class="form-floating mb-2">
-                <InputText type="name" class="form-control" id="billingAddressName" @bind-Value="@_billingAddress.Name"></InputText>
-                <ValidationMessage For="@(() => _billingAddress.Name)"/>
-                <label for="billingAddressName">Address Name *</label>
-            </div>
-            
-            <!-- POSITION -->
-            <div class="d-flex flex-row align-items-center justify-content-between gap-3">
-                <!-- POS X -->
-                <div class="form-floating mb-2 w-100">
-                    <InputNumber type="name" class="form-control" id="billingPosX" @bind-Value="@_billingAddress.PosX"></InputNumber>
-                    <ValidationMessage For="@(() => _billingAddress.PosX)"/>
-                    <label for="billingPosX">Position X *</label>
-                </div>
-                <!-- POS Y -->
-                <div class="form-floating mb-2 w-100">
-                    <InputNumber type="name" class="form-control" id="billingPosY" @bind-Value="@_billingAddress.PosY"></InputNumber>
-                    <ValidationMessage For="@(() => _billingAddress.PosY)"/>
-                    <label for="billingPosY">Position Y *</label>
-                </div>
-            </div>
-
-        </EditForm>
-        
-        <!-- SHIPPING ADDRESS -->
-        <h3 class="cart-checkout-title">Shipping Address</h3>
-        <EditForm Model="@_shippingAddress">
-            <DataAnnotationsValidator/>
-            <ValidationSummary class="text-danger" role="alert"/>
-            
-            <!-- NAME -->
-            <div class="form-floating mb-2">
-                <InputText type="name" class="form-control" id="shippingAddressName" @bind-Value="@_shippingAddress.Name"></InputText>
-                <ValidationMessage For="@(() => _billingAddress.Name)"/>
-                <label for="shippingAddressName">Address Name *</label>
-            </div>
-            
-            <!-- POSITION -->
-            <div class="d-flex flex-row align-items-center justify-content-ss gap-3">
-                <!-- POS X -->
-                <div class="form-floating mb-2 w-100">
-                    <InputNumber type="name" class="form-control" id="shippingPosX" @bind-Value="@_shippingAddress.PosX"></InputNumber>
-                    <ValidationMessage For="@(() => _billingAddress.PosX)"/>
-                    <label for="shippingPosX">Position X *</label>
-                </div>
-                <!-- POS Y -->
-                <div class="form-floating mb-2 w-100">
-                    <InputNumber type="name" class="form-control" id="shippingPosY" @bind-Value="@_shippingAddress.PosY"></InputNumber>
-                    <ValidationMessage For="@(() => _billingAddress.PosY)"/>
-                    <label for="shippingPosY">Position Y *</label>
-                </div>
-            </div>
-        </EditForm>
-        
-        <!-- SHARE ADDRESS -->
-        <div class="form-check my-3">
-          <input class="form-check-input" @onchange="OnToggleShareAddress" type="checkbox" value="" id="flexCheckDefault">
-          <label class="form-check-label" for="flexCheckDefault">
-              Use Billing Address For Shipping
-          </label>
-        </div>
-        
-        <!-- SELECT ADDRESS BUTTON -->
-        <button class="btn btn-link btn-icon ps-0">
-            <i class="fa fa-location-dot me-2"></i>
-            <span>Select a saved address.</span>
-        </button>
-    </div>
+    <!-- CHECKOUT TITLE -->
+    <h1 class="checkout-title">
+        @GetCheckoutTitle()
+    </h1>
     
-    <!-- CHECKOUT CART -->
-    <div class="cart-checkout checkout-summary w-100">
-        
-        <!-- CHECKOUT CART TITLE -->
-        <div class="cart-checkout-title">
-            <h3 class="mb-0">Summary</h3>
+    <!-- INNER WRAPPER -->
+    <div class="checkout-container-inner">
+    
+        <!-- CHECKOUT FORMS -->
+        <div class="checkout-forms-container">
+            
+            <!-- BILLING ADDRESS -->
+            <h3 class="cart-checkout-title">Billing Address</h3>
+            <EditForm Model="@_billingAddress">
+                <DataAnnotationsValidator/>
+                <ValidationSummary class="text-danger" role="alert"/>
+                
+                <!-- NAME -->
+                <div class="form-floating mb-2">
+                    <InputText type="name" class="form-control" id="billingAddressName" @bind-Value="@_billingAddress.Name"></InputText>
+                    <ValidationMessage For="@(() => _billingAddress.Name)"/>
+                    <label for="billingAddressName">Address Name *</label>
+                </div>
+                
+                <!-- POSITION -->
+                <div class="d-flex flex-row align-items-center justify-content-between gap-3">
+                    <!-- POS X -->
+                    <div class="form-floating mb-2 w-100">
+                        <InputNumber type="name" class="form-control" id="billingPosX" @bind-Value="@_billingAddress.PosX"></InputNumber>
+                        <ValidationMessage For="@(() => _billingAddress.PosX)"/>
+                        <label for="billingPosX">Position X *</label>
+                    </div>
+                    <!-- POS Y -->
+                    <div class="form-floating mb-2 w-100">
+                        <InputNumber type="name" class="form-control" id="billingPosY" @bind-Value="@_billingAddress.PosY"></InputNumber>
+                        <ValidationMessage For="@(() => _billingAddress.PosY)"/>
+                        <label for="billingPosY">Position Y *</label>
+                    </div>
+                </div>
+    
+            </EditForm>
+            
+            <!-- SHIPPING ADDRESS -->
+            <h3 class="cart-checkout-title">Shipping Address</h3>
+            <EditForm Model="@_shippingAddress">
+                <DataAnnotationsValidator/>
+                <ValidationSummary class="text-danger" role="alert"/>
+                
+                <!-- NAME -->
+                <div class="form-floating mb-2">
+                    <InputText type="name" class="form-control" id="shippingAddressName" @bind-Value="@_shippingAddress.Name"></InputText>
+                    <ValidationMessage For="@(() => _billingAddress.Name)"/>
+                    <label for="shippingAddressName">Address Name *</label>
+                </div>
+                
+                <!-- POSITION -->
+                <div class="d-flex flex-row align-items-center justify-content-ss gap-3">
+                    <!-- POS X -->
+                    <div class="form-floating mb-2 w-100">
+                        <InputNumber type="name" class="form-control" id="shippingPosX" @bind-Value="@_shippingAddress.PosX"></InputNumber>
+                        <ValidationMessage For="@(() => _billingAddress.PosX)"/>
+                        <label for="shippingPosX">Position X *</label>
+                    </div>
+                    <!-- POS Y -->
+                    <div class="form-floating mb-2 w-100">
+                        <InputNumber type="name" class="form-control" id="shippingPosY" @bind-Value="@_shippingAddress.PosY"></InputNumber>
+                        <ValidationMessage For="@(() => _billingAddress.PosY)"/>
+                        <label for="shippingPosY">Position Y *</label>
+                    </div>
+                </div>
+            </EditForm>
+            
+            <!-- SHARE ADDRESS -->
+            <div class="form-check my-3">
+              <input class="form-check-input" @onchange="OnToggleShareAddress" type="checkbox" value="" id="flexCheckDefault">
+              <label class="form-check-label" for="flexCheckDefault">
+                  Use Billing Address For Shipping
+              </label>
+            </div>
+            
+            <!-- SELECT ADDRESS BUTTON -->
+            <button class="btn btn-link btn-icon ps-0 mb-3">
+                <i class="fa fa-location-dot me-2"></i>
+                <span>Select a saved address.</span>
+            </button>
+            
+            <!-- CONTACT -->
+            <h3>Contact Information</h3>
+            <hr/>
+            <!-- FORM -->
+            <EditForm Model="@_contact">
+                <DataAnnotationsValidator/>
+                <ValidationSummary class="text-danger" role="alert"/>
+                <!-- NAME -->
+                <div class="form-floating mb-3">
+                    <InputText type="name" @bind-Value="@_contact.Name" id="username" class="form-control" autocomplete="username" aria-required="true" placeholder="Username"/>
+                    <ValidationMessage For="@(() => _contact.Name)" class="text-danger"/>
+                    <label for="username" class="form-label">Username</label>
+                </div>
+                <!-- EMAIL -->
+                <div class="form-floating mb-3">
+                    <InputText type="email" @bind-Value="@_contact.Email" id="email" class="form-control" autocomplete="email" aria-required="true" placeholder="Email"/>
+                    <ValidationMessage For="@(() => _contact.Email)" class="text-danger"/>
+                    <label for="email" class="form-label">Email</label>
+                </div>
+                <!-- PHONE -->
+                <div class="form-floating mb-3">
+                    <InputText type="phone" @bind-Value="@_contact.Phone" id="phone" class="form-control" autocomplete="phone" aria-required="true" placeholder="Phone"/>
+                    <ValidationMessage For="@(() => _contact.Phone)" class="text-danger"/>
+                    <label for="phone" class="form-label">Phone (Optional)</label>
+                </div>
+            </EditForm>
         </div>
         
-        <!-- CART CHECKOUT ITEMS -->
-        <div class="cart-checkout-items">
-            <ul class="list-unstyled">
-                @foreach ( var item in _itemsAndSummaries.Items() )
-                {
-                    <li class="d-flex flex-row align-items-center justify-content-between">
-                        <div class="d-flex flex-row">
-                            <strong class="d-inline-block me-1">@item.Quantity x</strong>
-                            <span class="d-inline-block">@_itemsAndSummaries.Dto( item ).Name</span>
-                        </div>
-                        <div class="d-flex flex-row align-items-center justify-content-end">
-                            @if (_itemsAndSummaries.Dto( item ).SalePrice > 0)
-                            {
-                                <span class="me-1">@_itemsAndSummaries.Dto( item ).SalePrice</span>
-                                <small class="text-muted text-decoration-line-through">@_itemsAndSummaries.Dto( item ).Price</small>
-                            }
-                            else
-                            {
-                                <span>@_itemsAndSummaries.Dto( item ).Price</span>
-                            }
-                        </div>
-                    </li>
-                }
-            </ul>
+        <!-- CHECKOUT CART -->
+        <div class="cart-checkout checkout-summary w-100">
+            
+            <!-- CHECKOUT CART TITLE -->
+            <div class="cart-checkout-title">
+                <h3 class="mb-0">Summary</h3>
+            </div>
+            
+            <!-- CART CHECKOUT ITEMS -->
+            <div class="cart-checkout-items">
+                <ul class="list-unstyled">
+                    @foreach ( var item in _itemsAndSummaries.Items() )
+                    {
+                        <li class="d-flex flex-row align-items-center justify-content-between">
+                            <div class="d-flex flex-row">
+                                <strong class="d-inline-block me-1">@item.Quantity x</strong>
+                                <span class="d-inline-block">@_itemsAndSummaries.Dto( item ).Name</span>
+                            </div>
+                            <div class="d-flex flex-row align-items-center justify-content-end">
+                                @if (_itemsAndSummaries.Dto( item ).SalePrice > 0)
+                                {
+                                    <span class="me-1">@_itemsAndSummaries.Dto( item ).SalePrice</span>
+                                    <small class="text-muted text-decoration-line-through">@_itemsAndSummaries.Dto( item ).Price</small>
+                                }
+                                else
+                                {
+                                    <span>@_itemsAndSummaries.Dto( item ).Price</span>
+                                }
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </div>
+            
+            <!-- CART PRICE -->
+            <div class="cart-checkout-section">
+                <span>Items:</span>
+                <span>$@_itemsAndSummaries.Price()</span>
+            </div>
+            <!-- SAVINGS -->
+            <div class="cart-checkout-section">
+                <span>Savings:</span>
+                <span>$@_itemsAndSummaries.Savings()</span>
+            </div>
+            <!-- CART PRICE -->
+            <div class="cart-checkout-section">
+                <span>Shipping:</span>
+                <span>$@_itemsAndSummaries.Shipping()</span>
+            </div>
+            <!-- CART TAX -->
+            <div class="cart-checkout-section">
+                <span>Estimated Tax:</span>
+                <span>$@_itemsAndSummaries.EstimatedTax()</span>
+            </div>
+            <hr/>
+            <!-- CART TOTAL -->
+            <div class="cart-checkout-section">
+                <span>Estimated Total:</span>
+                <span>$@_itemsAndSummaries.EstimatedTotal()</span>
+            </div>
+            <!-- PLACE ORDER -->
+            <button class="btn btn-outline-primary btn-icon mt-2" @onclick="@(async () => await PlaceOrder())">
+                Place Order
+            </button>
+            
         </div>
-        
-        <!-- CART PRICE -->
-        <div class="cart-checkout-section">
-            <span>Items:</span>
-            <span>$@_itemsAndSummaries.Price()</span>
-        </div>
-        <!-- SAVINGS -->
-        <div class="cart-checkout-section">
-            <span>Savings:</span>
-            <span>$@_itemsAndSummaries.Savings()</span>
-        </div>
-        <!-- CART PRICE -->
-        <div class="cart-checkout-section">
-            <span>Shipping:</span>
-            <span>$@_itemsAndSummaries.Shipping()</span>
-        </div>
-        <!-- CART TAX -->
-        <div class="cart-checkout-section">
-            <span>Estimated Tax:</span>
-            <span>$@_itemsAndSummaries.EstimatedTax()</span>
-        </div>
-        <hr/>
-        <!-- CART TOTAL -->
-        <div class="cart-checkout-section">
-            <span>Estimated Total:</span>
-            <span>$@_itemsAndSummaries.EstimatedTotal()</span>
-        </div>
-        <!-- PLACE ORDER -->
-        <button class="btn btn-outline-primary btn-icon mt-2" @onclick="@(async () => await PlaceOrder())">
-            Place Order
-        </button>
-        
     </div>
 </div>
 
@@ -164,12 +201,13 @@
 {
     [Inject] public LocationManager LocationService { get; init; } = default!;
     [Inject] public CartManager CartManager { get; init; } = default!;
+    
     CartItemsAndSummaries _itemsAndSummaries = CartItemsAndSummaries.Empty();
-
+    readonly Contact _contact = new();
     Address _billingAddress = new();
     Address _shippingAddress = new();
-
     bool _shareAddress = false;
+    bool _authenticated = false;
 
     protected override void OnDispose()
     {
@@ -179,11 +217,28 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        Loader.StartLoadingPage( "Loading cart..." );
+        
+        Loader.StartLoadingPage( "Loading..." );
         LocationService.OnLocationChanged += OnLocationChanged;
-        await GetInitialLocation();
+        
         await GetAuthentication();
+        await GetInitialLocation();
         await GetCart();
+
+        if (!_authenticated)
+        {
+            Loader.StopLoadingPage();
+            return;
+        }
+        
+        var userReply = await Http.GetAsyncAuthenticated<AccountModel>( Consts.ApiGetAccountProfile );
+        if (userReply)
+        {
+            _contact.Name = userReply.Data.Username;
+            _contact.Email = userReply.Data.Email;
+            _contact.Phone = userReply.Data.Phone;
+        }
+        
         Loader.StopLoadingPage();
     }
     async Task GetInitialLocation()
@@ -195,8 +250,7 @@
     async Task GetAuthentication()
     {
         var auth = await Auth.GetSessionState();
-        if (auth.User.Identity is null || !auth.User.Identity.IsAuthenticated)
-            PushError( "You must be a verified user to place orders." );
+        _authenticated = auth.User.Identity is not null && auth.User.Identity.IsAuthenticated;
     }
     async Task GetCart()
     {
@@ -230,6 +284,7 @@
         await Task.Delay( 500 );
         
         OrderPlacementRequest orderPlacement = new OrderPlacementRequest {
+            Contact = _contact,
             BillingAddress = _billingAddress,
             ShippingAddress = _shippingAddress,
             Items = _itemsAndSummaries.Items().ToList()
@@ -259,5 +314,14 @@
         _billingAddress = address ?? new Address();
         if (_shareAddress)
             _shippingAddress = address ?? new Address();
+    }
+    string GetCheckoutTitle() =>
+        _authenticated ? "User Checkout" : "Guest Checkout";
+
+    sealed class AccountModel
+    {
+        public string Username { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string? Phone { get; set; } = string.Empty;
     }
 }
