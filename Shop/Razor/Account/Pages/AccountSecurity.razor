@@ -94,7 +94,7 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        var httpReply = await Http.GetAsyncAuthenticated<ViewSecurityResponse>( Consts.ApiViewSecurity );
+        var httpReply = await Http.GetAsyncAuthenticated<ViewSecurityResponse>( Http.Ordering( Consts.ApiViewSecurity ) );
         if (!httpReply)
         {
             PushError( httpReply, "Failed to get account security information." );
@@ -113,8 +113,8 @@
     {
         StartLoading( "Updating Password..." );
 
-        var reply = await Http.PutAsyncAuthenticated<bool>( 
-            Consts.ApiUpdatePassword, new UpdatePasswordRequest( _passwordModel.OldPassword, _passwordModel.NewPassword ) );
+        var reply = await Http.PutAsyncAuthenticated<bool>(
+            Http.Ordering( Consts.ApiUpdatePassword ), new UpdatePasswordRequest( _passwordModel.OldPassword, _passwordModel.NewPassword ) );
         if (!reply) 
         {
             PushError( reply, "Failed to update password." );
@@ -130,7 +130,7 @@
     {
         StartLoading( "Generating recovery codes..." );
 
-        var reply = await Http.PostAsyncAuthenticated<IEnumerable<string>>( Consts.ApiGenerateRecoveryCodes );
+        var reply = await Http.PostAsyncAuthenticated<IEnumerable<string>>( Http.Ordering( Consts.ApiGenerateRecoveryCodes ) );
         if (!reply)
         {
             PushError( reply, "Failed to generate recovery codes." );
@@ -147,7 +147,7 @@
     {
         StartLoading( "Updating Two-Factor Authentication..." );
         
-        var httpReply = await Http.PutAsyncAuthenticated<bool>( Consts.ApiUpdate2Fa, _twoFactorModel );
+        var httpReply = await Http.PutAsyncAuthenticated<bool>( Http.Ordering( Consts.ApiUpdate2Fa ), _twoFactorModel );
         if (!httpReply)
         {
             PushError( httpReply, "Failed to update two factor authentication." );
@@ -171,7 +171,7 @@
         
         StartLoading( "Disabling two factor authentication..." );
         
-        var reply = await Http.PutAsyncAuthenticated<bool>( Consts.ApiDisable2Fa );
+        var reply = await Http.PutAsyncAuthenticated<bool>( Http.Ordering( Consts.ApiDisable2Fa ) );
         if (!reply)
         {
             PushError( reply, "Failed to disable two factor authentication." );

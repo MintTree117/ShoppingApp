@@ -8,8 +8,18 @@ using Shop.Utilities;
 
 namespace Shop.Infrastructure.Http;
 
-public sealed class HttpService( IHttpClientFactory httpFactory, IServiceProvider provider ) // SINGLETON
+public sealed class HttpService( IConfiguration configuration, IHttpClientFactory httpFactory, IServiceProvider provider ) // SINGLETON
 {
+    public string CatalogApiUrl { get; private set; } = configuration.GetSection( "CatalogUrl" ).Get<string>()
+        ?? throw new Exception( "Failed to get OrderingApiUrl from Configuration." );
+    public string OrderingApiUrl { get; private set; } = configuration.GetSection( "OrderingUrl" ).Get<string>()
+        ?? throw new Exception( "Failed to get OrderingApiUrl from Configuration." );
+
+    public string Catalog( string url ) =>
+        $"{CatalogApiUrl}{url}";
+    public string Ordering( string url ) =>
+        $"{OrderingApiUrl}{url}";
+    
     readonly IHttpClientFactory _httpFactory = httpFactory;
     readonly IServiceProvider _provider = provider;
     readonly JsonSerializerOptions JsonOptions = new() {
@@ -27,7 +37,8 @@ public sealed class HttpService( IHttpClientFactory httpFactory, IServiceProvide
         client.DefaultRequestHeaders.Add( "X-Requested-With", "XMLHttpRequest" );
 
         // Ensure HttpClient includes credentials
-        AuthenticationStateManager auth = _provider.GetService<AuthenticationStateManager>() ?? throw new Exception( "HttpService: Failed to get SessionManager from Provider." );
+        AuthenticationStateManager auth = _provider.GetService<AuthenticationStateManager>() 
+            ?? throw new Exception( "HttpService: Failed to get SessionManager from Provider." );
         client.SetAuthenticationHeader( auth.AccessToken );
         return client;
     }

@@ -28,7 +28,7 @@ public sealed class CategoriesCache( HttpService http, StorageService storage ) 
             return cacheReply;
         }
 
-        var fetchReply = await _http.GetAsync<List<CategoryDto>>( Consts.ApiGetCategories );
+        var fetchReply = await _http.GetAsync<List<CategoryDto>>( _http.Catalog( Consts.ApiGetCategories ) );
         if (!fetchReply)
         {
             _isFetching = false;

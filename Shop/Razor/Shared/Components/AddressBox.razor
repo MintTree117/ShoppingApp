@@ -153,7 +153,7 @@
         Dictionary<string, object> parameters = [];
         parameters.Add( "Page", _currentPage );
         parameters.Add( "PageSize", _pageSize );
-        var addressReply = await Http.GetAsyncAuthenticated<ViewPagedAddressesResponse>( Consts.ApiGetAddresses, parameters );
+        var addressReply = await Http.GetAsyncAuthenticated<ViewPagedAddressesResponse>( Http.Ordering( Consts.ApiGetAddresses ), parameters );
         _userAddresses = addressReply
             ? addressReply.Data.Addresses
             : [];
@@ -181,7 +181,7 @@
         Dictionary<string, object> parameters = [];
         parameters.Add( "Page", _currentPage );
         parameters.Add( "PageSize", _pageSize );
-        var reply = await Http.GetAsyncAuthenticated<ViewPagedAddressesResponse>( Consts.ApiGetAddresses, parameters );
+        var reply = await Http.GetAsyncAuthenticated<ViewPagedAddressesResponse>( Http.Ordering( Consts.ApiGetAddresses ), parameters );
 
         if (reply)
         {

@@ -240,11 +240,11 @@ else
     }
 
     async Task<Reply<LoginReply>> TryLogin() =>
-        await Http.PostAsync<LoginReply>( Consts.ApiLogin, _loginRequest );
+        await Http.PostAsync<LoginReply>( Http.Ordering( Consts.ApiLogin ), _loginRequest );
     async Task<Reply<TwoFactorReply>> TryTwoFactorLogin() =>
-        await Http.PostAsync<TwoFactorReply>( Consts.ApiTwoFactor, _twoFactorRequest );
+        await Http.PostAsync<TwoFactorReply>( Http.Ordering( Consts.ApiTwoFactor ), _twoFactorRequest );
     async Task<Reply<bool>> TryRegister() =>
-        await Http.PutAsync<bool>( Consts.ApiRegister, _registerRequest );
+        await Http.PutAsync<bool>( Http.Ordering( Consts.ApiRegister ), _registerRequest );
 
     void GoToLogin() =>
         Navigate( Consts.PageLoginOrRegister, true );

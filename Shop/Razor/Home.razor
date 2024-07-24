@@ -39,7 +39,7 @@
     {
         _loadingPanel.ToggleLoading( true, "Loading product specials..." );
         await Utils.Delay();
-        var reply = await Http.GetAsync<ProductSpecialsDto>( Consts.ApiGetSpecials );
+        var reply = await Http.GetAsync<ProductSpecialsDto>( Http.Catalog( Consts.ApiGetSpecials ) );
         if (!reply)
         {
             PushWarning( "Failed to load product specials." );

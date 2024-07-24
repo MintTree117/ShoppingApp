@@ -186,7 +186,7 @@ else
         parameters.Add( "Page", _currentPage );
         parameters.Add( "PageSize", _pageSize );
         
-        var reply = await Http.GetAsyncAuthenticated<AccountOrdersViewDto>( Consts.ApiOrdersView, parameters );
+        var reply = await Http.GetAsyncAuthenticated<AccountOrdersViewDto>( Http.Ordering( Consts.ApiOrdersView ), parameters );
         if (!reply)
         {
             PushError( reply, "An error occured while fetching addresses." );
@@ -213,7 +213,7 @@ else
         StartLoading( "Loading order details..." );
 
         var parameter = new Dictionary<string, object>() { { "OrderId", orderId } };
-        var details = await Http.GetAsyncAuthenticated<Order>( Consts.ApiOrdersDetails, parameter );
+        var details = await Http.GetAsyncAuthenticated<Order>( Http.Ordering( Consts.ApiOrdersDetails ), parameter );
 
         if (!details || details.Data is null)
         {

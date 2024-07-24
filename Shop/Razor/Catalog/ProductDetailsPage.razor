@@ -156,7 +156,7 @@
     // HELPERS
     async Task LoadDetails()
     {
-        var reply = await Http.GetAsync<ProductDetailsDto>( Consts.ApiGetDetails, GetUrlParamsDetails() );
+        var reply = await Http.GetAsync<ProductDetailsDto>( Http.Catalog( Consts.ApiGetDetails ), GetUrlParamsDetails() );
         if (!reply)
         {
             PushError( reply, "Failed to get product details." );
@@ -193,7 +193,7 @@
             { "productId", ProductId },
             { "brandId", _productModel.BrandId}
         };
-        var reply = await Http.GetAsync<ProductsSimilarDto>( Consts.ApiGetSimilarProducts, param );
+        var reply = await Http.GetAsync<ProductsSimilarDto>( Http.Catalog( Consts.ApiGetSimilarProducts ), param );
         if (!reply)
         {
             PushWarning( $"Failed to find similar products. {reply.GetMessage()}" );
@@ -211,7 +211,7 @@
             return;
         }
         
-        var reply = await Http.GetAsync<List<int>>( Consts.ApiGetEstimates, GetUrlParamsEstimate() );
+        var reply = await Http.GetAsync<List<int>>( Http.Catalog( Consts.ApiGetEstimates ), GetUrlParamsEstimate() );
         if (!reply)
         {
             PushError( reply, "Failed to update delivery estimate." );
