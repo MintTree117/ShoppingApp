@@ -13,7 +13,7 @@ WebAssemblyHostBuilder builder = WebAssemblyHostBuilder.CreateDefault( args );
 builder.RootComponents.Add<App>( "#app" );
 builder.RootComponents.Add<HeadOutlet>( "head::after" );
 
-builder.Configuration.AddJsonFile( "appsettings.json", optional: false, reloadOnChange: true );
+builder.Configuration.AddJsonFile( "/appsettings.json", optional: false, reloadOnChange: true );
 
 builder.ConfigureHttp();
 builder.Services.AddBlazoredLocalStorage();
