@@ -4,9 +4,10 @@ using Shop.Types.Users;
 
 namespace Shop.Infrastructure;
 
-public sealed class LocationManager( StorageService storage )
+public sealed class LocationManager( StorageService storage, NotificationService notifications )
     : MemoryCache<Address>( "Location", storage, TimeSpan.FromDays( 1 ) )
 {
+    readonly NotificationService _notifications = notifications;
     public event Func<Address?, Task>? OnLocationChangedAsync;
     public event Action<Address?>? OnLocationChanged;
     public event Func<Task>? OnOpenAddressBox;
@@ -27,6 +28,7 @@ public sealed class LocationManager( StorageService storage )
         var reply = await SetCache( address );
         OnLocationChanged?.Invoke(address);
         OnLocationChangedAsync?.Invoke( address );
+        _notifications.PushSuccess( "Location Updated." );
         return reply;
     }
     public async Task<bool> SetCurrentLocation( int? posX, int? posY )

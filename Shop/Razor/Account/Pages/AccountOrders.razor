@@ -2,6 +2,7 @@
 @using Shop.Types.Orders.Dtos
 @using Shop.Razor.Shared.Components
 @using Shop.Types.Common.ReplyTypes
+@using Shop.Types.Orders.Domain.Orders
 @using Shop.Utilities
 @inherits AccountPageBase
 @layout AccountLayout
@@ -19,7 +20,7 @@
                 <!-- ROWS DROPDOWN -->
                 <div class="dropdown me-3 h-100">
                     <!-- DROPDOWN TOGGLE -->
-                    <button class="btn btn-icon btn-outline-secondary dropdown-toggle h-100" type="button" id="RowsPerPage" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button class="btn btn-icon btn-outline-secondary dropdown-toggle h-100 px-3" type="button" id="RowsPerPage" data-bs-toggle="dropdown" aria-expanded="false">
                         @_pageSize
                     </button>
                     <!-- DROPDOWN LIST -->
@@ -37,7 +38,12 @@
             </div>
         </div>
         
-       <!-- VIEW BOTTOM -->
+        <!-- VIEW RESULT INFO -->
+        <hr/>
+        <span class="text-start text-muted">@GetViewHeader()</span>
+        <hr/>
+        
+        <!-- VIEW BOTTOM -->
         @if (_orderSummaries.Orders.Count > 0)
         {
             <!-- VIEW TABLE -->
@@ -58,11 +64,11 @@
                     @foreach ( AccountOrderViewDto dto in _orderSummaries.Orders )
                     {
                         <tr class="text-start view-orders-table-row" @onclick="@(async()=>await OnClickView(dto.OrderId))">
-                            <td class="ps-3">@dto.OrderId</td>
-                            <td class="ps-3">@dto.OrderDate</td>
-                            <td class="ps-3">@dto.State</td>
-                            <td class="ps-3">@dto.TotalQuantity</td>
-                            <td class="ps-3">@dto.TotalPrice</td>
+                            <td>@dto.OrderId</td>
+                            <td>@dto.OrderDate</td>
+                            <td>@dto.State</td>
+                            <td>@dto.TotalQuantity</td>
+                            <td>@dto.TotalPrice</td>
                         </tr>
                     }
                     </tbody>
@@ -70,7 +76,7 @@
             </div>
         }
         <!-- PAGINATION -->
-        <div class="mx-auto">
+        <div class="mx-auto flex-shrink-1">
             <PaginationPanel @ref="@_paginationPanel"/>
         </div>
     </div>
@@ -129,8 +135,8 @@ else
             {
                 <div class="view-order-container view-order-line-items">
                     <span>Price: @line.UnitPrice</span>
-                    <span>Discount: @line.Discount</span>
-                    <span>Tax: @line.Tax</span>
+                    <span>Discount: @line.UnitDiscount</span>
+                    <span>Shipping: @line.ShippingCost</span>
                     <span>Quantity: @line.Quantity</span>
                 </div>
             }
@@ -209,10 +215,11 @@ else
         var parameter = new Dictionary<string, object>() { { "OrderId", orderId } };
         var details = await Http.GetAsyncAuthenticated<Order>( Consts.ApiOrdersDetails, parameter );
 
-        if (!details)
+        if (!details || details.Data is null)
         {
             PushError( $"Failed to get order details. {details.GetMessage()}" );
             StopLoading();
+            return;
         }
 
         _currentOrder = details.Data;
@@ -235,4 +242,6 @@ else
 
         StateHasChanged();
     }
+    string GetViewHeader() =>
+        $"Viewing {Math.Min( _pageSize, _orderSummaries.Orders.Count )} results of {_orderSummaries.Orders.Count} total.";
 }

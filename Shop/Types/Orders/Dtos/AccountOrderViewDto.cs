@@ -1,3 +1,5 @@
+using Shop.Types.Orders.Domain.Orders;
+
 namespace Shop.Types.Orders.Dtos;
 
 public readonly record struct AccountOrderViewDto(

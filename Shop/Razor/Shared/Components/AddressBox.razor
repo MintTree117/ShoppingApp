@@ -51,8 +51,8 @@
                 <div class="address-box-form">
                     <span class="d-block w-100 text-center mb-3">Or enter a custom address:</span>
                     <div class="product-address-form-inputs mb-3">
-                        <input type="number" min="0" max="100000" step="1" @onchange="OnChangePosX" class="form-control"/>
-                        <input type="number" min="0" max="100000" step="1" @onchange="OnChangePosY" class="form-control"/>
+                        <input type="number" min="0" max="100000" step="1" value="@_currentAddress?.PosX" @onchange="OnChangePosX" class="form-control"/>
+                        <input type="number" min="0" max="100000" step="1" value="@_currentAddress?.PosY" @onchange="OnChangePosY" class="form-control"/>
                     </div>
                     <button type="submit" class="btn btn-primary btn-icon search-filters-btn-main" @onclick="OnClickSubmit">
                         <i class="fa-solid fa-circle-check me-2"></i>
@@ -92,6 +92,10 @@
     {
         await base.OnInitializedAsync();
         AddressManager.OnOpenAddressBox += Open;
+        Address? current = await AddressManager.GetCurrentAddress();
+        if (current is null)
+            return;
+        _currentAddress = new AddressModel( Guid.Empty, current?.Name ?? "Custom Address", current!.PosX, current.PosY );
     }
     protected override async Task OnAfterRenderAsync( bool firstRender )
     {

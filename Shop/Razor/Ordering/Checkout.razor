@@ -246,6 +246,10 @@
         var location = await LocationService.GetCurrentAddress();
         if (location is not null)
             _billingAddress = location;
+
+        _billingAddress.Name = string.IsNullOrWhiteSpace( _billingAddress.Name )
+            ? "Custom Address"
+            : _billingAddress.Name;
     }
     async Task GetAuthentication()
     {

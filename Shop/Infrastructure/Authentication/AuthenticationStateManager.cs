@@ -16,7 +16,6 @@ public sealed class AuthenticationStateManager
 
     readonly HttpService _http;
     readonly StorageService _storage;
-    // ReSharper disable once NotAccessedField.Local
     readonly Timer _timer;
     readonly object _fetchLock = new();
     
@@ -69,49 +68,63 @@ public sealed class AuthenticationStateManager
         if (DateTime.UtcNow - _lastUpdate < TimeSpan.FromMinutes( 1 ))
             return _authenticationState;
         _lastUpdate = DateTime.UtcNow;
+        
         // STORAGE OR SERVER
         await GetTokenFromBrowserStorage();
+        
         if (!IsSessionValid()) // TODO: Test if we need to clear memory here
             await GetTokenFromServer();
         
         SetBusy( false );
         InvokeNotify();
+        
         Console.WriteLine( IsSessionValid()
             ? "Session manager returning valid in-memory session."
             : "Session manager did not find a valid session on request." );
+        
         return await Task.FromResult( _authenticationState );
     }
     internal async Task<Reply<bool>> CreateNewSession( string newToken )
     {
         await SessionIsAlreadyBeingRefreshed();
+        
         SetBusy( true );
         SetMemory( newToken );
+        
         Console.WriteLine( await _storage.SetLocalStorageString( SessionStorageTokenKey, newToken )
             ? "Session manager saved new session to local storage"
             : $"Session manager failed to save new session to local storage." );
+        
         SetBusy( false );
         InvokeNotify();
+        
         return IReply.Success();
     }
     internal async Task ClearSession()
     {
         await SessionIsAlreadyBeingRefreshed();
+        
         SetBusy( true );
         ClearMemory();
+        
         Console.WriteLine( await _storage.RemoveLocalStorage( SessionStorageTokenKey )
             ? "Session manager cleared session state from storage."
             : "Session manager failed to clear token from storage." );
+        
         SetBusy( false );
         InvokeNotify();
     }
     internal async Task ForceRefresh()
     {
         await SessionIsAlreadyBeingRefreshed();
+        
         SetBusy( true );
         ClearMemory();
+        
         Console.WriteLine( await GetTokenFromServer()
             ? "Session manager refreshed session."
             : "Session manager failed to refresh session." );
+        
         SetBusy( false );
         InvokeNotify();
     }
@@ -120,17 +133,20 @@ public sealed class AuthenticationStateManager
     {
         bool hadToWait = false;
         int count = 0;
+        
         while ( _isLoading && count < 2 )
         {
             hadToWait = true;
             await Task.Delay( 500 );
             count++;
         }
+        
         return hadToWait;
     }
     async Task GetTokenFromBrowserStorage()
     {
         ClearMemory();
+        
         var tokenReply = await _storage.GetLocalStorageString( SessionStorageTokenKey );
         if (!tokenReply)
             return;

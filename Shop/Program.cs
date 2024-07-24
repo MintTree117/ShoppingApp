@@ -20,7 +20,7 @@ builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddBlazoredSessionStorage();
 builder.Services.AddSingleton<StorageService>();
 builder.Services.AddSingleton<NotificationService>();
-//builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddSingleton<AuthenticationStateManager>();
 builder.Services.AddSingleton<CartManager>();

@@ -1,12 +1,11 @@
 using System.Text.Json.Serialization;
 
-namespace Shop.Types.Orders.Dtos;
+namespace Shop.Types.Orders.Domain.Orders;
 
 public sealed class OrderGroup
 {
     public Guid Id { get; set; }
-    [JsonIgnore]
-    public Order Order { get; set; } = new();
+    [JsonIgnore] public Order Order { get; set; } = null!;
     public Guid OrderId { get; set; }
     public Guid WarehouseId { get; set; }
     public DateTime LastUpdated { get; set; }
@@ -18,4 +17,9 @@ public sealed class OrderGroup
         State = state;
         LastUpdated = DateTime.Now;
     }
+
+    public decimal GetSubtotal() =>
+        OrderLines.Sum( static o => o.UnitPrice );
+    public decimal GetShippingCost() =>
+        OrderLines.Sum( static o => o.ShippingCost );
 }
