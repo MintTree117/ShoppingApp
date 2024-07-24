@@ -10,9 +10,9 @@ namespace Shop.Infrastructure.Http;
 
 public sealed class HttpService( IConfiguration configuration, IHttpClientFactory httpFactory, IServiceProvider provider ) // SINGLETON
 {
-    public string CatalogApiUrl { get; private set; } = configuration.GetSection( "CatalogUrl" ).Get<string>()
+    public string CatalogApiUrl { get; private set; } = configuration.GetSection( "CatalogApiUrl" ).Get<string>()
         ?? throw new Exception( "Failed to get OrderingApiUrl from Configuration." );
-    public string OrderingApiUrl { get; private set; } = configuration.GetSection( "OrderingUrl" ).Get<string>()
+    public string OrderingApiUrl { get; private set; } = configuration.GetSection( "OrderingApiUrl" ).Get<string>()
         ?? throw new Exception( "Failed to get OrderingApiUrl from Configuration." );
 
     public string Catalog( string url ) =>
