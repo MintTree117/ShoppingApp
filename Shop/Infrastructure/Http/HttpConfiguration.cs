@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using Shop.Utilities;
 
 namespace Shop.Infrastructure.Http;
 
@@ -12,7 +11,7 @@ internal static class HttpConfiguration
             .AddScoped( static sp => sp
                 .GetRequiredService<IHttpClientFactory>()
                 .CreateClient( "API" ) )
-            .AddHttpClient( "API", static client => client.BaseAddress = new Uri( Consts.OrderingApiBase ) )
+            .AddHttpClient( "API", client => client.BaseAddress = new Uri( GetBaseUrl( builder ) ) )
             .AddHttpMessageHandler<CookieDelegatingHandler>();
         
         builder.Services.AddSingleton<HttpService>();
