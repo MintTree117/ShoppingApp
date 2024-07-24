@@ -163,7 +163,7 @@ else {
         {
             AddressModel testModel = new( Guid.NewGuid(), name: $"Test Address: {i}", i, i * i );
 
-            await Http.PutAsyncAuthenticated<bool>( Http.Ordering( Consts.ApiAddAddress ), testModel );
+            await Http.PutAsyncAuthenticated<bool>( Http.OrderingApi( Consts.ApiAddAddress ), testModel );
         }
 
         await LoadFreshAddresses();
@@ -209,7 +209,7 @@ else {
         parameters.Add( "Page", _currentPage );
         parameters.Add( "PageSize", _pageSize );
         
-        var reply = await Http.GetAsyncAuthenticated<ViewPagedAddressesResponse>( Http.Ordering( Consts.ApiGetAddresses ), parameters );
+        var reply = await Http.GetAsyncAuthenticated<ViewPagedAddressesResponse>( Http.OrderingApi( Consts.ApiGetAddresses ), parameters );
         if (!reply) 
         {
             PushError( reply, "An error occured while fetching addresses." );
@@ -225,8 +225,8 @@ else {
         StartLoading( "Saving Address..." );
 
         Reply<bool> reply = _isNew
-            ? await Http.PutAsyncAuthenticated<bool>( Http.Ordering( Consts.ApiAddAddress ), _editAddress )
-            : await Http.PutAsyncAuthenticated<bool>( Http.Ordering( Consts.ApiUpdateAddress ), _editAddress );
+            ? await Http.PutAsyncAuthenticated<bool>( Http.OrderingApi( Consts.ApiAddAddress ), _editAddress )
+            : await Http.PutAsyncAuthenticated<bool>( Http.OrderingApi( Consts.ApiUpdateAddress ), _editAddress );
 
         if (!reply) {
             PushError( reply, "Failed to save address." );
@@ -251,7 +251,7 @@ else {
         StartLoading( "Deleting Address..." );
 
         Dictionary<string, object> parameters = new() { { "AddressId", address.Id } };
-        Reply<bool> reply = await Http.DeleteAsyncAuthenticated<bool>( Http.Ordering( Consts.ApiDeleteAddress ), parameters );
+        Reply<bool> reply = await Http.DeleteAsyncAuthenticated<bool>( Http.OrderingApi( Consts.ApiDeleteAddress ), parameters );
 
         if (!reply) {
             PushError( reply, "Failed to delete address." );

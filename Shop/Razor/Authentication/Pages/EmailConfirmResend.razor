@@ -52,7 +52,7 @@ else {
     {
         StartLoading( "Sending reset link..." );
 
-        Reply<bool> result = await Http.PutAsync<bool>( Http.Ordering( Consts.ApiResendConfirm ), Request.Email );
+        Reply<bool> result = await Http.PutAsync<bool>( Http.OrderingApi( Consts.ApiResendConfirm ), Request.Email );
 
         if (!result) {
             PushError( result, "Failed to send reset link." );

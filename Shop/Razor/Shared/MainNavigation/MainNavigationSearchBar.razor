@@ -57,7 +57,7 @@
     async Task GetSuggestions()
     {
         var parameter = new Dictionary<string, object>() { { "searchText", _searchText } };
-        var reply = await Http.GetAsync<List<ProductSuggestionDto>>( Http.Catalog( Consts.ApiGetSuggestions ), parameter );
+        var reply = await Http.GetAsync<List<ProductSuggestionDto>>( Http.CatalogApi( Consts.ApiGetSuggestions ), parameter );
 
         if (!reply)
             return;

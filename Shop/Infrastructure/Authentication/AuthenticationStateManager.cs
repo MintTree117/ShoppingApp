@@ -155,7 +155,7 @@ public sealed class AuthenticationStateManager
     }
     async Task<bool> GetTokenFromServer()
     {
-        var serverReply = await _http.PostAsync<string>( _http.Ordering( Consts.ApiLoginRefresh ) );
+        var serverReply = await _http.PostAsync<string>( _http.OrderingApi( Consts.ApiLoginRefresh ) );
         if (!serverReply)
         {
             Console.WriteLine( $"Session manager failed to fetch from server. {serverReply.GetMessage()}" );

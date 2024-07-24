@@ -121,7 +121,7 @@
         parameters.Add( "Page", _currentPage );
         parameters.Add( "PageSize", _pageSize );
 
-        var reply = await Http.GetAsyncAuthenticated<UserSessionsDto>( Http.Ordering( Consts.ApiGetSessions ), parameters );
+        var reply = await Http.GetAsyncAuthenticated<UserSessionsDto>( Http.OrderingApi( Consts.ApiGetSessions ), parameters );
         if (!reply)
         {
             PushError( reply, "An error occured while fetching sessions." );
@@ -139,7 +139,7 @@
         Dictionary<string, object> parameters = [];
         parameters.Add( "SessionId", dto.SessionId );
 
-        var reply = await Http.DeleteAsyncAuthenticated<bool>( Http.Ordering( Consts.ApiDeleteSession ), parameters );
+        var reply = await Http.DeleteAsyncAuthenticated<bool>( Http.OrderingApi( Consts.ApiDeleteSession ), parameters );
         if (!reply)
         {
             PushError( reply, "An error occured while deleting session." );

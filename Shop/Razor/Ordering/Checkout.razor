@@ -231,7 +231,7 @@
             return;
         }
         
-        var userReply = await Http.GetAsyncAuthenticated<AccountModel>( Http.Ordering( Consts.ApiGetAccountProfile ) );
+        var userReply = await Http.GetAsyncAuthenticated<AccountModel>( Http.OrderingApi( Consts.ApiGetAccountProfile ) );
         if (userReply)
         {
             _contact.Name = userReply.Data.Username;
@@ -294,7 +294,7 @@
             Items = _itemsAndSummaries.Items().ToList()
         };
         
-        var reply = await Http.PostAsyncAuthenticated<bool>( Http.Ordering( Consts.ApiPlaceOrderUser ), orderPlacement );
+        var reply = await Http.PostAsyncAuthenticated<bool>( Http.OrderingApi( Consts.ApiPlaceOrderUser ), orderPlacement );
         if (!reply)
         {
             PushError( $"Failed to place order. {reply.GetMessage()}" );

@@ -82,7 +82,7 @@ public sealed class CartManager : IDisposable // Singleton
         }
         
         var serverReply = await _http.PostAsyncAuthenticated<List<CartItemDto>>(
-            _http.Ordering( Consts.ApiPostGetCart ), storageReply ? storageReply.Data.Items : [] );
+            _http.OrderingApi( Consts.ApiPostGetCart ), storageReply ? storageReply.Data.Items : [] );
         if (!serverReply)
         {
             SetBusy( false );
@@ -116,7 +116,7 @@ public sealed class CartManager : IDisposable // Singleton
 
         var storageTask = _storage.SetLocalStorage( SummaryStorageKey, _summaryInMemory );
         var httpTask = _isAuthenticated
-            ? _http.PostAsyncAuthenticated<List<CartItemDto>>( _http.Ordering( Consts.ApiPostGetCart ), _summaryInMemory )
+            ? _http.PostAsyncAuthenticated<List<CartItemDto>>( _http.OrderingApi( Consts.ApiPostGetCart ), _summaryInMemory )
             : null;
 
         if (httpTask is null) await storageTask;
@@ -145,7 +145,7 @@ public sealed class CartManager : IDisposable // Singleton
         _summaryInMemory = null;
         var storageTask = _storage.RemoveLocalStorage( SummaryStorageKey );
         var httpTask = _isAuthenticated
-            ? _http.DeleteAsyncAuthenticated<bool>( _http.Ordering( Consts.ApiClearCart ) )
+            ? _http.DeleteAsyncAuthenticated<bool>( _http.OrderingApi( Consts.ApiClearCart ) )
             : null;
 
         if (httpTask is null) await storageTask;

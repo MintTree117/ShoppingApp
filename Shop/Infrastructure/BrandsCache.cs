@@ -28,7 +28,7 @@ public sealed class BrandsCache( HttpService http, StorageService storage )
             return cacheReply;
         }
 
-        var fetchReply = await _http.GetAsync<BrandsDto>( _http.Catalog( Consts.ApiGetBrands ) );
+        var fetchReply = await _http.GetAsync<BrandsDto>( _http.CatalogApi( Consts.ApiGetBrands ) );
         if (!fetchReply)
         {
             _isFetching = false;

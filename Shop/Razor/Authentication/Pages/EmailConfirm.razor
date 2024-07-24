@@ -59,7 +59,7 @@ else
             return;
         }
         
-        _apiReply = await TryConfirmEmail( Http.Ordering( Consts.ApiConfirmEmail ), userId, code );
+        _apiReply = await TryConfirmEmail( Http.OrderingApi( Consts.ApiConfirmEmail ), userId, code );
         _emailConfirmed = _apiReply;
         _confirmFailed = !_emailConfirmed;
         StateHasChanged();

@@ -35,7 +35,7 @@
     {
         StartLoading( "Logging In..." );
 
-        Reply<string> reply = await Http.PostAsync<string>( Http.Ordering( Consts.ApiLoginRecovery ), _request );
+        Reply<string> reply = await Http.PostAsync<string>( Http.OrderingApi( Consts.ApiLoginRecovery ), _request );
         
         if (!reply)
         {

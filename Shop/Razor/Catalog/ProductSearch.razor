@@ -251,7 +251,7 @@
     async Task SearchProducts()
     {
         var searchReply = await Http.GetAsync<SearchResultsDto>( 
-            BuildSearchQueryString( Http.Catalog( Consts.ApiGetSearch ), true ) );
+            BuildSearchQueryString( Http.CatalogApi( Consts.ApiGetSearch ), true ) );
         
         if (!searchReply)
             PushWarning( "Failed to fetch products." );

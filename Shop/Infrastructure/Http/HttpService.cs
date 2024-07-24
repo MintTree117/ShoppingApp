@@ -15,9 +15,9 @@ public sealed class HttpService( IConfiguration configuration, IHttpClientFactor
     public string OrderingApiUrl { get; private set; } = configuration.GetSection( "OrderingApiUrl" ).Get<string>()
         ?? throw new Exception( "Failed to get OrderingApiUrl from Configuration." );
 
-    public string Catalog( string url ) =>
+    public string CatalogApi( string url ) =>
         $"{CatalogApiUrl}{url}";
-    public string Ordering( string url ) =>
+    public string OrderingApi( string url ) =>
         $"{OrderingApiUrl}{url}";
     
     readonly IHttpClientFactory _httpFactory = httpFactory;
