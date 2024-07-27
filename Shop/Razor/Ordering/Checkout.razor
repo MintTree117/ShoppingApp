@@ -268,7 +268,7 @@
         }
 
         // get products
-        var url = $"{Consts.ApiGetProductsByIds}?ProductIds={string.Join( ",", cartReply.Data.GetIds() )}";
+        var url = $"{Http.CatalogApi( Consts.ApiGetProductsByIds)}?ProductIds={string.Join( ",", cartReply.Data.GetIds() )}";
         var productsReply = await Http.GetAsync<List<ProductSummaryDto>>( url );
         if (!productsReply)
         {
