@@ -2,8 +2,10 @@
 
 This shopping app interacts with two APIs:
 
-- **Catalog API:** Provides read-only product and related information.
-- **Ordering API:** Manages orders, carts, user-accounts, and related functionalities.
+- [CatalogApi](https://github.com/MintTree117/CatalogApi.git) Provides read-only product and related information.
+- [OrderingApi](https://github.com/MintTree117/OrderingApi.git) Manages orders, carts, user-accounts, and related functionalities.
+
+See the fully deployed application [here](https://happy-bush-0b0f3e80f.5.azurestaticapps.net/).
 
 ## Features
 
