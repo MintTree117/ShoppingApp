@@ -117,40 +117,10 @@ else
     
     // RESEND EMAIL CONFIRM LINK
     <a class="w-100 text-start" href="@Consts.PageEmailConfirmResend">Resend Confirmation Email</a>
-
-    <!-- TESTING -->
-    <hr class="my-3"/>
-    <h2>Testing</h2>
-    <div class="w-100 d-flex flex-column gap-2">
-        <button class="btn btn-full btn-primary" onclick="@( async () => await TestRegister() )">
-            <i class="fa fa-user-plus me-2"></i>Test Register
-        </button>
-        <button class="btn btn-full btn-primary" onclick="@( async () => await TestLogin() )">
-            <i class="fa fa-sign-in me-2"></i>Test Login
-        </button>
-    </div>
 }
 
 @code 
 {
-    async Task TestRegister()
-    {
-        _registerRequest.Email = "martygrof3708@gmail.com";
-        _registerRequest.Username = "MintTree117";
-        _registerRequest.Password = "Password1?";
-        _registerRequest.PasswordConfirm = "Password1?";
-        _registerRequest.TwoFactorEmail = "martygrof@hotmail.com";
-
-        await OnValidRegisterSubmitAsync();
-    }
-    async Task TestLogin()
-    {
-        _loginRequest.EmailOrUsername = "martygrof3708@gmail.com";
-        _loginRequest.Password = "Password1?";
-
-        await OnValidLoginSubmitAsync();
-    }
-
     readonly LoginRequest _loginRequest = new();
     readonly RegisterRequest _registerRequest = new();
     readonly TwoFactorRequest _twoFactorRequest = new();
